@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Start de achtergrond-synchronisatie direct bij het openen van de app
+  SessionDataManager().init(races);
   runApp(const MyApp());
 }
 
@@ -20,9 +24,9 @@ class _MyAppState extends State<MyApp> {
   Locale _locale = const Locale('nl');
   ThemeMode _themeMode = ThemeMode.dark;
 
-  void _toggleLocale() {
+  void _setLocale(Locale newLocale) {
     setState(() {
-      _locale = _locale.languageCode == 'en' ? const Locale('nl') : const Locale('en');
+      _locale = newLocale;
     });
   }
 
@@ -41,7 +45,13 @@ class _MyAppState extends State<MyApp> {
       darkTheme: ThemeData.dark(useMaterial3: true),
       themeMode: _themeMode,
       locale: _locale,
-      supportedLocales: const [Locale('en'), Locale('nl')],
+      supportedLocales: const [
+        Locale('en'), 
+        Locale('nl'),
+        Locale('fr'),
+        Locale('es'),
+        Locale('de')
+      ],
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -49,10 +59,185 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       home: HomeScreen(
-        onToggleLocale: _toggleLocale,
+        onSetLocale: _setLocale,
         onToggleTheme: _toggleTheme,
       ),
     );
+  }
+}
+
+/// --- Data Manager voor Background Sync & Caching -----------------------
+
+class SessionDataManager extends ChangeNotifier {
+  static final SessionDataManager _instance = SessionDataManager._internal();
+  factory SessionDataManager() => _instance;
+  SessionDataManager._internal();
+
+  final Map<String, List<SessionResult>> cache = {};
+  bool isInitialized = false;
+
+  Future<void> init(List<Race> races) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // 1. Laad alles direct uit de lokale opslag in het geheugen
+    for (final race in races) {
+      final sessionNames = race.hasSprint 
+          ? ['Practice 1', 'Sprint Qualifying', 'Sprint', 'Qualifying']
+          : ['Practice 1', 'Practice 2', 'Practice 3', 'Qualifying'];
+
+      for (final session in sessionNames) {
+        final key = '${race.country}_${session}_2026';
+        final jsonStr = prefs.getString(key);
+        if (jsonStr != null) {
+          final List decoded = jsonDecode(jsonStr);
+          cache[key] = decoded.map((e) => SessionResult.fromJson(e)).toList();
+        }
+      }
+    }
+    isInitialized = true;
+    notifyListeners(); 
+
+    // 2. Start achtergrond synchronisatie voor ontbrekende/recente data
+    _syncData(races, prefs);
+  }
+
+  Future<void> _syncData(List<Race> races, SharedPreferences prefs) async {
+    final now = DateTime.now();
+
+    for (final race in races) {
+      final Map<String, DateTime> sessions = race.hasSprint 
+        ? {
+            'Practice 1': race.fp1,
+            'Sprint Qualifying': race.sprintQuali,
+            'Sprint': race.sprintRace,
+            'Qualifying': race.qualifying,
+          }
+        : {
+            'Practice 1': race.fp1,
+            'Practice 2': race.fp2,
+            'Practice 3': race.fp3,
+            'Qualifying': race.qualifying,
+          };
+
+      for (final entry in sessions.entries) {
+        final sName = entry.key;
+        final sTime = entry.value;
+        final key = '${race.country}_${sName}_2026';
+
+        // Sla sessies in de toekomst compleet over
+        if (sTime.isAfter(now)) continue; 
+
+        final isOlderThan7Days = now.difference(sTime).inDays > 7;
+        final hasCache = cache.containsKey(key) && cache[key]!.isNotEmpty;
+
+        // Als de data ouder is dan 7 dagen EN we hebben het al lokaal opgeslagen, overslaan.
+        if (isOlderThan7Days && hasCache) continue; 
+
+        // Ophalen (omdat het ontbreekt OF omdat het recent is en misschien updates heeft)
+        await _fetchAndCache(race.country, sName, key, prefs);
+      }
+    }
+  }
+
+  Future<void> _fetchAndCache(String country, String sessionName, String key, SharedPreferences prefs) async {
+    try {
+      // Pauzeer 2.5 seconden voordat we überhaupt aan deze sessie beginnen
+      await Future.delayed(const Duration(milliseconds: 2500));
+
+      final cName = Uri.encodeComponent(country);
+      final sName = Uri.encodeComponent(sessionName);
+      final sessionUrl = 'https://api.openf1.org/v1/sessions?year=2026&country_name=$cName&session_name=$sName';
+      
+      // CALL 1: Sessie info
+      final sessionRes = await http.get(Uri.parse(sessionUrl));
+      if (sessionRes.statusCode != 200) return;
+      
+      List sessionsData = json.decode(sessionRes.body) as List;
+      if (sessionsData.isEmpty) return;
+      
+      final int sessionKey = sessionsData.first['session_key'];
+
+      // Korte adempauze tegen Rate Limiting (HTTP 429)
+      await Future.delayed(const Duration(milliseconds: 700));
+
+      // CALL 2: Coureurs ophalen
+      final driversRes = await http.get(Uri.parse('https://api.openf1.org/v1/drivers?session_key=$sessionKey'));
+      final driversData = json.decode(driversRes.body) as List;
+      Map<int, String> driverMap = {};
+      for (var d in driversData) {
+        driverMap[d['driver_number']] = d['full_name'] ?? 'Onbekend';
+      }
+
+      // Weer even wachten
+      await Future.delayed(const Duration(milliseconds: 700));
+
+      // CALL 3: Ronden ophalen
+      final lapsRes = await http.get(Uri.parse('https://api.openf1.org/v1/laps?session_key=$sessionKey'));
+      final lapsData = json.decode(lapsRes.body) as List;
+      
+      // En de laatste pauze voor de laatste call
+      await Future.delayed(const Duration(milliseconds: 700));
+
+      // CALL 4: Stints (Banden) ophalen
+      final stintsRes = await http.get(Uri.parse('https://api.openf1.org/v1/stints?session_key=$sessionKey'));
+      final stintsData = json.decode(stintsRes.body) as List;
+
+      Map<int, Map<String, dynamic>> bestLaps = {};
+      for (var lap in lapsData) {
+        final duration = lap['lap_duration'];
+        final driverNum = lap['driver_number'];
+        final lapNum = lap['lap_number']; 
+        
+        if (duration == null || driverNum == null || lapNum == null) continue;
+        
+        if (!bestLaps.containsKey(driverNum) || duration < bestLaps[driverNum]!['duration']) {
+          bestLaps[driverNum] = {
+            'duration': duration,
+            'lap_number': lapNum,
+          };
+        }
+      }
+
+      var sortedEntries = bestLaps.entries.toList()
+        ..sort((a, b) => a.value['duration'].compareTo(b.value['duration']));
+        
+      List<SessionResult> fetchedResults = [];
+      for (int i = 0; i < sortedEntries.length && i < 5; i++) {
+        final entry = sortedEntries[i];
+        final driverNum = entry.key;
+        final name = driverMap[driverNum] ?? 'Auto $driverNum';
+        
+        final duration = entry.value['duration'] as double;
+        final lapNum = entry.value['lap_number'] as int;
+
+        final minutes = (duration / 60).floor();
+        final seconds = (duration % 60).toStringAsFixed(3).padLeft(6, '0');
+        final timeStr = '$minutes:$seconds';
+        
+        // Zoek de juiste band uit de Stints data o.b.v. de ronde waarin de snelste tijd werd gezet
+        String compound = 'Unknown';
+        for (var stint in stintsData) {
+          if (stint['driver_number'] == driverNum) {
+            final start = stint['lap_start'] ?? 0;
+            final end = stint['lap_end'] ?? 999;
+            if (lapNum >= start && lapNum <= end) {
+              compound = stint['compound'] ?? 'Unknown';
+              break;
+            }
+          }
+        }
+        
+        fetchedResults.add(SessionResult(name, timeStr, compound));
+      }
+
+      if (fetchedResults.isNotEmpty) {
+        cache[key] = fetchedResults;
+        prefs.setString(key, jsonEncode(fetchedResults.map((e) => e.toJson()).toList()));
+        notifyListeners(); // Update UI if watching
+      }
+    } catch (e) {
+      // Silent fail, laat de UI het later of op een ander moment proberen.
+    }
   }
 }
 
@@ -84,6 +269,8 @@ class AppLocalizations {
       'fastestLap': 'Fastest lap ever',
       'slowestLap': 'Slowest lap ever',
       'avgLap': 'Average lap time',
+      'top_speed': 'Highest Speed',
+      'avg_speed': 'Average Speed',
       'laps': 'Number of laps',
       'redFlag': 'Chance of red flag',
       'vsc': 'Chance of VSC',
@@ -108,21 +295,28 @@ class AppLocalizations {
       'characteristics': 'Unique Characteristics',
       'raceFinished': 'Race finished',
       'pts': 'pts',
-      // Settings
+      'session_results': 'Session Results',
+      'fp1': 'Free Practice 1',
+      'fp2': 'Free Practice 2',
+      'fp3': 'Free Practice 3',
+      'sprint_quali': 'Sprint Qualifying',
+      'sprint': 'Sprint Race',
+      'qualifying': 'Qualifying',
+      'no_data_yet': 'Results not yet available.',
+      'session_future': 'Session will start on',
       'settings': 'Settings',
       'toggleTheme': 'Toggle Light/Dark',
-      'toggleLanguage': 'Switch Language',
-      // Circuit specific
+      'selectLanguage': 'Language',
+      'changelog': 'Changelog',
+      'version': 'Version',
       'first_gp': 'First Grand Prix',
       'contract_until': 'Contract Until',
-      // Overtaking
       'overtaking': 'Overtaking',
       'overtake_very_easy': 'Very Easy',
       'overtake_easy': 'Easy',
       'overtake_average': 'Average',
       'overtake_difficult': 'Difficult',
       'overtake_very_difficult': 'Very Difficult',
-      // Driver Stats
       'driver_number': 'Driver Number',
       'nationality': 'Nationality',
       'current_team': 'Current Team',
@@ -143,7 +337,6 @@ class AppLocalizations {
       'driver_info': 'Driver Information',
       'career_stats': 'Career Statistics',
       'experience': 'Experience',
-      // Team Stats
       'team_info': 'Team Information',
       'cc_wins': 'Constructors\' Championships',
       'dc_wins': 'Drivers\' Championships',
@@ -157,7 +350,6 @@ class AppLocalizations {
       'race_stats': 'Race Statistics',
       'pitstop_leadership': 'Pitstop & Leadership',
       'using_fallback_data': 'No 2026 data available yet. Showing 2025 standings.',
-      // Dynamic Data Translations
       'tbd': 'TBD',
       'wear_High': 'High',
       'wear_Medium': 'Medium',
@@ -168,7 +360,6 @@ class AppLocalizations {
       'soft_tire': 'Soft',
       'medium_tire': 'Medium',
       'hard_tire': 'Hard',
-      // Countries
       'country_Australia': 'Australia',
       'country_China': 'China',
       'country_Japan': 'Japan',
@@ -190,7 +381,6 @@ class AppLocalizations {
       'country_Brazil': 'Brazil',
       'country_Qatar': 'Qatar',
       'country_UAE': 'UAE',
-      // Race Names
       'gp_Australian Grand Prix': 'Australian Grand Prix',
       'gp_Chinese Grand Prix': 'Chinese Grand Prix',
       'gp_Japanese Grand Prix': 'Japanese Grand Prix',
@@ -237,6 +427,8 @@ class AppLocalizations {
       'fastestLap': 'Snelste ronde ooit',
       'slowestLap': 'Traagste ronde ooit',
       'avgLap': 'Gemiddelde rondetijd',
+      'top_speed': 'Hoogste snelheid',
+      'avg_speed': 'Gemiddelde snelheid',
       'laps': 'Aantal rondes',
       'redFlag': 'Kans op rode vlag',
       'vsc': 'Kans op VSC',
@@ -261,21 +453,28 @@ class AppLocalizations {
       'characteristics': 'Unieke Kenmerken',
       'raceFinished': 'Race afgelopen',
       'pts': 'ptn',
-      // Settings
+      'session_results': 'Sessieresultaten',
+      'fp1': 'Vrije Training 1',
+      'fp2': 'Vrije Training 2',
+      'fp3': 'Vrije Training 3',
+      'sprint_quali': 'Sprint Kwalificatie',
+      'sprint': 'Sprintrace',
+      'qualifying': 'Kwalificatie',
+      'no_data_yet': 'Nog geen resultaten beschikbaar.',
+      'session_future': 'Sessie begint pas op',
       'settings': 'Instellingen',
       'toggleTheme': 'Wissel Thema (Licht/Donker)',
-      'toggleLanguage': 'Wissel Taal',
-      // Circuit specific
+      'selectLanguage': 'Taal / Language',
+      'changelog': 'Versiegeschiedenis',
+      'version': 'Versie',
       'first_gp': 'Eerste Grand Prix',
       'contract_until': 'Contract tot',
-      // Overtaking
       'overtaking': 'Inhalen',
       'overtake_very_easy': 'Zeer Makkelijk',
       'overtake_easy': 'Makkelijk',
       'overtake_average': 'Gemiddeld',
       'overtake_difficult': 'Moeilijk',
       'overtake_very_difficult': 'Zeer Moeilijk',
-      // Driver Stats
       'driver_number': 'Rijdersnummer',
       'nationality': 'Nationaliteit',
       'current_team': 'Huidig team',
@@ -296,7 +495,6 @@ class AppLocalizations {
       'driver_info': 'Coureurs Informatie',
       'career_stats': 'Carrière Statistieken',
       'experience': 'Ervaring',
-      // Team Stats
       'team_info': 'Team Informatie',
       'cc_wins': 'Constructeurskampioenschappen',
       'dc_wins': 'Coureurskampioenschappen',
@@ -310,7 +508,6 @@ class AppLocalizations {
       'race_stats': 'Race Statistieken',
       'pitstop_leadership': 'Pitstop & Leiding',
       'using_fallback_data': 'Nog geen 2026 data beschikbaar. Weergave toont actuele 2025 eindstanden.',
-      // Dynamic Data Translations
       'tbd': 'N.n.b.',
       'wear_High': 'Hoog',
       'wear_Medium': 'Gemiddeld',
@@ -321,7 +518,6 @@ class AppLocalizations {
       'soft_tire': 'Zacht',
       'medium_tire': 'Medium',
       'hard_tire': 'Hard',
-      // Countries
       'country_Australia': 'Australië',
       'country_China': 'China',
       'country_Japan': 'Japan',
@@ -343,7 +539,6 @@ class AppLocalizations {
       'country_Brazil': 'Brazilië',
       'country_Qatar': 'Qatar',
       'country_UAE': 'Verenigde Arabische Emiraten',
-      // Race Names
       'gp_Australian Grand Prix': 'GP van Australië',
       'gp_Chinese Grand Prix': 'GP van China',
       'gp_Japanese Grand Prix': 'GP van Japan',
@@ -368,6 +563,480 @@ class AppLocalizations {
       'gp_Las Vegas Grand Prix': 'GP van Las Vegas',
       'gp_Qatar Grand Prix': 'GP van Qatar',
       'gp_Abu Dhabi Grand Prix': 'GP van Abu Dhabi',
+    },
+    'fr': {
+      'appTitle': 'Courses F1',
+      'circuits': 'Circuits',
+      'standings': 'Classement',
+      'drivers': 'Pilotes',
+      'teams': 'Équipes',
+      'nextRace': 'Prochaine course',
+      'raceStarts': 'La course commence à',
+      'days': 'jours',
+      'day': 'jour',
+      'weeks': 'semaines',
+      'week': 'semaine',
+      'hours': 'heures',
+      'minutes': 'minutes',
+      'weather': 'Météo',
+      'country': 'Pays',
+      'timeUntil': 'jusqu\'à',
+      'startsIn': 'Commence dans :',
+      'fastestLap': 'Tour le plus rapide',
+      'slowestLap': 'Tour le plus lent',
+      'avgLap': 'Temps moyen',
+      'top_speed': 'Vitesse maximale',
+      'avg_speed': 'Vitesse moyenne',
+      'laps': 'Nombre de tours',
+      'redFlag': 'Risque de drapeau rouge',
+      'vsc': 'Risque de VSC',
+      'accident': 'Risque d\'accident',
+      'accidentTurn1': 'Risque d\'accident (virage 1)',
+      'tireWear': 'Usure des pneus',
+      'strategy': 'Stratégie des pneus',
+      'fastestPit': 'Arrêt le plus rapide',
+      'forecast': 'Prévisions météo',
+      'temp': 'Température',
+      'rainChance': 'Risque de pluie',
+      'rainAmount': 'Précipitations',
+      'wind': 'Vent',
+      'humidity': 'Humidité',
+      'pressure': 'Pression',
+      'feelsLike': 'Ressenti',
+      'lapStats': 'Statistiques des tours',
+      'risks': 'Risques',
+      'tyres': 'Pneus & Arrêts',
+      'general': 'Général',
+      'totalLength': 'Longueur du circuit',
+      'characteristics': 'Caractéristiques uniques',
+      'raceFinished': 'Course terminée',
+      'pts': 'pts',
+      'session_results': 'Résultats des sessions',
+      'fp1': 'Essais Libres 1',
+      'fp2': 'Essais Libres 2',
+      'fp3': 'Essais Libres 3',
+      'sprint_quali': 'Qualification Sprint',
+      'sprint': 'Course Sprint',
+      'qualifying': 'Qualifications',
+      'no_data_yet': 'Résultats pas encore disponibles.',
+      'session_future': 'La session commencera le',
+      'settings': 'Paramètres',
+      'toggleTheme': 'Changer de thème (Clair/Sombre)',
+      'selectLanguage': 'Langue',
+      'changelog': 'Journal des modifications',
+      'version': 'Version',
+      'first_gp': 'Premier Grand Prix',
+      'contract_until': 'Contrat jusqu\'en',
+      'overtaking': 'Dépassement',
+      'overtake_very_easy': 'Très facile',
+      'overtake_easy': 'Facile',
+      'overtake_average': 'Moyen',
+      'overtake_difficult': 'Difficile',
+      'overtake_very_difficult': 'Très difficile',
+      'driver_number': 'Numéro du pilote',
+      'nationality': 'Nationalité',
+      'current_team': 'Équipe actuelle',
+      'points_finish_pct': 'Dans les points (%)',
+      'wins': 'Victoires (1er)',
+      'second_place': '2ème place',
+      'third_place': '3ème place',
+      'podiums': 'Total des podiums',
+      'poles': 'Pole Positions',
+      'fastest_laps': 'Meilleurs tours',
+      'total_points': 'Total des points',
+      'championships': 'Championnats',
+      'laps_raced': 'Tours parcourus',
+      'starts': 'Départs',
+      'dnf': 'Abandons (DNF)',
+      'dsq': 'Disqualifications (DSQ)',
+      'dnq': 'Non qualifiés (DNQ)',
+      'driver_info': 'Informations sur le pilote',
+      'career_stats': 'Statistiques de carrière',
+      'experience': 'Expérience',
+      'team_info': 'Informations sur l\'équipe',
+      'cc_wins': 'Championnats des Constructeurs',
+      'dc_wins': 'Championnats des Pilotes',
+      'one_two': 'Doublés (1-2)',
+      'hattricks': 'Coups du chapeau',
+      'double_podiums': 'Doubles podiums',
+      'front_row': 'Départs en 1ère ligne',
+      'laps_led': 'Tours en tête',
+      'team_principal': 'Directeur d\'équipe',
+      'total_entries': 'Grands Prix disputés',
+      'race_stats': 'Statistiques de course',
+      'pitstop_leadership': 'Arrêts aux stands & Direction',
+      'using_fallback_data': 'Aucune donnée 2026 disponible. Affichage de 2025.',
+      'tbd': 'À déterminer',
+      'wear_High': 'Élevée',
+      'wear_Medium': 'Moyenne',
+      'wear_Low': 'Faible',
+      'wear_Very High': 'Très élevée',
+      'strategy_1 stop': '1 arrêt',
+      'strategy_2 stops': '2 arrêts',
+      'soft_tire': 'Tendre',
+      'medium_tire': 'Médium',
+      'hard_tire': 'Dur',
+      'country_Australia': 'Australie',
+      'country_China': 'Chine',
+      'country_Japan': 'Japon',
+      'country_Bahrain': 'Bahreïn',
+      'country_Saudi Arabia': 'Arabie Saoudite',
+      'country_USA': 'États-Unis',
+      'country_Canada': 'Canada',
+      'country_Monaco': 'Monaco',
+      'country_Spain': 'Espagne',
+      'country_Austria': 'Autriche',
+      'country_United Kingdom': 'Royaume-Uni',
+      'country_Belgium': 'Belgique',
+      'country_Hungary': 'Hongrie',
+      'country_Netherlands': 'Pays-Bas',
+      'country_Italy': 'Italie',
+      'country_Azerbaijan': 'Azerbaïdjan',
+      'country_Singapore': 'Singapour',
+      'country_Mexico': 'Mexique',
+      'country_Brazil': 'Brésil',
+      'country_Qatar': 'Qatar',
+      'country_UAE': 'Émirats Arabes Unis',
+      'gp_Australian Grand Prix': 'Grand Prix d\'Australie',
+      'gp_Chinese Grand Prix': 'Grand Prix de Chine',
+      'gp_Japanese Grand Prix': 'Grand Prix du Japon',
+      'gp_Bahrain Grand Prix': 'Grand Prix de Bahreïn',
+      'gp_Saudi Arabian Grand Prix': 'Grand Prix d\'Arabie Saoudite',
+      'gp_Miami Grand Prix': 'Grand Prix de Miami',
+      'gp_Canadian Grand Prix': 'Grand Prix du Canada',
+      'gp_Monaco Grand Prix': 'Grand Prix de Monaco',
+      'gp_Spanish Grand Prix': 'Grand Prix d\'Espagne',
+      'gp_Madrid Grand Prix': 'Grand Prix de Madrid',
+      'gp_Austrian Grand Prix': 'Grand Prix d\'Autriche',
+      'gp_British Grand Prix': 'Grand Prix de Grande-Bretagne',
+      'gp_Belgian Grand Prix': 'Grand Prix de Belgique',
+      'gp_Hungarian Grand Prix': 'Grand Prix de Hongrie',
+      'gp_Dutch Grand Prix': 'Grand Prix des Pays-Bas',
+      'gp_Italian Grand Prix': 'Grand Prix d\'Italie',
+      'gp_Azerbaijan Grand Prix': 'Grand Prix d\'Azerbaïdjan',
+      'gp_Singapore Grand Prix': 'Grand Prix de Singapour',
+      'gp_United States Grand Prix': 'Grand Prix des États-Unis',
+      'gp_Mexico City Grand Prix': 'Grand Prix de Mexico',
+      'gp_Brazilian Grand Prix': 'Grand Prix de São Paulo',
+      'gp_Las Vegas Grand Prix': 'Grand Prix de Las Vegas',
+      'gp_Qatar Grand Prix': 'Grand Prix du Qatar',
+      'gp_Abu Dhabi Grand Prix': 'Grand Prix d\'Abou Dabi',
+    },
+    'es': {
+      'appTitle': 'Carreras F1',
+      'circuits': 'Circuitos',
+      'standings': 'Clasificación',
+      'drivers': 'Pilotos',
+      'teams': 'Equipos',
+      'nextRace': 'Próxima carrera',
+      'raceStarts': 'La carrera empieza a las',
+      'days': 'días',
+      'day': 'día',
+      'weeks': 'semanas',
+      'week': 'semana',
+      'hours': 'horas',
+      'minutes': 'minutos',
+      'weather': 'Clima',
+      'country': 'País',
+      'timeUntil': 'hasta',
+      'startsIn': 'Empieza en:',
+      'fastestLap': 'Vuelta más rápida',
+      'slowestLap': 'Vuelta más lenta',
+      'avgLap': 'Tiempo medio por vuelta',
+      'top_speed': 'Velocidad máxima',
+      'avg_speed': 'Velocidad media',
+      'laps': 'Número de vueltas',
+      'redFlag': 'Probabilidad de bandera roja',
+      'vsc': 'Probabilidad de VSC',
+      'accident': 'Probabilidad de accidente',
+      'accidentTurn1': 'Probabilidad de accidente en curva 1',
+      'tireWear': 'Desgaste de neumáticos',
+      'strategy': 'Estrategia de neumáticos',
+      'fastestPit': 'Parada en boxes más rápida',
+      'forecast': 'Pronóstico del tiempo',
+      'temp': 'Temperatura',
+      'rainChance': 'Probabilidad de lluvia',
+      'rainAmount': 'Cantidad de lluvia',
+      'wind': 'Viento',
+      'humidity': 'Humedad',
+      'pressure': 'Presión',
+      'feelsLike': 'Sensación térmica',
+      'lapStats': 'Estadísticas de vueltas',
+      'risks': 'Riesgos',
+      'tyres': 'Neumáticos y Paradas',
+      'general': 'General',
+      'totalLength': 'Longitud del circuito',
+      'characteristics': 'Características únicas',
+      'raceFinished': 'Carrera terminada',
+      'pts': 'pts',
+      'session_results': 'Resultados de las sesiones',
+      'fp1': 'Entrenamientos Libres 1',
+      'fp2': 'Entrenamientos Libres 2',
+      'fp3': 'Entrenamientos Libres 3',
+      'sprint_quali': 'Clasificación Sprint',
+      'sprint': 'Carrera Sprint',
+      'qualifying': 'Clasificación',
+      'no_data_yet': 'Resultados aún no disponibles.',
+      'session_future': 'La sesión comenzará el',
+      'settings': 'Ajustes',
+      'toggleTheme': 'Cambiar tema (Claro/Oscuro)',
+      'selectLanguage': 'Idioma',
+      'changelog': 'Registro de cambios',
+      'version': 'Versión',
+      'first_gp': 'Primer Gran Premio',
+      'contract_until': 'Contrato hasta',
+      'overtaking': 'Adelantamientos',
+      'overtake_very_easy': 'Muy fácil',
+      'overtake_easy': 'Fácil',
+      'overtake_average': 'Medio',
+      'overtake_difficult': 'Difícil',
+      'overtake_very_difficult': 'Muy difícil',
+      'driver_number': 'Número del piloto',
+      'nationality': 'Nacionalidad',
+      'current_team': 'Equipo actual',
+      'points_finish_pct': 'Finalizados en los puntos (%)',
+      'wins': 'Victorias (1º)',
+      'second_place': '2º Lugar',
+      'third_place': '3º Lugar',
+      'podiums': 'Total de podios',
+      'poles': 'Pole Positions',
+      'fastest_laps': 'Vueltas rápidas',
+      'total_points': 'Puntos totales',
+      'championships': 'Campeonatos',
+      'laps_raced': 'Vueltas recorridas',
+      'starts': 'Salidas',
+      'dnf': 'Abandonos (DNF)',
+      'dsq': 'Descalificaciones (DSQ)',
+      'dnq': 'No clasificados (DNQ)',
+      'driver_info': 'Información del piloto',
+      'career_stats': 'Estadísticas de su carrera',
+      'experience': 'Experiencia',
+      'team_info': 'Información del equipo',
+      'cc_wins': 'Campeonatos de Constructores',
+      'dc_wins': 'Campeonatos de Pilotos',
+      'one_two': 'Dobletes (1-2)',
+      'hattricks': 'Hat-tricks',
+      'double_podiums': 'Dobles podios',
+      'front_row': 'Salidas en primera fila',
+      'laps_led': 'Vueltas lideradas',
+      'team_principal': 'Director del equipo',
+      'total_entries': 'Grandes Premios disputados',
+      'race_stats': 'Estadísticas de carrera',
+      'pitstop_leadership': 'Paradas en boxes y Liderazgo',
+      'using_fallback_data': 'No hay datos de 2026. Mostrando clasificación de 2025.',
+      'tbd': 'Por confirmar',
+      'wear_High': 'Alto',
+      'wear_Medium': 'Medio',
+      'wear_Low': 'Bajo',
+      'wear_Very High': 'Muy alto',
+      'strategy_1 stop': '1 parada',
+      'strategy_2 stops': '2 paradas',
+      'soft_tire': 'Blando',
+      'medium_tire': 'Medio',
+      'hard_tire': 'Duro',
+      'country_Australia': 'Australia',
+      'country_China': 'China',
+      'country_Japan': 'Japón',
+      'country_Bahrain': 'Baréin',
+      'country_Saudi Arabia': 'Arabia Saudita',
+      'country_USA': 'Estados Unidos',
+      'country_Canada': 'Canadá',
+      'country_Monaco': 'Mónaco',
+      'country_Spain': 'España',
+      'country_Austria': 'Austria',
+      'country_United Kingdom': 'Reino Unido',
+      'country_Belgium': 'Bélgica',
+      'country_Hungary': 'Hungría',
+      'country_Netherlands': 'Países Bajos',
+      'country_Italy': 'Italia',
+      'country_Azerbaijan': 'Azerbaiyán',
+      'country_Singapore': 'Singapur',
+      'country_Mexico': 'México',
+      'country_Brazil': 'Brasil',
+      'country_Qatar': 'Qatar',
+      'country_UAE': 'Emiratos Árabes Unidos',
+      'gp_Australian Grand Prix': 'Gran Premio de Australia',
+      'gp_Chinese Grand Prix': 'Gran Premio de China',
+      'gp_Japanese Grand Prix': 'Gran Premio de Japón',
+      'gp_Bahrain Grand Prix': 'Gran Premio de Baréin',
+      'gp_Saudi Arabian Grand Prix': 'Gran Premio de Arabia Saudita',
+      'gp_Miami Grand Prix': 'Gran Premio de Miami',
+      'gp_Canadian Grand Prix': 'Gran Premio de Canadá',
+      'gp_Monaco Grand Prix': 'Gran Premio de Mónaco',
+      'gp_Spanish Grand Prix': 'Gran Premio de España',
+      'gp_Madrid Grand Prix': 'Gran Premio de Madrid',
+      'gp_Austrian Grand Prix': 'Gran Premio de Austria',
+      'gp_British Grand Prix': 'Gran Premio de Gran Bretaña',
+      'gp_Belgian Grand Prix': 'Gran Premio de Bélgica',
+      'gp_Hungarian Grand Prix': 'Gran Premio de Hungría',
+      'gp_Dutch Grand Prix': 'Gran Premio de los Países Bajos',
+      'gp_Italian Grand Prix': 'Gran Premio de Italia',
+      'gp_Azerbaijan Grand Prix': 'Gran Premio de Azerbaiyán',
+      'gp_Singapore Grand Prix': 'Gran Premio de Singapur',
+      'gp_United States Grand Prix': 'Gran Premio de los Estados Unidos',
+      'gp_Mexico City Grand Prix': 'Gran Premio de la Ciudad de México',
+      'gp_Brazilian Grand Prix': 'Gran Premio de Brasil',
+      'gp_Las Vegas Grand Prix': 'Gran Premio de Las Vegas',
+      'gp_Qatar Grand Prix': 'Gran Premio de Qatar',
+      'gp_Abu Dhabi Grand Prix': 'Gran Premio de Abu Dabi',
+    },
+    'de': {
+      'appTitle': 'F1 Rennen',
+      'circuits': 'Strecken',
+      'standings': 'Wertung',
+      'drivers': 'Fahrer',
+      'teams': 'Teams',
+      'nextRace': 'Nächstes Rennen',
+      'raceStarts': 'Rennen beginnt um',
+      'days': 'Tage',
+      'day': 'Tag',
+      'weeks': 'Wochen',
+      'week': 'Woche',
+      'hours': 'Stunden',
+      'minutes': 'Minuten',
+      'weather': 'Wetter',
+      'country': 'Land',
+      'timeUntil': 'bis',
+      'startsIn': 'Beginnt in:',
+      'fastestLap': 'Schnellste Runde',
+      'slowestLap': 'Langsamste Runde',
+      'avgLap': 'Durchschnittliche Rundenzeit',
+      'top_speed': 'Höchstgeschwindigkeit',
+      'avg_speed': 'Durchschnittsgeschwindigkeit',
+      'laps': 'Anzahl der Runden',
+      'redFlag': 'Wahrscheinlichkeit Rote Flagge',
+      'vsc': 'Wahrscheinlichkeit VSC',
+      'accident': 'Unfallwahrscheinlichkeit',
+      'accidentTurn1': 'Unfallwahrscheinlichkeit Kurve 1',
+      'tireWear': 'Reifenverschleiß',
+      'strategy': 'Reifenstrategie',
+      'fastestPit': 'Schnellster Boxenstopp',
+      'forecast': 'Wettervorhersage',
+      'temp': 'Temperatur',
+      'rainChance': 'Regenwahrscheinlichkeit',
+      'rainAmount': 'Regenmenge',
+      'wind': 'Windgeschwindigkeit',
+      'humidity': 'Luftfeuchtigkeit',
+      'pressure': 'Luftdruck',
+      'feelsLike': 'Gefühlt wie',
+      'lapStats': 'Rundenstatistiken',
+      'risks': 'Risiken',
+      'tyres': 'Reifen & Box',
+      'general': 'Allgemein',
+      'totalLength': 'Streckenlänge',
+      'characteristics': 'Einzigartige Eigenschaften',
+      'raceFinished': 'Rennen beendet',
+      'pts': 'Pkt',
+      'session_results': 'Sitzungsergebnisse',
+      'fp1': 'Freies Training 1',
+      'fp2': 'Freies Training 2',
+      'fp3': 'Freies Training 3',
+      'sprint_quali': 'Sprint-Qualifying',
+      'sprint': 'Sprintrennen',
+      'qualifying': 'Qualifying',
+      'no_data_yet': 'Noch keine Ergebnisse verfügbar.',
+      'session_future': 'Sitzung beginnt am',
+      'settings': 'Einstellungen',
+      'toggleTheme': 'Design umschalten (Hell/Dunkel)',
+      'selectLanguage': 'Sprache',
+      'changelog': 'Änderungsprotokoll',
+      'version': 'Version',
+      'first_gp': 'Erster Grand Prix',
+      'contract_until': 'Vertrag bis',
+      'overtaking': 'Überholen',
+      'overtake_very_easy': 'Sehr einfach',
+      'overtake_easy': 'Einfach',
+      'overtake_average': 'Durchschnitt',
+      'overtake_difficult': 'Schwer',
+      'overtake_very_difficult': 'Sehr schwer',
+      'driver_number': 'Fahrernummer',
+      'nationality': 'Nationalität',
+      'current_team': 'Aktuelles Team',
+      'points_finish_pct': 'In den Punkten beendet (%)',
+      'wins': 'Siege (1. Platz)',
+      'second_place': '2. Platz',
+      'third_place': '3. Platz',
+      'podiums': 'Podestplätze gesamt',
+      'poles': 'Pole Positions',
+      'fastest_laps': 'Schnellste Runden',
+      'total_points': 'Gesamtpunkte',
+      'championships': 'Weltmeisterschaften',
+      'laps_raced': 'Gefahrene Runden',
+      'starts': 'Starts',
+      'dnf': 'Ausfälle (DNF)',
+      'dsq': 'Disqualifikationen (DSQ)',
+      'dnq': 'Nicht qualifiziert (DNQ)',
+      'driver_info': 'Fahrerinformationen',
+      'career_stats': 'Karrierestatistiken',
+      'experience': 'Erfahrung',
+      'team_info': 'Teaminformationen',
+      'cc_wins': 'Konstrukteursmeisterschaften',
+      'dc_wins': 'Fahrermeisterschaften',
+      'one_two': 'Doppelsiege (1-2)',
+      'hattricks': 'Hattricks',
+      'double_podiums': 'Doppelpodien',
+      'front_row': 'Starts aus erster Reihe',
+      'laps_led': 'Führungsrunden',
+      'team_principal': 'Teamchef',
+      'total_entries': 'Gemeldete Grands Prix',
+      'race_stats': 'Rennstatistiken',
+      'pitstop_leadership': 'Boxenstopps & Führung',
+      'using_fallback_data': 'Noch keine Daten für 2026 verfügbar. Stand von 2025.',
+      'tbd': 'TBD',
+      'wear_High': 'Hoch',
+      'wear_Medium': 'Mittel',
+      'wear_Low': 'Niedrig',
+      'wear_Very High': 'Sehr hoch',
+      'strategy_1 stop': '1 Stopp',
+      'strategy_2 stops': '2 Stopps',
+      'soft_tire': 'Soft',
+      'medium_tire': 'Medium',
+      'hard_tire': 'Hard',
+      'country_Australia': 'Australien',
+      'country_China': 'China',
+      'country_Japan': 'Japan',
+      'country_Bahrain': 'Bahrain',
+      'country_Saudi Arabia': 'Saudi-Arabien',
+      'country_USA': 'USA',
+      'country_Canada': 'Kanada',
+      'country_Monaco': 'Monaco',
+      'country_Spain': 'Spanien',
+      'country_Austria': 'Österreich',
+      'country_United Kingdom': 'Großbritannien',
+      'country_Belgium': 'Belgien',
+      'country_Hungary': 'Ungarn',
+      'country_Netherlands': 'Niederlande',
+      'country_Italy': 'Italien',
+      'country_Azerbaijan': 'Aserbaidschan',
+      'country_Singapore': 'Singapur',
+      'country_Mexico': 'Mexiko',
+      'country_Brazil': 'Brasilien',
+      'country_Qatar': 'Katar',
+      'country_UAE': 'VAE',
+      'gp_Australian Grand Prix': 'Großer Preis von Australien',
+      'gp_Chinese Grand Prix': 'Großer Preis von China',
+      'gp_Japanese Grand Prix': 'Großer Preis von Japan',
+      'gp_Bahrain Grand Prix': 'Großer Preis von Bahrain',
+      'gp_Saudi Arabian Grand Prix': 'Großer Preis von Saudi-Arabien',
+      'gp_Miami Grand Prix': 'Großer Preis von Miami',
+      'gp_Canadian Grand Prix': 'Großer Preis von Kanada',
+      'gp_Monaco Grand Prix': 'Großer Preis von Monaco',
+      'gp_Spanish Grand Prix': 'Großer Preis von Spanien',
+      'gp_Madrid Grand Prix': 'Großer Preis von Madrid',
+      'gp_Austrian Grand Prix': 'Großer Preis von Österreich',
+      'gp_British Grand Prix': 'Großer Preis von Großbritannien',
+      'gp_Belgian Grand Prix': 'Großer Preis von Belgien',
+      'gp_Hungarian Grand Prix': 'Großer Preis von Ungarn',
+      'gp_Dutch Grand Prix': 'Großer Preis der Niederlande',
+      'gp_Italian Grand Prix': 'Großer Preis von Italien',
+      'gp_Azerbaijan Grand Prix': 'Großer Preis von Aserbaidschan',
+      'gp_Singapore Grand Prix': 'Großer Preis von Singapur',
+      'gp_United States Grand Prix': 'Großer Preis der USA',
+      'gp_Mexico City Grand Prix': 'Großer Preis von Mexiko',
+      'gp_Brazilian Grand Prix': 'Großer Preis von São Paulo',
+      'gp_Las Vegas Grand Prix': 'Großer Preis von Las Vegas',
+      'gp_Qatar Grand Prix': 'Großer Preis von Katar',
+      'gp_Abu Dhabi Grand Prix': 'Großer Preis von Abu Dhabi',
     }
   };
 
@@ -386,7 +1055,7 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   const _AppLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => ['en', 'nl'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => ['en', 'nl', 'fr', 'es', 'de'].contains(locale.languageCode);
 
   @override
   Future<AppLocalizations> load(Locale locale) {
@@ -399,17 +1068,31 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
 
 /// --- data models ---------------------------------------------------------
 
+class SessionResult {
+  final String driver;
+  final String time;
+  final String tyre; 
+
+  SessionResult(this.driver, this.time, this.tyre);
+
+  Map<String, dynamic> toJson() => {'driver': driver, 'time': time, 'tyre': tyre};
+  factory SessionResult.fromJson(Map<String, dynamic> json) => SessionResult(json['driver'], json['time'], json['tyre']);
+}
+
 class Race {
   final String name;
   final String country;
   final String flag;
   final DateTime date;
+  final bool hasSprint;
   final int laps;
   final int length;
   final WeatherForecast weather;
   final LapRecord fastestLap;
   final LapRecord slowestLap;
   final String averageLap;
+  final String topSpeed;
+  final String averageSpeed;
   final int redFlagChance;
   final int vscChance;
   final int accidentChance;
@@ -424,11 +1107,19 @@ class Race {
   final List<String> characteristicsEn;
   final List<String> characteristicsNl;
 
+  DateTime get fp1 => date.subtract(const Duration(days: 2, hours: 4));
+  DateTime get fp2 => date.subtract(const Duration(days: 2));
+  DateTime get fp3 => date.subtract(const Duration(days: 1, hours: 4));
+  DateTime get sprintQuali => date.subtract(const Duration(days: 2));
+  DateTime get sprintRace => date.subtract(const Duration(days: 1, hours: 4));
+  DateTime get qualifying => date.subtract(const Duration(days: 1));
+
   Race({
     required this.name, required this.country, required this.flag,
-    required this.date, required this.laps, required this.length,
+    required this.date, required this.hasSprint, required this.laps, required this.length,
     required this.weather, required this.fastestLap, required this.slowestLap,
-    required this.averageLap, required this.redFlagChance, required this.vscChance,
+    required this.averageLap, required this.topSpeed, required this.averageSpeed,
+    required this.redFlagChance, required this.vscChance,
     required this.accidentChance, required this.turn1AccidentChance,
     required this.tireWear, required this.tireStrategy, required this.bestCombination,
     required this.fastestPitstop, required this.overtakingDifficulty,
@@ -542,10 +1233,10 @@ class Team {
 final List<Race> races = [
   Race(
     name: 'Australian Grand Prix', country: 'Australia', flag: '🇦🇺',
-    date: DateTime(2026, 3, 8, 5, 0), laps: 58, length: 5303,
+    date: DateTime(2026, 3, 8, 5, 0), hasSprint: false, laps: 58, length: 5303,
     weather: WeatherForecast(temperature: 22, rainChance: 20, rainAmount: 2, windSpeed: 14, humidity: 55, pressure: 1015, feelsLike: 21),
     fastestLap: LapRecord('Charles Leclerc', 'Ferrari', 2022, '1:20.260'), slowestLap: LapRecord('Robert Kubica', 'Alfa Romeo', 2019, '1:35.000'),
-    averageLap: '1:23.000', redFlagChance: 8, vscChance: 12, accidentChance: 18, turn1AccidentChance: 10,
+    averageLap: '1:23.000', topSpeed: '335 km/h', averageSpeed: '230 km/h', redFlagChance: 8, vscChance: 12, accidentChance: 18, turn1AccidentChance: 10,
     tireWear: 'High', tireStrategy: '2 stops', bestCombination: 'Soft → Medium → Hard',
     fastestPitstop: PitstopRecord('Ferrari', 2022, '2.3s'),
     overtakingDifficulty: 'overtake_average',
@@ -555,10 +1246,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Chinese Grand Prix', country: 'China', flag: '🇨🇳',
-    date: DateTime(2026, 3, 15, 8, 0), laps: 56, length: 5451,
+    date: DateTime(2026, 3, 15, 8, 0), hasSprint: true, laps: 56, length: 5451,
     weather: WeatherForecast(temperature: 17, rainChance: 25, rainAmount: 3, windSpeed: 12, humidity: 50, pressure: 1013, feelsLike: 16),
     fastestLap: LapRecord('Michael Schumacher', 'Ferrari', 2004, '1:32.238'), slowestLap: LapRecord('Marcus Ericsson', 'Sauber', 2018, '1:45.000'),
-    averageLap: '1:35.000', redFlagChance: 7, vscChance: 10, accidentChance: 14, turn1AccidentChance: 8,
+    averageLap: '1:35.000', topSpeed: '340 km/h', averageSpeed: '210 km/h', redFlagChance: 7, vscChance: 10, accidentChance: 14, turn1AccidentChance: 8,
     tireWear: 'Medium', tireStrategy: '1 stop', bestCombination: 'Soft → Medium',
     fastestPitstop: PitstopRecord('Williams', 2019, '2.2s'),
     overtakingDifficulty: 'overtake_easy',
@@ -568,10 +1259,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Japanese Grand Prix', country: 'Japan', flag: '🇯🇵',
-    date: DateTime(2026, 3, 29, 7, 0), laps: 53, length: 5807,
+    date: DateTime(2026, 3, 29, 7, 0), hasSprint: false, laps: 53, length: 5807,
     weather: WeatherForecast(temperature: 19, rainChance: 30, rainAmount: 5, windSpeed: 16, humidity: 60, pressure: 1018, feelsLike: 18),
     fastestLap: LapRecord('Lewis Hamilton', 'Mercedes', 2019, '1:30.983'), slowestLap: LapRecord('Pierre Gasly', 'AlphaTauri', 2020, '1:40.000'),
-    averageLap: '1:33.000', redFlagChance: 12, vscChance: 18, accidentChance: 22, turn1AccidentChance: 15,
+    averageLap: '1:33.000', topSpeed: '330 km/h', averageSpeed: '230 km/h', redFlagChance: 12, vscChance: 18, accidentChance: 22, turn1AccidentChance: 15,
     tireWear: 'Medium', tireStrategy: '2 stops', bestCombination: 'Medium → Hard → Hard',
     fastestPitstop: PitstopRecord('Red Bull', 2021, '2.1s'),
     overtakingDifficulty: 'overtake_difficult',
@@ -581,10 +1272,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Bahrain Grand Prix', country: 'Bahrain', flag: '🇧🇭',
-    date: DateTime(2026, 4, 12, 17, 0), laps: 57, length: 5412,
+    date: DateTime(2026, 4, 12, 17, 0), hasSprint: false, laps: 57, length: 5412,
     weather: WeatherForecast(temperature: 28, rainChance: 0, rainAmount: 0, windSpeed: 12, humidity: 40, pressure: 1012, feelsLike: 29),
     fastestLap: LapRecord('Lewis Hamilton', 'Mercedes', 2020, '1:32.014'), slowestLap: LapRecord('Nikita Mazepin', 'Haas', 2021, '1:45.000'),
-    averageLap: '1:35.000', redFlagChance: 5, vscChance: 10, accidentChance: 15, turn1AccidentChance: 7,
+    averageLap: '1:35.000', topSpeed: '335 km/h', averageSpeed: '215 km/h', redFlagChance: 5, vscChance: 10, accidentChance: 15, turn1AccidentChance: 7,
     tireWear: 'Medium', tireStrategy: '1 stop', bestCombination: 'Soft → Medium',
     fastestPitstop: PitstopRecord('Red Bull', 2022, '2.1s'),
     overtakingDifficulty: 'overtake_very_easy',
@@ -594,10 +1285,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Saudi Arabian Grand Prix', country: 'Saudi Arabia', flag: '🇸🇦',
-    date: DateTime(2026, 4, 19, 19, 0), laps: 50, length: 6150,
+    date: DateTime(2026, 4, 19, 19, 0), hasSprint: false, laps: 50, length: 6150,
     weather: WeatherForecast(temperature: 26, rainChance: 0, rainAmount: 0, windSpeed: 10, humidity: 35, pressure: 1010, feelsLike: 27),
     fastestLap: LapRecord('Max Verstappen', 'Red Bull', 2023, '1:30.734'), slowestLap: LapRecord('Nicholas Latifi', 'Williams', 2022, '1:45.000'),
-    averageLap: '1:33.000', redFlagChance: 10, vscChance: 15, accidentChance: 20, turn1AccidentChance: 12,
+    averageLap: '1:33.000', topSpeed: '340 km/h', averageSpeed: '250 km/h', redFlagChance: 10, vscChance: 15, accidentChance: 20, turn1AccidentChance: 12,
     tireWear: 'Low', tireStrategy: '1 stop', bestCombination: 'Medium → Hard',
     fastestPitstop: PitstopRecord('McLaren', 2023, '2.2s'),
     overtakingDifficulty: 'overtake_average',
@@ -607,10 +1298,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Miami Grand Prix', country: 'USA', flag: '🇺🇸',
-    date: DateTime(2026, 5, 3, 22, 0), laps: 57, length: 5412,
+    date: DateTime(2026, 5, 3, 22, 0), hasSprint: true, laps: 57, length: 5412,
     weather: WeatherForecast(temperature: 30, rainChance: 40, rainAmount: 8, windSpeed: 18, humidity: 65, pressure: 1008, feelsLike: 32),
     fastestLap: LapRecord('Max Verstappen', 'Red Bull', 2023, '1:29.708'), slowestLap: LapRecord('Kevin Magnussen', 'Haas', 2022, '1:45.000'),
-    averageLap: '1:32.000', redFlagChance: 15, vscChance: 20, accidentChance: 25, turn1AccidentChance: 17,
+    averageLap: '1:32.000', topSpeed: '340 km/h', averageSpeed: '220 km/h', redFlagChance: 15, vscChance: 20, accidentChance: 25, turn1AccidentChance: 17,
     tireWear: 'High', tireStrategy: '2 stops', bestCombination: 'Soft → Medium → Hard',
     fastestPitstop: PitstopRecord('McLaren', 2023, '2.1s'),
     overtakingDifficulty: 'overtake_average',
@@ -620,10 +1311,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Canadian Grand Prix', country: 'Canada', flag: '🇨🇦',
-    date: DateTime(2026, 5, 24, 22, 0), laps: 70, length: 4361,
+    date: DateTime(2026, 5, 24, 22, 0), hasSprint: false, laps: 70, length: 4361,
     weather: WeatherForecast(temperature: 20, rainChance: 25, rainAmount: 3, windSpeed: 10, humidity: 55, pressure: 1012, feelsLike: 19),
     fastestLap: LapRecord('Valtteri Bottas', 'Mercedes', 2019, '1:13.078'), slowestLap: LapRecord('Nicholas Latifi', 'Williams', 2022, '1:40.000'),
-    averageLap: '1:16.000', redFlagChance: 8, vscChance: 12, accidentChance: 18, turn1AccidentChance: 9,
+    averageLap: '1:16.000', topSpeed: '345 km/h', averageSpeed: '210 km/h', redFlagChance: 8, vscChance: 12, accidentChance: 18, turn1AccidentChance: 9,
     tireWear: 'Medium', tireStrategy: '1 stop', bestCombination: 'Soft → Medium',
     fastestPitstop: PitstopRecord('Red Bull', 2022, '2.1s'),
     overtakingDifficulty: 'overtake_easy',
@@ -633,10 +1324,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Monaco Grand Prix', country: 'Monaco', flag: '🇲🇨',
-    date: DateTime(2026, 6, 7, 15, 0), laps: 78, length: 3337,
+    date: DateTime(2026, 6, 7, 15, 0), hasSprint: false, laps: 78, length: 3337,
     weather: WeatherForecast(temperature: 21, rainChance: 10, rainAmount: 1, windSpeed: 8, humidity: 60, pressure: 1017, feelsLike: 21),
     fastestLap: LapRecord('Max Verstappen', 'Red Bull', 2021, '1:12.909'), slowestLap: LapRecord('Nicholas Latifi', 'Williams', 2022, '1:40.000'),
-    averageLap: '1:15.000', redFlagChance: 20, vscChance: 25, accidentChance: 30, turn1AccidentChance: 20,
+    averageLap: '1:15.000', topSpeed: '290 km/h', averageSpeed: '160 km/h', redFlagChance: 20, vscChance: 25, accidentChance: 30, turn1AccidentChance: 20,
     tireWear: 'Low', tireStrategy: '1 stop', bestCombination: 'Soft → Medium',
     fastestPitstop: PitstopRecord('Red Bull', 2022, '2.1s'),
     overtakingDifficulty: 'overtake_very_difficult',
@@ -646,10 +1337,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Spanish Grand Prix', country: 'Spain', flag: '🇪🇸',
-    date: DateTime(2026, 6, 14, 15, 0), laps: 66, length: 4655,
+    date: DateTime(2026, 6, 14, 15, 0), hasSprint: false, laps: 66, length: 4655,
     weather: WeatherForecast(temperature: 25, rainChance: 15, rainAmount: 2, windSpeed: 11, humidity: 45, pressure: 1014, feelsLike: 25),
     fastestLap: LapRecord('Max Verstappen', 'Red Bull', 2023, '1:16.330'), slowestLap: LapRecord('Carlos Sainz', 'Ferrari', 2022, '1:40.000'),
-    averageLap: '1:19.000', redFlagChance: 5, vscChance: 10, accidentChance: 12, turn1AccidentChance: 6,
+    averageLap: '1:19.000', topSpeed: '335 km/h', averageSpeed: '215 km/h', redFlagChance: 5, vscChance: 10, accidentChance: 12, turn1AccidentChance: 6,
     tireWear: 'High', tireStrategy: '2 stops', bestCombination: 'Soft → Medium → Hard',
     fastestPitstop: PitstopRecord('Williams', 2022, '2.2s'),
     overtakingDifficulty: 'overtake_difficult',
@@ -659,10 +1350,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Austrian Grand Prix', country: 'Austria', flag: '🇦🇹',
-    date: DateTime(2026, 6, 28, 15, 0), laps: 71, length: 4318,
+    date: DateTime(2026, 6, 28, 15, 0), hasSprint: true, laps: 71, length: 4318,
     weather: WeatherForecast(temperature: 23, rainChance: 20, rainAmount: 2, windSpeed: 12, humidity: 50, pressure: 1015, feelsLike: 22),
     fastestLap: LapRecord('Carlos Sainz', 'Ferrari', 2022, '1:07.634'), slowestLap: LapRecord('Nicholas Latifi', 'Williams', 2022, '1:40.000'),
-    averageLap: '1:10.000', redFlagChance: 6, vscChance: 9, accidentChance: 14, turn1AccidentChance: 7,
+    averageLap: '1:10.000', topSpeed: '330 km/h', averageSpeed: '240 km/h', redFlagChance: 6, vscChance: 9, accidentChance: 14, turn1AccidentChance: 7,
     tireWear: 'Medium', tireStrategy: '1 stop', bestCombination: 'Soft → Medium',
     fastestPitstop: PitstopRecord('Red Bull', 2022, '2.1s'),
     overtakingDifficulty: 'overtake_easy',
@@ -672,10 +1363,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'British Grand Prix', country: 'United Kingdom', flag: '🇬🇧',
-    date: DateTime(2026, 7, 5, 16, 0), laps: 52, length: 5891,
+    date: DateTime(2026, 7, 5, 16, 0), hasSprint: false, laps: 52, length: 5891,
     weather: WeatherForecast(temperature: 18, rainChance: 35, rainAmount: 6, windSpeed: 15, humidity: 65, pressure: 1016, feelsLike: 17),
     fastestLap: LapRecord('Lewis Hamilton', 'Mercedes', 2020, '1:27.097'), slowestLap: LapRecord('Nicholas Latifi', 'Williams', 2022, '1:40.000'),
-    averageLap: '1:30.000', redFlagChance: 12, vscChance: 18, accidentChance: 22, turn1AccidentChance: 13,
+    averageLap: '1:30.000', topSpeed: '335 km/h', averageSpeed: '245 km/h', redFlagChance: 12, vscChance: 18, accidentChance: 22, turn1AccidentChance: 13,
     tireWear: 'Medium', tireStrategy: '2 stops', bestCombination: 'Medium → Hard → Hard',
     fastestPitstop: PitstopRecord('Red Bull', 2022, '2.1s'),
     overtakingDifficulty: 'overtake_average',
@@ -685,10 +1376,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Belgian Grand Prix', country: 'Belgium', flag: '🇧🇪',
-    date: DateTime(2026, 7, 19, 15, 0), laps: 44, length: 7004,
+    date: DateTime(2026, 7, 19, 15, 0), hasSprint: false, laps: 44, length: 7004,
     weather: WeatherForecast(temperature: 16, rainChance: 50, rainAmount: 10, windSpeed: 20, humidity: 75, pressure: 1009, feelsLike: 15),
     fastestLap: LapRecord('Valtteri Bottas', 'Mercedes', 2018, '1:46.286'), slowestLap: LapRecord('Nicholas Latifi', 'Williams', 2022, '1:40.000'),
-    averageLap: '1:50.000', redFlagChance: 20, vscChance: 25, accidentChance: 30, turn1AccidentChance: 18,
+    averageLap: '1:50.000', topSpeed: '345 km/h', averageSpeed: '240 km/h', redFlagChance: 20, vscChance: 25, accidentChance: 30, turn1AccidentChance: 18,
     tireWear: 'Medium', tireStrategy: '2 stops', bestCombination: 'Medium → Hard → Hard',
     fastestPitstop: PitstopRecord('Red Bull', 2022, '2.1s'),
     overtakingDifficulty: 'overtake_easy',
@@ -698,10 +1389,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Hungarian Grand Prix', country: 'Hungary', flag: '🇭🇺',
-    date: DateTime(2026, 7, 26, 15, 0), laps: 70, length: 4381,
+    date: DateTime(2026, 7, 26, 15, 0), hasSprint: false, laps: 70, length: 4381,
     weather: WeatherForecast(temperature: 27, rainChance: 20, rainAmount: 2, windSpeed: 10, humidity: 55, pressure: 1012, feelsLike: 26),
     fastestLap: LapRecord('Max Verstappen', 'Red Bull', 2023, '1:17.103'), slowestLap: LapRecord('Nicholas Latifi', 'Williams', 2022, '1:40.000'),
-    averageLap: '1:20.000', redFlagChance: 8, vscChance: 12, accidentChance: 18, turn1AccidentChance: 9,
+    averageLap: '1:20.000', topSpeed: '315 km/h', averageSpeed: '200 km/h', redFlagChance: 8, vscChance: 12, accidentChance: 18, turn1AccidentChance: 9,
     tireWear: 'High', tireStrategy: '2 stops', bestCombination: 'Soft → Medium → Hard',
     fastestPitstop: PitstopRecord('Red Bull', 2022, '2.1s'),
     overtakingDifficulty: 'overtake_very_difficult',
@@ -711,10 +1402,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Dutch Grand Prix', country: 'Netherlands', flag: '🇳🇱',
-    date: DateTime(2026, 8, 23, 15, 0), laps: 72, length: 4259,
+    date: DateTime(2026, 8, 23, 15, 0), hasSprint: false, laps: 72, length: 4259,
     weather: WeatherForecast(temperature: 20, rainChance: 30, rainAmount: 4, windSpeed: 14, humidity: 60, pressure: 1015, feelsLike: 19),
     fastestLap: LapRecord('Lewis Hamilton', 'Mercedes', 2021, '1:11.097'), slowestLap: LapRecord('Nicholas Latifi', 'Williams', 2022, '1:40.000'),
-    averageLap: '1:14.000', redFlagChance: 10, vscChance: 15, accidentChance: 20, turn1AccidentChance: 12,
+    averageLap: '1:14.000', topSpeed: '325 km/h', averageSpeed: '215 km/h', redFlagChance: 10, vscChance: 15, accidentChance: 20, turn1AccidentChance: 12,
     tireWear: 'High', tireStrategy: '2 stops', bestCombination: 'Soft → Medium → Hard',
     fastestPitstop: PitstopRecord('Red Bull', 2022, '2.1s'),
     overtakingDifficulty: 'overtake_difficult',
@@ -724,10 +1415,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Italian Grand Prix', country: 'Italy', flag: '🇮🇹',
-    date: DateTime(2026, 9, 6, 15, 0), laps: 53, length: 5793,
+    date: DateTime(2026, 9, 6, 15, 0), hasSprint: false, laps: 53, length: 5793,
     weather: WeatherForecast(temperature: 24, rainChance: 15, rainAmount: 2, windSpeed: 10, humidity: 50, pressure: 1014, feelsLike: 24),
     fastestLap: LapRecord('Lewis Hamilton', 'Mercedes', 2020, '1:18.887'), slowestLap: LapRecord('Nicholas Latifi', 'Williams', 2022, '1:40.000'),
-    averageLap: '1:21.000', redFlagChance: 8, vscChance: 12, accidentChance: 18, turn1AccidentChance: 9,
+    averageLap: '1:21.000', topSpeed: '350 km/h', averageSpeed: '260 km/h', redFlagChance: 8, vscChance: 12, accidentChance: 18, turn1AccidentChance: 9,
     tireWear: 'Medium', tireStrategy: '1 stop', bestCombination: 'Soft → Medium',
     fastestPitstop: PitstopRecord('Red Bull', 2022, '2.1s'),
     overtakingDifficulty: 'overtake_average',
@@ -737,10 +1428,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Madrid Grand Prix', country: 'Spain', flag: '🇪🇸',
-    date: DateTime(2026, 9, 13, 15, 0), laps: 55, length: 5474,
+    date: DateTime(2026, 9, 13, 15, 0), hasSprint: false, laps: 55, length: 5474,
     weather: WeatherForecast(temperature: 26, rainChance: 10, rainAmount: 1, windSpeed: 12, humidity: 45, pressure: 1015, feelsLike: 27),
     fastestLap: LapRecord('TBD', 'TBD', 2026, 'TBD'), slowestLap: LapRecord('TBD', 'TBD', 2026, 'TBD'),
-    averageLap: 'TBD', redFlagChance: 15, vscChance: 20, accidentChance: 25, turn1AccidentChance: 10,
+    averageLap: 'TBD', topSpeed: '335 km/h', averageSpeed: '215 km/h', redFlagChance: 15, vscChance: 20, accidentChance: 25, turn1AccidentChance: 10,
     tireWear: 'High', tireStrategy: '2 stops', bestCombination: 'Soft → Medium → Hard',
     fastestPitstop: PitstopRecord('TBD', 2026, 'TBD'),
     overtakingDifficulty: 'overtake_average',
@@ -750,10 +1441,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Azerbaijan Grand Prix', country: 'Azerbaijan', flag: '🇦🇿',
-    date: DateTime(2026, 9, 27, 13, 0), laps: 51, length: 6003,
+    date: DateTime(2026, 9, 27, 13, 0), hasSprint: false, laps: 51, length: 6003,
     weather: WeatherForecast(temperature: 27, rainChance: 10, rainAmount: 1, windSpeed: 12, humidity: 45, pressure: 1012, feelsLike: 27),
     fastestLap: LapRecord('Charles Leclerc', 'Ferrari', 2022, '1:43.009'), slowestLap: LapRecord('Nicholas Latifi', 'Williams', 2022, '1:40.000'),
-    averageLap: '1:46.000', redFlagChance: 15, vscChance: 20, accidentChance: 25, turn1AccidentChance: 14,
+    averageLap: '1:46.000', topSpeed: '345 km/h', averageSpeed: '210 km/h', redFlagChance: 15, vscChance: 20, accidentChance: 25, turn1AccidentChance: 14,
     tireWear: 'Medium', tireStrategy: '1 stop', bestCombination: 'Medium → Hard',
     fastestPitstop: PitstopRecord('Red Bull', 2022, '2.1s'),
     overtakingDifficulty: 'overtake_easy',
@@ -763,10 +1454,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Singapore Grand Prix', country: 'Singapore', flag: '🇸🇬',
-    date: DateTime(2026, 10, 11, 14, 0), laps: 61, length: 5063,
+    date: DateTime(2026, 10, 11, 14, 0), hasSprint: false, laps: 61, length: 5063,
     weather: WeatherForecast(temperature: 32, rainChance: 60, rainAmount: 12, windSpeed: 18, humidity: 80, pressure: 1007, feelsLike: 34),
     fastestLap: LapRecord('Lewis Hamilton', 'Mercedes', 2018, '1:41.905'), slowestLap: LapRecord('Nicholas Latifi', 'Williams', 2022, '1:40.000'),
-    averageLap: '1:44.000', redFlagChance: 18, vscChance: 22, accidentChance: 28, turn1AccidentChance: 16,
+    averageLap: '1:44.000', topSpeed: '310 km/h', averageSpeed: '175 km/h', redFlagChance: 18, vscChance: 22, accidentChance: 28, turn1AccidentChance: 16,
     tireWear: 'High', tireStrategy: '2 stops', bestCombination: 'Soft → Medium → Hard',
     fastestPitstop: PitstopRecord('Red Bull', 2022, '2.1s'),
     overtakingDifficulty: 'overtake_very_difficult',
@@ -776,10 +1467,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'United States Grand Prix', country: 'USA', flag: '🇺🇸',
-    date: DateTime(2026, 10, 25, 21, 0), laps: 56, length: 5513,
+    date: DateTime(2026, 10, 25, 21, 0), hasSprint: true, laps: 56, length: 5513,
     weather: WeatherForecast(temperature: 28, rainChance: 20, rainAmount: 2, windSpeed: 14, humidity: 55, pressure: 1013, feelsLike: 29),
     fastestLap: LapRecord('Charles Leclerc', 'Ferrari', 2022, '1:36.198'), slowestLap: LapRecord('Nicholas Latifi', 'Williams', 2022, '1:40.000'),
-    averageLap: '1:39.000', redFlagChance: 10, vscChance: 15, accidentChance: 20, turn1AccidentChance: 11,
+    averageLap: '1:39.000', topSpeed: '335 km/h', averageSpeed: '215 km/h', redFlagChance: 10, vscChance: 15, accidentChance: 20, turn1AccidentChance: 11,
     tireWear: 'Medium', tireStrategy: '2 stops', bestCombination: 'Medium → Hard → Hard',
     fastestPitstop: PitstopRecord('Red Bull', 2022, '2.1s'),
     overtakingDifficulty: 'overtake_easy',
@@ -789,10 +1480,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Mexico City Grand Prix', country: 'Mexico', flag: '🇲🇽',
-    date: DateTime(2026, 11, 1, 21, 0), laps: 71, length: 4304,
+    date: DateTime(2026, 11, 1, 21, 0), hasSprint: false, laps: 71, length: 4304,
     weather: WeatherForecast(temperature: 22, rainChance: 15, rainAmount: 2, windSpeed: 10, humidity: 50, pressure: 1014, feelsLike: 22),
     fastestLap: LapRecord('Valtteri Bottas', 'Mercedes', 2021, '1:17.774'), slowestLap: LapRecord('Nicholas Latifi', 'Williams', 2022, '1:40.000'),
-    averageLap: '1:20.000', redFlagChance: 8, vscChance: 12, accidentChance: 18, turn1AccidentChance: 9,
+    averageLap: '1:20.000', topSpeed: '350 km/h', averageSpeed: '210 km/h', redFlagChance: 8, vscChance: 12, accidentChance: 18, turn1AccidentChance: 9,
     tireWear: 'Medium', tireStrategy: '1 stop', bestCombination: 'Soft → Medium',
     fastestPitstop: PitstopRecord('Red Bull', 2022, '2.1s'),
     overtakingDifficulty: 'overtake_average',
@@ -802,10 +1493,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Brazilian Grand Prix', country: 'Brazil', flag: '🇧🇷',
-    date: DateTime(2026, 11, 8, 18, 0), laps: 71, length: 4309,
+    date: DateTime(2026, 11, 8, 18, 0), hasSprint: true, laps: 71, length: 4309,
     weather: WeatherForecast(temperature: 26, rainChance: 30, rainAmount: 4, windSpeed: 12, humidity: 60, pressure: 1015, feelsLike: 25),
     fastestLap: LapRecord('Lewis Hamilton', 'Mercedes', 2021, '1:10.540'), slowestLap: LapRecord('Nicholas Latifi', 'Williams', 2022, '1:40.000'),
-    averageLap: '1:13.000', redFlagChance: 12, vscChance: 18, accidentChance: 22, turn1AccidentChance: 13,
+    averageLap: '1:13.000', topSpeed: '335 km/h', averageSpeed: '215 km/h', redFlagChance: 12, vscChance: 18, accidentChance: 22, turn1AccidentChance: 13,
     tireWear: 'Medium', tireStrategy: '2 stops', bestCombination: 'Medium → Hard → Hard',
     fastestPitstop: PitstopRecord('Red Bull', 2022, '2.1s'),
     overtakingDifficulty: 'overtake_easy',
@@ -815,10 +1506,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Las Vegas Grand Prix', country: 'USA', flag: '🇺🇸',
-    date: DateTime(2026, 11, 21, 5, 0), laps: 50, length: 6500,
+    date: DateTime(2026, 11, 21, 5, 0), hasSprint: false, laps: 50, length: 6500,
     weather: WeatherForecast(temperature: 15, rainChance: 5, rainAmount: 0, windSpeed: 10, humidity: 30, pressure: 1011, feelsLike: 15),
     fastestLap: LapRecord('Max Verstappen', 'Red Bull', 2023, '1:34.000'), slowestLap: LapRecord('Nicholas Latifi', 'Williams', 2022, '1:45.000'),
-    averageLap: '1:37.000', redFlagChance: 10, vscChance: 15, accidentChance: 20, turn1AccidentChance: 10,
+    averageLap: '1:37.000', topSpeed: '350 km/h', averageSpeed: '235 km/h', redFlagChance: 10, vscChance: 15, accidentChance: 20, turn1AccidentChance: 10,
     tireWear: 'Medium', tireStrategy: '1 stop', bestCombination: 'Soft → Medium',
     fastestPitstop: PitstopRecord('Red Bull', 2023, '2.1s'),
     overtakingDifficulty: 'overtake_very_easy',
@@ -828,10 +1519,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Qatar Grand Prix', country: 'Qatar', flag: '🇶🇦',
-    date: DateTime(2026, 11, 29, 17, 0), laps: 57, length: 5419,
+    date: DateTime(2026, 11, 29, 17, 0), hasSprint: true, laps: 57, length: 5419,
     weather: WeatherForecast(temperature: 28, rainChance: 0, rainAmount: 0, windSpeed: 16, humidity: 40, pressure: 1014, feelsLike: 30),
     fastestLap: LapRecord('Max Verstappen', 'Red Bull', 2021, '1:23.196'), slowestLap: LapRecord('Nikita Mazepin', 'Haas', 2021, '1:30.000'),
-    averageLap: '1:26.000', redFlagChance: 5, vscChance: 10, accidentChance: 15, turn1AccidentChance: 8,
+    averageLap: '1:26.000', topSpeed: '340 km/h', averageSpeed: '230 km/h', redFlagChance: 5, vscChance: 10, accidentChance: 15, turn1AccidentChance: 8,
     tireWear: 'High', tireStrategy: '2 stops', bestCombination: 'Medium → Hard → Hard',
     fastestPitstop: PitstopRecord('McLaren', 2023, '2.2s'),
     overtakingDifficulty: 'overtake_difficult',
@@ -841,10 +1532,10 @@ final List<Race> races = [
   ),
   Race(
     name: 'Abu Dhabi Grand Prix', country: 'UAE', flag: '🇦🇪',
-    date: DateTime(2026, 12, 6, 14, 0), laps: 58, length: 5281,
+    date: DateTime(2026, 12, 6, 14, 0), hasSprint: false, laps: 58, length: 5281,
     weather: WeatherForecast(temperature: 27, rainChance: 0, rainAmount: 0, windSpeed: 10, humidity: 40, pressure: 1012, feelsLike: 28),
     fastestLap: LapRecord('Max Verstappen', 'Red Bull', 2021, '1:26.103'), slowestLap: LapRecord('Nicholas Latifi', 'Williams', 2022, '1:40.000'),
-    averageLap: '1:29.000', redFlagChance: 5, vscChance: 10, accidentChance: 15, turn1AccidentChance: 7,
+    averageLap: '1:29.000', topSpeed: '335 km/h', averageSpeed: '210 km/h', redFlagChance: 5, vscChance: 10, accidentChance: 15, turn1AccidentChance: 7,
     tireWear: 'Low', tireStrategy: '1 stop', bestCombination: 'Medium → Hard',
     fastestPitstop: PitstopRecord('Red Bull', 2022, '2.1s'),
     overtakingDifficulty: 'overtake_average',
@@ -891,7 +1582,7 @@ final List<Team> fallbackTeams = [
   Team(name: 'Alpine', flag: '🇫🇷', points: 22, fastestPitstopTime: '2.18s', fastestPitstopYear: 2024, fastestPitstopCircuit: 'Japan', ccWins: 2, dcWins: 2, podiums: 105, oneTwo: 2, hattricks: 1, doublePodiums: 5, totalPoints: 2150.0, frontRow: 25, poles: 51, fastestLaps: 33, racesLed: 45, principalName: 'Oliver Oakes', principalAge: 59, principalFlag: '🇬🇧', totalEntries: 90),
 ];
 
-// Caching voor de app-sessie
+// Caching voor de app-sessie (Ergast)
 List<Driver>? _cachedDrivers;
 List<Team>? _cachedTeams;
 bool _usingFallback = false;
@@ -899,10 +1590,10 @@ bool _usingFallback = false;
 /// --- views ---------------------------------------------------------------
 
 class HomeScreen extends StatefulWidget {
-  final VoidCallback onToggleLocale;
+  final ValueChanged<Locale> onSetLocale;
   final VoidCallback onToggleTheme;
 
-  const HomeScreen({required this.onToggleLocale, required this.onToggleTheme, super.key});
+  const HomeScreen({required this.onSetLocale, required this.onToggleTheme, super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -965,7 +1656,10 @@ class _HomeScreenState extends State<HomeScreen> {
               tooltip: loc.translate('settings'),
               onSelected: (value) {
                 if (value == 0) widget.onToggleTheme();
-                if (value == 1) widget.onToggleLocale();
+                // value 1 is managed dynamically inside the DropdownButton
+                if (value == 2) {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ChangelogScreen()));
+                }
               },
               itemBuilder: (context) => [
                 PopupMenuItem(
@@ -984,7 +1678,38 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       const Icon(Icons.language),
                       const SizedBox(width: 12),
-                      Text(loc.translate('toggleLanguage')),
+                      Expanded(
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: loc.locale.languageCode,
+                            isDense: true,
+                            isExpanded: true,
+                            onChanged: (String? newValue) {
+                              if (newValue != null && newValue != loc.locale.languageCode) {
+                                widget.onSetLocale(Locale(newValue));
+                                Navigator.pop(context); // Menu sluiten na taalkeuze
+                              }
+                            },
+                            items: const [
+                              DropdownMenuItem(value: 'en', child: Text('English')),
+                              DropdownMenuItem(value: 'nl', child: Text('Nederlands')),
+                              DropdownMenuItem(value: 'fr', child: Text('Français')),
+                              DropdownMenuItem(value: 'es', child: Text('Español')),
+                              DropdownMenuItem(value: 'de', child: Text('Deutsch')),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 2,
+                  child: Row(
+                    children: [
+                      const Icon(Icons.history),
+                      const SizedBox(width: 12),
+                      Text(loc.translate('changelog')),
                     ],
                   ),
                 ),
@@ -1251,6 +1976,317 @@ class _StandingsViewState extends State<StandingsView> {
   }
 }
 
+class SessionResultsScreen extends StatelessWidget {
+  final Race race;
+  const SessionResultsScreen({required this.race, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(loc.translate('session_results')),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: race.hasSprint 
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                OpenF1SessionWidget(race: race, sessionName: 'Practice 1', displayTitle: loc.translate('fp1')),
+                OpenF1SessionWidget(race: race, sessionName: 'Sprint Qualifying', displayTitle: loc.translate('sprint_quali')),
+                OpenF1SessionWidget(race: race, sessionName: 'Sprint', displayTitle: loc.translate('sprint')),
+                OpenF1SessionWidget(race: race, sessionName: 'Qualifying', displayTitle: loc.translate('qualifying')),
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                OpenF1SessionWidget(race: race, sessionName: 'Practice 1', displayTitle: loc.translate('fp1')),
+                OpenF1SessionWidget(race: race, sessionName: 'Practice 2', displayTitle: loc.translate('fp2')),
+                OpenF1SessionWidget(race: race, sessionName: 'Practice 3', displayTitle: loc.translate('fp3')),
+                OpenF1SessionWidget(race: race, sessionName: 'Qualifying', displayTitle: loc.translate('qualifying')),
+              ],
+            ),
+      ),
+    );
+  }
+}
+
+class OpenF1SessionWidget extends StatelessWidget {
+  final Race race;
+  final String sessionName;
+  final String displayTitle;
+
+  const OpenF1SessionWidget({
+    required this.race,
+    required this.sessionName,
+    required this.displayTitle,
+    super.key,
+  });
+
+  String getTireEmoji(String compound) {
+    switch (compound.toUpperCase()) {
+      case 'SOFT': return '🔴 Soft';
+      case 'MEDIUM': return '🟡 Med';
+      case 'HARD': return '⚪ Hard';
+      case 'INTERMEDIATE': return '🟢 Int';
+      case 'WET': return '🔵 Wet';
+      default: return '❔ $compound';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final key = '${race.country}_${sessionName}_2026';
+    
+    DateTime sessionTime;
+    if (sessionName == 'Practice 1') sessionTime = race.fp1;
+    else if (sessionName == 'Practice 2') sessionTime = race.fp2;
+    else if (sessionName == 'Practice 3') sessionTime = race.fp3;
+    else if (sessionName == 'Sprint Qualifying') sessionTime = race.sprintQuali;
+    else if (sessionName == 'Sprint') sessionTime = race.sprintRace;
+    else sessionTime = race.qualifying;
+
+    return AnimatedBuilder(
+      animation: SessionDataManager(),
+      builder: (context, child) {
+        final results = SessionDataManager().cache[key];
+
+        // 1. Sessie is in de toekomst
+        if (sessionTime.isAfter(DateTime.now())) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(displayTitle, style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
+                const SizedBox(height: 4),
+                Text('${loc.translate('session_future')} ${sessionTime.toString().substring(0, 16)}', style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey)),
+                const SizedBox(height: 8),
+                const Divider(height: 1),
+              ],
+            ),
+          );
+        }
+
+        // 2. Data is aan het inladen
+        if (results == null && !SessionDataManager().isInitialized) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+                const SizedBox(width: 12),
+                Text('$displayTitle laden...'),
+              ],
+            ),
+          );
+        }
+
+        // 3. Geen data beschikbaar
+        if (results == null || results.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(displayTitle, style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
+                const SizedBox(height: 4),
+                Text(loc.translate('no_data_yet'), style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey)),
+                const SizedBox(height: 8),
+                const Divider(height: 1),
+              ],
+            ),
+          );
+        }
+
+        // 4. Toon resultaten
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 16, top: 12, bottom: 8),
+              child: Text(displayTitle, style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
+            ),
+            ...results.asMap().entries.map((e) {
+              final index = e.key + 1;
+              final res = e.value;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: Row(
+                  children: [
+                    SizedBox(width: 24, child: Text('$index.', style: const TextStyle(fontWeight: FontWeight.bold))),
+                    Expanded(child: Text(res.driver)),
+                    Text(res.time, style: const TextStyle(fontFamily: 'monospace')),
+                    const SizedBox(width: 12),
+                    SizedBox(
+                      width: 60,
+                      child: Text(getTireEmoji(res.tyre), style: const TextStyle(fontSize: 12)),
+                    ),
+                  ],
+                ),
+              );
+            }),
+            const SizedBox(height: 8),
+            const Divider(height: 1),
+          ],
+        );
+      }
+    );
+  }
+}
+
+class ChangelogScreen extends StatelessWidget {
+  const ChangelogScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+
+    // AI Beheerde Changelog
+    final List<Map<String, dynamic>> changelog = [
+      {
+        'version': '1.5.0',
+        'date': 'Maart 2026',
+        'changes_en': [
+          'Fixed German language translations.',
+          'Added Top Speed and Average Speed to lap statistics.',
+          'Lap statistics are now expanded by default.'
+        ],
+        'changes_nl': [
+          'Duitse vertalingen volledig gecorrigeerd.',
+          'Hoogste snelheid en gemiddelde snelheid toegevoegd aan rondestatistieken.',
+          'Rondestatistieken klapt nu standaard open bij het openen van een circuit.'
+        ]
+      },
+      {
+        'version': '1.4.0',
+        'date': 'Maart 2026',
+        'changes_en': [
+          'Added French and Spanish language support.',
+          'Added German language option.'
+        ],
+        'changes_nl': [
+          'Franse en Spaanse taalondersteuning toegevoegd.',
+          'Duitse taaloptie toegevoegd in het dropdownmenu.'
+        ]
+      },
+      {
+        'version': '1.3.0',
+        'date': 'Maart 2026',
+        'changes_en': [
+          'Replaced language toggle with a dropdown menu to support future languages.',
+        ],
+        'changes_nl': [
+          'Taalknop in instellingen vervangen door een dropdown menuutje ter voorbereiding op extra talen.',
+        ]
+      },
+      {
+        'version': '1.2.0',
+        'date': 'Maart 2026',
+        'changes_en': [
+          'Added automatic Sprint weekend support.',
+          'Replaced FP2 and FP3 with Sprint Qualifying and Sprint for specific grand prix.',
+          'Updated localization files for new sprint logic.'
+        ],
+        'changes_nl': [
+          'Ondersteuning voor Sprintraceweekenden toegevoegd.',
+          'Vrije Training 2 en 3 worden nu automatisch vervangen door Sprint Kwalificatie en Sprintrace tijdens actieve weekenden.',
+          'Vertaalbestanden geüpdatet met de nieuwe sprint-termen.'
+        ]
+      },
+      {
+        'version': '1.1.0',
+        'date': 'Maart 2026',
+        'changes_en': [
+          'Added live session results via OpenF1 API (FP1, FP2, FP3, Qualifying).',
+          'Implemented SharedPreferences to save results locally and save bandwidth.',
+          'Added intelligent API rate-limiting to prevent "Too Many Requests" errors.',
+          'Added live tire compound extraction (Soft, Medium, Hard) matching fastest laps.',
+          'Moved session results from the ExpansionTile to a dedicated new screen.',
+          'Added this Changelog screen.'
+        ],
+        'changes_nl': [
+          'Live sessieresultaten toegevoegd via OpenF1 API (FP1, FP2, FP3, Kwalificatie).',
+          'SharedPreferences geïmplementeerd om resultaten lokaal op te slaan en data te besparen.',
+          'Slimme API rate-limiting toegevoegd om "Too Many Requests" foutmeldingen te voorkomen.',
+          'Live bandendata (Soft, Medium, Hard) gekoppeld aan de snelst gereden rondes.',
+          'Sessieresultaten verplaatst van de uitklaplijst naar een volledig nieuw scherm.',
+          'Dit versiegeschiedenis-scherm (Changelog) toegevoegd.'
+        ]
+      },
+      {
+        'version': '1.0.0',
+        'date': 'Maart 2026',
+        'changes_en': [
+          'Initial release of the F1 Races app.',
+          'Added complete 2026 race calendar with mock data and circuit statistics.',
+          'Added Driver and Team standings using Ergast API.',
+          'Implemented Light & Dark mode support.',
+          'Added bi-lingual support (English & Dutch).'
+        ],
+        'changes_nl': [
+          'Eerste versie van de F1 Races app gelanceerd.',
+          'Volledige kalender van 2026 toegevoegd inclusief circuitstatistieken.',
+          'Coureur- en Teamstanden toegevoegd via de Ergast API.',
+          'Licht en Donker thema (Light & Dark mode) ondersteuning toegevoegd.',
+          'Volledig tweetalig gemaakt (Engels & Nederlands).'
+        ]
+      }
+    ];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(loc.translate('changelog')),
+      ),
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: changelog.length,
+        itemBuilder: (context, index) {
+          final entry = changelog[index];
+          final changes = loc.locale.languageCode == 'nl' || loc.locale.languageCode == 'de' ? entry['changes_nl'] : entry['changes_en'];
+
+          return Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${loc.translate('version')} ${entry['version']}',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                      ),
+                      Text(entry['date'], style: const TextStyle(color: Colors.grey)),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ...changes.map<Widget>((change) => Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('• ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                            Expanded(child: Text(change)),
+                          ],
+                        ),
+                      )),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
 class CircuitDetailView extends StatelessWidget {
   final Race race;
   const CircuitDetailView({required this.race, super.key});
@@ -1284,53 +2320,81 @@ class CircuitDetailView extends StatelessWidget {
         .replaceAll('Medium', loc.translate('medium_tire'))
         .replaceAll('Hard', loc.translate('hard_tire'));
 
-    List<String> raceChars = loc.locale.languageCode == 'nl' ? race.characteristicsNl : race.characteristicsEn;
+    List<String> raceChars = loc.locale.languageCode == 'nl' || loc.locale.languageCode == 'de' ? race.characteristicsNl : race.characteristicsEn;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Card(
-            color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
-            margin: const EdgeInsets.only(bottom: 16),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('🌦️ ${loc.translate('forecast')}:', style: Theme.of(context).textTheme.titleSmall),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16, top: 4),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('🌡️ ${race.weather.temperature}°C (${loc.translate('feelsLike').toLowerCase()} ${race.weather.feelsLike}°C)', style: Theme.of(context).textTheme.bodySmall),
-                        Text('🌧️ ${race.weather.rainChance}% ${loc.translate('rainChance').toLowerCase()}, ${race.weather.rainAmount}mm ${loc.translate('rainAmount').toLowerCase()}', style: Theme.of(context).textTheme.bodySmall),
-                        Text('💨 ${race.weather.windSpeed} km/h, 💧 ${race.weather.humidity}%', style: Theme.of(context).textTheme.bodySmall),
-                      ],
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Weerblokje
+                Expanded(
+                  child: Card(
+                    color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                    margin: const EdgeInsets.only(bottom: 16, right: 8),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('🌦️ ${loc.translate('forecast')}:', style: Theme.of(context).textTheme.titleSmall),
+                          const SizedBox(height: 8),
+                          Text('🌡️ ${race.weather.temperature}°C', style: Theme.of(context).textTheme.bodySmall),
+                          Text('🌧️ ${race.weather.rainChance}%', style: Theme.of(context).textTheme.bodySmall),
+                          Text('💨 ${race.weather.windSpeed} km/h', style: Theme.of(context).textTheme.bodySmall),
+                          Text('💧 ${race.weather.humidity}%', style: Theme.of(context).textTheme.bodySmall),
+                        ],
+                      ),
                     ),
-                  )
-                ],
-              ),
+                  ),
+                ),
+                // Circuit Details blokje (Algemeen)
+                Expanded(
+                  child: Card(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('🏎️ ${loc.translate('general')}:', style: Theme.of(context).textTheme.titleSmall),
+                          const SizedBox(height: 8),
+                          Text('📏 ${race.length} m', style: Theme.of(context).textTheme.bodySmall),
+                          Text('🔁 ${race.laps} ${loc.translate('laps').toLowerCase()}', style: Theme.of(context).textTheme.bodySmall),
+                          Text('📅 ${race.firstGrandPrix}', style: Theme.of(context).textTheme.bodySmall),
+                          Text('📜 ${race.contractUntil}', style: Theme.of(context).textTheme.bodySmall),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
+          
+          // Knop om naar de sessieresultaten te gaan
           Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  row('📏', loc.translate('totalLength'), '${race.length} m'),
-                  row('🔁', loc.translate('laps'), race.laps.toString()),
-                  row('🏎️', loc.translate('overtaking'), loc.translate(race.overtakingDifficulty)),
-                  row('📅', loc.translate('first_gp'), race.firstGrandPrix.toString()),
-                  row('📜', loc.translate('contract_until'), race.contractUntil),
-                ],
-              ),
+            color: Theme.of(context).colorScheme.primaryContainer,
+            margin: const EdgeInsets.only(bottom: 16),
+            child: ListTile(
+              leading: const Icon(Icons.format_list_numbered),
+              title: Text(loc.translate('session_results'), style: const TextStyle(fontWeight: FontWeight.bold)),
+              trailing: const Icon(Icons.arrow_forward),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SessionResultsScreen(race: race)),
+                );
+              },
             ),
           ),
+
           ExpansionTile(
+            initiallyExpanded: true,
             title: Text(loc.translate('lapStats')),
             leading: const Icon(Icons.speed),
             children: [
@@ -1338,6 +2402,8 @@ class CircuitDetailView extends StatelessWidget {
                 row('⚡', loc.translate('fastestLap'), formatLap(race.fastestLap)),
                 row('🐢', loc.translate('slowestLap'), formatLap(race.slowestLap)),
                 row('⏱️', loc.translate('avgLap'), race.averageLap == 'TBD' ? loc.translate('tbd') : race.averageLap),
+                row('🚀', loc.translate('top_speed'), race.topSpeed),
+                row('🏎️', loc.translate('avg_speed'), race.averageSpeed),
               ]))
             ],
           ),
