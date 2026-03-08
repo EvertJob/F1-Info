@@ -83,6 +83,7 @@ class AppLocalizations {
     'country_USA': 'VS', 'country_Italy': 'Italië', 'country_Monaco': 'Monaco', 'country_Canada': 'Canada', 'country_Spain': 'Spanje',
     'country_Austria': 'Oostenrijk', 'country_UK': 'Groot-Brittannië', 'country_Hungary': 'Hongarije', 'country_Belgium': 'België', 'country_Netherlands': 'Nederland',
     'country_Azerbaijan': 'Azerbeidzjan', 'country_Singapore': 'Singapore', 'country_Mexico': 'Mexico', 'country_Brazil': 'Brazilië', 'country_Qatar': 'Qatar', 'country_UAE': 'V.A.E.',
+    'clear_cache': '🗑️ Cache Legen', 'cache_cleared': 'Cache succesvol geleegd!',
   };
 
   static final Map<String, String> _enDictionary = {
@@ -153,6 +154,7 @@ class AppLocalizations {
     'country_USA': 'USA', 'country_Italy': 'Italy', 'country_Monaco': 'Monaco', 'country_Canada': 'Canada', 'country_Spain': 'Spain',
     'country_Austria': 'Austria', 'country_UK': 'UK', 'country_Hungary': 'Hungary', 'country_Belgium': 'Belgium', 'country_Netherlands': 'Netherlands',
     'country_Azerbaijan': 'Azerbeidzjan', 'country_Singapore': 'Singapore', 'country_Mexico': 'Mexico', 'country_Brazil': 'Brazil', 'country_Qatar': 'Qatar', 'country_UAE': 'UAE',
+    'clear_cache': '🗑️ Clear Cache', 'cache_cleared': 'Cache cleared successfully!',
   };
 
   static final Map<String, Map<String, String>> _localizedValues = {
@@ -193,14 +195,32 @@ class _F1ProAppState extends State<F1ProApp> {
   Locale? _locale; 
   ThemeMode _themeMode = ThemeMode.dark;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      final lang = prefs.getString('language_code');
+      if (lang != null) _locale = Locale(lang);
+      final isDark = prefs.getBool('is_dark');
+      if (isDark != null) _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
+    });
+  }
+
   void _setLocale(Locale newLocale) {
     setState(() => _locale = newLocale);
+    SharedPreferences.getInstance().then((p) => p.setString('language_code', newLocale.languageCode));
   }
 
   void _toggleTheme() {
     setState(() {
       _themeMode = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
     });
+    SharedPreferences.getInstance().then((p) => p.setBool('is_dark', _themeMode == ThemeMode.dark));
   }
 
   @override
@@ -467,9 +487,19 @@ class _MainNavigationState extends State<MainNavigation> {
     final loc = AppLocalizations.of(context);
     return PopupMenuButton<int>(
       icon: const Icon(Icons.settings),
-      onSelected: (value) {
+      onSelected: (value) async {
         if (value == 0) widget.onToggleTheme();
         if (value == 2) Navigator.push(context, MaterialPageRoute(builder: (context) => const ChangelogScreen()));
+        if (value == 3) {
+          final prefs = await SharedPreferences.getInstance();
+          final lang = prefs.getString('language_code');
+          final dark = prefs.getBool('is_dark');
+          await prefs.clear();
+          if (lang != null) await prefs.setString('language_code', lang);
+          if (dark != null) await prefs.setBool('is_dark', dark);
+          SessionDataManager().cache.clear();
+          if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(loc.translate('cache_cleared'))));
+        }
       },
       itemBuilder: (context) => [
         PopupMenuItem(value: 0, child: Row(children: [const Icon(Icons.brightness_6), const SizedBox(width: 12), Text(loc.translate('toggleTheme'))])),
@@ -486,6 +516,7 @@ class _MainNavigationState extends State<MainNavigation> {
           )))
         ])),
         PopupMenuItem(value: 2, child: Row(children: [const Icon(Icons.history), const SizedBox(width: 12), Text(loc.translate('changelog'))])),
+        PopupMenuItem(value: 3, child: Row(children: [const Icon(Icons.delete_outline, color: Colors.redAccent), const SizedBox(width: 12), Text(loc.translate('clear_cache'), style: const TextStyle(color: Colors.redAccent))])),
       ],
     );
   }
@@ -1014,51 +1045,116 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
   }
 }
 
-class DriverDetailView extends StatelessWidget {
+class DriverDetailView extends StatefulWidget {
   final Driver driver;
   final Widget settingsMenu;
   const DriverDetailView({required this.driver, required this.settingsMenu, super.key});
 
+  @override
+  State<DriverDetailView> createState() => _DriverDetailViewState();
+}
+
+class _DriverDetailViewState extends State<DriverDetailView> {
+  int? _selectedYearIndex;
+  late ScrollController _scrollController;
+  bool _showFullTitle = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.hasClients) {
+      final show = _scrollController.offset > 140;
+      if (show != _showFullTitle) {
+        setState(() => _showFullTitle = show);
+      }
+    }
+  }
+
   List<int> _getDriverHistory(String name) {
     switch (name) {
-      case 'Max Verstappen': return [1, 1, 1, 1, 1];
-      case 'Lewis Hamilton': return [2, 6, 3, 7, 8];
-      case 'Charles Leclerc': return [7, 2, 5, 3, 4];
-      case 'Lando Norris': return [6, 7, 6, 2, 2];
-      case 'Carlos Sainz': return [5, 5, 7, 5, 6];
-      case 'Fernando Alonso': return [10, 9, 4, 9, 8];
-      case 'George Russell': return [15, 4, 8, 6, 5];
-      case 'Oscar Piastri': return [20, 20, 9, 4, 3];
-      case 'Sergio Pérez': return [4, 3, 2, 8, 7];
-      case 'Valtteri Bottas': return [3, 10, 15, 20, 20];
+      case 'Max Verstappen': return [1, 1, 1, 1, 2]; // 2021-2025
+      case 'Lando Norris': return [6, 7, 6, 2, 1];
+      case 'Oscar Piastri': return [21, 21, 9, 4, 3]; // 21 = N/A
+      case 'George Russell': return [15, 4, 8, 6, 4];
+      case 'Charles Leclerc': return [7, 2, 5, 3, 5];
+      case 'Lewis Hamilton': return [2, 6, 3, 7, 6];
+      case 'Kimi Antonelli': return [21, 21, 21, 21, 7];
+      case 'Alexander Albon': return [21, 19, 13, 16, 8];
+      case 'Carlos Sainz': return [5, 5, 7, 5, 9];
+      case 'Fernando Alonso': return [10, 9, 4, 9, 10];
+      case 'Nico Hülkenberg': return [21, 22, 16, 11, 11];
+      case 'Isack Hadjar': return [21, 21, 21, 21, 12];
+      case 'Oliver Bearman': return [21, 21, 21, 18, 13];
+      case 'Esteban Ocon': return [11, 8, 12, 14, 14];
+      case 'Liam Lawson': return [21, 21, 20, 21, 15];
+      case 'Lance Stroll': return [13, 15, 10, 13, 16];
+      case 'Yuki Tsunoda': return [14, 17, 14, 12, 17];
+      case 'Pierre Gasly': return [9, 14, 11, 10, 18];
+      case 'Gabriel Bortoleto': return [21, 21, 21, 21, 19];
+      case 'Franco Colapinto': return [21, 21, 21, 19, 20];
+      case 'Sergio Pérez': return [4, 3, 2, 8, 21];
+      case 'Valtteri Bottas': return [3, 10, 15, 22, 21];
       default:
-        int hash = name.length;
-        return [min(20, hash), min(20, hash+2), min(20, max(1, hash-1)), min(20, hash+1), min(20, max(1, hash-3))];
+        return [21, 21, 21, 21, 21];
     }
   }
 
   Widget _buildHistoryChart(List<int> pos, Color color) {
     if (pos.isEmpty) return const SizedBox.shrink();
     List<String> years = ['21', '22', '23', '24', '25'];
-    return Container(
-      height: 140, 
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.03), borderRadius: BorderRadius.circular(12)),
-      padding: const EdgeInsets.all(15), 
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround, crossAxisAlignment: CrossAxisAlignment.end,
-        children: List.generate(pos.length, (i) {
-          double h = 100.0 - (pos[i] * 4.0);
-          if(h < 10) h = 10;
-          
-          return Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-            Text("P${pos[i]}", style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white)),
-            const SizedBox(height: 4),
-            Container(width: 24, height: h, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4))),
-            const SizedBox(height: 4),
-            Text(years[i], style: const TextStyle(fontSize: 10, color: Colors.white54)),
-          ]);
-        }),
-      ),
+    return Column(
+      children: [
+        Container(
+          height: 140, 
+          decoration: BoxDecoration(color: Colors.white.withOpacity(0.03), borderRadius: BorderRadius.circular(12)),
+          padding: const EdgeInsets.all(15), 
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround, crossAxisAlignment: CrossAxisAlignment.end,
+            children: List.generate(pos.length, (i) {
+              double h = 100.0 - (pos[i] * 4.0);
+              if(h < 10) h = 10;
+              final isSelected = _selectedYearIndex == i;
+              
+              return GestureDetector(
+                onTap: () => setState(() => _selectedYearIndex = i),
+                child: Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  Text("P${pos[i]}", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: isSelected ? const Color(0xFF2196F3) : Colors.white)),
+                  const SizedBox(height: 4),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: isSelected ? 28 : 24, 
+                    height: h, 
+                    decoration: BoxDecoration(
+                      color: color, 
+                      borderRadius: BorderRadius.circular(4),
+                      border: isSelected ? Border.all(color: Colors.white, width: 2) : null,
+                      boxShadow: isSelected ? [BoxShadow(color: color.withOpacity(0.5), blurRadius: 8)] : null,
+                    )
+                  ),
+                  const SizedBox(height: 4),
+                  Text(years[i], style: TextStyle(fontSize: 10, color: isSelected ? Colors.white : Colors.white54, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                ]),
+              );
+            }),
+          ),
+        ),
+        if (_selectedYearIndex != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text("20${years[_selectedYearIndex!]} Finish: P${pos[_selectedYearIndex!]}", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          )
+      ],
     );
   }
 
@@ -1066,33 +1162,39 @@ class DriverDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     final isDutch = loc.locale.languageCode == 'nl' || loc.locale.languageCode == 'de';
-    final List<String> facts = isDutch ? driver.realWorldFactsNl : driver.realWorldFactsEn;
-    final List<int> driverHistory = _getDriverHistory(driver.name);
+    final List<String> facts = isDutch ? widget.driver.realWorldFactsNl : widget.driver.realWorldFactsEn;
+    final List<int> driverHistory = _getDriverHistory(widget.driver.name);
+
+    String title = widget.driver.name.toUpperCase();
+    if (_showFullTitle) {
+      title = "${widget.driver.flag} $title - #${widget.driver.number}";
+    }
 
     return Scaffold(
-      appBar: AppBar(title: Text(driver.name.toUpperCase()), actions: [settingsMenu]),
+      appBar: AppBar(title: Text(title), actions: [widget.settingsMenu]),
       body: ListView(
+        controller: _scrollController,
         padding: const EdgeInsets.all(20), 
         children: [
-          Center(child: Text(driver.flag, style: const TextStyle(fontSize: 64))),
+          Center(child: Text(widget.driver.flag, style: const TextStyle(fontSize: 64))),
           const SizedBox(height: 10),
-          Text("#${driver.number}", textAlign: TextAlign.center, style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: _getTeamColor(driver.team))),
+          Text("#${widget.driver.number}", textAlign: TextAlign.center, style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: _getTeamColor(widget.driver.team))),
           const SizedBox(height: 20),
           
           ExpansionTile(
             initiallyExpanded: true,
-            title: Text("📈 ${loc.translate('driver_history')}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2196F3))),
+            title: Text(loc.translate('driver_history'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2196F3))),
             children: [
               Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
-                child: _buildHistoryChart(driverHistory, _getTeamColor(driver.team)),
+                child: _buildHistoryChart(driverHistory, _getTeamColor(widget.driver.team)),
               ),
             ],
           ),
 
           ExpansionTile(
             initiallyExpanded: true,
-            title: Text("🌟 ${loc.translate('driver_facts_title')}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2196F3))),
+            title: Text(loc.translate('driver_facts_title'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2196F3))),
             children: [
               Container(
                 width: double.infinity,
@@ -1108,33 +1210,33 @@ class DriverDetailView extends StatelessWidget {
           ),
 
           ExpansionTile(
-            title: Text("👤 ${loc.translate('general')}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2196F3))),
+            title: Text(loc.translate('general'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2196F3))),
             children: [
-              _statTile(loc.translate('current_team'), driver.team, Icons.groups),
-              _statTile(loc.translate('nationality'), loc.translate('nat_${driver.nationality}'), Icons.public),
+              _statTile(loc.translate('current_team'), widget.driver.team, Icons.groups),
+              _statTile(loc.translate('nationality'), loc.translate('nat_${widget.driver.nationality}'), Icons.public),
               const SizedBox(height: 8),
             ],
           ),
           
           ExpansionTile(
-            title: Text("🏆 ${loc.translate('career_stats')}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2196F3))),
+            title: Text(loc.translate('career_stats'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2196F3))),
             children: [
-              _statTile(loc.translate('championships'), driver.championships, Icons.workspace_premium),
-              _statTile(loc.translate('wins'), driver.wins, Icons.emoji_events),
-              _statTile(loc.translate('podiums'), driver.podiums, Icons.leaderboard),
-              _statTile(loc.translate('poles'), driver.poles, Icons.flag),
-              _statTile(loc.translate('fastest_laps'), driver.fastestLaps, Icons.timer),
-              _statTile(loc.translate('total_points'), driver.totalPoints, Icons.score),
+              _statTile(loc.translate('championships'), widget.driver.championships, Icons.workspace_premium),
+              _statTile(loc.translate('wins'), widget.driver.wins, Icons.emoji_events),
+              _statTile(loc.translate('podiums'), widget.driver.podiums, Icons.leaderboard),
+              _statTile(loc.translate('poles'), widget.driver.poles, Icons.flag),
+              _statTile(loc.translate('fastest_laps'), widget.driver.fastestLaps, Icons.timer),
+              _statTile(loc.translate('total_points'), widget.driver.totalPoints, Icons.score),
               const SizedBox(height: 8),
             ],
           ),
           
           ExpansionTile(
-            title: Text("🏁 ${loc.translate('experience')}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2196F3))),
+            title: Text(loc.translate('experience'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2196F3))),
             children: [
-              _statTile(loc.translate('starts'), driver.starts, Icons.traffic),
-              _statTile(loc.translate('laps_led'), driver.lapsLed, Icons.looks_one),
-              _statTile(loc.translate('dnf'), driver.dnfs, Icons.car_crash),
+              _statTile(loc.translate('starts'), widget.driver.starts, Icons.traffic),
+              _statTile(loc.translate('laps_led'), widget.driver.lapsLed, Icons.looks_one),
+              _statTile(loc.translate('dnf'), widget.driver.dnfs, Icons.car_crash),
               const SizedBox(height: 8),
             ],
           ),
@@ -1148,6 +1250,20 @@ class TeamDetailView extends StatelessWidget {
   final Team team;
   final Widget settingsMenu;
   const TeamDetailView({required this.team, required this.settingsMenu, super.key});
+
+  List<int> _getTeamHistory(String name) {
+    if (name.contains('Red Bull')) return [2, 1, 1, 2, 2]; // 2021-2025
+    if (name.contains('Mercedes')) return [1, 3, 2, 4, 3];
+    if (name.contains('Ferrari')) return [3, 2, 3, 3, 4];
+    if (name.contains('McLaren')) return [4, 5, 4, 1, 1];
+    if (name.contains('Aston')) return [7, 7, 5, 5, 5];
+    if (name.contains('Alpine')) return [5, 4, 6, 7, 7];
+    if (name.contains('Williams')) return [8, 10, 7, 8, 8];
+    if (name.contains('Racing Bulls') || name.contains('RB')) return [6, 9, 8, 6, 6];
+    if (name.contains('Haas')) return [10, 8, 10, 9, 9];
+    if (name.contains('Audi') || name.contains('Sauber')) return [9, 6, 9, 10, 10];
+    return [11, 11, 11, 11, 11];
+  }
 
   Widget _buildHistoryChart(List<dynamic> pos, Color color) {
     if (pos.isEmpty) return const SizedBox.shrink();
@@ -1172,7 +1288,7 @@ class TeamDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final mockHistory = [3, 2, 2, 2, 4, 6, 3, 2, 3, 2];
+    final teamHistory = _getTeamHistory(team.name);
 
     return Scaffold(
       appBar: AppBar(title: Text(team.name.toUpperCase()), actions: [settingsMenu]),
@@ -1188,13 +1304,13 @@ class TeamDetailView extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
-                child: _buildHistoryChart(mockHistory, _getTeamColor(team.name)),
+                child: _buildHistoryChart(teamHistory, _getTeamColor(team.name)),
               ),
             ],
           ),
 
           ExpansionTile(
-            title: Text("🏆 ${loc.translate('championships')}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2196F3))),
+            title: Text(loc.translate('championships'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2196F3))),
             children: [
               _statTile(loc.translate('cc_wins'), team.ccWins, Icons.emoji_events),
               _statTile(loc.translate('dc_wins'), team.dcWins, Icons.workspace_premium),
@@ -1203,7 +1319,7 @@ class TeamDetailView extends StatelessWidget {
           ),
           
           ExpansionTile(
-            title: Text("📈 ${loc.translate('race_stats')}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2196F3))),
+            title: Text(loc.translate('race_stats'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2196F3))),
             children: [
               _statTile(loc.translate('total_entries'), team.totalEntries, Icons.traffic),
               _statTile(loc.translate('wins'), team.podiums, Icons.leaderboard),
@@ -1215,7 +1331,7 @@ class TeamDetailView extends StatelessWidget {
           ),
           
           ExpansionTile(
-            title: Text("⚙️ ${loc.translate('pitstop_leadership')}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2196F3))),
+            title: Text(loc.translate('pitstop_leadership'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2196F3))),
             children: [
               _statTile(loc.translate('team_principal'), team.principalName, Icons.person_outline),
               _statTile(loc.translate('fastestPit'), team.fastestPitstopTime, Icons.build),
