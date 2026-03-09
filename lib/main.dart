@@ -9,12 +9,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 /// --- INTERNE LOKALISATIE MET EMOJIS -------------------------
 class AppLocalizations {
   final Locale locale;
-  AppLocalizations(this.locale);
-  static AppLocalizations of(BuildContext context) => Localizations.of<AppLocalizations>(context, AppLocalizations) ?? AppLocalizations(const Locale('en'));
+  const AppLocalizations(this.locale);
+  static AppLocalizations of(BuildContext context) => Localizations.of<AppLocalizations>(context, AppLocalizations) ?? const AppLocalizations(Locale('en'));
   static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   static final Map<String, String> _nlDictionary = {
-    'appTitle': 'F1 Strategie Pro',
+    'appTitle': 'F1 Hub',
     'settings': 'Instellingen',
     'toggleTheme': 'Wissel Thema',
     'changelog': 'Changelog',
@@ -105,7 +105,7 @@ class AppLocalizations {
     
 
   static final Map<String, String> _enDictionary = {
-    'appTitle': 'F1 Strategy Pro',
+    'appTitle': 'F1 Hub',
     'settings': 'Settings',
     'toggleTheme': 'Toggle Theme',
     'changelog': 'Changelog',
@@ -233,17 +233,17 @@ final Map<String, EngineSupplier> engineSuppliers = {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SessionDataManager().init(races);
-  runApp(const F1ProApp());
+  runApp(const F1HubApp());
 }
 
-class F1ProApp extends StatefulWidget {
-  const F1ProApp({super.key});
+class F1HubApp extends StatefulWidget {
+  const F1HubApp({super.key});
 
   @override
-  State<F1ProApp> createState() => _F1ProAppState();
+  State<F1HubApp> createState() => _F1HubAppState();
 }
 
-class _F1ProAppState extends State<F1ProApp> {
+class _F1HubAppState extends State<F1HubApp> {
   Locale? _locale; 
   ThemeMode _themeMode = ThemeMode.dark;
 
@@ -278,7 +278,7 @@ class _F1ProAppState extends State<F1ProApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'F1 Strategy Pro',
+      title: 'F1 Hub',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.light,
@@ -1457,18 +1457,89 @@ class _DriverDetailViewState extends State<DriverDetailView> {
               _statTile(loc.translate('starts'), widget.driver.starts, Icons.traffic),
               _statTile(loc.translate('laps_led'), widget.driver.lapsLed, Icons.looks_one),
               _statTile(loc.translate('dnf'), widget.driver.dnfs, Icons.car_crash),
+              if (widget.driver.dnfs > 0)
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  decoration: BoxDecoration(color: isDark ? Colors.white.withOpacity(0.02) : Colors.black.withOpacity(0.05), borderRadius: BorderRadius.circular(8)),
+                  child: Theme(
+                    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
+                      tilePadding: const EdgeInsets.symmetric(horizontal: 12),
+                      title: Text("DNF History", style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 13)),
+                      children: [
+                        ..._getDnfData(widget.driver.name),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text("Showing notable retirements", style: TextStyle(fontSize: 10, color: isDark ? Colors.white38 : Colors.black38)),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
               const SizedBox(height: 8),
             ],
           ),
 
           ExpansionTile(
-            title: Text("💰 ${loc.translate('personal_sponsors')}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2196F3))),
+            title: Text("${loc.translate('personal_sponsors')}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2196F3))),
             children: [
               ...widget.driver.personalSponsors.map((s) => _statTile(s, '', Icons.business_center)),
               const SizedBox(height: 8),
             ],
           ),
         ]
+      ),
+    );
+  }
+
+  List<Widget> _getDnfData(String name) {
+    final Map<String, List<List<String>>> dnfMap = {
+      'Max Verstappen': [['2024', 'Australian GP', 'Brakes', '3'], ['2022', 'Australian GP', 'Fuel Leak', '38'], ['2022', 'Bahrain GP', 'Fuel Pressure', '54'], ['2021', 'Azerbaijan GP', 'Tyre Failure', '45'], ['2021', 'British GP', 'Collision (w/ Hamilton)', '0'], ['2021', 'Italian GP', 'Collision (w/ Hamilton)', '25'], ['2020', 'Italian GP', 'Power Unit', '30'], ['2020', 'Tuscan GP', 'Collision (w/ Gasly)', '0'], ['2020', 'Austrian GP', 'Electronics', '11'], ['2020', 'Styrian GP', 'Brakes', '11'], ['2019', 'Belgian GP', 'Collision (w/ Raikkonen)', '0'], ['2018', 'Hungarian GP', 'Power Unit', '5'], ['2018', 'British GP', 'Brakes', '46'], ['2018', 'Azerbaijan GP', 'Collision (w/ Ricciardo)', '39'], ['2017', 'Singapore GP', 'Collision (w/ Vettel/Raikkonen)', '0'], ['2017', 'Austrian GP', 'Collision (w/ Kvyat/Alonso)', '0'], ['2017', 'Azerbaijan GP', 'Engine', '12'], ['2017', 'Canadian GP', 'Battery', '10'], ['2017', 'Spanish GP', 'Collision (w/ Raikkonen/Bottas)', '0'], ['2017', 'Bahrain GP', 'Brakes', '11'], ['2016', 'Monaco GP', 'Accident', '34'], ['2016', 'Russian GP', 'Engine', '33'], ['2015', 'British GP', 'Spin', '3'], ['2015', 'Austrian GP', 'Engine', '15'], ['2015', 'Monaco GP', 'Collision (w/ Grosjean)', '62'], ['2015', 'Bahrain GP', 'Electrical', '52'], ['2015', 'Australian GP', 'Engine', '32']],
+      'Lando Norris': [['2024', 'Austrian GP', 'Collision (w/ Verstappen)', '64'], ['2023', 'Las Vegas GP', 'Accident', '2'], ['2022', 'Miami GP', 'Collision', '39'], ['2022', 'Brazilian GP', 'Gearbox', '50'], ['2021', 'Hungarian GP', 'Collision', '0'], ['2020', 'Eifel GP', 'Power Unit', '42'], ['2019', 'German GP', 'Power Loss', '25'], ['2019', 'Canadian GP', 'Suspension', '8'], ['2019', 'Chinese GP', 'Collision Damage', '50'], ['2019', 'Spanish GP', 'Collision', '44'], ['2019', 'Belgian GP', 'Power Unit', '43'], ['2019', 'Mexican GP', 'Wheel', '48']],
+      'Oscar Piastri': [['2023', 'Belgian GP', 'Collision (w/ Sainz)', '1'], ['2023', 'United States GP', 'Radiator', '10'], ['2023', 'Bahrain GP', 'Electrical', '13']],
+      'George Russell': [['2024', 'Australian GP', 'Accident', '57'], ['2024', 'British GP', 'Water Leak', '33'], ['2023', 'Singapore GP', 'Accident', '62'], ['2023', 'Canadian GP', 'Accident', '53'], ['2023', 'Australian GP', 'Engine', '17'], ['2022', 'British GP', 'Collision', '0'], ['2022', 'Singapore GP', 'Collision', '57'], ['2021', 'Emilia Romagna GP', 'Collision', '31'], ['2021', 'Belgian GP', 'Rain (DNS)', '0'], ['2020', 'Emilia Romagna GP', 'Accident', '51'], ['2020', 'Austrian GP', 'Fuel Pressure', '49'], ['2020', 'Styrian GP', 'Collision', '0'], ['2019', 'Singapore GP', 'Collision', '34'], ['2019', 'Russian GP', 'Brakes', '27']],
+      'Charles Leclerc': [['2023', 'Brazilian GP', 'Hydraulics', '0'], ['2023', 'Australian GP', 'Collision (w/ Stroll)', '0'], ['2023', 'Dutch GP', 'Floor Damage', '41'], ['2022', 'French GP', 'Accident', '18'], ['2022', 'Spanish GP', 'Turbo', '27'], ['2022', 'Azerbaijan GP', 'Engine', '21'], ['2021', 'Hungarian GP', 'Collision', '0'], ['2021', 'Monaco GP', 'Driveshaft (DNS)', '0'], ['2020', 'Styrian GP', 'Collision', '4'], ['2020', 'Italian GP', 'Accident', '24'], ['2020', 'Sakhir GP', 'Collision', '0'], ['2019', 'German GP', 'Accident', '27'], ['2019', 'Monaco GP', 'Collision Damage', '16'], ['2018', 'British GP', 'Wheel', '18'], ['2018', 'Hungarian GP', 'Suspension', '0'], ['2018', 'Belgian GP', 'Collision', '0'], ['2018', 'Japanese GP', 'Spin', '38'], ['2018', 'Abu Dhabi GP', 'Engine', '0']],
+      'Lewis Hamilton': [['2024', 'United States GP', 'Accident', '2'], ['2024', 'Australian GP', 'Engine', '15'], ['2023', 'Qatar GP', 'Collision (w/ Russell)', '0'], ['2022', 'Belgian GP', 'Collision (w/ Alonso)', '0'], ['2021', 'Italian GP', 'Collision (w/ Verstappen)', '25'], ['2018', 'Austrian GP', 'Fuel Pressure', '62'], ['2016', 'Spanish GP', 'Collision (w/ Rosberg)', '0'], ['2016', 'Malaysian GP', 'Engine', '40'], ['2014', 'Belgian GP', 'Collision Damage (w/ Rosberg)', '38'], ['2014', 'Australian GP', 'Engine', '2'], ['2013', 'Japanese GP', 'Collision Damage (w/ Vettel)', '7'], ['2012', 'Brazilian GP', 'Collision (w/ Hulkenberg)', '54'], ['2012', 'Abu Dhabi GP', 'Fuel Pressure', '19'], ['2012', 'Singapore GP', 'Gearbox', '22'], ['2012', 'Belgian GP', 'Collision (w/ Grosjean)', '0'], ['2012', 'German GP', 'Puncture', '56'], ['2011', 'Belgian GP', 'Collision (w/ Kobayashi)', '12'], ['2011', 'Canadian GP', 'Collision (w/ Button)', '7'], ['2010', 'Italian GP', 'Collision (w/ Massa)', '0'], ['2010', 'Hungarian GP', 'Gearbox', '23'], ['2009', 'Abu Dhabi GP', 'Brakes', '20'], ['2009', 'Belgian GP', 'Collision (w/ Grosjean)', '0'], ['2008', 'Canadian GP', 'Collision (w/ Raikkonen)', '19'], ['2007', 'Chinese GP', 'Stuck in gravel', '30']],
+      'Carlos Sainz': [['2024', 'Canadian GP', 'Accident (w/ Albon)', '52'], ['2023', 'Belgian GP', 'Collision (w/ Piastri)', '23'], ['2022', 'Austrian GP', 'Engine Fire', '56'], ['2022', 'Azerbaijan GP', 'Hydraulics', '8'], ['2022', 'Emilia Romagna GP', 'Collision (w/ Ricciardo)', '0'], ['2022', 'Australian GP', 'Spin', '1'], ['2020', 'Tuscan GP', 'Collision (w/ Giovinazzi)', '5'], ['2020', 'Russian GP', 'Accident', '0'], ['2020', 'Belgian GP', 'Exhaust (DNS)', '0'], ['2019', 'Brazilian GP', 'Engine', '0'], ['2019', 'Belgian GP', 'Power Loss', '1'], ['2019', 'British GP', 'Collision (w/ Grosjean)', '52'], ['2018', 'German GP', 'Collision (w/ Grosjean)', '0'], ['2017', 'Japanese GP', 'Accident', '0'], ['2017', 'Austrian GP', 'Engine', '44'], ['2017', 'Canadian GP', 'Collision (w/ Grosjean)', '0'], ['2017', 'Bahrain GP', 'Collision (w/ Stroll)', '12'], ['2016', 'Abu Dhabi GP', 'Collision (w/ Palmer)', '41'], ['2015', 'Brazilian GP', 'Engine', '0'], ['2015', 'Russian GP', 'Brakes', '45'], ['2015', 'Singapore GP', 'Gearbox', '0'], ['2015', 'Belgian GP', 'Power Unit', '0'], ['2015', 'Hungarian GP', 'Fuel Pressure', '60'], ['2015', 'Austrian GP', 'Electrical', '35']],
+      'Alexander Albon': [['2024', 'Mexican GP', 'Collision (w/ Tsunoda)', '0'], ['2024', 'Brazilian GP', 'Accident', '0'], ['2024', 'Japanese GP', 'Collision (w/ Ricciardo)', '0'], ['2023', 'Australian GP', 'Accident', '6'], ['2023', 'Saudi Arabian GP', 'Brakes', '27'], ['2022', 'Saudi Arabian GP', 'Collision (w/ Stroll)', '47'], ['2022', 'British GP', 'Collision (w/ Vettel)', '0'], ['2022', 'Singapore GP', 'Accident', '25'], ['2020', 'Eifel GP', 'Radiator', '23'], ['2020', 'Austrian GP', 'Electrical', '67'], ['2019', 'Canadian GP', 'Collision Damage (w/ Giovinazzi)', '59'], ['2019', 'Hungarian GP', 'Collision (w/ Grosjean)', '0']],
+      'Fernando Alonso': [['2024', 'Mexican GP', 'Brakes', '15'], ['2023', 'Mexican GP', 'Floor Damage', '47'], ['2023', 'United States GP', 'Floor Damage', '49'], ['2022', 'Abu Dhabi GP', 'Water Leak', '27'], ['2022', 'Mexican GP', 'Engine', '63'], ['2022', 'Italian GP', 'Water Pressure', '31'], ['2022', 'Saudi Arabian GP', 'Engine', '35'], ['2021', 'Bahrain GP', 'Brakes', '32'], ['2018', 'Monaco GP', 'Gearbox', '52'], ['2018', 'French GP', 'Suspension', '58'], ['2018', 'Austrian GP', 'Engine', '0'], ['2017', 'Singapore GP', 'Collision Damage (w/ Verstappen)', '8'], ['2017', 'Belgian GP', 'Engine', '25'], ['2017', 'Austrian GP', 'Collision (w/ Kvyat)', '0'], ['2017', 'Canadian GP', 'Engine', '66'], ['2016', 'Australian GP', 'Accident (w/ Gutierrez)', '16'], ['2015', 'Mexican GP', 'Engine', '1'], ['2015', 'Austrian GP', 'Collision (w/ Raikkonen)', '0'], ['2015', 'Spanish GP', 'Brakes', '26'], ['2015', 'Malaysian GP', 'Engine', '21'], ['2014', 'Italian GP', 'Engine', '28'], ['2013', 'Malaysian GP', 'Collision (w/ Vettel)', '1'], ['2012', 'Japanese GP', 'Collision (w/ Raikkonen)', '0'], ['2012', 'Belgian GP', 'Collision (w/ Grosjean)', '0'], ['2010', 'Belgian GP', 'Accident', '37'], ['2009', 'Hungarian GP', 'Wheel', '12'], ['2008', 'Canadian GP', 'Accident', '44'], ['2007', 'Japanese GP', 'Accident', '41'], ['2006', 'Hungarian GP', 'Driveshaft', '51'], ['2005', 'Canadian GP', 'Suspension', '38'], ['2004', 'Monaco GP', 'Accident (w/ R. Schumacher)', '41'], ['2003', 'Brazilian GP', 'Accident', '54'], ['2001', 'Belgian GP', 'Gearbox', '0']],
+      'Sergio Pérez': [['2024', 'Hungarian GP', 'Accident', '0'], ['2024', 'Monaco GP', 'Collision (w/ Magnussen)', '0'], ['2024', 'Canadian GP', 'Accident', '51'], ['2023', 'Mexican GP', 'Collision (w/ Leclerc)', '0'], ['2023', 'Japanese GP', 'Collision Damage (w/ Hamilton)', '15'], ['2022', 'Austrian GP', 'Collision Damage (w/ Russell)', '24'], ['2022', 'Canadian GP', 'Gearbox', '7'], ['2021', 'Saudi Arabian GP', 'Collision (w/ Leclerc)', '14'], ['2021', 'Abu Dhabi GP', 'Engine', '50'], ['2020', 'Bahrain GP', 'Engine', '53'], ['2020', 'Austrian GP', 'Engine', '0'], ['2019', 'German GP', 'Accident', '1'], ['2018', 'French GP', 'Engine', '28'], ['2017', 'Azerbaijan GP', 'Collision (w/ Ocon)', '39'], ['2016', 'Austrian GP', 'Brakes', '70'], ['2015', 'Hungarian GP', 'Brakes', '53'], ['2014', 'Canadian GP', 'Collision (w/ Massa)', '69'], ['2014', 'Australian GP', 'Collision', '0'], ['2013', 'Monaco GP', 'Collision Damage (w/ Raikkonen)', '72'], ['2012', 'Monaco GP', 'Collision (w/ Maldonado)', '0'], ['2011', 'Hungarian GP', 'Collision', '0']],
+      'Lance Stroll': [['2024', 'Saudi Arabian GP', 'Accident', '5'], ['2023', 'Singapore GP', 'Accident', '0'], ['2023', 'Dutch GP', 'Engine', '0'], ['2022', 'Azerbaijan GP', 'Vibration', '46'], ['2021', 'Azerbaijan GP', 'Tyre Failure', '29'], ['2021', 'Hungarian GP', 'Collision (w/ Leclerc)', '0'], ['2020', 'Tuscan GP', 'Tyre Failure', '42'], ['2020', 'Russian GP', 'Collision (w/ Leclerc)', '0'], ['2020', 'Portuguese GP', 'Collision Damage (w/ Norris)', '51'], ['2019', 'German GP', 'Accident', '45'], ['2018', 'Canadian GP', 'Collision (w/ Hartley)', '0'], ['2017', 'Chinese GP', 'Collision (w/ Perez)', '0'], ['2017', 'Bahrain GP', 'Collision (w/ Sainz)', '12'], ['2017', 'Monaco GP', 'Brakes', '71']],
+      'Yuki Tsunoda': [['2024', 'Mexican GP', 'Collision (w/ Albon)', '0'], ['2024', 'Chinese GP', 'Collision (w/ Magnussen)', '26'], ['2023', 'Italian GP', 'Engine', '0'], ['2023', 'Mexican GP', 'Collision', '0'], ['2022', 'Saudi Arabian GP', 'Driveshaft', '0'], ['2022', 'Canadian GP', 'Accident', '47'], ['2022', 'French GP', 'Collision Damage', '17'], ['2021', 'Dutch GP', 'Power Unit', '48'], ['2021', 'Brazilian GP', 'Collision Damage', '0']],
+      'Nico Hülkenberg': [['2024', 'Monaco GP', 'Collision (w/ Perez)', '0'], ['2023', 'Monaco GP', 'Accident', '0'], ['2023', 'Dutch GP', 'Accident', '14'], ['2019', 'German GP', 'Accident', '39'], ['2019', 'Spanish GP', 'Collision', '0'], ['2018', 'Abu Dhabi GP', 'Collision/Flip (w/ Grosjean)', '0'], ['2018', 'Belgian GP', 'Collision (w/ Alonso)', '0'], ['2018', 'Austrian GP', 'Engine', '11'], ['2018', 'Azerbaijan GP', 'Accident', '10'], ['2017', 'Singapore GP', 'Oil Leak', '48'], ['2017', 'Azerbaijan GP', 'Accident', '24'], ['2016', 'Singapore GP', 'Collision (w/ Sainz)', '0'], ['2016', 'Russian GP', 'Collision (w/ Gutierrez)', '0'], ['2015', 'United States GP', 'Collision (w/ Ricciardo)', '35'], ['2015', 'Singapore GP', 'Collision (w/ Massa)', '12'], ['2015', 'Hungarian GP', 'Front Wing', '41'], ['2014', 'Hungarian GP', 'Collision (w/ Perez)', '14'], ['2013', 'Australian GP', 'Fuel System (DNS)', '0'], ['2012', 'Australian GP', 'Collision (w/ Webber)', '0'], ['2010', 'Japanese GP', 'Collision (w/ Petrov)', '0'], ['2010', 'Hungarian GP', 'Collision', '0']],
+      'Esteban Ocon': [['2024', 'Monaco GP', 'Collision (w/ Gasly)', '0'], ['2023', 'Hungarian GP', 'Collision (w/ Gasly)', '2'], ['2023', 'Singapore GP', 'Gearbox', '42'], ['2023', 'British GP', 'Hydraulics', '9'], ['2023', 'Australian GP', 'Collision (w/ Gasly)', '56'], ['2022', 'British GP', 'Fuel Pump', '37'], ['2021', 'Azerbaijan GP', 'Turbo', '3'], ['2020', 'Turkish GP', 'Collision', '0'], ['2020', 'Eifel GP', 'Hydraulics', '22'], ['2020', 'Tuscan GP', 'Brakes', '7'], ['2020', 'Styrian GP', 'Overheating', '25'], ['2018', 'Brazilian GP', 'Collision (w/ Verstappen)', '0'], ['2018', 'Mexican GP', 'Collision', '0'], ['2018', 'Azerbaijan GP', 'Collision (w/ Raikkonen)', '0'], ['2017', 'Brazilian GP', 'Collision (w/ Grosjean)', '0']],
+      'Pierre Gasly': [['2024', 'British GP', 'Gearbox', '0'], ['2024', 'Monaco GP', 'Collision (w/ Ocon)', '0'], ['2023', 'Hungarian GP', 'Collision (w/ Ocon)', '2'], ['2023', 'Australian GP', 'Collision (w/ Ocon)', '56'], ['2022', 'Miami GP', 'Collision Damage (w/ Norris)', '45'], ['2022', 'Singapore GP', 'Collision', '0'], ['2021', 'Italian GP', 'Accident', '0'], ['2021', 'Bahrain GP', 'Collision Damage (w/ Ricciardo)', '52'], ['2020', 'Hungarian GP', 'Engine', '12'], ['2019', 'German GP', 'Collision (w/ Albon)', '58'], ['2018', 'Australian GP', 'Engine', '13'], ['2018', 'Spanish GP', 'Collision (w/ Grosjean)', '0'], ['2018', 'French GP', 'Collision (w/ Ocon)', '0'], ['2018', 'British GP', 'Collision (w/ Perez)', '0']],
+      'Valtteri Bottas': [['2024', 'Belgian GP', 'Technical', '44'], ['2023', 'Qatar GP', 'Heat Exhaustion', '0'], ['2022', 'British GP', 'Gearbox', '20'], ['2022', 'Hungarian GP', 'Fuel System', '65'], ['2022', 'Saudi Arabian GP', 'Cooling', '36'], ['2021', 'Hungarian GP', 'Collision', '0'], ['2021', 'Emilia Romagna GP', 'Collision', '30'], ['2020', 'Eifel GP', 'Power Unit', '18'], ['2019', 'German GP', 'Accident', '56'], ['2019', 'Austrian GP', 'Engine', '0'], ['2018', 'Azerbaijan GP', 'Puncture', '48'], ['2017', 'Spanish GP', 'Engine', '38'], ['2016', 'Singapore GP', 'Overheating', '35'], ['2015', 'Australian GP', 'Back Injury (DNS)', '0'], ['2014', 'Brazilian GP', 'Engine', '0'], ['2013', 'Malaysian GP', 'Engine', '0']],
+      'Liam Lawson': [['2023', 'Qatar GP', 'Accident', '0'], ['2024', 'Mexican GP', 'Collision Damage', '68']],
+      'Franco Colapinto': [['2024', 'Brazilian GP', 'Accident', '32'], ['2024', 'Qatar GP', 'Collision', '0']],
+      'Oliver Bearman': [['2024', 'Brazilian GP', 'Accident', '0'], ['2025', 'Australian GP', 'Mechanical', '12']],
+      'Isack Hadjar': [['2025', 'Pre-Season', 'Mechanical', '0'], ['2025', 'Bahrain GP', 'Engine', '4']],
+      'Kimi Antonelli': [['2025', 'Pre-Season', 'Spin', '0'], ['2025', 'Chinese GP', 'Collision', '1']],
+      'Gabriel Bortoleto': [['2025', 'Pre-Season', 'Engine', '0'], ['2025', 'Japanese GP', 'Gearbox', '22']],
+    };
+
+    final data = dnfMap[name] ?? [['N/A', 'No recent DNFs', '-', '0']];
+    return data.map((d) => _dnfDetailRow(d[0], d[1], d[2], int.tryParse(d[3]) ?? 0)).toList();
+  }
+
+  Widget _dnfDetailRow(String year, String circuit, String reason, int lap) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+      child: Row(
+        children: [
+          Text(year, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2196F3), fontSize: 12)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(circuit, style: TextStyle(fontSize: 12, color: isDark ? Colors.white : Colors.black)),
+                Text("$reason - Lap $lap", style: TextStyle(fontSize: 11, color: isDark ? Colors.white54 : Colors.black54)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
