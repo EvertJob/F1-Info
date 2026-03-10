@@ -2570,8 +2570,8 @@ class _CircuitsViewState extends State<CircuitsView> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: widget.settingsMenu,
         title: Text(loc.translate('appTitle').toUpperCase()),
+        actions: [widget.settingsMenu],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -7270,23 +7270,35 @@ class ChangelogScreen extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final List<Map<String, dynamic>> changelog = [
       {
-        'version': '2.1.3',
+        'version': '1.0.0',
         'date': 'Maart 2026',
         'changes_en': [
-          'Merged live Open-Meteo weather API.',
-          'Added top blocks for weather and circuit info.',
-          'Session results fetch live data via Ergast API with smart fallback to last year if data is pending.',
-          'Top 3 results always visible, rest in a collapsible list.',
-          'Added previous teams section for all drivers in driver details.',
-          'Added interactive driver championship history chart.',
+          'F1 Hub 1.0.0 is the first full-featured release with a layout tuned for desktop use, while still staying clear and readable on smaller screens.',
+          'Added driver and team comparison screens to place stats, performance, and key differences side by side.',
+          'Introduced visual timelines across the app, including driver performance history, team history, championship overviews, and points progression.',
+          'Expanded driver pages with a full career path, including previous teams before Formula 1 and the racing class for each step.',
+          'Upgraded Facts & Trivia from 2 to 5 items per driver, with localized content support.',
+          'Added full DNF overviews with the reason for each retirement, plus a compact expandable timeline.',
+          'Updated team championship sections with corrected title years and constructor title context, including the drivers involved.',
+          'Expanded team pages with historical naming, full driver line-ups including reserve drivers, and clearer roster timelines.',
+          'Refined the circuit pages with a more complete overview: layout image, direct key stats, Turn 1 distance, difficulty indicators, lap references, and supporting context.',
+          'Added live-updating session results with richer tables, tyre compounds, fastest lap highlights, penalties, and responsive sticky headers for easier reading on desktop.',
+          'Added quick map opening from the circuit page so the track location can be opened directly in Apple Maps or Google Maps.',
+          'Improved current-season content, data completeness, and overall consistency across circuits, drivers, teams, and session screens.',
         ],
         'changes_nl': [
-          'Live Open-Meteo weer-API gekoppeld.',
-          'Nieuwe informatieblokken voor weer en circuit.',
-          'Sessie resultaten halen live data op via API met slimme fallback naar vorig jaar indien de race nog niet verwerkt is.',
-          'Top 3 resultaten direct in beeld, rest uitklapbaar.',
-          'Sectie Vorige Teams toegevoegd voor alle coureurs in de coureur details.',
-          'Interactieve grafiek toegevoegd in de Coureur Details met kampioenschaphistorie.',
+          'F1 Hub 1.0.0 is de eerste volledige release, met een lay-out die beter werkt op een vaste pc en tegelijk overzichtelijk blijft op kleinere schermen.',
+          'Vergelijkingsschermen toegevoegd voor coureurs en teams, zodat statistieken, prestaties en onderlinge verschillen direct naast elkaar zichtbaar zijn.',
+          'Visuele tijdlijnen toegevoegd in de app, waaronder coureurshistorie, teamgeschiedenis, kampioenschapsoverzichten en puntenverloop per seizoen.',
+          'Coureurspagina\'s uitgebreid met een volledig carrièrepad, inclusief eerdere teams van voor de Formule 1 en de klasse per stap.',
+          'Feiten & weetjes uitgebreid van 2 naar 5 items per coureur, met ondersteuning voor gelokaliseerde inhoud.',
+          'Alle uitvalbeurten opgenomen inclusief reden van uitval, verwerkt in een compacte en uitklapbare tijdlijn.',
+          'De kampioenschapssecties van teams bijgewerkt met gecorrigeerde titeljaren en extra context bij constructeurstitels, inclusief de betrokken coureurs.',
+          'Team pagina\'s uitgebreid met teamgeschiedenis, eerdere namen, volledige rijdersbezetting inclusief reservecoureurs en duidelijkere tijdlijnen.',
+          'De circuitpagina\'s zijn vernieuwd met een completer overzicht: lay-out afbeelding, direct zichtbare kerninformatie, afstand tot bocht 1, moeilijkheidsniveaus, rondereferenties en extra context.',
+          'Live sessieresultaten toegevoegd met uitgebreidere tabellen, bandensoorten, snelste ronde-markeringen, straffen en sticky headers die vooral op desktop prettiger werken.',
+          'Mogelijkheid toegevoegd om vanuit de circuitpagina direct Apple Maps of Google Maps te openen voor de locatie van het circuit.',
+          'De actuele seizoensdata, inhoudelijke volledigheid en algemene consistentie zijn verbeterd over circuits, coureurs, teams en sessieschermen.',
         ],
       },
     ];
