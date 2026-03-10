@@ -19,6 +19,9 @@ class AppLocalizations {
     'settings': 'Instellingen',
     'toggleTheme': 'Wissel Thema',
     'changelog': 'Changelog',
+    'compare': 'Vergelijken',
+    'select_drivers_to_compare': 'Selecteer 2 coureurs',
+    'select_teams_to_compare': 'Selecteer 2 teams',
     'circuits': 'Circuits',
     'standings': 'Standen',
     'nextRace': 'Volgende Race',
@@ -103,7 +106,7 @@ class AppLocalizations {
     'engine_name': 'Motornaam',
     'city': 'Stad',
     'headquarters': 'Hoofdkantoor',
-    'previous_names': 'Vorige Namen',
+    'team_history': 'Team Geschiedenis',
     'personal_sponsors': 'Persoonlijke Sponsors',
     'circuit_layout': 'Circuit Lay-out',
     'distanceToTurn1': 'Afstand tot Bocht 1',
@@ -117,6 +120,9 @@ class AppLocalizations {
     'settings': 'Settings',
     'toggleTheme': 'Toggle Theme',
     'changelog': 'Changelog',
+    'compare': 'Compare',
+    'select_drivers_to_compare': 'Select 2 drivers',
+    'select_teams_to_compare': 'Select 2 teams',
     'circuits': 'Circuits',
     'standings': 'Standings',
     'nextRace': 'Next Race',
@@ -200,7 +206,7 @@ class AppLocalizations {
     'engine_name': 'Engine Name',
     'city': 'City',
     'headquarters': 'Headquarters',
-    'previous_names': 'Previous Names',
+    'team_history': 'Team History',
     'personal_sponsors': 'Personal Sponsors',
     'circuit_layout': 'Circuit Layout',
     'distanceToTurn1': 'Distance to Turn 1',
@@ -468,6 +474,12 @@ class SessionDataManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> fetchAllData() async {
+    for (int i = 0; i < races.length; i++) {
+      await fetchDataForRace(races[i], i + 1);
+    }
+  }
+
   void _saveResults(List resultsData, String sessionType, String defaultTyre, String key, SharedPreferences prefs) {
     final results = resultsData.map((r) {
       String timeStr = 'N/A';
@@ -568,6 +580,12 @@ class _MainNavigationState extends State<MainNavigation> {
   final GlobalKey<NavigatorState> _racesNavKey = GlobalKey<NavigatorState>();
   final GlobalKey<NavigatorState> _driversNavKey = GlobalKey<NavigatorState>();
   final GlobalKey<NavigatorState> _teamsNavKey = GlobalKey<NavigatorState>();
+
+  @override
+  void initState() {
+    super.initState();
+    SessionDataManager().fetchAllData();
+  }
 
   Widget _buildSettingsMenu(BuildContext context) {
     final loc = AppLocalizations.of(context);
@@ -830,6 +848,9 @@ class _StandingsViewState extends State<StandingsView> {
   int _selectedYear = DateTime.now().year;
   final List<int> _years = List.generate(10, (index) => DateTime.now().year - index);
 
+  final List<dynamic> _selectedForComparison = [];
+  bool _isCompareMode = false;
+
   @override void initState() { super.initState(); _fetchStandings(); }
 
   Future<void> _fetchStandings() async {
@@ -881,7 +902,7 @@ class _StandingsViewState extends State<StandingsView> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _cachedDrivers = List.from(fallbackDrivers);
+          _cachedDrivers = List.from(driversData[_selectedYear] ?? []);
           _cachedTeams = List.from(fallbackTeams);
           _usingFallback = true;
           _isLoading = false;
@@ -892,7 +913,8 @@ class _StandingsViewState extends State<StandingsView> {
 
   void _processStandingsData(List apiDrivers, List apiTeams) {
     List<Driver> mergedDrivers = [];
-    for (var localD in fallbackDrivers) {
+    final localDrivers = driversData[_selectedYear] ?? [];
+    for (var localD in localDrivers) {
       final apiMatch = apiDrivers.firstWhere((apiD) => localD.name.toLowerCase().contains((apiD['Driver']['familyName'] ?? '').toLowerCase()), orElse: () => null);
       int pts = apiMatch != null ? (double.tryParse(apiMatch['points'].toString())?.toInt() ?? 0) : 0;
       mergedDrivers.add(Driver.copy(localD, pts));
@@ -914,20 +936,55 @@ class _StandingsViewState extends State<StandingsView> {
   Widget _buildList(bool isDriver) {
     final loc = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final int count = isDriver ? (_cachedDrivers.isEmpty ? fallbackDrivers.length : _cachedDrivers.length) : (_cachedTeams.isEmpty ? fallbackTeams.length : _cachedTeams.length);
+    final isDriverView = widget.isDriverView;
+    final int count = isDriver ? (_cachedDrivers.isEmpty ? (driversData[_selectedYear]?.length ?? 0) : _cachedDrivers.length) : (_cachedTeams.isEmpty ? fallbackTeams.length : _cachedTeams.length);
     
     return ListView.builder(itemCount: count, padding: const EdgeInsets.symmetric(vertical: 10), itemBuilder: (c, i) {
-      final item = isDriver ? (_cachedDrivers.isEmpty ? fallbackDrivers[i] : _cachedDrivers[i]) : (_cachedTeams.isEmpty ? fallbackTeams[i] : _cachedTeams[i]);
+      final item = isDriver ? (_cachedDrivers.isEmpty ? driversData[_selectedYear]![i] : _cachedDrivers[i]) : (_cachedTeams.isEmpty ? fallbackTeams[i] : _cachedTeams[i]);
       final String name = isDriver ? (item as Driver).name : (item as Team).name;
       final int points = isDriver ? (item as Driver).points : (item as Team).points;
       final String flag = isDriver ? (item as Driver).flag : (item as Team).flag;
       final String teamName = isDriver ? (item as Driver).team : (item as Team).name;
 
+      final bool isSelected = _isCompareMode && _selectedForComparison.contains(item);
+
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6), 
-        decoration: BoxDecoration(color: isDark ? const Color(0xFF16161E) : Colors.white, borderRadius: BorderRadius.circular(12), border: Border(left: BorderSide(color: _getTeamColor(teamName), width: 6)), boxShadow: isDark ? [] : [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))]), 
+        decoration: BoxDecoration(
+          color: isSelected ? _getTeamColor(teamName).withOpacity(0.3) : (isDark ? const Color(0xFF16161E) : Colors.white),
+          borderRadius: BorderRadius.circular(12), 
+          border: Border(left: BorderSide(color: _getTeamColor(teamName), width: 6)), 
+          boxShadow: isDark ? [] : [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))]
+        ), 
         child: ListTile(
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (c) => isDriver ? DriverDetailView(driver: item as Driver, settingsMenu: widget.settingsMenu) : TeamDetailView(team: item as Team, settingsMenu: widget.settingsMenu))),
+          onTap: () {
+            if (_isCompareMode) {
+              setState(() {
+                if (_selectedForComparison.contains(item)) {
+                  _selectedForComparison.remove(item);
+                } else if (_selectedForComparison.length < 2) {
+                  _selectedForComparison.add(item);
+                }
+              });
+              if (_selectedForComparison.length == 2) {
+                Widget comparisonPage;
+                if (isDriverView) {
+                  comparisonPage = DriverComparisonView(driver1: _selectedForComparison[0] as Driver, driver2: _selectedForComparison[1] as Driver);
+                } else {
+                  comparisonPage = TeamComparisonView(team1: _selectedForComparison[0] as Team, team2: _selectedForComparison[1] as Team);
+                }
+
+                Navigator.push(context, MaterialPageRoute(builder: (context) => comparisonPage)).then((_) {
+                  setState(() {
+                    _isCompareMode = false;
+                    _selectedForComparison.clear();
+                  });
+                });
+              }
+            } else {
+              Navigator.push(context, MaterialPageRoute(builder: (c) => isDriver ? DriverDetailView(driver: item as Driver, settingsMenu: widget.settingsMenu) : TeamDetailView(team: item as Team, settingsMenu: widget.settingsMenu)));
+            }
+          },
           leading: Text("${i + 1}", style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white24 : Colors.black26, fontSize: 16)),
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -949,30 +1006,36 @@ class _StandingsViewState extends State<StandingsView> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
+    final isDriverView = widget.isDriverView;
     
     return Scaffold(
       appBar: AppBar(
-        title: DropdownButton<int>(
-          value: _selectedYear,
-          underline: Container(),
-          onChanged: (int? newValue) {
-            if (newValue != null) {
-              setState(() {
-                _selectedYear = newValue;
-                _cachedDrivers = [];
-                _cachedTeams = [];
-              });
-              _fetchStandings();
-            }
-          },
-          items: _years.map<DropdownMenuItem<int>>((int year) {
-            return DropdownMenuItem<int>(
-              value: year,
-              child: Text(year.toString(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: 1.5)),
-            );
-          }).toList(),
-        ),
-        actions: [widget.settingsMenu],
+        title: _isCompareMode
+            ? Text('${isDriverView ? loc.translate('select_drivers_to_compare') : loc.translate('select_teams_to_compare')} (${_selectedForComparison.length}/2)')
+            : DropdownButton<int>(
+                value: _selectedYear,
+                underline: Container(),
+                onChanged: (int? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      _selectedYear = newValue;
+                      _cachedDrivers = [];
+                      _cachedTeams = [];
+                    });
+                    _fetchStandings();
+                  }
+                },
+                items: _years.map<DropdownMenuItem<int>>((int year) {
+                  return DropdownMenuItem<int>(
+                    value: year,
+                    child: Text(year.toString(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: 1.5)),
+                  );
+                }).toList(),
+              ),
+        actions: [
+          IconButton(icon: Icon(_isCompareMode ? Icons.cancel : Icons.compare_arrows), tooltip: loc.translate('compare'), onPressed: () => setState(() { _isCompareMode = !_isCompareMode; _selectedForComparison.clear(); })),
+          widget.settingsMenu
+        ],
       ),
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())
@@ -982,6 +1045,212 @@ class _StandingsViewState extends State<StandingsView> {
             Expanded(child: _buildList(widget.isDriverView)),
           ],
         ),
+    );
+  }
+}
+
+/// --- DRIVER COMPARISON VIEW ----------------------------------------------
+class ComparisonRow extends StatelessWidget {
+  final String label;
+  final dynamic value1;
+  final dynamic value2;
+  final bool isDark;
+  final bool lowerIsBetter;
+
+  const ComparisonRow({
+    super.key,
+    required this.label,
+    required this.value1,
+    required this.value2,
+    required this.isDark,
+    this.lowerIsBetter = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    bool d1IsBetter = false;
+    bool d2IsBetter = false;
+
+    num? numVal1;
+    num? numVal2;
+
+    if (value1 is num) { numVal1 = value1; } 
+    else if (value1 is String) { numVal1 = double.tryParse(value1.split(' ').first.replaceAll(RegExp(r'[^0-9.]'), '')); }
+
+    if (value2 is num) { numVal2 = value2; } 
+    else if (value2 is String) { numVal2 = double.tryParse(value2.split(' ').first.replaceAll(RegExp(r'[^0-9.]'), '')); }
+
+    if (numVal1 != null && numVal2 != null) {
+      if (lowerIsBetter) { d1IsBetter = numVal1 < numVal2; d2IsBetter = numVal2 < numVal1; } 
+      else { d1IsBetter = numVal1 > numVal2; d2IsBetter = numVal2 > numVal1; }
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        children: [
+          Text(label.toUpperCase(), style: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : Colors.black54, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildStatCell(value1.toString(), d1IsBetter, isDark),
+              _buildStatCell(value2.toString(), d2IsBetter, isDark),
+            ],
+          ),
+          Divider(color: isDark ? Colors.white10 : Colors.black12, height: 24),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCell(String text, bool isBetter, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: isBetter ? BoxDecoration(
+        color: Colors.green.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.green.withOpacity(0.5)),
+      ) : null,
+      child: Text(
+        text, 
+        style: TextStyle(
+          fontSize: isBetter ? 20 : 16, 
+          fontWeight: isBetter ? FontWeight.bold : FontWeight.normal, 
+          color: isBetter ? Colors.green : (isDark ? Colors.white70 : Colors.black87)
+        )
+      ),
+    );
+  }
+}
+
+class DriverComparisonView extends StatelessWidget {
+  final Driver driver1;
+  final Driver driver2;
+
+  const DriverComparisonView({
+    required this.driver1,
+    required this.driver2,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('${driver1.name.split(' ').last} vs ${driver2.name.split(' ').last}'),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: [
+          _buildHeader(context),
+          const SizedBox(height: 20),
+          ComparisonRow(label: loc.translate('championships'), value1: driver1.championships, value2: driver2.championships, isDark: isDark),
+          ComparisonRow(label: loc.translate('wins'), value1: driver1.wins, value2: driver2.wins, isDark: isDark),
+          ComparisonRow(label: loc.translate('podiums'), value1: driver1.podiums, value2: driver2.podiums, isDark: isDark),
+          ComparisonRow(label: loc.translate('poles'), value1: driver1.poles, value2: driver2.poles, isDark: isDark),
+          ComparisonRow(label: loc.translate('fastest_laps'), value1: driver1.fastestLaps, value2: driver2.fastestLaps, isDark: isDark),
+          ComparisonRow(label: loc.translate('total_points'), value1: driver1.totalPoints, value2: driver2.totalPoints, isDark: isDark),
+          ComparisonRow(label: loc.translate('starts'), value1: driver1.starts, value2: driver2.starts, isDark: isDark),
+          ComparisonRow(label: loc.translate('dnf'), value1: driver1.dnfs, value2: driver2.dnfs, isDark: isDark, lowerIsBetter: true),
+          ComparisonRow(label: loc.translate('laps_led'), value1: driver1.lapsLed, value2: driver2.lapsLed, isDark: isDark),
+          ComparisonRow(label: loc.translate('highestFinish'), value1: driver1.highestFinish, value2: driver2.highestFinish, isDark: isDark, lowerIsBetter: true),
+          ComparisonRow(label: loc.translate('highestGrid'), value1: driver1.highestGrid, value2: driver2.highestGrid, isDark: isDark, lowerIsBetter: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: _buildDriverHeader(driver1)),
+        const Padding(
+          padding: EdgeInsets.only(top: 40.0, left: 8.0, right: 8.0),
+          child: Text('VS', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        ),
+        Expanded(child: _buildDriverHeader(driver2)),
+      ],
+    );
+  }
+
+  Widget _buildDriverHeader(Driver driver) {
+    return Column(
+      children: [
+        Text(driver.flag, style: const TextStyle(fontSize: 48)),
+        const SizedBox(height: 8),
+        Text(driver.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16), textAlign: TextAlign.center),
+        Text('#${driver.number}', style: TextStyle(color: _getTeamColor(driver.team), fontSize: 20, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+}
+
+/// --- TEAM COMPARISON VIEW ----------------------------------------------
+class TeamComparisonView extends StatelessWidget {
+  final Team team1;
+  final Team team2;
+
+  const TeamComparisonView({
+    required this.team1,
+    required this.team2,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('${team1.name} vs ${team2.name}'),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: [
+          _buildHeader(context),
+          const SizedBox(height: 20),
+          ComparisonRow(label: loc.translate('cc_wins'), value1: team1.ccWins, value2: team2.ccWins, isDark: isDark),
+          ComparisonRow(label: loc.translate('dc_wins'), value1: team1.dcWins, value2: team2.dcWins, isDark: isDark),
+          ComparisonRow(label: loc.translate('wins'), value1: team1.podiums, value2: team2.podiums, isDark: isDark),
+          ComparisonRow(label: loc.translate('one_two'), value1: team1.oneTwo, value2: team2.oneTwo, isDark: isDark),
+          ComparisonRow(label: loc.translate('poles'), value1: team1.poles, value2: team2.poles, isDark: isDark),
+          ComparisonRow(label: loc.translate('fastest_laps'), value1: team1.fastestLaps, value2: team2.fastestLaps, isDark: isDark),
+          ComparisonRow(label: loc.translate('total_points'), value1: team1.totalPoints, value2: team2.totalPoints, isDark: isDark),
+          ComparisonRow(label: loc.translate('total_entries'), value1: team1.totalEntries, value2: team2.totalEntries, isDark: isDark),
+          ComparisonRow(label: loc.translate('fastestPit'), value1: team1.fastestPitstopTime, value2: team2.fastestPitstopTime, isDark: isDark, lowerIsBetter: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: _buildTeamHeader(team1)),
+        const Padding(
+          padding: EdgeInsets.only(top: 40.0, left: 8.0, right: 8.0),
+          child: Text('VS', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        ),
+        Expanded(child: _buildTeamHeader(team2)),
+      ],
+    );
+  }
+
+  Widget _buildTeamHeader(Team team) {
+    return Column(
+      children: [
+        Text(team.flag, style: const TextStyle(fontSize: 48)),
+        const SizedBox(height: 8),
+        Text(team.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16), textAlign: TextAlign.center),
+        Text(team.principalName, style: TextStyle(color: _getTeamColor(team.name), fontSize: 12), textAlign: TextAlign.center),
+      ],
     );
   }
 }
@@ -1777,7 +2046,10 @@ class _TeamDetailViewState extends State<TeamDetailView> {
         }
         
         if (years.contains(year)) {
-          Driver d = fallbackDrivers.firstWhere((fd) => fd.name == name, orElse: () => Driver(
+          // Try to find driver in the specific year list first, fallback to 2026 list for static data
+          List<Driver> pool = driversData[year] ?? [];
+          Driver d = pool.firstWhere((fd) => fd.name == name, orElse: () => 
+            drivers2026.firstWhere((fd) => fd.name == name, orElse: () => Driver(
                name: name, flag: '', points: 0, number: 0, nationality: '', team: widget.team.name,
                pointsFinishPct: 0, seasonPointsFinishPct: 0, wins: 0, podiums2nd: 0, podiums3rd: 0,
                podiums: 0, poles: 0, fastestLaps: 0, totalPoints: 0, championships: 0, championshipYears: [],
@@ -1786,7 +2058,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
                birthPlace: '-', partner: '-', children: '-', pets: '-', manager: '-',
                realWorldFactsEn: [], realWorldFactsNl: [], pointsPerSeason: {}, debutYear: 0,
                contractUntil: '-', previousTeams: [], personalSponsors: []
-             ));
+             )));
           yearDrivers.add(d);
         }
       }
@@ -1849,14 +2121,117 @@ class _TeamDetailViewState extends State<TeamDetailView> {
                   child: Theme(
                     data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
                     child: ExpansionTile(
-                      title: Text(loc.translate('previous_names'),
+                      title: Text(loc.translate('team_history'),
                           style: TextStyle(
                               color: isDark ? Colors.white70 : Colors.black87,
                               fontSize: 13)),
-                      children: widget.team.previousNames.map((name) => Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                        child: Text(name, textAlign: TextAlign.center, style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 12)),
-                      )).toList(),
+                      children: [
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            bool isWide = constraints.maxWidth > 600;
+                            final history = widget.team.previousNames.reversed.toList();
+                            if (isWide) {
+                              // Horizontal Layout for wider screens
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: history.asMap().entries.map((entry) {
+                                    int idx = entry.key;
+                                    String name = entry.value;
+                                    String teamName = name;
+                                    String years = "";
+                                    if (name.contains(' (')) {
+                                      final parts = name.split(' (');
+                                      teamName = parts[0];
+                                      years = parts[1].replaceAll(')', '');
+                                    }
+                                    bool isLast = idx == history.length - 1;
+
+                                    return Expanded(
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Expanded(child: Container(height: 2, color: idx == 0 ? Colors.transparent : (isDark ? Colors.white24 : Colors.black12))),
+                                              Container(
+                                                width: 10, height: 10,
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0xFF2196F3),
+                                                  shape: BoxShape.circle,
+                                                  border: Border.all(color: isDark ? Colors.white : Colors.black, width: 1.5),
+                                                ),
+                                              ),
+                                              Expanded(child: Container(height: 2, color: isLast ? Colors.transparent : (isDark ? Colors.white24 : Colors.black12))),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(teamName, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black, fontSize: 13)),
+                                          Text(years, textAlign: TextAlign.center, style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 11)),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              );
+                            } else {
+                              // Vertical Layout for narrower screens
+                              return Column(
+                                children: history.asMap().entries.map((entry) {
+                                  int idx = entry.key;
+                                  String name = entry.value;
+                                  String teamName = name;
+                                  String years = "";
+                                  if (name.contains(' (')) {
+                                    final parts = name.split(' (');
+                                    teamName = parts[0];
+                                    years = parts[1].replaceAll(')', '');
+                                  }
+                                  bool isLast = idx == history.length - 1;
+                                  return IntrinsicHeight(
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 16, right: 12),
+                                          child: Column(
+                                            children: [
+                                              Container(
+                                                width: 10, height: 10,
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0xFF2196F3),
+                                                  shape: BoxShape.circle,
+                                                  border: Border.all(color: isDark ? Colors.white : Colors.black, width: 1.5),
+                                                ),
+                                              ),
+                                              if (!isLast)
+                                                Expanded(
+                                                  child: Container(width: 2, color: isDark ? Colors.white24 : Colors.black12),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(bottom: 16.0),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(teamName, style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black, fontSize: 13)),
+                                                Text(years, style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 11)),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              );
+                            }
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -2259,7 +2634,7 @@ final List<Race> races = [
   Race(name: 'Abu Dhabi Grand Prix', country: 'UAE', flag: '🇦🇪', date: DateTime(2026, 12, 6, 14, 0), hasSprint: false, laps: 58, length: 5281, distanceToTurn1: '300m', lat: 24.4672, lon: 54.6031, mapUrl: 'https://raw.githubusercontent.com/f1stats/f1-maps/main/maps/abu_dhabi.png', circuitImage: 'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026trackyasmarinacircuitblackoutline.svg', weather: WeatherForecast(temperature: 26, rainChance: 0, rainAmount: 0, windSpeed: 12, humidity: 50, pressure: 1015, feelsLike: 27), fastestLap: LapRecord('Max Verstappen', 'Red Bull', 2021, '1:26.103'), slowestLap: LapRecord('Nikita Mazepin', 'Haas', 2021, '1:30.000'), averageLap: '1:28.000', topSpeed: '335 km/h', averageSpeed: '215 km/h', redFlagChance: 5, vscChance: 10, accidentChance: 10, turn1AccidentChance: 15, tireWear: 'Medium', tireStrategy: '1 stop', bestCombination: 'Medium → Hard', fastestPitstop: PitstopRecord('Red Bull', 2023, '2.1s'), circuitDifficulty: 'level_3', overtakingDifficulty: 'level_3', previousWinners: ['2025: Max Verstappen', '2024: Max Verstappen'], maxGForce: '4.5 G', avgGForce: '2.3 G', firstGrandPrix: 2009, contractUntil: '2030', characteristicsEn: ['Twilight race', 'Long back straight', 'Smooth surface', 'Yas Marina setting', 'Technical sector 3'], characteristicsNl: ['Race tijdens de zonsondergang', 'Lang recht stuk achteraan', 'Zeer glad asfalt', 'Luxe Yas Marina omgeving', 'Technische en trage derde sector']),
 ];
 
-final List<Driver> fallbackDrivers = [
+final List<Driver> drivers2026 = [
   Driver(name: 'Max Verstappen', flag: '🇳🇱', points: 0, number: 33, nationality: 'Dutch', team: 'Red Bull Racing', pointsFinishPct: 85.1, seasonPointsFinishPct: 95.8, wins: 62, podiums2nd: 31, podiums3rd: 16, podiums: 116, poles: 45, fastestLaps: 35, totalPoints: 3400.5, championships: 4, championshipYears: [2021, 2022, 2023, 2024], lapsRaced: 11452, starts: 210, dnfs: 31, dsqs: 0, dnqs: 0, lapsLed: 3350, frontRowStarts: 65, highestFinish: '1e (x62)', highestGrid: '1e (x45)', hatTricks: 13, overtakes: 850, age: 28, height: '1.81m', birthPlace: 'Hasselt, Belgium', partner: 'Kelly Piquet', children: 'Penelope (step), Carola', pets: 'Jimmy & Sassy (Cats)', manager: 'Raymond Vermeulen', realWorldFactsNl: ['Jongste coureur ooit in een Grand Prix-weekend.', 'Recordhouder meeste overwinningen in één seizoen (19).'], realWorldFactsEn: ['Youngest ever driver in a GP weekend.', 'Most wins in a single season (19).'], pointsPerSeason: {2025: 450, 2024: 400, 2023: 575, 2022: 454, 2021: 395.5}, debutYear: 2015, contractUntil: '2028', previousTeams: ['Toro Rosso (2015-2016)'], personalSponsors: ['Red Bull', 'Jumbo', 'CarNext.com', 'Viaplay']),
   Driver(name: 'Lewis Hamilton', flag: '🇬🇧', points: 0, number: 44, nationality: 'British', team: 'Ferrari', pointsFinishPct: 88.5, seasonPointsFinishPct: 66.6, wins: 105, podiums2nd: 56, podiums3rd: 40, podiums: 201, poles: 104, fastestLaps: 67, totalPoints: 4895.5, championships: 7, championshipYears: [2008, 2014, 2015, 2017, 2018, 2019, 2020], lapsRaced: 19612, starts: 356, dnfs: 31, dsqs: 1, dnqs: 0, lapsLed: 5455, frontRowStarts: 175, highestFinish: '1e (x105)', highestGrid: '1e (x104)', hatTricks: 19, overtakes: 1200, age: 41, height: '1.74m', birthPlace: 'Stevenage, UK', partner: '-', children: '-', pets: 'Roscoe (Dog)', manager: 'Marc Hynes', realWorldFactsNl: ['Gedeeld record 7 wereldtitels.', 'Meeste Grand Prix overwinningen ooit.'], realWorldFactsEn: ['Shared record 7 World Titles.', 'Most Grand Prix wins in history.'], pointsPerSeason: {2025: 200, 2024: 200, 2023: 234, 2022: 240, 2021: 387.5}, debutYear: 2007, contractUntil: '2026+', previousTeams: ['McLaren (2007-2012)', 'Mercedes (2013-2024)'], personalSponsors: ['Tommy Hilfiger', 'IWC', 'Monster Energy']),
   Driver(name: 'Fernando Alonso', flag: '🇪🇸', points: 0, number: 14, nationality: 'Spanish', team: 'Aston Martin', pointsFinishPct: 75.3, seasonPointsFinishPct: 45.8, wins: 32, podiums2nd: 40, podiums3rd: 34, podiums: 106, poles: 22, fastestLaps: 24, totalPoints: 2385.0, championships: 2, championshipYears: [2005, 2006], lapsRaced: 20145, starts: 402, dnfs: 75, dsqs: 0, dnqs: 1, lapsLed: 1773, frontRowStarts: 42, highestFinish: '1e (x32)', highestGrid: '1e (x22)', hatTricks: 5, overtakes: 1500, age: 44, height: '1.71m', birthPlace: 'Oviedo, Spain', partner: 'Melissa Jimenez', children: '-', pets: '-', manager: 'Flavio Briatore', realWorldFactsNl: ['Meeste F1 starts ooit.', 'Won Le Mans twee keer.'], realWorldFactsEn: ['Most F1 starts in history.', 'Won Le Mans twice.'], pointsPerSeason: {2025: 150, 2024: 100, 2023: 206, 2022: 81, 2021: 81}, debutYear: 2001, contractUntil: '2026', previousTeams: ['Minardi (2001)', 'Renault (2003-2006, 2008-2009)', 'McLaren (2007, 2015-2018)', 'Ferrari (2010-2014)', 'Alpine (2021-2022)'], personalSponsors: ['Kimoa', 'Finetwork', 'Citi']),
@@ -2284,6 +2659,10 @@ final List<Driver> fallbackDrivers = [
   Driver(name: 'Sergio Pérez', flag: '🇲🇽', points: 0, number: 11, nationality: 'Mexican', team: 'Cadillac', pointsFinishPct: 65.0, seasonPointsFinishPct: 50.0, wins: 6, podiums2nd: 15, podiums3rd: 18, podiums: 39, poles: 3, fastestLaps: 12, totalPoints: 1637.0, championships: 0, championshipYears: [], lapsRaced: 15123, starts: 280, dnfs: 31, dsqs: 0, dnqs: 0, lapsLed: 400, frontRowStarts: 10, highestFinish: '1e (x6)', highestGrid: '1e (x3)', hatTricks: 0, overtakes: 950, age: 36, height: '1.73m', birthPlace: 'Guadalajara, Mexico', partner: 'Carola Martinez', children: 'Sergio Jr., Carlota, Emilio', pets: '-', manager: 'Julian Jakobi', realWorldFactsNl: ['Minister of Defence.', 'Meester op stratencircuits.'], realWorldFactsEn: ['Minister of Defence.', 'Master of street circuits.'], pointsPerSeason: {2025: 150, 2024: 150, 2023: 285, 2022: 305, 2021: 190}, debutYear: 2011, contractUntil: '2026', previousTeams: ['Sauber (2011-2012)', 'McLaren (2013)', 'Force India (2014-2018)', 'Racing Point (2018-2020)', 'Red Bull Racing (2021-2024)'], personalSponsors: ['Telmex', 'Claro']),
   Driver(name: 'Valtteri Bottas', flag: '🇫🇮', points: 0, number: 77, nationality: 'Finnish', team: 'Cadillac', pointsFinishPct: 70.0, seasonPointsFinishPct: 15.0, wins: 10, podiums2nd: 30, podiums3rd: 27, podiums: 67, poles: 20, fastestLaps: 19, totalPoints: 1797.0, championships: 0, championshipYears: [], lapsRaced: 13500, starts: 250, dnfs: 25, dsqs: 0, dnqs: 0, lapsLed: 650, frontRowStarts: 45, highestFinish: '1e (x10)', highestGrid: '1e (x20)', hatTricks: 2, overtakes: 900, age: 36, height: '1.73m', birthPlace: 'Nastola, Finland', partner: 'Tiffany Cromwell', children: '-', pets: '-', manager: 'Didier Coton', realWorldFactsNl: ['Vijf constructeurstitels met Mercedes.', 'Brengt humor en ervaring naar Cadillac.'], realWorldFactsEn: ['Five constructors titles with Mercedes.', 'Brings humor and experience to Cadillac.'], pointsPerSeason: {2025: 50, 2024: 0, 2023: 10, 2022: 49, 2021: 226}, debutYear: 2013, contractUntil: '2026', previousTeams: ['Williams (2013-2016)', 'Mercedes (2017-2021)', 'Alfa Romeo (2022-2023)', 'Kick Sauber (2024-2025)'], personalSponsors: ['Wihuri', 'Abloy']),
 ];
+
+final Map<int, List<Driver>> driversData = {
+  2026: drivers2026,
+};
 
 final List<Team> fallbackTeams = [
   Team(name: 'McLaren', flag: '🇬🇧', points: 0, engine: 'Mercedes', fastestPitstopTime: '1.80s', fastestPitstopYear: 2023, fastestPitstopCircuit: 'Qatar', ccWins: 9, dcWins: 13, ccYears: [1974, 1984, 1985, 1988, 1989, 1990, 1991, 1998, 2024], dcList: ['Lewis Hamilton (2008)', 'Mika Häkkinen (1998, 1999)', 'Ayrton Senna (1988, 1990, 1991)', 'Alain Prost (1985, 1986, 1989)', 'Niki Lauda (1984)', 'James Hunt (1976)', 'Emerson Fittipaldi (1974)'], podiums: 520, oneTwo: 49, hattricks: 28, doublePodiums: 110, totalPoints: 7200.5, frontRow: 145, poles: 165, fastestLaps: 170, racesLed: 380, principalName: 'Andrea Stella', principalAge: 54, principalFlag: '🇮🇹', totalEntries: 967, technicalDirectorName: 'Rob Marshall', technicalDirectorAge: 58, engineSupplier: engineSuppliers['Mercedes']!, sponsors: ['Google Chrome', 'Dell', 'Android', 'Coca-Cola'], headquarters: 'Woking, UK', previousNames: [], drivers: ['Lando Norris (2019-2027+ Current)', 'Oscar Piastri (2023-2026 Current)', 'Daniel Ricciardo (2021-2022)', 'Carlos Sainz (2019-2020)', 'Fernando Alonso (2015-2018)', 'Stoffel Vandoorne (2017-2018)', 'Jenson Button (2010-2017)', 'Pato O\'Ward (Reserve 2024-2025)', 'Ryo Hirakawa (Reserve 2024-2025)', 'Alex Palou (Reserve 2023)', 'Mick Schumacher (Reserve 2023)', 'Felipe Drugovich (Reserve 2023)', 'Nyck de Vries (Reserve 2021-2022)', 'Stoffel Vandoorne (Reserve 2020-2022)', 'Sergey Sirotkin (Reserve 2019-2020)', 'Lando Norris (Reserve 2018)', 'Jenson Button (Reserve 2017)', 'Nobuharu Matsushita (Test 2017)', 'Stoffel Vandoorne (Reserve 2016)'], carImageUrl: 'https://media.formula1.com/image/upload/c_lfill,w_600/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/v1740000000/common/f1/2026/mclaren/2026mclarencarright.webp'),
