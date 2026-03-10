@@ -25126,6 +25126,7 @@ limitations under the License.
 shared_preferences
 shared_preferences_android
 shared_preferences_foundation
+two_dimensional_scrollables
 vector_graphics_compiler
 
 Copyright 2013 The Flutter Authors

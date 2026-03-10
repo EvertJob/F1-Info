@@ -42,6 +42,7 @@ dependencies:
   flutter_svg: ^2.2.4
   firebase_core: ^4.5.0
   firebase_analytics: ^12.1.3
+  two_dimensional_scrollables: ^0.3.8
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +65,13 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/tires/F1_tire_Pirelli_PZero_Red.svg
+    - assets/tires/F1_tire_Pirelli_PZero_Yellow.svg
+    - assets/tires/F1_tire_Pirelli_PZero_White.svg
+    - assets/tires/F1_tire_Pirelli_Cinturato_Green.svg
+    - assets/tires/F1_tire_Pirelli_Cinturato_Blue.svg
 
   # To add assets to your application, add an assets section, like this:
   # assets:
