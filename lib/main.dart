@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
@@ -268,6 +269,351 @@ LinearGradient _heroPanelGradient(BuildContext context) {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [tokens.heroStart, tokens.heroEnd],
+  );
+}
+
+String _driverFlagHeroTag(Driver driver, {String source = 'default'}) =>
+    'driver-flag:$source:${driver.name}';
+
+String _teamFlagHeroTag(Team team, {String source = 'default'}) =>
+    'team-flag:$source:${team.name}';
+
+String _raceFlagHeroTag(Race race, {String source = 'default'}) =>
+    'race-flag:$source:${race.name}';
+
+Widget _buildFlagHero({
+  required String tag,
+  required String flag,
+  required double fontSize,
+  TextAlign textAlign = TextAlign.center,
+}) {
+  return Hero(
+    tag: tag,
+    child: Material(
+      color: Colors.transparent,
+      child: Text(
+        flag,
+        textAlign: textAlign,
+        style: TextStyle(fontSize: fontSize, height: 1),
+      ),
+    ),
+  );
+}
+
+class SkeletonBox extends StatefulWidget {
+  final double? width;
+  final double height;
+  final BorderRadiusGeometry borderRadius;
+
+  const SkeletonBox({
+    super.key,
+    this.width,
+    required this.height,
+    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
+  });
+
+  @override
+  State<SkeletonBox> createState() => _SkeletonBoxState();
+}
+
+class _SkeletonBoxState extends State<SkeletonBox>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1300),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = _themeTokens(context);
+    final baseColor = tokens.panel.withOpacity(0.96);
+    final highlightColor = tokens.panelStrong.withOpacity(0.98);
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final shimmer = _controller.value;
+        return Container(
+          width: widget.width,
+          height: widget.height,
+          decoration: BoxDecoration(
+            borderRadius: widget.borderRadius,
+            gradient: LinearGradient(
+              begin: Alignment(-1.2 + (shimmer * 2), -0.25),
+              end: Alignment(0.2 + (shimmer * 2), 0.25),
+              colors: [baseColor, highlightColor, baseColor],
+              stops: const [0.15, 0.35, 0.55],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+Widget _buildStandingsSkeleton(BuildContext context, {required bool isDriver}) {
+  final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
+  final sampleDrivers =
+      driversData[DateTime.now().year] ??
+      driversData.values.firstWhere(
+        (drivers) => drivers.isNotEmpty,
+        orElse: () => <Driver>[],
+      );
+
+  return ListView.builder(
+    physics: const AlwaysScrollableScrollPhysics(),
+    padding: const EdgeInsets.symmetric(vertical: 10),
+    itemCount: 8,
+    itemBuilder: (context, index) {
+      final accentColor = isDriver
+          ? _getTeamColor(
+              sampleDrivers.isEmpty
+                  ? 'drivers'
+                  : sampleDrivers[index % sampleDrivers.length].team,
+            )
+          : _getTeamColor(fallbackTeams[index % fallbackTeams.length].name);
+
+      return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF16161E) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border(left: BorderSide(color: accentColor, width: 6)),
+          boxShadow: isDark
+              ? []
+              : [
+                  const BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              const SkeletonBox(
+                width: 24,
+                height: 18,
+                borderRadius: BorderRadius.all(Radius.circular(6)),
+              ),
+              const SizedBox(width: 16),
+              const SkeletonBox(
+                width: 18,
+                height: 18,
+                borderRadius: BorderRadius.all(Radius.circular(9)),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SkeletonBox(
+                      width: index.isEven ? 148 : 172,
+                      height: 14,
+                      borderRadius: BorderRadius.circular(7),
+                    ),
+                    if (isDriver) ...[
+                      const SizedBox(height: 8),
+                      SkeletonBox(
+                        width: index.isEven ? 82 : 96,
+                        height: 10,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              SkeletonBox(
+                width: index.isEven ? 72 : 64,
+                height: 14,
+                borderRadius: BorderRadius.circular(7),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+Widget _buildSessionResultsSkeleton(
+  BuildContext context, {
+  required Race race,
+}) {
+  return SingleChildScrollView(
+    physics: const AlwaysScrollableScrollPhysics(),
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: List.generate(5, (index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: _themeTokens(context).panelStrong,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: _themeTokens(context).outline.withOpacity(0.7),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SkeletonBox(
+                  width: index.isEven ? 154 : 172,
+                  height: 14,
+                  borderRadius: BorderRadius.circular(7),
+                ),
+                const SizedBox(height: 14),
+                const SkeletonBox(height: 38),
+                const SizedBox(height: 10),
+                ...List.generate(
+                  3,
+                  (rowIndex) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      children: [
+                        const SkeletonBox(
+                          width: 30,
+                          height: 12,
+                          borderRadius: BorderRadius.all(Radius.circular(6)),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: SkeletonBox(
+                            width: rowIndex.isEven ? 146 : 126,
+                            height: 12,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const SkeletonBox(
+                          width: 64,
+                          height: 12,
+                          borderRadius: BorderRadius.all(Radius.circular(6)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }),
+    ),
+  );
+}
+
+Widget _buildSessionWidgetSkeleton(BuildContext context, String title) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF2196F3),
+          ),
+        ),
+        const SizedBox(height: 10),
+        const SkeletonBox(height: 34),
+        const SizedBox(height: 10),
+        ...List.generate(
+          3,
+          (index) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Row(
+              children: [
+                const SkeletonBox(
+                  width: 34,
+                  height: 12,
+                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SkeletonBox(
+                    width: index.isEven ? 150 : 132,
+                    height: 12,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const SkeletonBox(
+                  width: 68,
+                  height: 12,
+                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Divider(
+          height: 1,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white10
+              : Colors.black12,
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildWeatherSkeletonRows(BuildContext context) {
+  final theme = Theme.of(context);
+
+  Widget skeletonRow(IconData icon, double valueWidth) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: theme.colorScheme.primary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: SkeletonBox(
+              width: 118,
+              height: 12,
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+          const SizedBox(width: 12),
+          SkeletonBox(
+            width: valueWidth,
+            height: 12,
+            borderRadius: BorderRadius.circular(6),
+          ),
+        ],
+      ),
+    );
+  }
+
+  return Column(
+    children: [
+      skeletonRow(Icons.thermostat, 42),
+      skeletonRow(Icons.umbrella, 36),
+      skeletonRow(Icons.air, 52),
+      skeletonRow(Icons.water_drop, 38),
+      const SizedBox(height: 8),
+    ],
   );
 }
 
@@ -755,7 +1101,7 @@ final Map<String, EngineSupplier> engineSuppliers = {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SessionDataManager().init(races);
+  await SessionDataManager().init(races);
   runApp(const F1HubApp());
 }
 
@@ -2247,9 +2593,22 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _idx = 0;
+  late final PageController _pageController;
   final GlobalKey<NavigatorState> _racesNavKey = GlobalKey<NavigatorState>();
   final GlobalKey<NavigatorState> _driversNavKey = GlobalKey<NavigatorState>();
   final GlobalKey<NavigatorState> _teamsNavKey = GlobalKey<NavigatorState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _idx);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   Future<void> _clearCache() async {
     final prefs = await SharedPreferences.getInstance();
@@ -2412,7 +2771,11 @@ class _MainNavigationState extends State<MainNavigation> {
               _teamsNavKey.currentState?.popUntil((route) => route.isFirst);
             }
           } else {
-            setState(() => _idx = i);
+            _pageController.animateToPage(
+              i,
+              duration: const Duration(milliseconds: 280),
+              curve: Curves.easeInOutCubic,
+            );
           }
         },
         items: [
@@ -2430,8 +2793,13 @@ class _MainNavigationState extends State<MainNavigation> {
           ),
         ],
       ),
-      body: IndexedStack(
-        index: _idx,
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          if (_idx != index) {
+            setState(() => _idx = index);
+          }
+        },
         children: [
           Navigator(
             key: _racesNavKey,
@@ -2486,7 +2854,7 @@ class _CircuitsViewState extends State<CircuitsView> {
   @override
   void initState() {
     super.initState();
-    _fetchLiveWeather();
+    _primeHomeData();
     _timer = Timer.periodic(const Duration(seconds: 60), (_) {
       if (mounted) _fetchLiveWeather();
     });
@@ -2507,6 +2875,44 @@ class _CircuitsViewState extends State<CircuitsView> {
     }
   }
 
+  Race? _latestCompletedRace() {
+    final now = DateTime.now();
+    for (final race in races.reversed) {
+      if (!race.date.isAfter(now)) {
+        return race;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _primeHomeData() async {
+    await _fetchLiveWeather();
+    await _preloadLatestRacePodium();
+  }
+
+  Future<void> _preloadLatestRacePodium() async {
+    final latestRace = _latestCompletedRace();
+    if (latestRace == null) {
+      return;
+    }
+
+    final cacheKey = '${latestRace.country}_Race_${latestRace.date.year}';
+    final cachedResults = SessionDataManager().cache[cacheKey];
+    if (cachedResults != null && cachedResults.length >= 3) {
+      if (mounted) {
+        setState(() {});
+      }
+      return;
+    }
+
+    final roundIndex = races.indexOf(latestRace) + 1;
+    await SessionDataManager().fetchDataForRace(latestRace, roundIndex);
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   Future<void> _fetchLiveWeather() async {
     try {
       await Future.delayed(const Duration(milliseconds: 700));
@@ -2524,6 +2930,26 @@ class _CircuitsViewState extends State<CircuitsView> {
         });
       }
     } catch (_) {}
+  }
+
+  Future<void> _refreshCircuits() async {
+    await _fetchLiveWeather();
+    await _preloadLatestRacePodium();
+
+    final now = DateTime.now();
+    final racesToRefresh = races.where((race) {
+      final dayDifference = race.date.difference(now).inDays.abs();
+      return dayDifference <= 7;
+    }).toList();
+
+    if (racesToRefresh.isEmpty) {
+      racesToRefresh.add(_nextRace());
+    }
+
+    for (final race in racesToRefresh) {
+      final roundIndex = races.indexOf(race) + 1;
+      await SessionDataManager().fetchDataForRace(race, roundIndex);
+    }
   }
 
   String _timeUntil(DateTime date, BuildContext context) {
@@ -2573,158 +2999,185 @@ class _CircuitsViewState extends State<CircuitsView> {
         title: Text(loc.translate('appTitle').toUpperCase()),
         actions: [widget.settingsMenu],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (c) => CircuitDetailScreen(
-                  race: upcoming,
-                  settingsMenu: widget.settingsMenu,
-                ),
-              ),
-            ),
-            child: Card(
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: _heroPanelGradient(context),
-                  border: Border.all(color: tokens.outline.withOpacity(0.65)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          loc.translate('nextRace').toUpperCase(),
-                          style: TextStyle(
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 10,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              '$liveTemp°C ',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.onSurface,
-                              ),
-                            ),
-                            Icon(
-                              liveRain > 30 ? Icons.umbrella : Icons.wb_sunny,
-                              color: liveRain > 30 ? Colors.blue : Colors.amber,
-                              size: 20,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      "${loc.translate('gp_${upcoming.name}')} ${_getFlag(loc.translate('country_${upcoming.country}'))}",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                    Text(
-                      upcoming.name,
-                      style: TextStyle(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontSize: 14,
-                      ),
-                    ),
-                    Divider(
-                      height: 30,
-                      color: tokens.outline.withOpacity(0.75),
-                    ),
-                    Text(
-                      timeStrNext.isEmpty
-                          ? _getPodiumString(upcoming)
-                          : '${loc.translate('startsIn')} $timeStrNext',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.secondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          _sectionHeader("2026 Calendar", "📅"),
-          ...races.map((r) {
-            final isFinished = r.date.difference(DateTime.now()).isNegative;
-            final tStr = _timeUntil(r.date, context);
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: InkWell(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (c) => CircuitDetailScreen(
-                      race: r,
-                      settingsMenu: widget.settingsMenu,
-                    ),
+      body: RefreshIndicator(
+        onRefresh: _refreshCircuits,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          children: [
+            GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (c) => CircuitDetailScreen(
+                    race: upcoming,
+                    heroTag: _raceFlagHeroTag(upcoming, source: 'featured'),
+                    settingsMenu: widget.settingsMenu,
                   ),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
+              ),
+              child: Card(
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: _heroPanelGradient(context),
+                    border: Border.all(color: tokens.outline.withOpacity(0.65)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(r.flag, style: const TextStyle(fontSize: 32)),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              loc.translate('gp_${r.name}'),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            loc.translate('nextRace').toUpperCase(),
+                            style: TextStyle(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                '$liveTemp°C ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ),
+                              Icon(
+                                liveRain > 30 ? Icons.umbrella : Icons.wb_sunny,
+                                color: liveRain > 30
+                                    ? Colors.blue
+                                    : Colors.amber,
+                                size: 20,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildFlagHero(
+                            tag: _raceFlagHeroTag(upcoming, source: 'featured'),
+                            flag: _getFlag(
+                              loc.translate('country_${upcoming.country}'),
+                            ),
+                            fontSize: 32,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              loc.translate('gp_${upcoming.name}'),
                               style: TextStyle(
+                                fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 14,
                                 color: theme.colorScheme.onSurface,
                               ),
                             ),
-                            const SizedBox(height: 6),
-                            Text(
-                              "${r.date.day}-${r.date.month}-${r.date.year}",
-                              style: TextStyle(
-                                color: theme.colorScheme.onSurfaceVariant,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
+                          ),
+                        ],
+                      ),
+                      Text(
+                        upcoming.name,
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontSize: 14,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      Divider(
+                        height: 30,
+                        color: tokens.outline.withOpacity(0.75),
+                      ),
                       Text(
-                        isFinished ? _getPodiumString(r) : tStr,
+                        timeStrNext.isEmpty
+                            ? _getPodiumString(upcoming)
+                            : '${loc.translate('startsIn')} $timeStrNext',
                         style: TextStyle(
-                          fontSize: 9,
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: isFinished
-                              ? theme.colorScheme.onSurfaceVariant
-                              : theme.colorScheme.primary,
+                          color: theme.colorScheme.secondary,
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-            );
-          }),
-        ],
+            ),
+            _sectionHeader("2026 Calendar", "📅"),
+            ...races.map((r) {
+              final isFinished = r.date.difference(DateTime.now()).isNegative;
+              final tStr = _timeUntil(r.date, context);
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: InkWell(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (c) => CircuitDetailScreen(
+                        race: r,
+                        heroTag: _raceFlagHeroTag(r, source: 'calendar'),
+                        settingsMenu: widget.settingsMenu,
+                      ),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        _buildFlagHero(
+                          tag: _raceFlagHeroTag(r, source: 'calendar'),
+                          flag: r.flag,
+                          fontSize: 32,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                loc.translate('gp_${r.name}'),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                "${r.date.day}-${r.date.month}-${r.date.year}",
+                                style: TextStyle(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          isFinished ? _getPodiumString(r) : tStr,
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: isFinished
+                                ? theme.colorScheme.onSurfaceVariant
+                                : theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
       ),
     );
   }
@@ -2764,7 +3217,7 @@ class _StandingsViewState extends State<StandingsView> {
     _fetchStandings();
   }
 
-  Future<void> _fetchStandings() async {
+  Future<void> _fetchStandings({bool forceRefresh = false}) async {
     final prefs = await SharedPreferences.getInstance();
     final cacheKeyDrivers = 'api_drivers_cache_$_selectedYear';
     final cacheKeyTeams = 'api_teams_cache_$_selectedYear';
@@ -2772,7 +3225,7 @@ class _StandingsViewState extends State<StandingsView> {
     final now = DateTime.now().millisecondsSinceEpoch;
     final lastFetch = prefs.getInt(cacheTimeKey) ?? 0;
 
-    if (now - lastFetch < 24 * 60 * 60 * 1000) {
+    if (!forceRefresh && now - lastFetch < 24 * 60 * 60 * 1000) {
       final cachedD = prefs.getString(cacheKeyDrivers);
       final cachedT = prefs.getString(cacheKeyTeams);
       if (cachedD != null && cachedT != null) {
@@ -2833,6 +3286,8 @@ class _StandingsViewState extends State<StandingsView> {
       }
     }
   }
+
+  Future<void> _refreshStandings() => _fetchStandings(forceRefresh: true);
 
   void _processStandingsData(List apiDrivers, List apiTeams) {
     List<Driver> mergedDrivers = [];
@@ -2895,6 +3350,7 @@ class _StandingsViewState extends State<StandingsView> {
         : (_cachedTeams.isEmpty ? fallbackTeams.length : _cachedTeams.length);
 
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       itemCount: count,
       padding: const EdgeInsets.symmetric(vertical: 10),
       itemBuilder: (c, i) {
@@ -2912,6 +3368,9 @@ class _StandingsViewState extends State<StandingsView> {
         final String flag = isDriver
             ? (item as Driver).flag
             : (item as Team).flag;
+        final String heroTag = isDriver
+            ? _driverFlagHeroTag(item as Driver, source: 'standings')
+            : _teamFlagHeroTag(item as Team, source: 'standings');
         final String teamName = isDriver
             ? (item as Driver).team
             : (item as Team).name;
@@ -2980,10 +3439,12 @@ class _StandingsViewState extends State<StandingsView> {
                     builder: (c) => isDriver
                         ? DriverDetailView(
                             driver: item as Driver,
+                            heroTag: heroTag,
                             settingsMenu: widget.settingsMenu,
                           )
                         : TeamDetailView(
                             team: item as Team,
+                            heroTag: heroTag,
                             settingsMenu: widget.settingsMenu,
                           ),
                   ),
@@ -3003,7 +3464,12 @@ class _StandingsViewState extends State<StandingsView> {
               children: [
                 Row(
                   children: [
-                    Text(flag),
+                    _buildFlagHero(
+                      tag: heroTag,
+                      flag: flag,
+                      fontSize: 14,
+                      textAlign: TextAlign.left,
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -3097,7 +3563,13 @@ class _StandingsViewState extends State<StandingsView> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? RefreshIndicator(
+              onRefresh: _refreshStandings,
+              child: _buildStandingsSkeleton(
+                context,
+                isDriver: widget.isDriverView,
+              ),
+            )
           : Column(
               children: [
                 if (_usingFallback)
@@ -3117,7 +3589,12 @@ class _StandingsViewState extends State<StandingsView> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                Expanded(child: _buildList(widget.isDriverView)),
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: _refreshStandings,
+                    child: _buildList(widget.isDriverView),
+                  ),
+                ),
               ],
             ),
     );
@@ -3489,10 +3966,12 @@ class TeamComparisonView extends StatelessWidget {
 
 class CircuitDetailScreen extends StatefulWidget {
   final Race race;
+  final String heroTag;
   final Widget settingsMenu;
   const CircuitDetailScreen({
     super.key,
     required this.race,
+    required this.heroTag,
     required this.settingsMenu,
   });
   @override
@@ -3504,6 +3983,7 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
   int r = 0;
   String w = "--";
   String h = "--";
+  bool _isWeatherLoading = true;
   late ScrollController _scrollController;
   bool _showFlagInTitle = false;
 
@@ -3546,10 +4026,15 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
             w = d['current']['wind_speed_10m'].toString();
             h = d['current']['relative_humidity_2m'].toString();
             r = d['daily']['precipitation_probability_max'][0];
+            _isWeatherLoading = false;
           });
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isWeatherLoading = false);
+      }
+    }
   }
 
   Widget _buildCircuitHero(BuildContext context, AppLocalizations loc) {
@@ -3566,7 +4051,11 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
       ),
       child: Column(
         children: [
-          Text(widget.race.flag, style: const TextStyle(fontSize: 58)),
+          _buildFlagHero(
+            tag: widget.heroTag,
+            flag: widget.race.flag,
+            fontSize: 58,
+          ),
           const SizedBox(height: 12),
           Text(
             loc.translate('gp_${widget.race.name}').toUpperCase(),
@@ -3649,7 +4138,7 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
     final tokens = _themeTokens(context);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       decoration: BoxDecoration(
         color: tokens.panelStrong,
         borderRadius: BorderRadius.circular(20),
@@ -3669,17 +4158,26 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
           const SizedBox(height: 12),
           Expanded(
             child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 220),
-                child: SvgPicture.network(
-                  widget.race.circuitImage,
-                  colorFilter: ColorFilter.mode(
-                    Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white
-                        : Colors.black,
-                    BlendMode.srcIn,
-                  ),
-                ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: constraints.maxWidth,
+                      maxHeight: constraints.maxHeight,
+                    ),
+                    child: SvgPicture.network(
+                      widget.race.circuitImage,
+                      width: constraints.maxWidth,
+                      fit: BoxFit.contain,
+                      colorFilter: ColorFilter.mode(
+                        Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.black,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -3695,7 +4193,7 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
 
         if (isWide) {
           return SizedBox(
-            height: 280,
+            height: 340,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -3711,7 +4209,7 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
           children: [
             _buildCircuitHero(context, loc),
             const SizedBox(height: 20),
-            SizedBox(height: 280, child: _buildCircuitLayoutCard(context, loc)),
+            SizedBox(height: 340, child: _buildCircuitLayoutCard(context, loc)),
           ],
         );
       },
@@ -3778,11 +4276,15 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
           ),
         ),
         children: [
-          _statTile(loc.translate('temp'), '$t°C', Icons.thermostat),
-          _statTile(loc.translate('rain_chance'), '$r%', Icons.umbrella),
-          _statTile(loc.translate('wind_speed'), '$w km/h', Icons.air),
-          _statTile(loc.translate('humidity'), '$h%', Icons.water_drop),
-          const SizedBox(height: 8),
+          if (_isWeatherLoading)
+            _buildWeatherSkeletonRows(context)
+          else ...[
+            _statTile(loc.translate('temp'), '$t°C', Icons.thermostat),
+            _statTile(loc.translate('rain_chance'), '$r%', Icons.umbrella),
+            _statTile(loc.translate('wind_speed'), '$w km/h', Icons.air),
+            _statTile(loc.translate('humidity'), '$h%', Icons.water_drop),
+            const SizedBox(height: 8),
+          ],
         ],
       ),
       ExpansionTile(
@@ -4089,33 +4591,38 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(actions: [widget.settingsMenu], title: Text(title)),
-      body: ListView(
-        controller: _scrollController,
-        padding: const EdgeInsets.all(20),
-        children: [
-          const SizedBox(height: 20),
-          _buildCircuitTopArea(context, loc),
-          const SizedBox(height: 16),
-          Card(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            child: ListTile(
-              leading: const Icon(Icons.format_list_numbered),
-              title: Text(
-                loc.translate('session_results'),
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              trailing: const Icon(Icons.arrow_forward),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SessionResultsScreen(race: widget.race),
+      body: RefreshIndicator(
+        onRefresh: _fetchWeather,
+        child: ListView(
+          controller: _scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(20),
+          children: [
+            const SizedBox(height: 20),
+            _buildCircuitTopArea(context, loc),
+            const SizedBox(height: 16),
+            Card(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              child: ListTile(
+                leading: const Icon(Icons.format_list_numbered),
+                title: Text(
+                  loc.translate('session_results'),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                trailing: const Icon(Icons.arrow_forward),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        SessionResultsScreen(race: widget.race),
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 20),
-          _buildResponsiveSections(sections: circuitSections),
-        ],
+            const SizedBox(height: 20),
+            _buildResponsiveSections(sections: circuitSections),
+          ],
+        ),
       ),
     );
   }
@@ -4123,9 +4630,11 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
 
 class DriverDetailView extends StatefulWidget {
   final Driver driver;
+  final String heroTag;
   final Widget settingsMenu;
   const DriverDetailView({
     required this.driver,
+    required this.heroTag,
     required this.settingsMenu,
     super.key,
   });
@@ -4963,9 +5472,10 @@ class _DriverDetailViewState extends State<DriverDetailView> {
         padding: const EdgeInsets.all(20),
         children: [
           Center(
-            child: Text(
-              widget.driver.flag,
-              style: const TextStyle(fontSize: 64),
+            child: _buildFlagHero(
+              tag: widget.heroTag,
+              flag: widget.driver.flag,
+              fontSize: 64,
             ),
           ),
           const SizedBox(height: 10),
@@ -5116,9 +5626,11 @@ class _DriverDetailViewState extends State<DriverDetailView> {
 
 class TeamDetailView extends StatefulWidget {
   final Team team;
+  final String heroTag;
   final Widget settingsMenu;
   const TeamDetailView({
     required this.team,
+    required this.heroTag,
     required this.settingsMenu,
     super.key,
   });
@@ -5965,6 +6477,10 @@ class _TeamDetailViewState extends State<TeamDetailView> {
                   MaterialPageRoute(
                     builder: (c) => DriverDetailView(
                       driver: d,
+                      heroTag: _driverFlagHeroTag(
+                        d,
+                        source: 'team-roster:${widget.team.name}',
+                      ),
                       settingsMenu: widget.settingsMenu,
                     ),
                   ),
@@ -5990,7 +6506,15 @@ class _TeamDetailViewState extends State<TeamDetailView> {
                         ),
                       ),
                       if (d.nationality.isNotEmpty)
-                        Text(d.flag, style: const TextStyle(fontSize: 12)),
+                        _buildFlagHero(
+                          tag: _driverFlagHeroTag(
+                            d,
+                            source: 'team-roster:${widget.team.name}',
+                          ),
+                          flag: d.flag,
+                          fontSize: 12,
+                          textAlign: TextAlign.left,
+                        ),
                     ],
                   ),
                 ),
@@ -6386,7 +6910,11 @@ class _TeamDetailViewState extends State<TeamDetailView> {
         padding: const EdgeInsets.all(20),
         children: [
           Center(
-            child: Text(widget.team.flag, style: const TextStyle(fontSize: 64)),
+            child: _buildFlagHero(
+              tag: widget.heroTag,
+              flag: widget.team.flag,
+              fontSize: 64,
+            ),
           ),
           const SizedBox(height: 20),
 
@@ -6447,71 +6975,75 @@ class _SessionResultsScreenState extends State<SessionResultsScreen> {
       ),
       body: Column(
         children: [
-          if (_isFetching)
-            const LinearProgressIndicator(color: Color(0xFF2196F3)),
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: widget.race.hasSprint
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        OpenF1SessionWidget(
-                          race: widget.race,
-                          sessionName: 'Practice 1',
-                          displayTitle: loc.translate('fp1'),
-                        ),
-                        OpenF1SessionWidget(
-                          race: widget.race,
-                          sessionName: 'Sprint Qualifying',
-                          displayTitle: loc.translate('sprint_quali'),
-                        ),
-                        OpenF1SessionWidget(
-                          race: widget.race,
-                          sessionName: 'Qualifying',
-                          displayTitle: loc.translate('qualifying'),
-                        ),
-                        OpenF1SessionWidget(
-                          race: widget.race,
-                          sessionName: 'Sprint',
-                          displayTitle: loc.translate('sprint'),
-                        ),
-                        OpenF1SessionWidget(
-                          race: widget.race,
-                          sessionName: 'Race',
-                          displayTitle: '🏁 Race',
-                        ),
-                      ],
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        OpenF1SessionWidget(
-                          race: widget.race,
-                          sessionName: 'Practice 1',
-                          displayTitle: loc.translate('fp1'),
-                        ),
-                        OpenF1SessionWidget(
-                          race: widget.race,
-                          sessionName: 'Practice 2',
-                          displayTitle: loc.translate('fp2'),
-                        ),
-                        OpenF1SessionWidget(
-                          race: widget.race,
-                          sessionName: 'Practice 3',
-                          displayTitle: loc.translate('fp3'),
-                        ),
-                        OpenF1SessionWidget(
-                          race: widget.race,
-                          sessionName: 'Qualifying',
-                          displayTitle: loc.translate('qualifying'),
-                        ),
-                        OpenF1SessionWidget(
-                          race: widget.race,
-                          sessionName: 'Race',
-                          displayTitle: '🏁 Race',
-                        ),
-                      ],
+            child: RefreshIndicator(
+              onRefresh: _fetchData,
+              child: _isFetching
+                  ? _buildSessionResultsSkeleton(context, race: widget.race)
+                  : SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(16),
+                      child: widget.race.hasSprint
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                OpenF1SessionWidget(
+                                  race: widget.race,
+                                  sessionName: 'Practice 1',
+                                  displayTitle: loc.translate('fp1'),
+                                ),
+                                OpenF1SessionWidget(
+                                  race: widget.race,
+                                  sessionName: 'Sprint Qualifying',
+                                  displayTitle: loc.translate('sprint_quali'),
+                                ),
+                                OpenF1SessionWidget(
+                                  race: widget.race,
+                                  sessionName: 'Qualifying',
+                                  displayTitle: loc.translate('qualifying'),
+                                ),
+                                OpenF1SessionWidget(
+                                  race: widget.race,
+                                  sessionName: 'Sprint',
+                                  displayTitle: loc.translate('sprint'),
+                                ),
+                                OpenF1SessionWidget(
+                                  race: widget.race,
+                                  sessionName: 'Race',
+                                  displayTitle: '🏁 Race',
+                                ),
+                              ],
+                            )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                OpenF1SessionWidget(
+                                  race: widget.race,
+                                  sessionName: 'Practice 1',
+                                  displayTitle: loc.translate('fp1'),
+                                ),
+                                OpenF1SessionWidget(
+                                  race: widget.race,
+                                  sessionName: 'Practice 2',
+                                  displayTitle: loc.translate('fp2'),
+                                ),
+                                OpenF1SessionWidget(
+                                  race: widget.race,
+                                  sessionName: 'Practice 3',
+                                  displayTitle: loc.translate('fp3'),
+                                ),
+                                OpenF1SessionWidget(
+                                  race: widget.race,
+                                  sessionName: 'Qualifying',
+                                  displayTitle: loc.translate('qualifying'),
+                                ),
+                                OpenF1SessionWidget(
+                                  race: widget.race,
+                                  sessionName: 'Race',
+                                  displayTitle: '🏁 Race',
+                                ),
+                              ],
+                            ),
                     ),
             ),
           ),
@@ -6540,6 +7072,22 @@ class OpenF1SessionWidget extends StatelessWidget {
       sessionName == 'Practice 3' ||
       sessionName == 'Qualifying' ||
       sessionName == 'Sprint Qualifying';
+
+  void _openFullscreenRaceResults(
+    BuildContext context,
+    List<RaceResultRow> rows,
+  ) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => FullscreenTablePage(
+          title: displayTitle,
+          tableBuilder: (pageContext) =>
+              _buildRaceResultsTable(pageContext, rows),
+        ),
+      ),
+    );
+  }
 
   String? _tyreAssetPath(String compound) {
     switch (compound.toUpperCase()) {
@@ -7134,23 +7682,7 @@ class OpenF1SessionWidget extends StatelessWidget {
           );
         }
         if (results == null && !SessionDataManager().isInitialized) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Color(0xFF2196F3),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Text('$displayTitle laden...'),
-              ],
-            ),
-          );
+          return _buildSessionWidgetSkeleton(context, displayTitle);
         }
         if (sessionName == 'Race') {
           if (raceResults == null || raceResults.isEmpty) {
@@ -7162,12 +7694,24 @@ class OpenF1SessionWidget extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.only(left: 16, top: 12, bottom: 8),
-                child: Text(
-                  displayTitle,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF2196F3),
-                  ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        displayTitle,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2196F3),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.fullscreen),
+                      tooltip: 'Fullscreen table',
+                      onPressed: () =>
+                          _openFullscreenRaceResults(context, raceResults),
+                    ),
+                  ],
                 ),
               ),
               _buildRaceResultsTable(context, raceResults),
@@ -7257,6 +7801,59 @@ class OpenF1SessionWidget extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class FullscreenTablePage extends StatefulWidget {
+  final String title;
+  final WidgetBuilder tableBuilder;
+
+  const FullscreenTablePage({
+    super.key,
+    required this.title,
+    required this.tableBuilder,
+  });
+
+  @override
+  State<FullscreenTablePage> createState() => _FullscreenTablePageState();
+}
+
+class _FullscreenTablePageState extends State<FullscreenTablePage> {
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations(const [
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+    ]);
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setPreferredOrientations(const [
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: InteractiveViewer(
+        constrained: false,
+        minScale: 0.5,
+        maxScale: 4.0,
+        child: widget.tableBuilder(context),
+      ),
     );
   }
 }
