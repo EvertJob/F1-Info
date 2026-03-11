@@ -1870,6 +1870,14 @@ class AppLocalizations {
     'compare': 'Vergelijken',
     'select_drivers_to_compare': 'Selecteer 2 coureurs',
     'select_teams_to_compare': 'Selecteer 2 teams',
+    'compare_overall': 'Overall',
+    'compare_season': 'Per seizoen',
+    'compare_year': 'Seizoen',
+    'compare_season_unavailable': 'Seizoensdata voor deze vergelijking is niet beschikbaar.',
+    'points_progression': 'Puntenverloop',
+    'points_after_each_race': 'Stand na elke race',
+    'round_short': 'R',
+    'dnf_percentage': 'Uitval %',
     'circuits': 'Circuits',
     'standings': 'Standen',
     'nextRace': 'Volgende Race',
@@ -1882,6 +1890,13 @@ class AppLocalizations {
     'minutes': 'minuten',
     'sponsors': 'Sponsors',
     'drivers': 'Coureurs',
+    'drivers_chart': 'Coureursgrafiek',
+    'championship_progression': 'Kampioenschapsverloop',
+    'chart_no_data': 'Geen grafiekdata beschikbaar voor dit seizoen.',
+    'top_5': 'Top 5',
+    'top_10': 'Top 10',
+    'show_all': 'Alles',
+    'hide_all': 'Geen',
     'reserve_driver': 'Reservecoureur',
     'teams': 'Teams',
     'pts': 'PNT',
@@ -2145,8 +2160,10 @@ class AppLocalizations {
     'avg_finish': 'Gem. finish',
     'avg_finish_l5': 'Gem. finish (L5)',
     'no_finish_data': 'Geen finishdata',
+    'points_per_start': 'Punten / start',
+    'win_rate': 'Winrate %',
     'ai_race_engineer': 'AI Race Engineer',
-    'ai_example_prompt': 'Probeer bijvoorbeeld: "Fetch latest results", "Show next weekend", "Compare Max Verstappen vs Lando Norris" of "Show form Oscar Piastri".',
+    'ai_example_prompt': 'Probeer bijvoorbeeld: "Fetch latest results", "Show next weekend", "Show driver standings", "Open driver Charles Leclerc" of "Show latest penalties".',
     'ai_no_completed_race': 'Er is nog geen verreden race gevonden.',
     'ai_latest_results_refreshed': 'De laatste uitslag is opnieuw opgehaald.',
     'ai_latest_results_podium': 'Laatste resultaten vernieuwd. Podium: {podium}',
@@ -2162,12 +2179,29 @@ class AppLocalizations {
     'ai_form_no_driver': 'Ik kon geen coureur vinden voor de form-analyse.',
     'ai_form_no_cache': 'Nog geen gecachte recente races voor {driver}.',
     'ai_form_summary': 'Laatste vorm van {driver}: {summary}',
-    'ai_supported_commands': 'Ondersteunde commando\'s: Fetch latest results, Show next weekend, Compare naam1 vs naam2, Show form [driver].',
+    'ai_driver_standings_summary': 'Driver standings {year}: {summary}',
+    'ai_team_standings_summary': 'Constructor standings {year}: {summary}',
+    'ai_open_driver_standings': 'Open driver standings',
+    'ai_open_team_standings': 'Open constructor standings',
+    'ai_driver_profile_ready': 'Driverprofiel klaar voor {driver}.',
+    'ai_open_driver_profile': 'Open driverprofiel',
+    'ai_team_profile_ready': 'Teamprofiel klaar voor {team}.',
+    'ai_open_team_profile': 'Open teamprofiel',
+    'ai_drivers_chart_ready': 'De coureursgrafiek staat klaar voor {year}.',
+    'ai_open_drivers_chart': 'Open coureursgrafiek',
+    'ai_next_weekend_weather': 'Weer voor {race}: {temp}C, {rain}% regen, {wind} km/u wind.',
+    'ai_latest_penalties_summary': 'Laatste penalties bij {race}: {count}. {details}',
+    'ai_latest_penalties_none': 'Geen penalties gevonden voor {race}.',
+    'ai_latest_race_control_summary': 'Race Control bij {race}: {count} berichten. Laatste update: {message}',
+    'ai_latest_race_control_none': 'Geen Race Control-berichten gevonden voor {race}.',
+    'ai_supported_commands': 'Ondersteunde commando\'s: Fetch latest results, Show next weekend, Compare naam1 vs naam2, Show form [driver], Show driver standings, Show team standings, Open driver [naam], Open team [naam], Show drivers chart, Show latest penalties, Show latest race control.',
     'ai_crash': 'De assistent liep vast op: {error}',
     'ai_chip_fetch_latest_results': 'Fetch latest results',
     'ai_chip_show_next_weekend': 'Show next weekend',
     'ai_chip_compare_max_lando': 'Compare Max vs Lando',
     'ai_chip_show_form_piastri': 'Show form Piastri',
+    'ai_chip_show_driver_standings': 'Show driver standings',
+    'ai_chip_show_latest_penalties': 'Show latest penalties',
     'ai_type_command': 'Typ een opdracht...',
     'no_race_results_available': 'Nog geen race-uitslag beschikbaar.',
   };
@@ -2180,6 +2214,14 @@ class AppLocalizations {
     'compare': 'Compare',
     'select_drivers_to_compare': 'Select 2 drivers',
     'select_teams_to_compare': 'Select 2 teams',
+    'compare_overall': 'Overall',
+    'compare_season': 'By season',
+    'compare_year': 'Season',
+    'compare_season_unavailable': 'Season data is unavailable for this comparison.',
+    'points_progression': 'Points progression',
+    'points_after_each_race': 'Standings after each race',
+    'round_short': 'R',
+    'dnf_percentage': 'DNF %',
     'circuits': 'Circuits',
     'standings': 'Standings',
     'nextRace': 'Next Race',
@@ -2192,6 +2234,13 @@ class AppLocalizations {
     'minutes': 'minutes',
     'sponsors': 'Sponsors',
     'drivers': 'Drivers',
+    'drivers_chart': 'Drivers chart',
+    'championship_progression': 'Championship progression',
+    'chart_no_data': 'No chart data is available for this season.',
+    'top_5': 'Top 5',
+    'top_10': 'Top 10',
+    'show_all': 'All',
+    'hide_all': 'None',
     'reserve_driver': 'Reserve Driver',
     'teams': 'Teams',
     'pts': 'PTS',
@@ -2455,8 +2504,10 @@ class AppLocalizations {
     'avg_finish': 'Avg finish',
     'avg_finish_l5': 'Avg finish (L5)',
     'no_finish_data': 'No finish data',
+    'points_per_start': 'Points / start',
+    'win_rate': 'Win rate %',
     'ai_race_engineer': 'AI Race Engineer',
-    'ai_example_prompt': 'Try for example: "Fetch latest results", "Show next weekend", "Compare Max Verstappen vs Lando Norris" or "Show form Oscar Piastri".',
+    'ai_example_prompt': 'Try for example: "Fetch latest results", "Show next weekend", "Show driver standings", "Open driver Charles Leclerc" or "Show latest penalties".',
     'ai_no_completed_race': 'No completed race has been found yet.',
     'ai_latest_results_refreshed': 'The latest results were refreshed.',
     'ai_latest_results_podium': 'Latest results refreshed. Podium: {podium}',
@@ -2472,12 +2523,29 @@ class AppLocalizations {
     'ai_form_no_driver': 'I could not find a driver for the form analysis.',
     'ai_form_no_cache': 'No cached recent races for {driver} yet.',
     'ai_form_summary': 'Recent form for {driver}: {summary}',
-    'ai_supported_commands': 'Supported commands: Fetch latest results, Show next weekend, Compare name1 vs name2, Show form [driver].',
+    'ai_driver_standings_summary': 'Driver standings {year}: {summary}',
+    'ai_team_standings_summary': 'Constructor standings {year}: {summary}',
+    'ai_open_driver_standings': 'Open driver standings',
+    'ai_open_team_standings': 'Open constructor standings',
+    'ai_driver_profile_ready': 'Driver profile ready for {driver}.',
+    'ai_open_driver_profile': 'Open driver profile',
+    'ai_team_profile_ready': 'Team profile ready for {team}.',
+    'ai_open_team_profile': 'Open team profile',
+    'ai_drivers_chart_ready': 'The drivers chart is ready for {year}.',
+    'ai_open_drivers_chart': 'Open drivers chart',
+    'ai_next_weekend_weather': 'Weather for {race}: {temp}C, {rain}% rain, {wind} km/h wind.',
+    'ai_latest_penalties_summary': 'Latest penalties at {race}: {count}. {details}',
+    'ai_latest_penalties_none': 'No penalties found for {race}.',
+    'ai_latest_race_control_summary': 'Race Control at {race}: {count} messages. Latest update: {message}',
+    'ai_latest_race_control_none': 'No Race Control messages found for {race}.',
+    'ai_supported_commands': 'Supported commands: Fetch latest results, Show next weekend, Compare name1 vs name2, Show form [driver], Show driver standings, Show team standings, Open driver [name], Open team [name], Show drivers chart, Show latest penalties, Show latest race control.',
     'ai_crash': 'The assistant ran into: {error}',
     'ai_chip_fetch_latest_results': 'Fetch latest results',
     'ai_chip_show_next_weekend': 'Show next weekend',
     'ai_chip_compare_max_lando': 'Compare Max vs Lando',
     'ai_chip_show_form_piastri': 'Show form Piastri',
+    'ai_chip_show_driver_standings': 'Show driver standings',
+    'ai_chip_show_latest_penalties': 'Show latest penalties',
     'ai_type_command': 'Type a command...',
     'no_race_results_available': 'No race results available yet.',
   };
@@ -3684,6 +3752,679 @@ String _formatFormPoints(List<DriverFormEntry> entries) {
   return total == total.roundToDouble()
       ? total.toInt().toString()
       : total.toStringAsFixed(1);
+}
+
+Driver? _driverForSeason(String driverName, int year) {
+  final seasonDrivers = driversData[year] ?? const <Driver>[];
+  for (final driver in seasonDrivers) {
+    if (_driverNameMatches(driver.name, driverName)) {
+      return driver;
+    }
+  }
+  return null;
+}
+
+List<int> _sharedDriverComparisonYears(String driverName1, String driverName2) {
+  final years = <int>[];
+  for (final year in driversData.keys) {
+    if (_driverForSeason(driverName1, year) != null &&
+        _driverForSeason(driverName2, year) != null) {
+      years.add(year);
+    }
+  }
+  years.sort((a, b) => b.compareTo(a));
+  return years;
+}
+
+class SeasonalDriverComparisonStats {
+  final double points;
+  final List<SeasonRacePointsEntry> pointsByRace;
+  final int poles;
+  final int fastestLaps;
+  final double dnfPercentage;
+  final int podiums;
+  final String highestFinish;
+  final String highestGrid;
+  final double winRate;
+
+  const SeasonalDriverComparisonStats({
+    required this.points,
+    required this.pointsByRace,
+    required this.poles,
+    required this.fastestLaps,
+    required this.dnfPercentage,
+    required this.podiums,
+    required this.highestFinish,
+    required this.highestGrid,
+    required this.winRate,
+  });
+
+  factory SeasonalDriverComparisonStats.fromJson(Map<String, dynamic> json) {
+    return SeasonalDriverComparisonStats(
+      points: (json['points'] as num?)?.toDouble() ?? 0,
+      pointsByRace: (json['pointsByRace'] as List?)
+              ?.whereType<Map>()
+              .map(
+                (entry) => SeasonRacePointsEntry.fromJson(
+                  entry.map((key, value) => MapEntry(key.toString(), value)),
+                ),
+              )
+              .toList() ??
+          const <SeasonRacePointsEntry>[],
+      poles: (json['poles'] as num?)?.toInt() ?? 0,
+      fastestLaps: (json['fastestLaps'] as num?)?.toInt() ?? 0,
+      dnfPercentage: (json['dnfPercentage'] as num?)?.toDouble() ?? 0,
+      podiums: (json['podiums'] as num?)?.toInt() ?? 0,
+      highestFinish: json['highestFinish']?.toString() ?? '-',
+      highestGrid: json['highestGrid']?.toString() ?? '-',
+      winRate: (json['winRate'] as num?)?.toDouble() ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'points': points,
+      'pointsByRace': pointsByRace.map((entry) => entry.toJson()).toList(),
+      'poles': poles,
+      'fastestLaps': fastestLaps,
+      'dnfPercentage': dnfPercentage,
+      'podiums': podiums,
+      'highestFinish': highestFinish,
+      'highestGrid': highestGrid,
+      'winRate': winRate,
+    };
+  }
+}
+
+class SeasonRacePointsEntry {
+  final int round;
+  final String raceName;
+  final double points;
+
+  const SeasonRacePointsEntry({
+    required this.round,
+    required this.raceName,
+    required this.points,
+  });
+
+  factory SeasonRacePointsEntry.fromJson(Map<String, dynamic> json) {
+    return SeasonRacePointsEntry(
+      round: (json['round'] as num?)?.toInt() ?? 0,
+      raceName: json['raceName']?.toString() ?? '-',
+      points: (json['points'] as num?)?.toDouble() ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'round': round,
+      'raceName': raceName,
+      'points': points,
+    };
+  }
+}
+
+class DriverStandingsChartSeries {
+  final String driverName;
+  final List<SeasonRacePointsEntry> pointsByRace;
+  final Color color;
+
+  const DriverStandingsChartSeries({
+    required this.driverName,
+    required this.pointsByRace,
+    required this.color,
+  });
+}
+
+class DriverStandingsChartData {
+  final int year;
+  final List<String> circuitLabels;
+  final List<DriverStandingsChartSeries> series;
+  final double maxPoints;
+
+  const DriverStandingsChartData({
+    required this.year,
+    required this.circuitLabels,
+    required this.series,
+    required this.maxPoints,
+  });
+}
+
+final Map<String, Future<SeasonalDriverComparisonStats?>>
+_seasonalDriverComparisonStatsCache =
+    <String, Future<SeasonalDriverComparisonStats?>>{};
+Future<Map<int, Map<String, SeasonalDriverComparisonStats>>>?
+_seasonalDriverComparisonAssetCache;
+final Map<int, Future<DriverStandingsChartData?>>
+_driverStandingsChartDataCache = <int, Future<DriverStandingsChartData?>>{};
+
+Future<Map<int, Map<String, SeasonalDriverComparisonStats>>>
+_loadSeasonalDriverComparisonAssetCache() {
+  return _seasonalDriverComparisonAssetCache ??=
+      _readSeasonalDriverComparisonAssetCache();
+}
+
+Future<DriverStandingsChartData?> _fetchDriverStandingsChartData(int year) {
+  return _driverStandingsChartDataCache.putIfAbsent(
+    year,
+    () => _loadDriverStandingsChartData(year),
+  );
+}
+
+Future<DriverStandingsChartData?> _loadDriverStandingsChartData(int year) async {
+  final assetData = await _loadDriverStandingsChartDataFromAsset(year);
+  if (assetData != null) {
+    return assetData;
+  }
+  return _loadDriverStandingsChartDataFromApi(year);
+}
+
+Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromAsset(
+  int year,
+) async {
+  try {
+    final raw = await rootBundle.loadString(
+      'data/results/driver_comparison_stats_2017_2025.json',
+    );
+    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    final years = decoded['years'] as Map<String, dynamic>? ??
+        const <String, dynamic>{};
+    final yearData = years['$year'] as Map<String, dynamic>?;
+    if (yearData == null) {
+      return null;
+    }
+
+    final drivers = yearData['drivers'] as Map<String, dynamic>? ??
+        const <String, dynamic>{};
+    final series = <DriverStandingsChartSeries>[];
+    var maxPoints = 0.0;
+
+    var index = 0;
+    for (final entry in drivers.entries) {
+      final stats = SeasonalDriverComparisonStats.fromJson(
+        (entry.value as Map).map((key, value) => MapEntry(key.toString(), value)),
+      );
+      if (stats.pointsByRace.isEmpty) {
+        continue;
+      }
+      maxPoints = math.max(maxPoints, stats.points);
+      series.add(
+        DriverStandingsChartSeries(
+          driverName: entry.key,
+          pointsByRace: stats.pointsByRace,
+          color: _chartColorForDriver(entry.key, year, index),
+        ),
+      );
+      index += 1;
+    }
+
+    if (series.isEmpty) {
+      return null;
+    }
+
+    series.sort(
+      (left, right) => (right.pointsByRace.isEmpty ? 0.0 : right.pointsByRace.last.points)
+          .compareTo(left.pointsByRace.isEmpty ? 0.0 : left.pointsByRace.last.points),
+    );
+    final labels = _buildCircuitLabels(series);
+
+    return DriverStandingsChartData(
+      year: year,
+      circuitLabels: labels,
+      series: series,
+      maxPoints: maxPoints <= 0 ? 1 : maxPoints,
+    );
+  } catch (_) {
+    return null;
+  }
+}
+
+Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromApi(
+  int year,
+) async {
+  try {
+    final standingsResponse = await http
+        .get(
+          Uri.parse('https://api.jolpi.ca/ergast/f1/$year/driverStandings.json'),
+        )
+        .timeout(const Duration(seconds: 6));
+    final resultsResponse = await http
+        .get(Uri.parse('https://api.jolpi.ca/ergast/f1/$year/results.json?limit=1000'))
+        .timeout(const Duration(seconds: 6));
+
+    if (standingsResponse.statusCode != 200 || resultsResponse.statusCode != 200) {
+      return null;
+    }
+
+    final standingsData = jsonDecode(standingsResponse.body) as Map<String, dynamic>;
+    final standingsLists = standingsData['MRData']?['StandingsTable']?['StandingsLists'] as List? ??
+        const <dynamic>[];
+    if (standingsLists.isEmpty) {
+      return null;
+    }
+
+    final resultsData = jsonDecode(resultsResponse.body) as Map<String, dynamic>;
+    final races = resultsData['MRData']?['RaceTable']?['Races'] as List? ?? const <dynamic>[];
+    final raceNameByRound = <int, String>{
+      for (final race in races.whereType<Map>())
+        if (int.tryParse(race['round']?.toString() ?? '') != null)
+          int.parse(race['round'].toString()): race['raceName']?.toString() ?? '-',
+    };
+    final availableRounds = raceNameByRound.keys.toList()..sort();
+    if (availableRounds.isEmpty) {
+      return null;
+    }
+
+    final seriesByDriver = <String, List<SeasonRacePointsEntry>>{};
+    final displayNameByDriver = <String, String>{};
+    var maxPoints = 0.0;
+
+    for (final round in availableRounds) {
+      final roundResponse = await http
+          .get(
+            Uri.parse(
+              'https://api.jolpi.ca/ergast/f1/$year/$round/driverStandings.json',
+            ),
+          )
+          .timeout(const Duration(seconds: 6));
+      if (roundResponse.statusCode != 200) {
+        continue;
+      }
+
+      final roundData = jsonDecode(roundResponse.body) as Map<String, dynamic>;
+      final roundStandingsLists = roundData['MRData']?['StandingsTable']?['StandingsLists'] as List? ??
+          const <dynamic>[];
+      if (roundStandingsLists.isEmpty) {
+        continue;
+      }
+
+      final driverStandings = roundStandingsLists.first['DriverStandings'] as List? ??
+          const <dynamic>[];
+      for (final entry in driverStandings.whereType<Map>()) {
+        final driverData = entry['Driver'] as Map? ?? const <String, dynamic>{};
+        final givenName = driverData['givenName']?.toString() ?? '';
+        final familyName = driverData['familyName']?.toString() ?? '';
+        final driverName = '$givenName $familyName'.trim();
+        if (driverName.isEmpty) {
+          continue;
+        }
+        final normalizedName = _normalizeDriverLookupName(driverName);
+        final points = double.tryParse(entry['points']?.toString() ?? '') ?? 0.0;
+        maxPoints = math.max(maxPoints, points);
+        displayNameByDriver[normalizedName] = driverName;
+        seriesByDriver.putIfAbsent(normalizedName, () => <SeasonRacePointsEntry>[]).add(
+          SeasonRacePointsEntry(
+            round: round,
+            raceName: raceNameByRound[round] ?? '-',
+            points: points,
+          ),
+        );
+      }
+    }
+
+    if (seriesByDriver.isEmpty) {
+      return null;
+    }
+
+    final normalizedNames = seriesByDriver.keys.toList()
+      ..sort(
+        (left, right) => (seriesByDriver[right]?.last.points ?? 0)
+            .compareTo(seriesByDriver[left]?.last.points ?? 0),
+      );
+    final series = <DriverStandingsChartSeries>[];
+    for (var index = 0; index < normalizedNames.length; index++) {
+      final normalizedName = normalizedNames[index];
+      final driverName = displayNameByDriver[normalizedName] ?? normalizedName;
+      final pointsByRace = seriesByDriver[normalizedName] ?? const <SeasonRacePointsEntry>[];
+      series.add(
+        DriverStandingsChartSeries(
+          driverName: driverName,
+          pointsByRace: pointsByRace,
+          color: _chartColorForDriver(driverName, year, index),
+        ),
+      );
+    }
+
+    return DriverStandingsChartData(
+      year: year,
+      circuitLabels: _buildCircuitLabels(series),
+      series: series,
+      maxPoints: maxPoints <= 0 ? 1 : maxPoints,
+    );
+  } catch (_) {
+    return null;
+  }
+}
+
+List<String> _buildCircuitLabels(List<DriverStandingsChartSeries> series) {
+  final labelsByRound = <int, String>{};
+  for (final driverSeries in series) {
+    for (final entry in driverSeries.pointsByRace) {
+      labelsByRound.putIfAbsent(entry.round, () => _abbreviateRaceLabel(entry.raceName));
+    }
+  }
+
+  final rounds = labelsByRound.keys.toList()..sort();
+  return rounds.map((round) => labelsByRound[round] ?? round.toString()).toList();
+}
+
+String _abbreviateRaceLabel(String raceName) {
+  final cleaned = raceName.replaceAll(' Grand Prix', '').trim();
+  if (cleaned.isEmpty) {
+    return '-';
+  }
+  final words = cleaned.split(RegExp(r'\s+'));
+  if (words.length == 1) {
+    final word = words.first;
+    return word.length <= 3 ? word.toUpperCase() : word.substring(0, 3).toUpperCase();
+  }
+  return words.take(3).map((word) => word.substring(0, 1).toUpperCase()).join();
+}
+
+Color _chartColorForDriver(String driverName, int year, int index) {
+  final hue = (index * 37) % 360;
+  final fallback = HSVColor.fromAHSV(1, hue.toDouble(), 0.72, 0.92).toColor();
+  final driver = _driverForSeason(driverName, year);
+  if (driver == null) {
+    return fallback;
+  }
+  final teamColor = _getTeamColor(driver.team);
+  return Color.lerp(teamColor, fallback, 0.35) ?? teamColor;
+}
+
+Future<Map<int, Map<String, SeasonalDriverComparisonStats>>>
+_readSeasonalDriverComparisonAssetCache() async {
+  try {
+    final raw = await rootBundle.loadString(
+      'data/results/driver_comparison_stats_2017_2025.json',
+    );
+    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    final years = decoded['years'] as Map<String, dynamic>? ??
+        const <String, dynamic>{};
+    final resolved = <int, Map<String, SeasonalDriverComparisonStats>>{};
+
+    for (final yearEntry in years.entries) {
+      final year = int.tryParse(yearEntry.key);
+      if (year == null || yearEntry.value is! Map<String, dynamic>) {
+        continue;
+      }
+
+      final yearData = yearEntry.value as Map<String, dynamic>;
+      final drivers = yearData['drivers'] as Map<String, dynamic>? ??
+          const <String, dynamic>{};
+      resolved[year] = {
+        for (final driverEntry in drivers.entries)
+          _normalizeDriverLookupName(driverEntry.key):
+              SeasonalDriverComparisonStats.fromJson(
+                (driverEntry.value as Map).map(
+                  (key, value) => MapEntry(key.toString(), value),
+                ),
+              ),
+      };
+    }
+
+    return resolved;
+  } catch (_) {
+    return const <int, Map<String, SeasonalDriverComparisonStats>>{};
+  }
+}
+
+String _normalizeDriverLookupName(String value) {
+  const replacements = <String, String>{
+    'ä': 'a',
+    'á': 'a',
+    'à': 'a',
+    'â': 'a',
+    'å': 'a',
+    'æ': 'ae',
+    'ç': 'c',
+    'é': 'e',
+    'è': 'e',
+    'ê': 'e',
+    'ë': 'e',
+    'í': 'i',
+    'ì': 'i',
+    'î': 'i',
+    'ï': 'i',
+    'ñ': 'n',
+    'ö': 'o',
+    'ó': 'o',
+    'ò': 'o',
+    'ô': 'o',
+    'ø': 'o',
+    'ü': 'u',
+    'ú': 'u',
+    'ù': 'u',
+    'û': 'u',
+    'ß': 'ss',
+    'ý': 'y',
+    'ÿ': 'y',
+    'ř': 'r',
+    'š': 's',
+    'č': 'c',
+    'ž': 'z',
+  };
+
+  var normalized = value.trim().toLowerCase();
+  replacements.forEach((source, target) {
+    normalized = normalized.replaceAll(source, target);
+  });
+  return normalized.replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();
+}
+
+bool _apiDriverEntryMatches(dynamic driverData, String driverName) {
+  if (driverData is! Map) {
+    return false;
+  }
+
+  final givenName = driverData['givenName']?.toString() ?? '';
+  final familyName = driverData['familyName']?.toString() ?? '';
+  final fullName = '$givenName $familyName'.trim();
+  final normalizedTarget = _normalizeDriverLookupName(driverName);
+  final normalizedFull = _normalizeDriverLookupName(fullName);
+  final normalizedFamily = _normalizeDriverLookupName(familyName);
+  final targetParts = normalizedTarget.split(' ');
+  final targetFamily = targetParts.isEmpty ? normalizedTarget : targetParts.last;
+
+  return normalizedFull == normalizedTarget || normalizedFamily == targetFamily;
+}
+
+bool _isRetirementStatus(String status) {
+  final normalized = status.trim().toUpperCase();
+  if (normalized.isEmpty) {
+    return false;
+  }
+  if (normalized == 'FINISHED' || normalized == 'DISQUALIFIED') {
+    return false;
+  }
+  if (RegExp(r'^\+\d+\s+LAPS?$').hasMatch(normalized)) {
+    return false;
+  }
+  return true;
+}
+
+Future<SeasonalDriverComparisonStats?> _fetchSeasonalDriverComparisonStats(
+  String driverName,
+  int year,
+) {
+  final cacheKey = '$year|$driverName';
+  return _seasonalDriverComparisonStatsCache.putIfAbsent(cacheKey, () async {
+    final assetCache = await _loadSeasonalDriverComparisonAssetCache();
+    final cachedStats = assetCache[year]?[_normalizeDriverLookupName(driverName)];
+    if (cachedStats != null) {
+      return cachedStats;
+    }
+
+    final standingsResponse = await http
+        .get(
+          Uri.parse(
+            'https://api.jolpi.ca/ergast/f1/$year/driverStandings.json',
+          ),
+        )
+        .timeout(const Duration(seconds: 4));
+
+    if (standingsResponse.statusCode != 200) {
+      return null;
+    }
+
+    final standingsData = json.decode(standingsResponse.body);
+    final standingsLists =
+        standingsData['MRData']?['StandingsTable']?['StandingsLists'] as List? ??
+        const <dynamic>[];
+    if (standingsLists.isEmpty) {
+      return null;
+    }
+
+    final driverStandings = standingsLists.first['DriverStandings'] as List? ??
+        const <dynamic>[];
+    Map<String, dynamic>? standingEntry;
+    for (final entry in driverStandings.whereType<Map>()) {
+      if (_apiDriverEntryMatches(entry['Driver'], driverName)) {
+        standingEntry = entry.map(
+          (key, value) => MapEntry(key.toString(), value),
+        );
+        break;
+      }
+    }
+    if (standingEntry == null) {
+      return null;
+    }
+
+    final driverId = standingEntry['Driver'] is Map
+        ? (standingEntry['Driver'] as Map)['driverId']?.toString()
+        : null;
+    if (driverId == null || driverId.isEmpty) {
+      return null;
+    }
+
+    final points =
+        double.tryParse(standingEntry['points']?.toString() ?? '') ?? 0;
+
+    final resultsResponse = await http
+        .get(
+          Uri.parse(
+            'https://api.jolpi.ca/ergast/f1/$year/drivers/$driverId/results.json?limit=100',
+          ),
+        )
+        .timeout(const Duration(seconds: 4));
+    final qualifyingResponse = await http
+        .get(
+          Uri.parse(
+            'https://api.jolpi.ca/ergast/f1/$year/drivers/$driverId/qualifying.json?limit=100',
+          ),
+        )
+        .timeout(const Duration(seconds: 4));
+
+    if (resultsResponse.statusCode != 200 || qualifyingResponse.statusCode != 200) {
+      return null;
+    }
+
+    final resultsData = json.decode(resultsResponse.body);
+    final qualifyingData = json.decode(qualifyingResponse.body);
+    final resultRaces =
+        resultsData['MRData']?['RaceTable']?['Races'] as List? ?? const <dynamic>[];
+    final qualifyingRaces = qualifyingData['MRData']?['RaceTable']?['Races'] as List? ??
+        const <dynamic>[];
+
+    var wins = 0;
+    var podiums = 0;
+    var fastestLaps = 0;
+    var dnfs = 0;
+    int? highestFinish;
+    int? highestGrid;
+    var runningPoints = 0.0;
+    final pointsByRace = <SeasonRacePointsEntry>[];
+
+    for (final race in resultRaces.whereType<Map>()) {
+      final results = race['Results'] as List? ?? const <dynamic>[];
+      if (results.isEmpty || results.first is! Map) {
+        continue;
+      }
+      final result = (results.first as Map).map(
+        (key, value) => MapEntry(key.toString(), value),
+      );
+      final finishPosition = int.tryParse(result['position']?.toString() ?? '');
+      if (finishPosition != null) {
+        if (finishPosition == 1) {
+          wins += 1;
+        }
+        if (finishPosition <= 3) {
+          podiums += 1;
+        }
+        highestFinish = highestFinish == null
+            ? finishPosition
+            : math.min(highestFinish, finishPosition).toInt();
+      }
+
+      final fastestLapRank = result['FastestLap'] is Map
+          ? (result['FastestLap'] as Map)['rank']?.toString()
+          : null;
+      if (fastestLapRank == '1') {
+        fastestLaps += 1;
+      }
+
+      if (_isRetirementStatus(result['status']?.toString() ?? '')) {
+        dnfs += 1;
+      }
+
+      final grid = int.tryParse(result['grid']?.toString() ?? '');
+      if (grid != null && grid > 0) {
+        highestGrid = highestGrid == null
+            ? grid
+            : math.min(highestGrid, grid).toInt();
+      }
+
+      final racePoints =
+          double.tryParse(result['points']?.toString() ?? '') ?? 0.0;
+      runningPoints += racePoints;
+      pointsByRace.add(
+        SeasonRacePointsEntry(
+          round: int.tryParse(race['round']?.toString() ?? '') ??
+              pointsByRace.length + 1,
+          raceName: race['raceName']?.toString() ?? '-',
+          points: runningPoints,
+        ),
+      );
+    }
+
+    var poles = 0;
+    for (final race in qualifyingRaces.whereType<Map>()) {
+      final qualifyingResults =
+          race['QualifyingResults'] as List? ?? const <dynamic>[];
+      if (qualifyingResults.isEmpty || qualifyingResults.first is! Map) {
+        continue;
+      }
+      final qualifyingResult = (qualifyingResults.first as Map).map(
+        (key, value) => MapEntry(key.toString(), value),
+      );
+      final qualifyingPosition =
+          int.tryParse(qualifyingResult['position']?.toString() ?? '');
+      if (qualifyingPosition != null && qualifyingPosition > 0) {
+        if (qualifyingPosition == 1) {
+          poles += 1;
+        }
+        highestGrid = highestGrid == null
+            ? qualifyingPosition
+          : math.min(highestGrid, qualifyingPosition).toInt();
+      }
+    }
+
+    final starts = resultRaces.length;
+    final dnfPercentage = starts == 0 ? 0.0 : (dnfs / starts) * 100.0;
+    final winRate = starts == 0 ? 0.0 : (wins / starts) * 100.0;
+
+    return SeasonalDriverComparisonStats(
+      points: points,
+      pointsByRace: pointsByRace,
+      poles: poles,
+      fastestLaps: fastestLaps,
+      dnfPercentage: dnfPercentage,
+      podiums: podiums,
+      highestFinish: highestFinish == null ? '-' : 'P$highestFinish',
+      highestGrid: highestGrid == null ? '-' : 'P$highestGrid',
+      winRate: winRate,
+    );
+  });
 }
 
 Future<Race?> _findLatestCompletedRace() async {
@@ -6587,6 +7328,19 @@ class _StandingsViewState extends State<StandingsView> {
 
   Future<void> _refreshStandings() => _fetchStandings(forceRefresh: true);
 
+  void _handleChartYearChanged(int year) {
+    if (_selectedYear == year) {
+      return;
+    }
+
+    setState(() {
+      _selectedYear = year;
+      _cachedDrivers = [];
+      _cachedTeams = [];
+    });
+    _fetchStandings();
+  }
+
   void _processStandingsData(List apiDrivers, List apiTeams) {
     List<Driver> mergedDrivers = [];
     final localDrivers = driversData[_selectedYear] ?? [];
@@ -6834,6 +7588,17 @@ class _StandingsViewState extends State<StandingsView> {
                 }).toList(),
               ),
         actions: [
+          if (isDriverView)
+            IconButton(
+              icon: const Icon(Icons.show_chart),
+              tooltip: loc.translate('drivers_chart'),
+              onPressed: () => _openDriverStandingsChartSheet(
+                context,
+                initialYear: _selectedYear,
+                availableYears: _years,
+                onYearChanged: _handleChartYearChanged,
+              ),
+            ),
           IconButton(
             icon: Icon(_isCompareMode ? Icons.cancel : Icons.compare_arrows),
             tooltip: loc.translate('compare'),
@@ -6985,7 +7750,771 @@ class ComparisonRow extends StatelessWidget {
   }
 }
 
-class DriverComparisonView extends StatelessWidget {
+void _openDriverStandingsChartSheet(
+  BuildContext context, {
+  required int initialYear,
+  required List<int> availableYears,
+  ValueChanged<int>? onYearChanged,
+}) {
+  final screenWidth = MediaQuery.of(context).size.width;
+  final maxSheetWidth = screenWidth >= 1400
+      ? 1320.0
+      : screenWidth >= 1100
+      ? 1120.0
+      : screenWidth;
+
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    backgroundColor: Theme.of(context).colorScheme.surface,
+    constraints: BoxConstraints(
+      maxWidth: maxSheetWidth,
+    ),
+    builder: (context) => FractionallySizedBox(
+      heightFactor: 0.9,
+      child: DriverStandingsChartSheet(
+        initialYear: initialYear,
+        availableYears: availableYears,
+        onYearChanged: onYearChanged,
+      ),
+    ),
+  );
+}
+
+class DriverStandingsChartSheet extends StatefulWidget {
+  final int initialYear;
+  final List<int> availableYears;
+  final ValueChanged<int>? onYearChanged;
+
+  const DriverStandingsChartSheet({
+    required this.initialYear,
+    required this.availableYears,
+    this.onYearChanged,
+    super.key,
+  });
+
+  @override
+  State<DriverStandingsChartSheet> createState() =>
+      _DriverStandingsChartSheetState();
+}
+
+class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
+  late int _selectedYear;
+  final Map<int, Set<String>> _selectedDriverNamesByYear =
+      <int, Set<String>>{};
+  int? _hoveredRound;
+  Offset? _hoverPosition;
+
+  Set<String> _buildDefaultChartSelection(DriverStandingsChartData data) {
+    return data.series
+        .take(8)
+        .map((series) => series.driverName)
+        .toSet();
+  }
+
+  void _selectTopDrivers(DriverStandingsChartData data, int count) {
+    setState(() {
+      _selectedDriverNamesByYear[_selectedYear] = data.series
+          .take(count)
+          .map((series) => series.driverName)
+          .toSet();
+    });
+  }
+
+  void _setAllDriversVisible(DriverStandingsChartData data) {
+    setState(() {
+      _selectedDriverNamesByYear[_selectedYear] = data.series
+          .map((series) => series.driverName)
+          .toSet();
+    });
+  }
+
+  void _clearAllDrivers() {
+    setState(() {
+      _selectedDriverNamesByYear[_selectedYear] = <String>{};
+    });
+  }
+
+  List<int> _sortedChartRoundsForSeries(
+    List<DriverStandingsChartSeries> series,
+  ) {
+    final rounds = <int>{
+      for (final driverSeries in series)
+        ...driverSeries.pointsByRace.map((entry) => entry.round),
+    }.toList()
+      ..sort();
+    return rounds;
+  }
+
+  String _roundShortLabel(DriverStandingsChartData data, int round) {
+    for (final series in data.series) {
+      for (final entry in series.pointsByRace) {
+        if (entry.round == round) {
+          return _abbreviateRaceLabel(entry.raceName);
+        }
+      }
+    }
+    return round.toString();
+  }
+
+  String _roundFullLabel(DriverStandingsChartData data, int round) {
+    for (final series in data.series) {
+      for (final entry in series.pointsByRace) {
+        if (entry.round == round) {
+          return entry.raceName;
+        }
+      }
+    }
+    return 'Round $round';
+  }
+
+  double? _pointsForRound(DriverStandingsChartSeries series, int round) {
+    for (final entry in series.pointsByRace) {
+      if (entry.round == round) {
+        return entry.points;
+      }
+    }
+    return null;
+  }
+
+  String _formatChartPoints(double value) {
+    return value == value.roundToDouble()
+        ? value.toInt().toString()
+        : value.toStringAsFixed(1);
+  }
+
+  List<MapEntry<DriverStandingsChartSeries, double>> _rankedValuesForRound(
+    List<DriverStandingsChartSeries> visibleSeries,
+    int round,
+  ) {
+    final values = visibleSeries
+        .map((series) => MapEntry(series, _pointsForRound(series, round)))
+        .where((entry) => entry.value != null)
+        .map((entry) => MapEntry(entry.key, entry.value!))
+        .toList()
+      ..sort((left, right) => right.value.compareTo(left.value));
+    return values;
+  }
+
+  int? _resolveHoveredRound(
+    List<int> rounds,
+    double localX,
+    double width,
+  ) {
+    if (rounds.isEmpty || width <= 0) {
+      return null;
+    }
+    if (rounds.length == 1) {
+      return rounds.first;
+    }
+
+    final clampedX = localX.clamp(0.0, width);
+    final stepWidth = width / (rounds.length - 1);
+    final index = (clampedX / stepWidth).round().clamp(0, rounds.length - 1);
+    return rounds[index];
+  }
+
+  Widget _buildHoverTooltip(
+    BuildContext context, {
+    required DriverStandingsChartData data,
+    required List<DriverStandingsChartSeries> visibleSeries,
+    required int round,
+  }) {
+    final theme = Theme.of(context);
+    final values = _rankedValuesForRound(visibleSeries, round);
+
+    return Container(
+      width: 220,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withOpacity(0.96),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.35)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.18),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            _roundFullLabel(data, round),
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...values.take(6).toList().asMap().entries.map(
+            (rankedEntry) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                children: [
+                  Text(
+                    '#${rankedEntry.key + 1}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: rankedEntry.value.key.color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      rankedEntry.value.key.driverName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${_formatChartPoints(rankedEntry.value.value)} pts',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedYear = widget.initialYear;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        loc.translate('drivers_chart'),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        loc.translate('championship_progression'),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                DropdownButton<int>(
+                  value: _selectedYear,
+                  onChanged: (value) {
+                    if (value == null) {
+                      return;
+                    }
+                    setState(() {
+                      _selectedYear = value;
+                      _hoveredRound = null;
+                      _hoverPosition = null;
+                    });
+                    widget.onYearChanged?.call(value);
+                  },
+                  items: widget.availableYears
+                      .map(
+                        (year) => DropdownMenuItem<int>(
+                          value: year,
+                          child: Text(year.toString()),
+                        ),
+                      )
+                      .toList(growable: false),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: FutureBuilder<DriverStandingsChartData?>(
+                future: _fetchDriverStandingsChartData(_selectedYear),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final data = snapshot.data;
+                  if (snapshot.hasError || data == null || data.series.isEmpty) {
+                    return Center(
+                      child: Text(
+                        loc.translate('chart_no_data'),
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    );
+                  }
+
+                  final selectedNames = _selectedDriverNamesByYear.putIfAbsent(
+                    _selectedYear,
+                    () => _buildDefaultChartSelection(data),
+                  );
+                  final visibleSeries = data.series
+                      .where((series) => selectedNames.contains(series.driverName))
+                      .toList(growable: false);
+                  final rounds = _sortedChartRoundsForSeries(visibleSeries);
+
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withOpacity(0.03)
+                          : Colors.black.withOpacity(0.02),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 148,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              right: BorderSide(
+                                color: isDark ? Colors.white10 : Colors.black12,
+                              ),
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: [
+                                  ActionChip(
+                                    label: Text(loc.translate('top_5')),
+                                    onPressed: () => _selectTopDrivers(data, 5),
+                                  ),
+                                  ActionChip(
+                                    label: Text(loc.translate('top_10')),
+                                    onPressed: () => _selectTopDrivers(data, 10),
+                                  ),
+                                  ActionChip(
+                                    label: Text(loc.translate('show_all')),
+                                    onPressed: () => _setAllDriversVisible(data),
+                                  ),
+                                  ActionChip(
+                                    label: Text(loc.translate('hide_all')),
+                                    onPressed: _clearAllDrivers,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Expanded(
+                                child: ListView.separated(
+                                  itemCount: data.series.length,
+                                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                                  itemBuilder: (context, index) {
+                                    final series = data.series[index];
+                                    final isSelected = selectedNames.contains(
+                                      series.driverName,
+                                    );
+                                    return Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(12),
+                                        onTap: () {
+                                          setState(() {
+                                            final selection = _selectedDriverNamesByYear
+                                                .putIfAbsent(
+                                                  _selectedYear,
+                                                  () => _buildDefaultChartSelection(data),
+                                                );
+                                            if (selection.contains(series.driverName)) {
+                                              selection.remove(series.driverName);
+                                            } else {
+                                              selection.add(series.driverName);
+                                            }
+                                          });
+                                        },
+                                        child: AnimatedOpacity(
+                                          duration: const Duration(milliseconds: 180),
+                                          opacity: isSelected ? 1 : 0.38,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 9,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: isSelected
+                                                  ? series.color.withOpacity(0.12)
+                                                  : Colors.transparent,
+                                              borderRadius: BorderRadius.circular(12),
+                                              border: Border.all(
+                                                color: isSelected
+                                                    ? series.color.withOpacity(0.45)
+                                                    : (isDark
+                                                        ? Colors.white10
+                                                        : Colors.black12),
+                                              ),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Container(
+                                                  width: 12,
+                                                  height: 12,
+                                                  decoration: BoxDecoration(
+                                                    color: series.color,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 10),
+                                                Expanded(
+                                                  child: Text(
+                                                    series.driverName,
+                                                    maxLines: 2,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: theme.colorScheme.onSurface,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Icon(
+                                                  isSelected
+                                                      ? Icons.visibility
+                                                      : Icons.visibility_off,
+                                                  size: 16,
+                                                  color: isSelected
+                                                      ? series.color
+                                                      : theme.colorScheme.onSurfaceVariant,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final chartWidth = math.max(
+                                0.0,
+                                constraints.maxWidth - 24,
+                              );
+                              final labelWidth = rounds.isEmpty
+                                  ? 24.0
+                                  : (chartWidth / rounds.length)
+                                      .clamp(18.0, 42.0)
+                                      .toDouble();
+
+                              return Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 16, 16, 16),
+                                child: SizedBox(
+                                  width: chartWidth,
+                                  child: MouseRegion(
+                                    onExit: (_) => setState(() {
+                                      _hoveredRound = null;
+                                      _hoverPosition = null;
+                                    }),
+                                    onHover: (event) {
+                                      final box = context.findRenderObject();
+                                      if (box is! RenderBox) {
+                                        return;
+                                      }
+                                      final local = box.globalToLocal(event.position);
+                                      setState(() {
+                                        _hoverPosition = local;
+                                        _hoveredRound = _resolveHoveredRound(
+                                          rounds,
+                                          local.dx,
+                                          chartWidth,
+                                        );
+                                      });
+                                    },
+                                    child: GestureDetector(
+                                      behavior: HitTestBehavior.opaque,
+                                      onTapDown: (details) {
+                                        setState(() {
+                                          _hoverPosition = details.localPosition;
+                                          _hoveredRound = _resolveHoveredRound(
+                                            rounds,
+                                            details.localPosition.dx,
+                                            chartWidth,
+                                          );
+                                        });
+                                      },
+                                      child: Stack(
+                                        children: [
+                                          Column(
+                                            children: [
+                                              Expanded(
+                                                child: CustomPaint(
+                                                  painter: _DriverStandingsChartPainter(
+                                                    data: data,
+                                                    series: visibleSeries,
+                                                    rounds: rounds,
+                                                    theme: theme,
+                                                    isDark: isDark,
+                                                    hoveredRound: _hoveredRound,
+                                                  ),
+                                                  child: const SizedBox.expand(),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 6),
+                                              Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: rounds
+                                                    .map(
+                                                      (round) => SizedBox(
+                                                        width: labelWidth,
+                                                        child: Transform.rotate(
+                                                          angle: -0.8,
+                                                          alignment: Alignment.topCenter,
+                                                          child: Text(
+                                                            _roundShortLabel(
+                                                              data,
+                                                              round,
+                                                            ),
+                                                            textAlign:
+                                                                TextAlign.center,
+                                                            style: TextStyle(
+                                                              fontSize: 9,
+                                                              fontWeight:
+                                                                  FontWeight.w700,
+                                                              color: theme
+                                                                  .colorScheme
+                                                                  .onSurfaceVariant,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    )
+                                                    .toList(growable: false),
+                                              ),
+                                            ],
+                                          ),
+                                          if (_hoveredRound != null &&
+                                              _hoverPosition != null)
+                                            Positioned(
+                                              left: (_hoverPosition!.dx + 12)
+                                                  .clamp(8.0, chartWidth - 228.0),
+                                              top: 8,
+                                              child: _buildHoverTooltip(
+                                                context,
+                                                data: data,
+                                                visibleSeries: visibleSeries,
+                                                round: _hoveredRound!,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DriverStandingsChartPainter extends CustomPainter {
+  final DriverStandingsChartData data;
+  final List<DriverStandingsChartSeries> series;
+  final List<int> rounds;
+  final ThemeData theme;
+  final bool isDark;
+  final int? hoveredRound;
+
+  const _DriverStandingsChartPainter({
+    required this.data,
+    required this.series,
+    required this.rounds,
+    required this.theme,
+    required this.isDark,
+    this.hoveredRound,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (rounds.isEmpty || series.isEmpty) {
+      return;
+    }
+
+    final gridPaint = Paint()
+      ..color = isDark ? Colors.white10 : Colors.black12
+      ..strokeWidth = 1;
+    final axisLabelStyle = TextStyle(
+      color: theme.colorScheme.onSurfaceVariant,
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+    );
+    const leftInset = 12.0;
+    const topInset = 20.0;
+    const bottomInset = 16.0;
+    final chartWidth = size.width - leftInset * 2;
+    final chartHeight = size.height - topInset - bottomInset;
+    final steps = math.max(1, rounds.length - 1);
+    final maxPoints = math.max(1.0, data.maxPoints);
+    final roundIndexMap = <int, int>{
+      for (var index = 0; index < rounds.length; index++) rounds[index]: index,
+    };
+
+    for (var index = 0; index <= 4; index++) {
+      final y = topInset + (chartHeight / 4) * index;
+      canvas.drawLine(
+        Offset(leftInset, y),
+        Offset(size.width - leftInset, y),
+        gridPaint,
+      );
+      final value = ((maxPoints / 4) * (4 - index));
+      final painter = TextPainter(
+        text: TextSpan(
+          text: value == value.roundToDouble()
+              ? value.toInt().toString()
+              : value.toStringAsFixed(1),
+          style: axisLabelStyle,
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      painter.paint(canvas, Offset(leftInset, y - painter.height - 2));
+    }
+
+    for (var roundIndex = 0; roundIndex < rounds.length; roundIndex++) {
+      final x = leftInset + (chartWidth / steps) * roundIndex;
+      canvas.drawLine(
+        Offset(x, topInset),
+        Offset(x, topInset + chartHeight),
+        gridPaint,
+      );
+    }
+
+    if (hoveredRound != null) {
+      final hoverIndex = roundIndexMap[hoveredRound!];
+      if (hoverIndex != null) {
+        final hoverX = leftInset + (chartWidth / steps) * hoverIndex;
+        final hoverPaint = Paint()
+          ..color = theme.colorScheme.primary.withOpacity(0.5)
+          ..strokeWidth = 1.4;
+        canvas.drawLine(
+          Offset(hoverX, topInset),
+          Offset(hoverX, topInset + chartHeight),
+          hoverPaint,
+        );
+      }
+    }
+
+    for (final driverSeries in series) {
+      final sortedEntries = [...driverSeries.pointsByRace]
+        ..sort((left, right) => left.round.compareTo(right.round));
+      if (sortedEntries.isEmpty) {
+        continue;
+      }
+
+      final path = Path();
+      for (var index = 0; index < sortedEntries.length; index++) {
+        final entry = sortedEntries[index];
+        final roundIndex = roundIndexMap[entry.round];
+        if (roundIndex == null) {
+          continue;
+        }
+        final x = leftInset + (chartWidth / steps) * roundIndex;
+        final y = topInset +
+            chartHeight -
+            ((entry.points / maxPoints) * chartHeight);
+        if (index == 0) {
+          path.moveTo(x, y);
+        } else {
+          path.lineTo(x, y);
+        }
+      }
+
+      final paint = Paint()
+        ..color = driverSeries.color
+        ..strokeWidth = 2.0
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round;
+      canvas.drawPath(path, paint);
+
+      final dotPaint = Paint()..color = driverSeries.color;
+      for (final entry in sortedEntries) {
+        final roundIndex = roundIndexMap[entry.round];
+        if (roundIndex == null) {
+          continue;
+        }
+        final x = leftInset + (chartWidth / steps) * roundIndex;
+        final y = topInset +
+            chartHeight -
+            ((entry.points / maxPoints) * chartHeight);
+        canvas.drawCircle(Offset(x, y), 2.1, dotPaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DriverStandingsChartPainter oldDelegate) {
+    return oldDelegate.data != data ||
+        oldDelegate.series != series ||
+        oldDelegate.theme != theme ||
+        oldDelegate.isDark != isDark ||
+        oldDelegate.hoveredRound != hoveredRound;
+  }
+}
+
+class DriverComparisonView extends StatefulWidget {
   final Driver driver1;
   final Driver driver2;
 
@@ -6996,129 +8525,496 @@ class DriverComparisonView extends StatelessWidget {
   });
 
   @override
+  State<DriverComparisonView> createState() => _DriverComparisonViewState();
+}
+
+class _DriverComparisonViewState extends State<DriverComparisonView> {
+  bool _showOverall = true;
+  late final List<int> _availableYears;
+  int? _selectedYear;
+
+  @override
+  void initState() {
+    super.initState();
+    _availableYears = _sharedDriverComparisonYears(
+      widget.driver1.name,
+      widget.driver2.name,
+    );
+    _selectedYear = _availableYears.isEmpty ? null : _availableYears.first;
+  }
+
+  Driver get _leftDriver {
+    if (_showOverall || _selectedYear == null) {
+      return widget.driver1;
+    }
+    return _driverForSeason(widget.driver1.name, _selectedYear!) ?? widget.driver1;
+  }
+
+  Driver get _rightDriver {
+    if (_showOverall || _selectedYear == null) {
+      return widget.driver2;
+    }
+    return _driverForSeason(widget.driver2.name, _selectedYear!) ?? widget.driver2;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final recentForm1 = _buildDriverRecentFormEntries(driver1.name);
-    final recentForm2 = _buildDriverRecentFormEntries(driver2.name);
-    final starts1 = driver1.starts == 0 ? 1 : driver1.starts;
-    final starts2 = driver2.starts == 0 ? 1 : driver2.starts;
+    final leftDriver = _leftDriver;
+    final rightDriver = _rightDriver;
+    final recentForm1 = _buildDriverRecentFormEntries(widget.driver1.name);
+    final recentForm2 = _buildDriverRecentFormEntries(widget.driver2.name);
+    final starts1 = leftDriver.starts == 0 ? 1 : leftDriver.starts;
+    final starts2 = rightDriver.starts == 0 ? 1 : rightDriver.starts;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '${driver1.name.split(' ').last} vs ${driver2.name.split(' ').last}',
+          '${widget.driver1.name.split(' ').last} vs ${widget.driver2.name.split(' ').last}',
         ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          _buildHeader(context),
+          _buildHeader(context, leftDriver, rightDriver),
           const SizedBox(height: 20),
-          ComparisonRow(
-            label: loc.translate('championships'),
-            value1: driver1.championships,
-            value2: driver2.championships,
-            isDark: isDark,
-          ),
-          ComparisonRow(
-            label: loc.translate('wins'),
-            value1: driver1.wins,
-            value2: driver2.wins,
-            isDark: isDark,
-          ),
-          ComparisonRow(
-            label: loc.translate('podiums'),
-            value1: driver1.podiums,
-            value2: driver2.podiums,
-            isDark: isDark,
-          ),
-          ComparisonRow(
-            label: loc.translate('poles'),
-            value1: driver1.poles,
-            value2: driver2.poles,
-            isDark: isDark,
-          ),
-          ComparisonRow(
-            label: loc.translate('fastest_laps'),
-            value1: driver1.fastestLaps,
-            value2: driver2.fastestLaps,
-            isDark: isDark,
-          ),
-          ComparisonRow(
-            label: loc.translate('total_points'),
-            value1: driver1.totalPoints,
-            value2: driver2.totalPoints,
-            isDark: isDark,
-          ),
-          ComparisonRow(
-            label: loc.translate('starts'),
-            value1: driver1.starts,
-            value2: driver2.starts,
-            isDark: isDark,
-          ),
-          ComparisonRow(
-            label: loc.translate('dnf'),
-            value1: driver1.dnfs,
-            value2: driver2.dnfs,
-            isDark: isDark,
-            lowerIsBetter: true,
-          ),
-          ComparisonRow(
-            label: loc.translate('laps_led'),
-            value1: driver1.lapsLed,
-            value2: driver2.lapsLed,
-            isDark: isDark,
-          ),
-          ComparisonRow(
-            label: loc.translate('highestFinish'),
-            value1: driver1.highestFinish,
-            value2: driver2.highestFinish,
-            isDark: isDark,
-            lowerIsBetter: true,
-          ),
-          ComparisonRow(
-            label: loc.translate('highestGrid'),
-            value1: driver1.highestGrid,
-            value2: driver2.highestGrid,
-            isDark: isDark,
-            lowerIsBetter: true,
-          ),
-          ComparisonRow(
-            label: 'Points / start',
-            value1: (driver1.totalPoints / starts1).toStringAsFixed(2),
-            value2: (driver2.totalPoints / starts2).toStringAsFixed(2),
-            isDark: isDark,
-          ),
-          ComparisonRow(
-            label: 'Win rate %',
-            value1: ((driver1.wins / starts1) * 100).toStringAsFixed(1),
-            value2: ((driver2.wins / starts2) * 100).toStringAsFixed(1),
-            isDark: isDark,
-          ),
-          ComparisonRow(
-            label: 'Last 5 points',
-            value1: _formatFormPoints(recentForm1),
-            value2: _formatFormPoints(recentForm2),
-            isDark: isDark,
-          ),
-          ComparisonRow(
-            label: 'Avg finish (L5)',
-            value1: _formatDriverAverageFinish(recentForm1),
-            value2: _formatDriverAverageFinish(recentForm2),
-            isDark: isDark,
-            lowerIsBetter: true,
-          ),
+          _buildCompareScopeControls(context),
+          const SizedBox(height: 20),
+          if (_showOverall) ...[
+            ComparisonRow(
+              label: loc.translate('championships'),
+              value1: leftDriver.championships,
+              value2: rightDriver.championships,
+              isDark: isDark,
+            ),
+            ComparisonRow(
+              label: loc.translate('wins'),
+              value1: leftDriver.wins,
+              value2: rightDriver.wins,
+              isDark: isDark,
+            ),
+            ComparisonRow(
+              label: loc.translate('podiums'),
+              value1: leftDriver.podiums,
+              value2: rightDriver.podiums,
+              isDark: isDark,
+            ),
+            ComparisonRow(
+              label: loc.translate('poles'),
+              value1: leftDriver.poles,
+              value2: rightDriver.poles,
+              isDark: isDark,
+            ),
+            ComparisonRow(
+              label: loc.translate('fastest_laps'),
+              value1: leftDriver.fastestLaps,
+              value2: rightDriver.fastestLaps,
+              isDark: isDark,
+            ),
+            ComparisonRow(
+              label: loc.translate('total_points'),
+              value1: leftDriver.totalPoints,
+              value2: rightDriver.totalPoints,
+              isDark: isDark,
+            ),
+          ],
+          if (_showOverall) ...[
+            ComparisonRow(
+              label: loc.translate('starts'),
+              value1: leftDriver.starts,
+              value2: rightDriver.starts,
+              isDark: isDark,
+            ),
+            ComparisonRow(
+              label: loc.translate('dnf'),
+              value1: leftDriver.dnfs,
+              value2: rightDriver.dnfs,
+              isDark: isDark,
+              lowerIsBetter: true,
+            ),
+            ComparisonRow(
+              label: loc.translate('laps_led'),
+              value1: leftDriver.lapsLed,
+              value2: rightDriver.lapsLed,
+              isDark: isDark,
+            ),
+            ComparisonRow(
+              label: loc.translate('highestFinish'),
+              value1: leftDriver.highestFinish,
+              value2: rightDriver.highestFinish,
+              isDark: isDark,
+              lowerIsBetter: true,
+            ),
+            ComparisonRow(
+              label: loc.translate('highestGrid'),
+              value1: leftDriver.highestGrid,
+              value2: rightDriver.highestGrid,
+              isDark: isDark,
+              lowerIsBetter: true,
+            ),
+            ComparisonRow(
+              label: loc.translate('points_per_start'),
+              value1: (leftDriver.totalPoints / starts1).toStringAsFixed(2),
+              value2: (rightDriver.totalPoints / starts2).toStringAsFixed(2),
+              isDark: isDark,
+            ),
+            ComparisonRow(
+              label: loc.translate('win_rate'),
+              value1: ((leftDriver.wins / starts1) * 100).toStringAsFixed(1),
+              value2: ((rightDriver.wins / starts2) * 100).toStringAsFixed(1),
+              isDark: isDark,
+            ),
+            ComparisonRow(
+              label: loc.translate('last_5_points'),
+              value1: _formatFormPoints(recentForm1),
+              value2: _formatFormPoints(recentForm2),
+              isDark: isDark,
+            ),
+            ComparisonRow(
+              label: loc.translate('avg_finish_l5'),
+              value1: _formatDriverAverageFinish(recentForm1),
+              value2: _formatDriverAverageFinish(recentForm2),
+              isDark: isDark,
+              lowerIsBetter: true,
+            ),
+          ] else if (_selectedYear != null)
+            ..._buildSeasonComparisonRows(
+              context,
+              year: _selectedYear!,
+              isDark: isDark,
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  List<Widget> _buildSeasonComparisonRows(
+    BuildContext context, {
+    required int year,
+    required bool isDark,
+  }) {
+    final loc = AppLocalizations.of(context);
+
+    return <Widget>[
+      FutureBuilder<List<SeasonalDriverComparisonStats?>>(
+        future: Future.wait(<Future<SeasonalDriverComparisonStats?>>[
+          _fetchSeasonalDriverComparisonStats(widget.driver1.name, year),
+          _fetchSeasonalDriverComparisonStats(widget.driver2.name, year),
+        ]),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          final stats = snapshot.data;
+          if (snapshot.hasError ||
+              stats == null ||
+              stats.length != 2 ||
+              stats[0] == null ||
+              stats[1] == null) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                loc.translate('compare_season_unavailable'),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            );
+          }
+
+          final leftStats = stats[0]!;
+          final rightStats = stats[1]!;
+
+          return Column(
+            children: [
+              ComparisonRow(
+                label: loc.translate('points'),
+                value1: leftStats.points.toStringAsFixed(
+                  leftStats.points == leftStats.points.roundToDouble() ? 0 : 1,
+                ),
+                value2: rightStats.points.toStringAsFixed(
+                  rightStats.points == rightStats.points.roundToDouble() ? 0 : 1,
+                ),
+                isDark: isDark,
+              ),
+              ComparisonRow(
+                label: loc.translate('poles'),
+                value1: leftStats.poles,
+                value2: rightStats.poles,
+                isDark: isDark,
+              ),
+              ComparisonRow(
+                label: loc.translate('fastest_laps'),
+                value1: leftStats.fastestLaps,
+                value2: rightStats.fastestLaps,
+                isDark: isDark,
+              ),
+              ComparisonRow(
+                label: loc.translate('dnf_percentage'),
+                value1: leftStats.dnfPercentage.toStringAsFixed(1),
+                value2: rightStats.dnfPercentage.toStringAsFixed(1),
+                isDark: isDark,
+                lowerIsBetter: true,
+              ),
+              ComparisonRow(
+                label: loc.translate('podiums'),
+                value1: leftStats.podiums,
+                value2: rightStats.podiums,
+                isDark: isDark,
+              ),
+              ComparisonRow(
+                label: loc.translate('highestFinish'),
+                value1: leftStats.highestFinish,
+                value2: rightStats.highestFinish,
+                isDark: isDark,
+                lowerIsBetter: true,
+              ),
+              ComparisonRow(
+                label: loc.translate('highestGrid'),
+                value1: leftStats.highestGrid,
+                value2: rightStats.highestGrid,
+                isDark: isDark,
+                lowerIsBetter: true,
+              ),
+              ComparisonRow(
+                label: loc.translate('win_rate'),
+                value1: leftStats.winRate.toStringAsFixed(1),
+                value2: rightStats.winRate.toStringAsFixed(1),
+                isDark: isDark,
+              ),
+              _buildSeasonPointsProgressionCard(
+                context,
+                leftStats: leftStats,
+                rightStats: rightStats,
+                isDark: isDark,
+              ),
+            ],
+          );
+        },
+      ),
+    ];
+  }
+
+  Widget _buildSeasonPointsProgressionCard(
+    BuildContext context, {
+    required SeasonalDriverComparisonStats leftStats,
+    required SeasonalDriverComparisonStats rightStats,
+    required bool isDark,
+  }) {
+    final rounds = <int>{
+      ...leftStats.pointsByRace.map((entry) => entry.round),
+      ...rightStats.pointsByRace.map((entry) => entry.round),
+    }.toList()
+      ..sort();
+
+    if (rounds.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final leftByRound = {
+      for (final entry in leftStats.pointsByRace) entry.round: entry,
+    };
+    final rightByRound = {
+      for (final entry in rightStats.pointsByRace) entry.round: entry,
+    };
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? Colors.white10 : Colors.black12,
+          ),
+        ),
+        child: Theme(
+          data: theme.copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            title: Text(
+              loc.translate('points_progression'),
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            subtitle: Text(loc.translate('points_after_each_race')),
+            children: rounds.map((round) {
+              final leftEntry = leftByRound[round];
+              final rightEntry = rightByRound[round];
+              final leftPoints = leftEntry?.points;
+              final rightPoints = rightEntry?.points;
+              final leftBetter = leftPoints != null && rightPoints != null && leftPoints > rightPoints;
+              final rightBetter = leftPoints != null && rightPoints != null && rightPoints > leftPoints;
+              final raceName = leftEntry?.raceName ?? rightEntry?.raceName ?? '-';
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: _buildProgressionValueChip(
+                          _formatSeasonPointsValue(leftPoints),
+                          leftBetter,
+                          isDark,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        children: [
+                          Text(
+                            '${loc.translate('round_short')} $round',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? Colors.white60 : Colors.black54,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            raceName,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: _buildProgressionValueChip(
+                          _formatSeasonPointsValue(rightPoints),
+                          rightBetter,
+                          isDark,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(growable: false),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProgressionValueChip(String text, bool isBetter, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: isBetter
+            ? Colors.green.withOpacity(0.14)
+            : (isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.04)),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isBetter
+              ? Colors.green.withOpacity(0.45)
+              : (isDark ? Colors.white10 : Colors.black12),
+        ),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: isBetter ? 15 : 14,
+          fontWeight: isBetter ? FontWeight.w700 : FontWeight.w500,
+          color: isBetter
+              ? Colors.green
+              : (isDark ? Colors.white70 : Colors.black87),
+        ),
+      ),
+    );
+  }
+
+  String _formatSeasonPointsValue(double? value) {
+    if (value == null) {
+      return '-';
+    }
+    return value == value.roundToDouble()
+        ? value.toInt().toString()
+        : value.toStringAsFixed(1);
+  }
+
+  Widget _buildCompareScopeControls(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final seasonsAvailable = _availableYears.isNotEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            ChoiceChip(
+              label: Text(loc.translate('compare_overall')),
+              selected: _showOverall,
+              onSelected: (_) => setState(() => _showOverall = true),
+            ),
+            ChoiceChip(
+              label: Text(loc.translate('compare_season')),
+              selected: !_showOverall,
+              onSelected: seasonsAvailable
+                  ? (_) => setState(() => _showOverall = false)
+                  : null,
+            ),
+          ],
+        ),
+        if (!_showOverall && _selectedYear != null) ...[
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Text(
+                '${loc.translate('compare_year')}:',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(width: 12),
+              DropdownButton<int>(
+                value: _selectedYear,
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => _selectedYear = value);
+                  }
+                },
+                items: _availableYears
+                    .map(
+                      (year) => DropdownMenuItem<int>(
+                        value: year,
+                        child: Text(year.toString()),
+                      ),
+                    )
+                    .toList(growable: false),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, Driver leftDriver, Driver rightDriver) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: _buildDriverHeader(driver1)),
+        Expanded(child: _buildDriverHeader(leftDriver)),
         const Padding(
           padding: EdgeInsets.only(top: 40.0, left: 8.0, right: 8.0),
           child: Text(
@@ -7126,7 +9022,7 @@ class DriverComparisonView extends StatelessWidget {
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
         ),
-        Expanded(child: _buildDriverHeader(driver2)),
+        Expanded(child: _buildDriverHeader(rightDriver)),
       ],
     );
   }
@@ -10162,6 +12058,139 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
   String? _actionLabel;
   VoidCallback? _action;
 
+  String _normalizeAssistantText(String value) {
+    return value
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), ' ')
+        .trim();
+  }
+
+  int _assistantMatchScore(String query, String candidate) {
+    final normalizedQuery = _normalizeAssistantText(query);
+    final normalizedCandidate = _normalizeAssistantText(candidate);
+    if (normalizedQuery.isEmpty || normalizedCandidate.isEmpty) {
+      return -1;
+    }
+    if (normalizedQuery == normalizedCandidate) {
+      return 1000;
+    }
+    if (normalizedCandidate.startsWith(normalizedQuery)) {
+      return 800;
+    }
+    if (normalizedCandidate.contains(normalizedQuery)) {
+      return 700;
+    }
+
+    final queryTokens = normalizedQuery
+        .split(' ')
+        .where((token) => token.isNotEmpty)
+        .toList(growable: false);
+    final candidateTokens = normalizedCandidate
+        .split(' ')
+        .where((token) => token.isNotEmpty)
+        .toSet();
+    if (queryTokens.isEmpty) {
+      return -1;
+    }
+
+    final matchedTokens = queryTokens
+        .where(
+          (token) => candidateTokens.any(
+            (candidateToken) =>
+                candidateToken == token || candidateToken.startsWith(token),
+          ),
+        )
+        .length;
+    if (matchedTokens == 0) {
+      return -1;
+    }
+    return matchedTokens * 100;
+  }
+
+  List<Driver> _knownDrivers() {
+    final seenNames = <String>{};
+    final drivers = <Driver>[];
+    for (final seasonDrivers in driversData.values) {
+      for (final driver in seasonDrivers) {
+        if (seenNames.add(driver.name)) {
+          drivers.add(driver);
+        }
+      }
+    }
+    for (final driver in drivers2026) {
+      if (seenNames.add(driver.name)) {
+        drivers.add(driver);
+      }
+    }
+    return drivers;
+  }
+
+  Driver? _matchDriver(String query) {
+    Driver? bestMatch;
+    var bestScore = -1;
+    for (final driver in _knownDrivers()) {
+      final score = math.max(
+        _assistantMatchScore(query, driver.name),
+        _assistantMatchScore(query, driver.name.split(' ').last),
+      );
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = driver;
+      }
+    }
+    return bestScore >= 100 ? bestMatch : null;
+  }
+
+  Team? _matchTeam(String query) {
+    Team? bestMatch;
+    var bestScore = -1;
+    for (final team in fallbackTeams) {
+      final score = _assistantMatchScore(query, team.name);
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = team;
+      }
+    }
+    return bestScore >= 100 ? bestMatch : null;
+  }
+
+  Race? _matchRace(String query) {
+    Race? bestMatch;
+    var bestScore = -1;
+    for (final race in races) {
+      final candidate = '${race.name} ${race.country}';
+      final score = _assistantMatchScore(query, candidate);
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = race;
+      }
+    }
+    return bestScore >= 100 ? bestMatch : null;
+  }
+
+  int _latestKnownSeasonYear() {
+    if (driversData.isEmpty) {
+      return DateTime.now().year;
+    }
+    return driversData.keys.reduce((left, right) => left > right ? left : right);
+  }
+
+  String _formatAiPoints(num value) {
+    return value % 1 == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(1);
+  }
+
+  String _removeLeadingAssistantVerb(String prompt) {
+    return prompt
+        .replaceFirst(
+          RegExp(
+            r'^(show|open|find|tell me|give me|laat|toon|open|vind)\s+',
+            caseSensitive: false,
+          ),
+          '',
+        )
+        .trim();
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -10312,7 +12341,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
         }
       } else if (lower.contains('form') || lower.contains('trend')) {
         Driver? target;
-        for (final driver in drivers2026) {
+        for (final driver in _knownDrivers()) {
           if (lower.contains(driver.name.toLowerCase()) ||
               lower.contains(driver.name.split(' ').last.toLowerCase())) {
             target = driver;
@@ -10341,8 +12370,229 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
             });
           }
         }
+      } else if ((lower.contains('driver standings') ||
+              lower.contains('coureurstand') ||
+              lower.contains('driver stand') ||
+              lower == 'standings' ||
+              lower == 'show standings') &&
+          !lower.contains('team') &&
+          !lower.contains('constructor')) {
+        final year = _latestKnownSeasonYear();
+        final standings = List<Driver>.from(driversData[year] ?? drivers2026)
+          ..sort((left, right) => right.points.compareTo(left.points));
+        final summary = standings
+            .take(3)
+            .map(
+              (driver) =>
+                  '${driver.name} ${_formatAiPoints(driver.points)} pts',
+            )
+            .join(' • ');
+        _response = loc.format('ai_driver_standings_summary', {
+          'year': '$year',
+          'summary': summary,
+        });
+        _actionLabel = loc.translate('ai_open_driver_standings');
+        _action = () {
+          final router = GoRouter.of(context);
+          Navigator.of(context).pop();
+          Future<void>.delayed(const Duration(milliseconds: 150), () {
+            router.push(_driversPath());
+          });
+        };
+      } else if (lower.contains('team standings') ||
+          lower.contains('constructor standings') ||
+          lower.contains('constructors standings') ||
+          lower.contains('team stand') ||
+          lower.contains('constructor stand')) {
+        final year = _latestKnownSeasonYear();
+        final standings = List<Team>.from(fallbackTeams)
+          ..sort((left, right) => right.points.compareTo(left.points));
+        final summary = standings
+            .take(3)
+            .map((team) => '${team.name} ${team.points} pts')
+            .join(' • ');
+        _response = loc.format('ai_team_standings_summary', {
+          'year': '$year',
+          'summary': summary,
+        });
+        _actionLabel = loc.translate('ai_open_team_standings');
+        _action = () {
+          final router = GoRouter.of(context);
+          Navigator.of(context).pop();
+          Future<void>.delayed(const Duration(milliseconds: 150), () {
+            router.push(_teamsPath());
+          });
+        };
+      } else if ((lower.contains('drivers chart') ||
+              lower.contains('driver chart') ||
+              lower.contains('coureursgrafiek') ||
+              lower.contains('grafiek coureurs')) &&
+          !lower.contains('compare')) {
+        final year = _latestKnownSeasonYear();
+        _response = loc.format('ai_drivers_chart_ready', {'year': '$year'});
+        _actionLabel = loc.translate('ai_open_drivers_chart');
+        _action = () {
+          final navigator = Navigator.of(context);
+          navigator.pop();
+          Future<void>.delayed(const Duration(milliseconds: 150), () {
+            _openDriverStandingsChartSheet(
+              navigator.context,
+              initialYear: year,
+              availableYears: List<int>.generate(
+                10,
+                (index) => DateTime.now().year - index,
+              ),
+            );
+          });
+        };
+      } else if ((lower.contains('weather') || lower.contains('weer')) &&
+          (lower.contains('next weekend') ||
+              lower.contains('volgend weekend') ||
+              lower.contains('upcoming race'))) {
+        final nextRace = races.firstWhere(
+          (race) => race.date.isAfter(DateTime.now()),
+          orElse: () => races.last,
+        );
+        _response = loc.format('ai_next_weekend_weather', {
+          'race': nextRace.name,
+          'temp': '${nextRace.weather.temperature}',
+          'rain': '${nextRace.weather.rainChance}',
+          'wind': '${nextRace.weather.windSpeed}',
+        });
+        _actionLabel = loc.translate('ai_open_weekend_hub');
+        _action = () {
+          final router = GoRouter.of(context);
+          Navigator.of(context).pop();
+          Future<void>.delayed(const Duration(milliseconds: 150), () {
+            router.push(_weekendHubPath(nextRace));
+          });
+        };
+      } else if (lower.contains('penalt') ||
+          lower.contains('straf') ||
+          lower.contains('penalties')) {
+        final latestRace = await _findLatestCompletedRace();
+        if (latestRace == null) {
+          _response = loc.translate('ai_no_completed_race');
+        } else {
+          final roundIndex = raceRoundFor(latestRace);
+          await SessionDataManager().fetchDataForRace(latestRace, roundIndex);
+          final rows =
+              SessionDataManager().raceResultsCache[SessionDataManager()
+                  .raceResultsKeyFor(latestRace)] ??
+              const <RaceResultRow>[];
+          final penalties = rows
+              .where((row) => row.penalty.trim().isNotEmpty && row.penalty.trim() != '-')
+              .toList(growable: false);
+          if (penalties.isEmpty) {
+            _response = loc.format('ai_latest_penalties_none', {
+              'race': latestRace.name,
+            });
+          } else {
+            final details = penalties
+                .take(3)
+                .map((row) => '${row.driver} (${row.penalty})')
+                .join(' • ');
+            _response = loc.format('ai_latest_penalties_summary', {
+              'race': latestRace.name,
+              'count': '${penalties.length}',
+              'details': details,
+            });
+          }
+          _actionLabel = loc.translate('ai_open_weekend_hub');
+          _action = () {
+            final router = GoRouter.of(context);
+            Navigator.of(context).pop();
+            Future<void>.delayed(const Duration(milliseconds: 150), () {
+              router.push(_weekendHubPath(latestRace));
+            });
+          };
+        }
+      } else if (lower.contains('race control') ||
+          lower.contains('wedstrijdleiding') ||
+          lower.contains('racecontrol')) {
+        final latestRace = await _findLatestCompletedRace();
+        if (latestRace == null) {
+          _response = loc.translate('ai_no_completed_race');
+        } else {
+          final roundIndex = raceRoundFor(latestRace);
+          await SessionDataManager().fetchDataForRace(latestRace, roundIndex);
+          final messages =
+              SessionDataManager().raceControlCache[SessionDataManager()
+                  .raceControlKeyFor(latestRace)] ??
+              const <Map<String, dynamic>>[];
+          if (messages.isEmpty) {
+            _response = loc.format('ai_latest_race_control_none', {
+              'race': latestRace.name,
+            });
+          } else {
+            final latestMessage = messages.last['message']?.toString() ?? '-';
+            _response = loc.format('ai_latest_race_control_summary', {
+              'race': latestRace.name,
+              'count': '${messages.length}',
+              'message': latestMessage,
+            });
+          }
+          _actionLabel = loc.translate('ai_open_weekend_hub');
+          _action = () {
+            final router = GoRouter.of(context);
+            Navigator.of(context).pop();
+            Future<void>.delayed(const Duration(milliseconds: 150), () {
+              router.push(_weekendHubPath(latestRace));
+            });
+          };
+        }
       } else {
-        _response = loc.translate('ai_supported_commands');
+        final strippedPrompt = _removeLeadingAssistantVerb(prompt);
+        final requestedRace = _matchRace(strippedPrompt);
+        final requestedDriver = _matchDriver(strippedPrompt);
+        final requestedTeam = _matchTeam(strippedPrompt);
+
+        if ((lower.contains('driver') || lower.contains('coureur')) &&
+            requestedDriver != null) {
+          _response = loc.format('ai_driver_profile_ready', {
+            'driver': requestedDriver.name,
+          });
+          _actionLabel = loc.translate('ai_open_driver_profile');
+          _action = () {
+            final router = GoRouter.of(context);
+            Navigator.of(context).pop();
+            Future<void>.delayed(const Duration(milliseconds: 150), () {
+              router.push(_driverPath(requestedDriver));
+            });
+          };
+        } else if ((lower.contains('team') || lower.contains('constructor')) &&
+            requestedTeam != null) {
+          _response = loc.format('ai_team_profile_ready', {
+            'team': requestedTeam.name,
+          });
+          _actionLabel = loc.translate('ai_open_team_profile');
+          _action = () {
+            final router = GoRouter.of(context);
+            Navigator.of(context).pop();
+            Future<void>.delayed(const Duration(milliseconds: 150), () {
+              router.push(_teamPath(requestedTeam));
+            });
+          };
+        } else if ((lower.contains('weekend') ||
+                lower.contains('race') ||
+                lower.contains('circuit')) &&
+            requestedRace != null) {
+          _response = loc.format('ai_next_weekend', {
+            'race': requestedRace.name,
+            'date':
+                '${requestedRace.date.day}-${requestedRace.date.month}-${requestedRace.date.year}',
+          });
+          _actionLabel = loc.translate('ai_open_weekend_hub');
+          _action = () {
+            final router = GoRouter.of(context);
+            Navigator.of(context).pop();
+            Future<void>.delayed(const Duration(milliseconds: 150), () {
+              router.push(_weekendHubPath(requestedRace));
+            });
+          };
+        } else {
+          _response = loc.translate('ai_supported_commands');
+        }
       }
     } catch (error) {
       _response = loc.format('ai_crash', {'error': '$error'});
@@ -10400,6 +12650,14 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
                 ActionChip(
                   label: Text(loc.translate('ai_chip_show_form_piastri')),
                   onPressed: () => _runPrompt('Show form Oscar Piastri'),
+                ),
+                ActionChip(
+                  label: Text(loc.translate('ai_chip_show_driver_standings')),
+                  onPressed: () => _runPrompt('Show driver standings'),
+                ),
+                ActionChip(
+                  label: Text(loc.translate('ai_chip_show_latest_penalties')),
+                  onPressed: () => _runPrompt('Show latest penalties'),
                 ),
               ],
             ),
