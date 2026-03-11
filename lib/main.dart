@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 import 'package:http/http.dart' as http;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
+import 'package:go_router/go_router.dart';
+import 'data/repositories/race_repository.dart';
+import 'data/local/hive/hive_boxes.dart';
+import 'data/local/hive/hive_bootstrap.dart';
 import 'browser_bridge.dart' as browser_bridge;
 
 part 'f1_data.dart';
@@ -73,24 +79,23 @@ class AppTheme {
 
   static ThemeData _buildTheme({required Brightness brightness}) {
     final bool isDark = brightness == Brightness.dark;
-    final ColorScheme scheme =
-        ColorScheme.fromSeed(
-          seedColor: _primary,
-          brightness: brightness,
-        ).copyWith(
-          primary: _primary,
-          secondary: _secondary,
-          tertiary: _tertiary,
-          surface: isDark ? const Color(0xFF11141B) : const Color(0xFFFFFFFF),
-          surfaceContainerHighest: isDark
-              ? const Color(0xFF1A1F29)
-              : const Color(0xFFF3F6FB),
-          onSurface: isDark ? const Color(0xFFF4F7FB) : const Color(0xFF11151C),
-          onSurfaceVariant: isDark
-              ? const Color(0xFFAAB6C8)
-              : const Color(0xFF5F6B7A),
-          outline: isDark ? const Color(0xFF2A3340) : const Color(0xFFD8E0EA),
-        );
+    final ColorScheme scheme = ColorScheme.fromSeed(
+      seedColor: _primary,
+      brightness: brightness,
+    ).copyWith(
+      primary: _primary,
+      secondary: _secondary,
+      tertiary: _tertiary,
+      surface: isDark ? const Color(0xFF11141B) : const Color(0xFFFFFFFF),
+      surfaceContainerHighest: isDark
+          ? const Color(0xFF1A1F29)
+          : const Color(0xFFF3F6FB),
+      onSurface: isDark ? const Color(0xFFF4F7FB) : const Color(0xFF11151C),
+      onSurfaceVariant: isDark
+          ? const Color(0xFFAAB6C8)
+          : const Color(0xFF5F6B7A),
+      outline: isDark ? const Color(0xFF2A3340) : const Color(0xFFD8E0EA),
+    );
 
     final F1ThemeTokens tokens = F1ThemeTokens(
       panel: isDark ? const Color(0xFF171C25) : const Color(0xFFF8FAFD),
@@ -617,6 +622,1236 @@ Widget _buildWeatherSkeletonRows(BuildContext context) {
   );
 }
 
+String _formatWeatherTimeLabel(DateTime timestamp) {
+  final local = timestamp.toLocal();
+  final hour = local.hour.toString().padLeft(2, '0');
+  final minute = local.minute.toString().padLeft(2, '0');
+  return '$hour:$minute';
+}
+
+String _formatWeatherTimestampLabel(DateTime timestamp) {
+  final local = timestamp.toLocal();
+  final day = local.day.toString().padLeft(2, '0');
+  final month = local.month.toString().padLeft(2, '0');
+  return '$day-$month ${_formatWeatherTimeLabel(timestamp)}';
+}
+
+@immutable
+class _TrackFlagState {
+  final String labelKey;
+  final Color color;
+
+  const _TrackFlagState({required this.labelKey, required this.color});
+}
+
+@immutable
+class _TrackFlagContext {
+  final _TrackFlagState state;
+  final String? message;
+
+  const _TrackFlagContext({required this.state, this.message});
+}
+
+@immutable
+class _WeekendWeatherData {
+  final Map<String, List<Map<String, dynamic>>> weatherBySession;
+  final Map<String, List<Map<String, dynamic>>> lapTimelineBySession;
+
+  const _WeekendWeatherData({
+    required this.weatherBySession,
+    required this.lapTimelineBySession,
+  });
+}
+
+const _trackClearState = _TrackFlagState(
+  labelKey: 'track_flag_green',
+  color: Color(0xFF2E7D32),
+);
+
+const _trackYellowState = _TrackFlagState(
+  labelKey: 'track_flag_yellow',
+  color: Color(0xFFF9A825),
+);
+
+const _trackDoubleYellowState = _TrackFlagState(
+  labelKey: 'track_flag_double_yellow',
+  color: Color(0xFFF57F17),
+);
+
+const _trackRedState = _TrackFlagState(
+  labelKey: 'track_flag_red',
+  color: Color(0xFFC62828),
+);
+
+String? _trackFlagScopeKey(Map<String, dynamic> message) {
+  final scope = message['scope']?.toString().trim().toUpperCase() ?? '';
+  if (scope == 'DRIVER') {
+    return null;
+  }
+  if (scope == 'SECTOR') {
+    final sector = message['sector'];
+    return 'sector:${sector ?? 'unknown'}';
+  }
+  if (scope == 'TRACK' || scope.isEmpty) {
+    return 'track';
+  }
+  return scope.toLowerCase();
+}
+
+bool _isSessionFlagMessage(Map<String, dynamic> message, String sessionName) {
+  final category = message['category']?.toString().trim().toUpperCase() ?? '';
+  final flag = message['flag']?.toString().trim().toUpperCase() ?? '';
+  final session = message['sessionName']?.toString().trim().toUpperCase() ?? '';
+  return category == 'FLAG' &&
+      flag.isNotEmpty &&
+      session == sessionName.trim().toUpperCase();
+}
+
+int _trackFlagSeverity(String flag) {
+  switch (flag.trim().toUpperCase()) {
+    case 'RED':
+      return 3;
+    case 'DOUBLE YELLOW':
+      return 2;
+    default:
+      return flag.toUpperCase().contains('YELLOW') ? 1 : 0;
+  }
+}
+
+_TrackFlagContext _resolveTrackFlagContext(
+  DateTime? timestamp,
+  List<Map<String, dynamic>> messages,
+  String sessionName,
+) {
+  if (timestamp == null) {
+    return const _TrackFlagContext(state: _trackClearState);
+  }
+
+  final relevantMessages = messages
+      .where((message) => _isSessionFlagMessage(message, sessionName))
+      .toList()
+    ..sort((a, b) {
+      final aTime = DateTime.tryParse(a['timestampUtc']?.toString() ?? '');
+      final bTime = DateTime.tryParse(b['timestampUtc']?.toString() ?? '');
+      if (aTime == null && bTime == null) {
+        return 0;
+      }
+      if (aTime == null) {
+        return 1;
+      }
+      if (bTime == null) {
+        return -1;
+      }
+      return aTime.compareTo(bTime);
+    });
+
+  if (relevantMessages.isEmpty) {
+    return const _TrackFlagContext(state: _trackClearState);
+  }
+
+  final activeFlags = <String, Map<String, dynamic>>{};
+  String? lastSignalFlag;
+
+  for (final message in relevantMessages) {
+    final messageTime = DateTime.tryParse(
+      message['timestampUtc']?.toString() ?? '',
+    );
+    if (messageTime == null || messageTime.isAfter(timestamp)) {
+      break;
+    }
+
+    final scopeKey = _trackFlagScopeKey(message);
+    if (scopeKey == null) {
+      continue;
+    }
+
+    final flag = message['flag']?.toString().trim().toUpperCase() ?? '';
+    if (flag.isEmpty) {
+      continue;
+    }
+
+    lastSignalFlag = flag;
+    if (flag == 'CLEAR' || flag == 'GREEN') {
+      activeFlags.remove(scopeKey);
+      continue;
+    }
+
+    if (flag == 'RED' || flag.contains('YELLOW')) {
+      activeFlags[scopeKey] = message;
+    }
+  }
+
+  if (activeFlags.isNotEmpty) {
+    final prioritizedActiveFlags = activeFlags.values.toList(growable: false)
+      ..sort((a, b) {
+        final flagA = a['flag']?.toString() ?? '';
+        final flagB = b['flag']?.toString() ?? '';
+        final severityCompare =
+            _trackFlagSeverity(flagB).compareTo(_trackFlagSeverity(flagA));
+        if (severityCompare != 0) {
+          return severityCompare;
+        }
+
+        final timeA = DateTime.tryParse(a['timestampUtc']?.toString() ?? '');
+        final timeB = DateTime.tryParse(b['timestampUtc']?.toString() ?? '');
+        if (timeA != null && timeB != null) {
+          return timeB.compareTo(timeA);
+        }
+        if (timeA == null && timeB == null) {
+          return 0;
+        }
+        return timeA == null ? 1 : -1;
+      });
+
+    final activeMessage = prioritizedActiveFlags.first;
+    final activeFlag = activeMessage['flag']?.toString().trim().toUpperCase() ?? '';
+    final activeReason = activeMessage['message']?.toString().trim();
+    if (activeFlag == 'RED') {
+      return _TrackFlagContext(state: _trackRedState, message: activeReason);
+    }
+    if (activeFlag == 'DOUBLE YELLOW') {
+      return _TrackFlagContext(
+        state: _trackDoubleYellowState,
+        message: activeReason,
+      );
+    }
+    if (activeFlag.contains('YELLOW')) {
+      return _TrackFlagContext(state: _trackYellowState, message: activeReason);
+    }
+  }
+  if (lastSignalFlag == 'GREEN' || lastSignalFlag == 'CLEAR') {
+    return const _TrackFlagContext(state: _trackClearState);
+  }
+
+  return const _TrackFlagContext(state: _trackClearState);
+}
+
+int? _resolveLapFromTimeline(
+  DateTime? timestamp,
+  List<Map<String, dynamic>> lapTimeline,
+) {
+  if (timestamp == null || lapTimeline.isEmpty) {
+    return null;
+  }
+
+  int? latestLap;
+  final sortedMarkers = List<Map<String, dynamic>>.from(lapTimeline)
+    ..sort((a, b) {
+      final aTime = DateTime.tryParse(a['timestampUtc']?.toString() ?? '');
+      final bTime = DateTime.tryParse(b['timestampUtc']?.toString() ?? '');
+      if (aTime == null && bTime == null) {
+        return 0;
+      }
+      if (aTime == null) {
+        return 1;
+      }
+      if (bTime == null) {
+        return -1;
+      }
+      return aTime.compareTo(bTime);
+    });
+
+  for (final marker in sortedMarkers) {
+    final markerTime = DateTime.tryParse(
+      marker['timestampUtc']?.toString() ?? '',
+    );
+    if (markerTime == null || markerTime.isAfter(timestamp)) {
+      break;
+    }
+
+    final lap = _asInt(marker['lap']);
+    if (lap != null && lap > 0) {
+      latestLap = lap;
+    }
+  }
+
+  return latestLap;
+}
+
+int? _resolveCurrentSessionLap(
+  DateTime? timestamp,
+  List<Map<String, dynamic>> lapTimeline,
+  List<Map<String, dynamic>> messages,
+  String sessionName,
+) {
+  if (timestamp == null) {
+    return null;
+  }
+
+  final timelineLap = _resolveLapFromTimeline(timestamp, lapTimeline);
+  if (timelineLap != null) {
+    return timelineLap;
+  }
+
+  int? latestLap;
+  final relevantMessages = messages
+      .where(
+        (message) =>
+            message['sessionName']?.toString().trim().toUpperCase() ==
+            sessionName.trim().toUpperCase(),
+      )
+      .toList()
+    ..sort((a, b) {
+      final aTime = DateTime.tryParse(a['timestampUtc']?.toString() ?? '');
+      final bTime = DateTime.tryParse(b['timestampUtc']?.toString() ?? '');
+      if (aTime == null && bTime == null) {
+        return 0;
+      }
+      if (aTime == null) {
+        return 1;
+      }
+      if (bTime == null) {
+        return -1;
+      }
+      return aTime.compareTo(bTime);
+    });
+
+  for (final message in relevantMessages) {
+    final messageTime = DateTime.tryParse(
+      message['timestampUtc']?.toString() ?? '',
+    );
+    if (messageTime == null || messageTime.isAfter(timestamp)) {
+      break;
+    }
+
+    final lap = _asInt(message['lap']);
+    if (lap != null && lap > 0) {
+      latestLap = lap;
+    }
+  }
+
+  return latestLap;
+}
+
+double _normalizeWindDegrees(double degrees) {
+  final normalized = degrees % 360;
+  return normalized < 0 ? normalized + 360 : normalized;
+}
+
+String _windDirectionLabel(int? degrees) {
+  if (degrees == null) {
+    return '-';
+  }
+  const labels = <String>['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+  final normalized = _normalizeWindDegrees(degrees.toDouble());
+  final index = ((normalized + 22.5) ~/ 45) % labels.length;
+  return labels[index];
+}
+
+double? _lerpNullableDouble(double? start, double? end, double t) {
+  if (start == null && end == null) {
+    return null;
+  }
+  if (start == null) {
+    return end;
+  }
+  if (end == null) {
+    return start;
+  }
+  return start + ((end - start) * t);
+}
+
+double? _lerpDegrees(int? start, int? end, double t) {
+  if (start == null && end == null) {
+    return null;
+  }
+  if (start == null) {
+    return end?.toDouble();
+  }
+  if (end == null) {
+    return start.toDouble();
+  }
+  final delta = (((end - start) + 540) % 360) - 180;
+  return _normalizeWindDegrees(start + (delta * t).toDouble());
+}
+
+int? _asInt(dynamic value) {
+  if (value is int) {
+    return value;
+  }
+  if (value is num) {
+    return value.toInt();
+  }
+  return int.tryParse(value?.toString() ?? '');
+}
+
+String _trimTrailingZero(String value) {
+  if (!value.contains('.')) {
+    return value;
+  }
+  return value
+      .replaceFirst(RegExp(r'\.0+$'), '')
+      .replaceFirst(RegExp(r'(\.[1-9]*)0+$'), r'$1');
+}
+
+bool _isRaceControlPenaltyServedMessage(String? rawMessage) {
+  final message = rawMessage?.trim().toUpperCase() ?? '';
+  return message.contains('PENALTY SERVED');
+}
+
+String _formatTyreCompound(String? compound) {
+  switch ((compound ?? '').toUpperCase()) {
+    case 'SOFT':
+      return 'Soft';
+    case 'MEDIUM':
+      return 'Medium';
+    case 'HARD':
+      return 'Hard';
+    case 'INTERMEDIATE':
+      return 'Inter';
+    case 'WET':
+      return 'Wet';
+    default:
+      return '-';
+  }
+}
+
+List<Map<String, dynamic>> _buildInterpolatedWeatherSamples(
+  List<Map<String, dynamic>> samples,
+) {
+  if (samples.length < 2) {
+    return List<Map<String, dynamic>>.from(samples);
+  }
+
+  final sortedSamples = List<Map<String, dynamic>>.from(samples)
+    ..sort((a, b) {
+      final aTime = DateTime.tryParse(a['timestampUtc']?.toString() ?? '');
+      final bTime = DateTime.tryParse(b['timestampUtc']?.toString() ?? '');
+      if (aTime == null && bTime == null) {
+        return 0;
+      }
+      if (aTime == null) {
+        return 1;
+      }
+      if (bTime == null) {
+        return -1;
+      }
+      return aTime.compareTo(bTime);
+    });
+
+  final interpolated = <Map<String, dynamic>>[];
+  for (var index = 0; index < sortedSamples.length - 1; index++) {
+    final current = sortedSamples[index];
+    final next = sortedSamples[index + 1];
+    final currentTime = DateTime.tryParse(
+      current['timestampUtc']?.toString() ?? '',
+    );
+    final nextTime = DateTime.tryParse(next['timestampUtc']?.toString() ?? '');
+    if (currentTime == null ||
+        nextTime == null ||
+        !nextTime.isAfter(currentTime)) {
+      interpolated.add(current);
+      continue;
+    }
+
+    interpolated.add(current);
+    final minutesBetween = nextTime.difference(currentTime).inMinutes;
+    if (minutesBetween <= 1) {
+      continue;
+    }
+
+    for (var minute = 1; minute < minutesBetween; minute++) {
+      final t = minute / minutesBetween;
+      final targetTime = currentTime.add(Duration(minutes: minute));
+      interpolated.add({
+        'timestampUtc': targetTime.toUtc().toIso8601String(),
+        'airTemperatureC': _lerpNullableDouble(
+          (current['airTemperatureC'] as num?)?.toDouble(),
+          (next['airTemperatureC'] as num?)?.toDouble(),
+          t,
+        ),
+        'trackTemperatureC': _lerpNullableDouble(
+          (current['trackTemperatureC'] as num?)?.toDouble(),
+          (next['trackTemperatureC'] as num?)?.toDouble(),
+          t,
+        ),
+        'humidity': _lerpNullableDouble(
+          (current['humidity'] as num?)?.toDouble(),
+          (next['humidity'] as num?)?.toDouble(),
+          t,
+        ),
+        'rainfall': _lerpNullableDouble(
+          (current['rainfall'] as num?)?.toDouble(),
+          (next['rainfall'] as num?)?.toDouble(),
+          t,
+        ),
+        'pressure': _lerpNullableDouble(
+          (current['pressure'] as num?)?.toDouble(),
+          (next['pressure'] as num?)?.toDouble(),
+          t,
+        ),
+        'windSpeed': _lerpNullableDouble(
+          (current['windSpeed'] as num?)?.toDouble(),
+          (next['windSpeed'] as num?)?.toDouble(),
+          t,
+        ),
+        'windDirection': _lerpDegrees(
+          current['windDirection'] as int?,
+          next['windDirection'] as int?,
+          t,
+        )?.round(),
+        'interpolated': true,
+      });
+    }
+  }
+
+  interpolated.add(sortedSamples.last);
+  return interpolated;
+}
+
+class _WeatherMetricTile extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+
+  const _WeatherMetricTile({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = _themeTokens(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+      decoration: BoxDecoration(
+        color: tokens.panel,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: tokens.outline.withOpacity(0.7)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: theme.colorScheme.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WeatherTrackOverlayPainter extends CustomPainter {
+  final Color primaryColor;
+  final Color rainColor;
+  final double phase;
+  final double windSpeed;
+  final double windDirectionDegrees;
+  final double rainIntensity;
+
+  const _WeatherTrackOverlayPainter({
+    required this.primaryColor,
+    required this.rainColor,
+    required this.phase,
+    required this.windSpeed,
+    required this.windDirectionDegrees,
+    required this.rainIntensity,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final directionRadians = windDirectionDegrees * (math.pi / 180);
+    final windVector = Offset(
+      math.cos(directionRadians),
+      math.sin(directionRadians),
+    );
+    final normalVector = Offset(-windVector.dy, windVector.dx);
+    final trackBounds = Rect.fromCenter(
+      center: center,
+      width: size.width * 0.72,
+      height: size.height * 0.62,
+    );
+    final flowLength = math.sqrt(
+      (trackBounds.width * trackBounds.width) +
+          (trackBounds.height * trackBounds.height),
+    );
+
+    final particleCount = (20 + (windSpeed * 1.35)).round().clamp(20, 42);
+    final baseOpacity = (0.22 + (windSpeed / 38)).clamp(0.22, 0.5);
+    final speedFactor = 0.11 + (windSpeed / 260);
+
+    for (var index = 0; index < particleCount; index++) {
+      final lane = index % 5;
+      final progressSeed = ((index * 37) % 100) / 100;
+      final spreadSeed = (((index * 29) % 100) / 100) - 0.5;
+      final wave = math.sin((phase * math.pi * 2.4) + index) * 4;
+      final flowProgress = ((progressSeed + (phase * speedFactor)) % 1.0) - 0.5;
+      final travel = flowProgress * flowLength * 1.08;
+      final lateral =
+          ((lane - 2) * trackBounds.height * 0.16) +
+          (spreadSeed * 26) +
+          wave;
+      final particleCenter = Offset(
+        center.dx + (windVector.dx * travel) + (normalVector.dx * lateral),
+        center.dy + (windVector.dy * travel) + (normalVector.dy * lateral),
+      );
+      final particleSize = 7.0 + (((index * 13) % 7) / 7) * 5;
+      final particlePaint = Paint()
+        ..color = primaryColor.withOpacity(
+          (baseOpacity + ((((index * 17) % 100) / 100) * 0.18)).clamp(
+            0.22,
+            0.62,
+          ),
+        )
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.6
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round;
+      _drawWindArrowParticle(
+        canvas,
+        particleCenter,
+        directionRadians,
+        particleSize,
+        particlePaint,
+      );
+    }
+
+    if (rainIntensity <= 0) {
+      return;
+    }
+
+    final streakCount = (18 + (rainIntensity * 6)).round().clamp(18, 72);
+    final rainPaint = Paint()
+      ..color = rainColor.withOpacity(
+        (0.18 + (rainIntensity * 0.08)).clamp(0.2, 0.55),
+      )
+      ..strokeWidth = 1.6
+      ..strokeCap = StrokeCap.round;
+
+    for (var index = 0; index < streakCount; index++) {
+      final xSeed = (index * 37.0) % size.width;
+      final ySeed =
+          ((index * 53.0) + (phase * size.height * 1.8)) % size.height;
+      final start = Offset(xSeed, ySeed);
+      final end = Offset(
+        start.dx + (-7 - (windVector.dx * 10)),
+        start.dy + (14 + (windVector.dy * 6)),
+      );
+      canvas.drawLine(start, end, rainPaint);
+    }
+  }
+
+  void _drawWindArrowParticle(
+    Canvas canvas,
+    Offset center,
+    double rotation,
+    double size,
+    Paint paint,
+  ) {
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+    canvas.rotate(rotation);
+
+    final path = Path()
+      ..moveTo(-size * 0.6, 0)
+      ..lineTo(size * 0.45, 0)
+      ..moveTo(size * 0.05, -size * 0.32)
+      ..lineTo(size * 0.45, 0)
+      ..lineTo(size * 0.05, size * 0.32);
+
+    canvas.drawPath(path, paint);
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _WeatherTrackOverlayPainter oldDelegate) {
+    return oldDelegate.phase != phase ||
+        oldDelegate.windSpeed != windSpeed ||
+        oldDelegate.windDirectionDegrees != windDirectionDegrees ||
+        oldDelegate.rainIntensity != rainIntensity ||
+        oldDelegate.primaryColor != primaryColor ||
+        oldDelegate.rainColor != rainColor;
+  }
+}
+
+class CircuitWeatherPlaybackCard extends StatefulWidget {
+  final Race race;
+  final List<Map<String, dynamic>> weatherSamples;
+  final List<Map<String, dynamic>> lapTimeline;
+  final List<Map<String, dynamic>> raceControlMessages;
+  final String sessionName;
+
+  const CircuitWeatherPlaybackCard({
+    required this.race,
+    required this.weatherSamples,
+    this.lapTimeline = const <Map<String, dynamic>>[],
+    this.raceControlMessages = const <Map<String, dynamic>>[],
+    this.sessionName = 'Race',
+    super.key,
+  });
+
+  @override
+  State<CircuitWeatherPlaybackCard> createState() =>
+      _CircuitWeatherPlaybackCardState();
+}
+
+class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
+    with SingleTickerProviderStateMixin {
+  static const Duration _autoLoopInterval = Duration(milliseconds: 70);
+  static const double _autoLoopStep = 0.08;
+
+  late final AnimationController _controller;
+  late List<Map<String, dynamic>> _resolvedSamples;
+  Timer? _autoLoopTimer;
+  double _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    )..repeat();
+    _resolvedSamples = _buildInterpolatedWeatherSamples(widget.weatherSamples);
+    _startAutoLoop();
+  }
+
+  void _startAutoLoop() {
+    _autoLoopTimer?.cancel();
+    if (_resolvedSamples.length <= 1) {
+      return;
+    }
+
+    _autoLoopTimer = Timer.periodic(_autoLoopInterval, (_) {
+      if (!mounted || _resolvedSamples.isEmpty) {
+        return;
+      }
+
+      setState(() {
+        final maxIndex = (_resolvedSamples.length - 1).toDouble();
+        final nextIndex = _selectedIndex + _autoLoopStep;
+        _selectedIndex = nextIndex > maxIndex ? 0 : nextIndex;
+      });
+    });
+  }
+
+  DateTime? _interpolateDateTime(
+    DateTime? start,
+    DateTime? end,
+    double t,
+  ) {
+    if (start == null && end == null) {
+      return null;
+    }
+    if (start == null) {
+      return end;
+    }
+    if (end == null) {
+      return start;
+    }
+
+    final deltaMilliseconds = end.difference(start).inMilliseconds;
+    return start.add(Duration(milliseconds: (deltaMilliseconds * t).round()));
+  }
+
+  Map<String, dynamic> _resolvedPlaybackSample() {
+    if (_resolvedSamples.length <= 1) {
+      return _resolvedSamples.first;
+    }
+
+    final lowerIndex = _selectedIndex.floor().clamp(0, _resolvedSamples.length - 1);
+    final upperIndex = _selectedIndex.ceil().clamp(0, _resolvedSamples.length - 1);
+    final lowerSample = _resolvedSamples[lowerIndex];
+    final upperSample = _resolvedSamples[upperIndex];
+
+    if (lowerIndex == upperIndex) {
+      return lowerSample;
+    }
+
+    final t = (_selectedIndex - lowerIndex).clamp(0.0, 1.0);
+    final lowerTime = DateTime.tryParse(lowerSample['timestampUtc']?.toString() ?? '');
+    final upperTime = DateTime.tryParse(upperSample['timestampUtc']?.toString() ?? '');
+    final interpolatedTime = _interpolateDateTime(lowerTime, upperTime, t);
+
+    return {
+      'timestampUtc': interpolatedTime?.toUtc().toIso8601String() ??
+          lowerSample['timestampUtc']?.toString(),
+      'airTemperatureC': _lerpNullableDouble(
+        (lowerSample['airTemperatureC'] as num?)?.toDouble(),
+        (upperSample['airTemperatureC'] as num?)?.toDouble(),
+        t,
+      ),
+      'trackTemperatureC': _lerpNullableDouble(
+        (lowerSample['trackTemperatureC'] as num?)?.toDouble(),
+        (upperSample['trackTemperatureC'] as num?)?.toDouble(),
+        t,
+      ),
+      'humidity': _lerpNullableDouble(
+        (lowerSample['humidity'] as num?)?.toDouble(),
+        (upperSample['humidity'] as num?)?.toDouble(),
+        t,
+      ),
+      'rainfall': _lerpNullableDouble(
+        (lowerSample['rainfall'] as num?)?.toDouble(),
+        (upperSample['rainfall'] as num?)?.toDouble(),
+        t,
+      ),
+      'pressure': _lerpNullableDouble(
+        (lowerSample['pressure'] as num?)?.toDouble(),
+        (upperSample['pressure'] as num?)?.toDouble(),
+        t,
+      ),
+      'windSpeed': _lerpNullableDouble(
+        (lowerSample['windSpeed'] as num?)?.toDouble(),
+        (upperSample['windSpeed'] as num?)?.toDouble(),
+        t,
+      ),
+      'windDirection': _lerpDegrees(
+            lowerSample['windDirection'] as int?,
+            upperSample['windDirection'] as int?,
+            t,
+          )
+          ?.round(),
+      'interpolated': true,
+    };
+  }
+
+  @override
+  void didUpdateWidget(covariant CircuitWeatherPlaybackCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.weatherSamples != widget.weatherSamples ||
+        oldWidget.sessionName != widget.sessionName) {
+      _resolvedSamples = _buildInterpolatedWeatherSamples(
+        widget.weatherSamples,
+      );
+      _selectedIndex = 0;
+      if (_selectedIndex >= _resolvedSamples.length) {
+        _selectedIndex = math.max(0, _resolvedSamples.length - 1).toDouble();
+      }
+      _startAutoLoop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _autoLoopTimer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final tokens = _themeTokens(context);
+
+    if (_resolvedSamples.isEmpty) {
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: tokens.panelStrong,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: tokens.outline.withOpacity(0.7)),
+        ),
+        child: Text(
+          loc.translate('track_playback_no_weather'),
+          style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+        ),
+      );
+    }
+
+    final selectedSample = _resolvedPlaybackSample();
+    final timestamp = DateTime.tryParse(
+      selectedSample['timestampUtc']?.toString() ?? '',
+    );
+    final air = (selectedSample['airTemperatureC'] as num?)?.toDouble();
+    final track = (selectedSample['trackTemperatureC'] as num?)?.toDouble();
+    final humidity = (selectedSample['humidity'] as num?)?.toDouble();
+    final rain = (selectedSample['rainfall'] as num?)?.toDouble() ?? 0;
+    final pressure = (selectedSample['pressure'] as num?)?.toDouble();
+    final windSpeed = (selectedSample['windSpeed'] as num?)?.toDouble() ?? 0;
+    final windDirection = selectedSample['windDirection'] as int?;
+    final isInterpolated = selectedSample['interpolated'] == true;
+    final trackFlagContext = _resolveTrackFlagContext(
+      timestamp,
+      widget.raceControlMessages,
+      widget.sessionName,
+    );
+    final trackFlagState = trackFlagContext.state;
+    final currentLap = _resolveCurrentSessionLap(
+      timestamp,
+      widget.lapTimeline,
+      widget.raceControlMessages,
+      widget.sessionName,
+    );
+    final translatedTrackFlagLabel = loc.translate(trackFlagState.labelKey);
+    final trackStatusLabel =
+      trackFlagState.labelKey == _trackClearState.labelKey &&
+        currentLap != null
+      ? loc.format('lap_label', {'lap': '$currentLap'})
+      : translatedTrackFlagLabel;
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: tokens.panelStrong,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: tokens.outline.withOpacity(0.8)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      loc.translate('track_playback_title'),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      timestamp == null
+                          ? loc.translate('track_playback_unknown_sample')
+                          : '${_formatWeatherTimestampLabel(timestamp)} • ${loc.translate(isInterpolated ? 'track_playback_interpolated_minute' : 'track_playback_recorded_sample')}',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.end,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: trackFlagState.color.withOpacity(0.14),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: trackFlagState.color.withOpacity(0.34),
+                      ),
+                    ),
+                    child: Text(
+                      trackStatusLabel,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 11,
+                        color: trackFlagState.color,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: rain > 0
+                          ? const Color(0xFFDCF0FF)
+                          : const Color(0xFFEAF7EC),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      loc.translate(
+                        rain > 0
+                            ? 'track_playback_rain_active'
+                            : 'track_playback_dry_track',
+                      ),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 11,
+                        color: rain > 0
+                            ? const Color(0xFF1565C0)
+                            : const Color(0xFF2E7D32),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          if (trackFlagContext.message != null &&
+              trackFlagContext.message!.trim().isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 8,
+              ),
+              decoration: BoxDecoration(
+                color: trackFlagState.color.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: trackFlagState.color.withOpacity(0.28),
+                ),
+              ),
+              child: Text(
+                trackFlagContext.message!,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: trackFlagState.color,
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 14),
+          Container(
+            height: 300,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color.alphaBlend(
+                    trackFlagState.color.withOpacity(0.14),
+                    tokens.panel.withOpacity(0.92),
+                  ),
+                  Color.alphaBlend(
+                    trackFlagState.color.withOpacity(0.08),
+                    tokens.accentSoft.withOpacity(0.45),
+                  ),
+                ],
+              ),
+              border: Border.all(color: trackFlagState.color.withOpacity(0.45)),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: SvgPicture.network(
+                      widget.race.circuitImage,
+                      fit: BoxFit.contain,
+                      colorFilter: ColorFilter.mode(
+                        trackFlagState.color,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: AnimatedBuilder(
+                        animation: _controller,
+                        builder: (context, _) => CustomPaint(
+                          painter: _WeatherTrackOverlayPainter(
+                            primaryColor: const Color(0xFF1E88E5),
+                            rainColor: const Color(0xFF42A5F5),
+                            phase: _controller.value,
+                            windSpeed: windSpeed,
+                            windDirectionDegrees: (windDirection ?? 0)
+                                .toDouble(),
+                            rainIntensity: rain,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 14,
+                    right: 14,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: tokens.panelStrong.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: tokens.outline.withOpacity(0.7),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            loc.translate('wind'),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${windSpeed.toStringAsFixed(1)} km/h',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                          Text(
+                            '${windDirection ?? '-'}° ${_windDirectionLabel(windDirection)}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              activeTrackColor: theme.colorScheme.primary,
+              thumbColor: theme.colorScheme.primary,
+              inactiveTrackColor: tokens.outline.withOpacity(0.5),
+              overlayColor: theme.colorScheme.primary.withOpacity(0.14),
+            ),
+            child: Slider(
+              min: 0,
+              max: (_resolvedSamples.length - 1).toDouble(),
+              value: _selectedIndex.clamp(
+                0,
+                (_resolvedSamples.length - 1).toDouble(),
+              ),
+              onChangeStart: (_) => _autoLoopTimer?.cancel(),
+              onChanged: (value) => setState(() => _selectedIndex = value),
+              onChangeEnd: (_) => _startAutoLoop(),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _resolvedSamples.isEmpty
+                    ? '--:--'
+                    : _formatWeatherTimeLabel(
+                        DateTime.parse(
+                          _resolvedSamples.first['timestampUtc'].toString(),
+                        ),
+                      ),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              Text(
+                timestamp == null
+                    ? '--:--'
+                    : _formatWeatherTimeLabel(timestamp),
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              Text(
+                _resolvedSamples.isEmpty
+                    ? '--:--'
+                    : _formatWeatherTimeLabel(
+                        DateTime.parse(
+                          _resolvedSamples.last['timestampUtc'].toString(),
+                        ),
+                      ),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              SizedBox(
+                width: 150,
+                child: _WeatherMetricTile(
+                  label: loc.translate('air_temperature'),
+                  value: air == null ? '-' : '${air.toStringAsFixed(1)} C',
+                  icon: Icons.thermostat,
+                ),
+              ),
+              SizedBox(
+                width: 150,
+                child: _WeatherMetricTile(
+                  label: loc.translate('track_temperature'),
+                  value: track == null ? '-' : '${track.toStringAsFixed(1)} C',
+                  icon: Icons.device_thermostat,
+                ),
+              ),
+              SizedBox(
+                width: 150,
+                child: _WeatherMetricTile(
+                  label: loc.translate('humidity'),
+                  value: humidity == null
+                      ? '-'
+                      : '${humidity.toStringAsFixed(1)}%',
+                  icon: Icons.water_drop,
+                ),
+              ),
+              SizedBox(
+                width: 150,
+                child: _WeatherMetricTile(
+                  label: loc.translate('rainfall'),
+                  value: '${rain.toStringAsFixed(1)} mm',
+                  icon: Icons.umbrella,
+                ),
+              ),
+              SizedBox(
+                width: 150,
+                child: _WeatherMetricTile(
+                  label: loc.translate('pressure'),
+                  value: pressure == null
+                      ? '-'
+                      : '${pressure.toStringAsFixed(1)} hPa',
+                  icon: Icons.compress,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// --- INTERNE LOKALISATIE MET EMOJIS -------------------------
 class AppLocalizations {
   final Locale locale;
@@ -826,6 +2061,115 @@ class AppLocalizations {
     'distanceToTurn1': 'Afstand tot Bocht 1',
     'circuitDifficulty': 'Circuit Moeilijkheid',
     'overtakingDifficulty': 'Inhaal Moeilijkheid',
+    'race': 'Race',
+    'results': 'Resultaten',
+    'driver': 'Coureur',
+    'finish': 'Finish',
+    'time': 'Tijd',
+    'start': 'Start',
+    'points': 'Punten',
+    'penalty': 'Straf',
+    'status': 'Status',
+    'scope': 'Scope',
+    'session': 'Sessie',
+    'circuit': 'Circuit',
+    'rain': 'Regen',
+    'wind': 'Wind',
+    'top_3': 'Top 3',
+    'best_lap': 'Beste ronde',
+    'total_time': 'Totale tijd',
+    'gap': 'Verschil',
+    'result': 'Resultaat',
+    'pos': 'Pos',
+    'tyre': 'Band',
+    'time_gap': 'Tijd / Verschil',
+    'fullscreen_table': 'Tabel op volledig scherm',
+    'weekend_hub': 'Weekend Hub',
+    'weekend_hub_card_subtitle': 'Schema, weer, podium en penalties in een scherm',
+    'weekend_hub_loading': 'Weekend Hub laden...',
+    'weekend_hub_load_error': 'Weekend Hub kon niet volledig laden. Cachedata wordt getoond.',
+    'weekend_schedule': 'Weekend schema',
+    'session_status_upcoming': 'Aankomend',
+    'session_status_live_recent': 'Live / Recent',
+    'session_status_completed': 'Voltooid',
+    'track_flag_green': 'Groene vlag',
+    'track_flag_yellow': 'Gele vlag',
+    'track_flag_double_yellow': 'Dubbel geel',
+    'track_flag_red': 'Rode vlag',
+    'track_playback_title': 'Track Playback',
+    'track_playback_no_weather': 'Geen weerdata beschikbaar voor deze sessie.',
+    'track_playback_unknown_sample': 'Onbekend sample',
+    'track_playback_interpolated_minute': 'geinterpoleerde minuut',
+    'track_playback_recorded_sample': 'opgenomen sample',
+    'track_playback_rain_active': 'Regen actief',
+    'track_playback_dry_track': 'Droge baan',
+    'air_temperature': 'Luchttemperatuur',
+    'track_temperature': 'Baantemperatuur',
+    'rainfall': 'Neerslag',
+    'pressure': 'Druk',
+    'unknown_time': 'Onbekende tijd',
+    'unknown_sample': 'Onbekend',
+    'unknown': 'Onbekend',
+    'all_scopes': 'Alle scopes',
+    'race_control': 'Race Control',
+    'race_control_detail': 'Race Control detail',
+    'race_control_search_hint': 'Zoek op bericht, vlag, categorie, ronde of coureur',
+    'race_control_message_count': '{visible} van {total} berichten',
+    'race_control_empty': 'Geen race control-berichten gevonden voor deze filter of zoekopdracht.',
+    'race_control_no_linked_message': 'Geen gekoppeld steward-bericht gevonden.',
+    'race_control_related_updates': 'Gerelateerde steward-updates',
+    'race_control_relation_served_penalty': 'Uitgevoerde straf',
+    'race_control_relation_issued_earlier': 'Eerder opgelegd',
+    'race_control_relation_penalty_message': 'Strafbericht',
+    'race_control_relation_served_later': 'Later uitgevoerd',
+    'race_control_relation_noted': 'Genoteerd',
+    'race_control_relation_investigation': 'Onderzoek',
+    'race_control_relation_outcome': 'Uitkomst',
+    'race_control_relation_message': 'Race Control-bericht',
+    'race_control_relation_linked': 'Gekoppeld bericht',
+    'linked_update_one': '1 gekoppelde update',
+    'linked_update_many': '{count} gekoppelde updates',
+    'show_less_messages': 'Minder berichten tonen',
+    'show_all_messages': 'Alle {count} berichten tonen',
+    'lap_label': 'Ronde {lap}',
+    'car_label': 'Auto {number}',
+    'penalties': 'Penalties',
+    'penalties_empty': 'Geen penalties gevonden in de huidige weekendcache.',
+    'session_weather_unavailable': 'Geen weerdata beschikbaar voor {session}.',
+    'session_data_unavailable': '{session}-data wordt geladen of is nog niet beschikbaar.',
+    'close': 'Sluiten',
+    'used_tyre': 'gebruikt',
+    'q1_out': 'Q1 uit',
+    'q2_out': 'Q2 uit',
+    'last_5_points': 'Punten laatste 5',
+    'avg_finish': 'Gem. finish',
+    'avg_finish_l5': 'Gem. finish (L5)',
+    'no_finish_data': 'Geen finishdata',
+    'ai_race_engineer': 'AI Race Engineer',
+    'ai_example_prompt': 'Probeer bijvoorbeeld: "Fetch latest results", "Show next weekend", "Compare Max Verstappen vs Lando Norris" of "Show form Oscar Piastri".',
+    'ai_no_completed_race': 'Er is nog geen verreden race gevonden.',
+    'ai_latest_results_refreshed': 'De laatste uitslag is opnieuw opgehaald.',
+    'ai_latest_results_podium': 'Laatste resultaten vernieuwd. Podium: {podium}',
+    'ai_open_latest_results': 'Open laatste resultaten',
+    'ai_next_weekend': 'Volgend weekend: {race} op {date}.',
+    'ai_open_weekend_hub': 'Open weekend hub',
+    'ai_compare_parse_error': 'Ik kon de vergelijking niet lezen. Gebruik: naam1 vs naam2',
+    'ai_driver_compare_ready': 'Driver comparison klaar voor {left} en {right}.',
+    'ai_open_driver_compare': 'Open driver compare',
+    'ai_team_compare_ready': 'Team comparison klaar voor {left} en {right}.',
+    'ai_open_team_compare': 'Open team compare',
+    'ai_compare_no_match': 'Ik kon geen twee geldige drivers of teams vinden voor deze vergelijking.',
+    'ai_form_no_driver': 'Ik kon geen coureur vinden voor de form-analyse.',
+    'ai_form_no_cache': 'Nog geen gecachte recente races voor {driver}.',
+    'ai_form_summary': 'Laatste vorm van {driver}: {summary}',
+    'ai_supported_commands': 'Ondersteunde commando\'s: Fetch latest results, Show next weekend, Compare naam1 vs naam2, Show form [driver].',
+    'ai_crash': 'De assistent liep vast op: {error}',
+    'ai_chip_fetch_latest_results': 'Fetch latest results',
+    'ai_chip_show_next_weekend': 'Show next weekend',
+    'ai_chip_compare_max_lando': 'Compare Max vs Lando',
+    'ai_chip_show_form_piastri': 'Show form Piastri',
+    'ai_type_command': 'Typ een opdracht...',
+    'no_race_results_available': 'Nog geen race-uitslag beschikbaar.',
   };
 
   static final Map<String, String> _enDictionary = {
@@ -1027,6 +2371,115 @@ class AppLocalizations {
     'distanceToTurn1': 'Distance to Turn 1',
     'circuitDifficulty': 'Circuit Difficulty',
     'overtakingDifficulty': 'Overtaking Difficulty',
+    'race': 'Race',
+    'results': 'Results',
+    'driver': 'Driver',
+    'finish': 'Finish',
+    'time': 'Time',
+    'start': 'Start',
+    'points': 'Points',
+    'penalty': 'Penalty',
+    'status': 'Status',
+    'scope': 'Scope',
+    'session': 'Session',
+    'circuit': 'Circuit',
+    'rain': 'Rain',
+    'wind': 'Wind',
+    'top_3': 'Top 3',
+    'best_lap': 'Best lap',
+    'total_time': 'Total time',
+    'gap': 'Gap',
+    'result': 'Result',
+    'pos': 'Pos',
+    'tyre': 'Tyre',
+    'time_gap': 'Time / Gap',
+    'fullscreen_table': 'Fullscreen table',
+    'weekend_hub': 'Weekend Hub',
+    'weekend_hub_card_subtitle': 'Schedule, weather, podium and penalties in one screen',
+    'weekend_hub_loading': 'Loading Weekend Hub...',
+    'weekend_hub_load_error': 'Weekend Hub could not be fully loaded. Cached data is being shown.',
+    'weekend_schedule': 'Weekend schedule',
+    'session_status_upcoming': 'Upcoming',
+    'session_status_live_recent': 'Live / Recent',
+    'session_status_completed': 'Completed',
+    'track_flag_green': 'Green flag',
+    'track_flag_yellow': 'Yellow flag',
+    'track_flag_double_yellow': 'Double yellow',
+    'track_flag_red': 'Red flag',
+    'track_playback_title': 'Track Playback',
+    'track_playback_no_weather': 'No weather data available for this session.',
+    'track_playback_unknown_sample': 'Unknown sample',
+    'track_playback_interpolated_minute': 'interpolated minute',
+    'track_playback_recorded_sample': 'recorded sample',
+    'track_playback_rain_active': 'Rain active',
+    'track_playback_dry_track': 'Dry track',
+    'air_temperature': 'Air temperature',
+    'track_temperature': 'Track temperature',
+    'rainfall': 'Rainfall',
+    'pressure': 'Pressure',
+    'unknown_time': 'Unknown time',
+    'unknown_sample': 'Unknown sample',
+    'unknown': 'Unknown',
+    'all_scopes': 'All scopes',
+    'race_control': 'Race Control',
+    'race_control_detail': 'Race Control detail',
+    'race_control_search_hint': 'Search by message, flag, category, lap or driver',
+    'race_control_message_count': '{visible} of {total} messages',
+    'race_control_empty': 'No race control messages found for this filter or search.',
+    'race_control_no_linked_message': 'No linked steward message found.',
+    'race_control_related_updates': 'Related steward updates',
+    'race_control_relation_served_penalty': 'Served penalty',
+    'race_control_relation_issued_earlier': 'Issued earlier',
+    'race_control_relation_penalty_message': 'Penalty message',
+    'race_control_relation_served_later': 'Served later',
+    'race_control_relation_noted': 'Noted',
+    'race_control_relation_investigation': 'Investigation',
+    'race_control_relation_outcome': 'Outcome',
+    'race_control_relation_message': 'Race Control message',
+    'race_control_relation_linked': 'Linked message',
+    'linked_update_one': '1 linked update',
+    'linked_update_many': '{count} linked updates',
+    'show_less_messages': 'Show fewer messages',
+    'show_all_messages': 'Show all {count} messages',
+    'lap_label': 'Lap {lap}',
+    'car_label': 'Car {number}',
+    'penalties': 'Penalties',
+    'penalties_empty': 'No penalties found in the current weekend cache.',
+    'session_weather_unavailable': 'No weather data available for {session}.',
+    'session_data_unavailable': '{session} data is loading or not available yet.',
+    'close': 'Close',
+    'used_tyre': 'used',
+    'q1_out': 'Q1 out',
+    'q2_out': 'Q2 out',
+    'last_5_points': 'Last 5 points',
+    'avg_finish': 'Avg finish',
+    'avg_finish_l5': 'Avg finish (L5)',
+    'no_finish_data': 'No finish data',
+    'ai_race_engineer': 'AI Race Engineer',
+    'ai_example_prompt': 'Try for example: "Fetch latest results", "Show next weekend", "Compare Max Verstappen vs Lando Norris" or "Show form Oscar Piastri".',
+    'ai_no_completed_race': 'No completed race has been found yet.',
+    'ai_latest_results_refreshed': 'The latest results were refreshed.',
+    'ai_latest_results_podium': 'Latest results refreshed. Podium: {podium}',
+    'ai_open_latest_results': 'Open latest results',
+    'ai_next_weekend': 'Next weekend: {race} on {date}.',
+    'ai_open_weekend_hub': 'Open weekend hub',
+    'ai_compare_parse_error': 'I could not read the comparison. Use: name1 vs name2',
+    'ai_driver_compare_ready': 'Driver comparison is ready for {left} and {right}.',
+    'ai_open_driver_compare': 'Open driver compare',
+    'ai_team_compare_ready': 'Team comparison is ready for {left} and {right}.',
+    'ai_open_team_compare': 'Open team compare',
+    'ai_compare_no_match': 'I could not find two valid drivers or teams for this comparison.',
+    'ai_form_no_driver': 'I could not find a driver for the form analysis.',
+    'ai_form_no_cache': 'No cached recent races for {driver} yet.',
+    'ai_form_summary': 'Recent form for {driver}: {summary}',
+    'ai_supported_commands': 'Supported commands: Fetch latest results, Show next weekend, Compare name1 vs name2, Show form [driver].',
+    'ai_crash': 'The assistant ran into: {error}',
+    'ai_chip_fetch_latest_results': 'Fetch latest results',
+    'ai_chip_show_next_weekend': 'Show next weekend',
+    'ai_chip_compare_max_lando': 'Compare Max vs Lando',
+    'ai_chip_show_form_piastri': 'Show form Piastri',
+    'ai_type_command': 'Type a command...',
+    'no_race_results_available': 'No race results available yet.',
   };
 
   static final Map<String, Map<String, String>> _localizedValues = {
@@ -1041,6 +2494,14 @@ class AppLocalizations {
     return _localizedValues[locale.languageCode]?[key] ??
         _enDictionary[key] ??
         key;
+  }
+
+  String format(String key, Map<String, String> values) {
+    var text = translate(key);
+    for (final entry in values.entries) {
+      text = text.replaceAll('{${entry.key}}', entry.value);
+    }
+    return text;
   }
 }
 
@@ -1099,8 +2560,96 @@ final Map<String, EngineSupplier> engineSuppliers = {
   ),
 };
 
+String _slugify(String value) {
+  final slug = value
+      .toLowerCase()
+      .trim()
+      .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+      .replaceAll(RegExp(r'-{2,}'), '-')
+      .replaceAll(RegExp(r'^-|-$'), '');
+  return slug.isEmpty ? 'item' : slug;
+}
+
+String _raceSlug(Race race) => _slugify(
+  race.name.replaceAll(RegExp(r'\s+Grand Prix$', caseSensitive: false), ''),
+);
+String _driverSlug(Driver driver) => _slugify(driver.name);
+String _teamSlug(Team team) => _slugify(team.name);
+String _sessionSlug(String sessionName) => _slugify(sessionName);
+
+const List<String> _knownSessionNames = <String>[
+  'Practice 1',
+  'Practice 2',
+  'Practice 3',
+  'Sprint Qualifying',
+  'Sprint',
+  'Qualifying',
+  'Race',
+];
+
+String? _sessionNameFromSlug(String slug) {
+  for (final sessionName in _knownSessionNames) {
+    if (_sessionSlug(sessionName) == slug) {
+      return sessionName;
+    }
+  }
+  return null;
+}
+
+Race? _findRaceBySlug(String slug) {
+  for (final race in races) {
+    if (_raceSlug(race) == slug) {
+      return race;
+    }
+  }
+  return null;
+}
+
+Driver? _findDriverBySlug(String slug) {
+  final seenNames = <String>{};
+  for (final seasonDrivers in driversData.values) {
+    for (final driver in seasonDrivers) {
+      if (!seenNames.add(driver.name)) {
+        continue;
+      }
+      if (_driverSlug(driver) == slug) {
+        return driver;
+      }
+    }
+  }
+  return null;
+}
+
+Team? _findTeamBySlug(String slug) {
+  for (final team in fallbackTeams) {
+    if (_teamSlug(team) == slug) {
+      return team;
+    }
+  }
+  return null;
+}
+
+String _circuitsPath() => '/circuits';
+String _driversPath() => '/drivers';
+String _teamsPath() => '/teams';
+String _changelogPath() => '/changelog';
+String _racePath(Race race) => '${_circuitsPath()}/${_raceSlug(race)}';
+String _weekendHubPath(Race race) => '${_racePath(race)}/weekend';
+String _raceResultsPath(Race race) => '${_racePath(race)}/results';
+String _fullscreenRaceResultsPath(Race race) =>
+    '${_raceResultsPath(race)}/fullscreen';
+String _singleSessionResultsPath(Race race, String sessionName) =>
+    '${_racePath(race)}/session/${_sessionSlug(sessionName)}';
+String _driverPath(Driver driver) => '${_driversPath()}/${_driverSlug(driver)}';
+String _teamPath(Team team) => '${_teamsPath()}/${_teamSlug(team)}';
+String _driverComparePath(Driver driver1, Driver driver2) =>
+    '${_driversPath()}/compare/${_driverSlug(driver1)}/${_driverSlug(driver2)}';
+String _teamComparePath(Team team1, Team team2) =>
+    '${_teamsPath()}/compare/${_teamSlug(team1)}/${_teamSlug(team2)}';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await HiveBootstrap.initialize();
   await SessionDataManager().init(races);
   runApp(const F1HubApp());
 }
@@ -1117,6 +2666,239 @@ class _F1HubAppState extends State<F1HubApp> {
   ThemeMode _themeMode = (DateTime.now().hour > 6 && DateTime.now().hour < 20)
       ? ThemeMode.light
       : ThemeMode.dark;
+
+  Widget _buildSettingsMenu() => AppSettingsMenuButton(
+    onSetLocale: _setLocale,
+    onToggleTheme: _toggleTheme,
+  );
+
+  late final GoRouter _router = GoRouter(
+    initialLocation: _circuitsPath(),
+    routes: [
+      GoRoute(path: '/', redirect: (_, _) => _circuitsPath()),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) =>
+            MainNavigation(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: _circuitsPath(),
+                builder: (context, state) =>
+                    CircuitsView(settingsMenu: _buildSettingsMenu()),
+                routes: [
+                  GoRoute(
+                    path: ':raceSlug',
+                    redirect: (context, state) =>
+                        _findRaceBySlug(
+                              state.pathParameters['raceSlug'] ?? '',
+                            ) ==
+                            null
+                        ? _circuitsPath()
+                        : null,
+                    builder: (context, state) {
+                      final race = _findRaceBySlug(
+                        state.pathParameters['raceSlug']!,
+                      )!;
+                      return CircuitDetailScreen(
+                        race: race,
+                        heroTag: _raceFlagHeroTag(race, source: 'route'),
+                        settingsMenu: _buildSettingsMenu(),
+                      );
+                    },
+                    routes: [
+                      GoRoute(
+                        path: 'weekend',
+                        builder: (context, state) {
+                          final race = _findRaceBySlug(
+                            state.pathParameters['raceSlug']!,
+                          )!;
+                          return WeekendHubScreen(race: race);
+                        },
+                      ),
+                      GoRoute(
+                        path: 'results',
+                        builder: (context, state) {
+                          final race = _findRaceBySlug(
+                            state.pathParameters['raceSlug']!,
+                          )!;
+                          return SessionResultsScreen(race: race);
+                        },
+                        routes: [
+                          GoRoute(
+                            path: 'fullscreen',
+                            builder: (context, state) {
+                              final race = _findRaceBySlug(
+                                state.pathParameters['raceSlug']!,
+                              )!;
+                              return FullscreenRaceResultsScreen(
+                                race: race,
+                                title: _sessionDisplayTitle(context, 'Race'),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                      GoRoute(
+                        path: 'session/:sessionSlug',
+                        redirect: (context, state) {
+                          final race = _findRaceBySlug(
+                            state.pathParameters['raceSlug'] ?? '',
+                          );
+                          final sessionName = _sessionNameFromSlug(
+                            state.pathParameters['sessionSlug'] ?? '',
+                          );
+                          if (race == null || sessionName == null) {
+                            return _circuitsPath();
+                          }
+                          return null;
+                        },
+                        builder: (context, state) {
+                          final race = _findRaceBySlug(
+                            state.pathParameters['raceSlug']!,
+                          )!;
+                          final sessionName = _sessionNameFromSlug(
+                            state.pathParameters['sessionSlug']!,
+                          )!;
+                          return SingleSessionResultsScreen(
+                            race: race,
+                            sessionName: sessionName,
+                            displayTitle: _sessionDisplayTitle(
+                              context,
+                              sessionName,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: _driversPath(),
+                builder: (context, state) => StandingsView(
+                  isDriverView: true,
+                  settingsMenu: _buildSettingsMenu(),
+                ),
+                routes: [
+                  GoRoute(
+                    path: 'compare/:leftSlug/:rightSlug',
+                    redirect: (context, state) {
+                      final left = _findDriverBySlug(
+                        state.pathParameters['leftSlug'] ?? '',
+                      );
+                      final right = _findDriverBySlug(
+                        state.pathParameters['rightSlug'] ?? '',
+                      );
+                      return left == null || right == null
+                          ? _driversPath()
+                          : null;
+                    },
+                    builder: (context, state) {
+                      final left = _findDriverBySlug(
+                        state.pathParameters['leftSlug']!,
+                      )!;
+                      final right = _findDriverBySlug(
+                        state.pathParameters['rightSlug']!,
+                      )!;
+                      return DriverComparisonView(
+                        driver1: left,
+                        driver2: right,
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: ':driverSlug',
+                    redirect: (context, state) =>
+                        _findDriverBySlug(
+                              state.pathParameters['driverSlug'] ?? '',
+                            ) ==
+                            null
+                        ? _driversPath()
+                        : null,
+                    builder: (context, state) {
+                      final driver = _findDriverBySlug(
+                        state.pathParameters['driverSlug']!,
+                      )!;
+                      return DriverDetailView(
+                        driver: driver,
+                        heroTag: _driverFlagHeroTag(driver, source: 'route'),
+                        settingsMenu: _buildSettingsMenu(),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: _teamsPath(),
+                builder: (context, state) => StandingsView(
+                  isDriverView: false,
+                  settingsMenu: _buildSettingsMenu(),
+                ),
+                routes: [
+                  GoRoute(
+                    path: 'compare/:leftSlug/:rightSlug',
+                    redirect: (context, state) {
+                      final left = _findTeamBySlug(
+                        state.pathParameters['leftSlug'] ?? '',
+                      );
+                      final right = _findTeamBySlug(
+                        state.pathParameters['rightSlug'] ?? '',
+                      );
+                      return left == null || right == null
+                          ? _teamsPath()
+                          : null;
+                    },
+                    builder: (context, state) {
+                      final left = _findTeamBySlug(
+                        state.pathParameters['leftSlug']!,
+                      )!;
+                      final right = _findTeamBySlug(
+                        state.pathParameters['rightSlug']!,
+                      )!;
+                      return TeamComparisonView(team1: left, team2: right);
+                    },
+                  ),
+                  GoRoute(
+                    path: ':teamSlug',
+                    redirect: (context, state) =>
+                        _findTeamBySlug(
+                              state.pathParameters['teamSlug'] ?? '',
+                            ) ==
+                            null
+                        ? _teamsPath()
+                        : null,
+                    builder: (context, state) {
+                      final team = _findTeamBySlug(
+                        state.pathParameters['teamSlug']!,
+                      )!;
+                      return TeamDetailView(
+                        team: team,
+                        heroTag: _teamFlagHeroTag(team, source: 'route'),
+                        settingsMenu: _buildSettingsMenu(),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      GoRoute(
+        path: _changelogPath(),
+        builder: (context, state) => const ChangelogScreen(),
+      ),
+    ],
+  );
 
   @override
   void initState() {
@@ -1156,9 +2938,10 @@ class _F1HubAppState extends State<F1HubApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'F1 Hub',
       debugShowCheckedModeBanner: false,
+      routerConfig: _router,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeAnimationCurve: Curves.easeInOutCubic,
@@ -1188,10 +2971,6 @@ class _F1HubAppState extends State<F1HubApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: MainNavigation(
-        onSetLocale: _setLocale,
-        onToggleTheme: _toggleTheme,
-      ),
     );
   }
 }
@@ -1469,6 +3248,19 @@ class RaceResultRow {
   final String penalty;
   final String points;
   final bool hasFastestLap;
+  final List<String> tyreCompounds;
+  final List<Map<String, dynamic>> tyreStints;
+  final String tyreStrategy;
+  final List<int> tyreChangeLaps;
+  final List<Map<String, dynamic>> penaltyDetails;
+  final bool penaltyServed;
+  final List<int> penaltyServedLaps;
+  final List<Map<String, dynamic>> weatherSamples;
+  final List<Map<String, dynamic>> raceControlMessages;
+  final List<Map<String, dynamic>> pitStops;
+  final String totalPitTime;
+  final Map<String, dynamic>? fastestPitStop;
+  final String averagePitTime;
 
   const RaceResultRow({
     required this.driver,
@@ -1480,6 +3272,19 @@ class RaceResultRow {
     required this.penalty,
     required this.points,
     required this.hasFastestLap,
+    required this.tyreCompounds,
+    required this.tyreStints,
+    required this.tyreStrategy,
+    required this.tyreChangeLaps,
+    required this.penaltyDetails,
+    required this.penaltyServed,
+    required this.penaltyServedLaps,
+    required this.weatherSamples,
+    required this.raceControlMessages,
+    required this.pitStops,
+    required this.totalPitTime,
+    required this.fastestPitStop,
+    required this.averagePitTime,
   });
 
   factory RaceResultRow.fromJson(Map<String, dynamic> json) {
@@ -1493,6 +3298,63 @@ class RaceResultRow {
       penalty: json['penalty']?.toString() ?? '-',
       points: json['points']?.toString() ?? '0',
       hasFastestLap: json['hasFastestLap'] == true,
+      tyreCompounds: (json['tyreCompounds'] as List<dynamic>? ?? const [])
+          .map((entry) => entry.toString())
+          .toList(growable: false),
+      tyreStints: (json['tyreStints'] as List<dynamic>? ?? const [])
+          .whereType<Map>()
+          .map(
+            (entry) =>
+                entry.map((key, value) => MapEntry(key.toString(), value)),
+          )
+          .toList(growable: false),
+      tyreStrategy: json['tyreStrategy']?.toString() ?? '-',
+      tyreChangeLaps: (json['tyreChangeLaps'] as List<dynamic>? ?? const [])
+          .map((entry) => int.tryParse(entry.toString()))
+          .whereType<int>()
+          .toList(growable: false),
+      penaltyDetails: (json['penaltyDetails'] as List<dynamic>? ?? const [])
+          .whereType<Map>()
+          .map(
+            (entry) =>
+                entry.map((key, value) => MapEntry(key.toString(), value)),
+          )
+          .toList(growable: false),
+      penaltyServed: json['penaltyServed'] == true,
+      penaltyServedLaps:
+          (json['penaltyServedLaps'] as List<dynamic>? ?? const [])
+              .map((entry) => int.tryParse(entry.toString()))
+              .whereType<int>()
+              .toList(growable: false),
+      weatherSamples: (json['weatherSamples'] as List<dynamic>? ?? const [])
+          .whereType<Map>()
+          .map(
+            (entry) =>
+                entry.map((key, value) => MapEntry(key.toString(), value)),
+          )
+          .toList(growable: false),
+      raceControlMessages:
+          (json['raceControlMessages'] as List<dynamic>? ?? const [])
+              .whereType<Map>()
+              .map(
+                (entry) =>
+                    entry.map((key, value) => MapEntry(key.toString(), value)),
+              )
+              .toList(growable: false),
+      pitStops: (json['pitStops'] as List<dynamic>? ?? const [])
+          .whereType<Map>()
+          .map(
+            (entry) =>
+                entry.map((key, value) => MapEntry(key.toString(), value)),
+          )
+          .toList(growable: false),
+      totalPitTime: json['totalPitTime']?.toString() ?? '-',
+      fastestPitStop: json['fastestPitStop'] is Map
+          ? (json['fastestPitStop'] as Map).map(
+              (key, value) => MapEntry(key.toString(), value),
+            )
+          : null,
+      averagePitTime: json['averagePitTime']?.toString() ?? '-',
     );
   }
 
@@ -1507,6 +3369,19 @@ class RaceResultRow {
       'penalty': penalty,
       'points': points,
       'hasFastestLap': hasFastestLap,
+      'tyreCompounds': tyreCompounds,
+      'tyreStints': tyreStints,
+      'tyreStrategy': tyreStrategy,
+      'tyreChangeLaps': tyreChangeLaps,
+      'penaltyDetails': penaltyDetails,
+      'penaltyServed': penaltyServed,
+      'penaltyServedLaps': penaltyServedLaps,
+      'weatherSamples': weatherSamples,
+      'raceControlMessages': raceControlMessages,
+      'pitStops': pitStops,
+      'totalPitTime': totalPitTime,
+      'fastestPitStop': fastestPitStop,
+      'averagePitTime': averagePitTime,
     };
   }
 }
@@ -1519,6 +3394,11 @@ class SessionOverviewRow {
   final String tyreCompound;
   final String points;
   final bool hasFastestLap;
+  final bool usedTyre;
+  final int? tyreAgeAtStart;
+  final int? totalLaps;
+  final Map<String, int> tyreLaps;
+  final List<SessionTyreLapBreakdownEntry> tyreLapSequence;
 
   const SessionOverviewRow({
     required this.driver,
@@ -1528,6 +3408,11 @@ class SessionOverviewRow {
     required this.tyreCompound,
     required this.points,
     required this.hasFastestLap,
+    required this.usedTyre,
+    required this.tyreAgeAtStart,
+    required this.totalLaps,
+    required this.tyreLaps,
+    required this.tyreLapSequence,
   });
 
   factory SessionOverviewRow.fromJson(Map<String, dynamic> json) {
@@ -1539,6 +3424,21 @@ class SessionOverviewRow {
       tyreCompound: json['tyreCompound']?.toString() ?? '-',
       points: json['points']?.toString() ?? '-',
       hasFastestLap: json['hasFastestLap'] == true,
+      usedTyre: json['usedTyre'] == true,
+      tyreAgeAtStart: int.tryParse(json['tyreAgeAtStart']?.toString() ?? ''),
+      totalLaps: int.tryParse(json['totalLaps']?.toString() ?? ''),
+      tyreLaps: ((json['tyreLaps'] as Map?) ?? const <String, dynamic>{}).map(
+        (key, value) =>
+            MapEntry(key.toString(), int.tryParse(value.toString()) ?? 0),
+      ),
+      tyreLapSequence: (json['tyreLapSequence'] as List<dynamic>? ?? const [])
+          .whereType<Map>()
+          .map(
+            (entry) => SessionTyreLapBreakdownEntry.fromJson(
+              entry.map((key, value) => MapEntry(key.toString(), value)),
+            ),
+          )
+          .toList(growable: false),
     );
   }
 
@@ -1551,7 +3451,38 @@ class SessionOverviewRow {
       'tyreCompound': tyreCompound,
       'points': points,
       'hasFastestLap': hasFastestLap,
+      'usedTyre': usedTyre,
+      'tyreAgeAtStart': tyreAgeAtStart,
+      'totalLaps': totalLaps,
+      'tyreLaps': tyreLaps,
+      'tyreLapSequence': tyreLapSequence
+          .map((entry) => entry.toJson())
+          .toList(growable: false),
     };
+  }
+}
+
+class SessionTyreLapBreakdownEntry {
+  final String compound;
+  final int laps;
+  final bool usedTyre;
+
+  const SessionTyreLapBreakdownEntry({
+    required this.compound,
+    required this.laps,
+    required this.usedTyre,
+  });
+
+  factory SessionTyreLapBreakdownEntry.fromJson(Map<String, dynamic> json) {
+    return SessionTyreLapBreakdownEntry(
+      compound: json['compound']?.toString() ?? '-',
+      laps: int.tryParse(json['laps']?.toString() ?? '') ?? 0,
+      usedTyre: json['usedTyre'] == true,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'compound': compound, 'laps': laps, 'usedTyre': usedTyre};
   }
 }
 
@@ -1567,6 +3498,224 @@ class FastestLapDetails {
   });
 }
 
+class _TyreUsageDetails {
+  final String compound;
+  final int? tyreAgeAtStart;
+
+  const _TyreUsageDetails({
+    required this.compound,
+    required this.tyreAgeAtStart,
+  });
+
+  bool get usedTyre => (tyreAgeAtStart ?? 0) > 0;
+
+  String get formattedCompound {
+    if (compound == '-' || compound.isEmpty) {
+      return '-';
+    }
+    return usedTyre ? '$compound (used)' : compound;
+  }
+}
+
+class _SessionLapSummary {
+  final int totalLaps;
+  final Map<String, int> lapsByCompound;
+  final List<SessionTyreLapBreakdownEntry> stintSequence;
+
+  const _SessionLapSummary({
+    required this.totalLaps,
+    required this.lapsByCompound,
+    required this.stintSequence,
+  });
+}
+
+class _MutableSessionLapSummary {
+  int totalLaps = 0;
+  final Map<String, int> lapsByCompound = <String, int>{};
+  final List<SessionTyreLapBreakdownEntry> stintSequence =
+      <SessionTyreLapBreakdownEntry>[];
+
+  _SessionLapSummary build() {
+    return _SessionLapSummary(
+      totalLaps: totalLaps,
+      lapsByCompound: Map<String, int>.from(lapsByCompound),
+      stintSequence: List<SessionTyreLapBreakdownEntry>.from(stintSequence),
+    );
+  }
+}
+
+class WeekendHubPodiumEntry {
+  final int position;
+  final int? driverNumber;
+  final String driver;
+  final String points;
+  final String totalTime;
+  final String gapToLeader;
+  final String fastestLap;
+  final bool hasFastestLap;
+  final List<String> tyreCompounds;
+
+  const WeekendHubPodiumEntry({
+    required this.position,
+    required this.driverNumber,
+    required this.driver,
+    required this.points,
+    required this.totalTime,
+    required this.gapToLeader,
+    required this.fastestLap,
+    required this.hasFastestLap,
+    required this.tyreCompounds,
+  });
+}
+
+class DriverFormEntry {
+  final Race race;
+  final int? finishPosition;
+  final double points;
+  final bool hasFastestLap;
+  final bool hasPenalty;
+
+  const DriverFormEntry({
+    required this.race,
+    required this.finishPosition,
+    required this.points,
+    required this.hasFastestLap,
+    required this.hasPenalty,
+  });
+
+  bool get isPodium => finishPosition != null && finishPosition! <= 3;
+  bool get isDnf => finishPosition == null;
+
+  String get label => finishPosition == null ? 'DNF' : 'P$finishPosition';
+}
+
+bool _driverNameMatches(String cachedName, String targetName) {
+  final cached = cachedName.trim().toLowerCase();
+  final target = targetName.trim().toLowerCase();
+  if (cached == target) {
+    return true;
+  }
+
+  final cachedParts = cached.split(RegExp(r'\s+'));
+  final targetParts = target.split(RegExp(r'\s+'));
+  if (cachedParts.isEmpty || targetParts.isEmpty) {
+    return false;
+  }
+
+  return cachedParts.last == targetParts.last;
+}
+
+int? _extractFinishPosition(String finish) {
+  final match = RegExp(r'P(\d+)').firstMatch(finish.toUpperCase());
+  return match == null ? null : int.tryParse(match.group(1)!);
+}
+
+double _parsePointsValue(String points) {
+  return double.tryParse(points.trim()) ?? 0;
+}
+
+List<DriverFormEntry> _buildDriverRecentFormEntries(String driverName) {
+  final now = DateTime.now();
+  final completedRaces = races.where((race) => !race.date.isAfter(now)).toList()
+    ..sort((a, b) => b.date.compareTo(a.date));
+
+  final entries = <DriverFormEntry>[];
+  for (final race in completedRaces) {
+    final key = SessionDataManager().raceResultsKeyFor(race);
+    final rows = SessionDataManager().raceResultsCache[key];
+    if (rows == null || rows.isEmpty) {
+      continue;
+    }
+
+    RaceResultRow? row;
+    for (final candidate in rows) {
+      if (_driverNameMatches(candidate.driver, driverName)) {
+        row = candidate;
+        break;
+      }
+    }
+    if (row == null) {
+      continue;
+    }
+
+    entries.add(
+      DriverFormEntry(
+        race: race,
+        finishPosition: _extractFinishPosition(row.finish),
+        points: _parsePointsValue(row.points),
+        hasFastestLap: row.hasFastestLap,
+        hasPenalty: row.penalty.trim() != '-' && row.penalty.trim().isNotEmpty,
+      ),
+    );
+
+    if (entries.length == 5) {
+      break;
+    }
+  }
+
+  return entries;
+}
+
+double? _averageDriverFinish(List<DriverFormEntry> entries) {
+  final finishes = entries
+      .where((entry) => entry.finishPosition != null)
+      .map((entry) => entry.finishPosition!.toDouble())
+      .toList();
+  if (finishes.isEmpty) {
+    return null;
+  }
+  return finishes.reduce((a, b) => a + b) / finishes.length;
+}
+
+double _sumDriverPoints(List<DriverFormEntry> entries) {
+  return entries.fold<double>(0, (sum, entry) => sum + entry.points);
+}
+
+String _formatDriverAverageFinish(List<DriverFormEntry> entries) {
+  final average = _averageDriverFinish(entries);
+  if (average == null) {
+    return '-';
+  }
+  return average.toStringAsFixed(1);
+}
+
+String _formatFormPoints(List<DriverFormEntry> entries) {
+  final total = _sumDriverPoints(entries);
+  return total == total.roundToDouble()
+      ? total.toInt().toString()
+      : total.toStringAsFixed(1);
+}
+
+Future<Race?> _findLatestCompletedRace() async {
+  final now = DateTime.now();
+  for (final race in races.reversed) {
+    if (!race.date.isAfter(now)) {
+      return race;
+    }
+  }
+  return null;
+}
+
+int raceRoundFor(Race race) {
+  final seasonRaces =
+      races.where((entry) => entry.date.year == race.date.year).toList()
+        ..sort((a, b) => a.date.compareTo(b.date));
+
+  final resolvedIndex = seasonRaces.indexWhere(
+    (entry) =>
+        entry.name == race.name &&
+        entry.country == race.country &&
+        entry.date == race.date,
+  );
+
+  if (resolvedIndex != -1) {
+    return resolvedIndex + 1;
+  }
+
+  final fallbackIndex = races.indexOf(race);
+  return fallbackIndex == -1 ? 1 : fallbackIndex + 1;
+}
+
 class SessionDataManager extends ChangeNotifier {
   static final SessionDataManager _instance = SessionDataManager._internal();
   factory SessionDataManager() => _instance;
@@ -1575,11 +3724,17 @@ class SessionDataManager extends ChangeNotifier {
   final Map<String, List<SessionResult>> cache = {};
   final Map<String, List<RaceResultRow>> raceResultsCache = {};
   final Map<String, List<SessionOverviewRow>> sessionOverviewCache = {};
+  final Map<String, List<Map<String, dynamic>>> raceWeatherCache = {};
+  final Map<String, List<Map<String, dynamic>>> raceControlCache = {};
   final Map<String, List<Map<String, dynamic>>> _openF1Cache = {};
   DateTime? _lastOpenF1RequestAt;
   bool isInitialized = false;
 
+  Box<String> get _sessionPayloadBox =>
+      Hive.box<String>(HiveBoxes.sessionPayloads);
+
   Future<void> init(List<Race> races) async {
+    final sessionBox = _sessionPayloadBox;
     final prefs = await SharedPreferences.getInstance();
     for (final race in races) {
       final sessionNames = race.hasSprint
@@ -1587,7 +3742,7 @@ class SessionDataManager extends ChangeNotifier {
           : ['Practice 1', 'Practice 2', 'Practice 3', 'Qualifying', 'Race'];
       for (final session in sessionNames) {
         final key = '${race.country}_${session}_${race.date.year}';
-        final jsonStr = prefs.getString(key);
+        final jsonStr = _readCachedPayload(sessionBox, prefs, key);
         if (jsonStr != null) {
           final List<dynamic> decoded = jsonDecode(jsonStr) as List<dynamic>;
           cache[key] = decoded
@@ -1599,7 +3754,11 @@ class SessionDataManager extends ChangeNotifier {
         }
       }
 
-      final raceResultsJson = prefs.getString(_raceResultsKey(race));
+      final raceResultsJson = _readCachedPayload(
+        sessionBox,
+        prefs,
+        _raceResultsKey(race),
+      );
       if (raceResultsJson != null) {
         final List<dynamic> decoded =
             jsonDecode(raceResultsJson) as List<dynamic>;
@@ -1616,8 +3775,62 @@ class SessionDataManager extends ChangeNotifier {
         }
       }
 
+      final raceWeatherJson = _readCachedPayload(
+        sessionBox,
+        prefs,
+        _raceWeatherKey(race),
+      );
+      if (raceWeatherJson != null) {
+        final decoded = jsonDecode(raceWeatherJson);
+        dynamic weatherEntries;
+        if (decoded is Map<String, dynamic>) {
+          weatherEntries = decoded['samples'];
+          if (weatherEntries is! List) {
+            final sessions = decoded['sessions'];
+            if (sessions is Map) {
+              final raceSession = sessions['Race'];
+              if (raceSession is Map) {
+                weatherEntries = raceSession['samples'];
+              }
+            }
+          }
+        }
+        if (weatherEntries is List) {
+          raceWeatherCache[_raceWeatherKey(race)] = weatherEntries
+              .whereType<Map>()
+              .map(
+                (entry) =>
+                    entry.map((key, value) => MapEntry(key.toString(), value)),
+              )
+              .toList(growable: false);
+        }
+      }
+
+      final raceControlJson = _readCachedPayload(
+        sessionBox,
+        prefs,
+        _raceControlKey(race),
+      );
+      if (raceControlJson != null) {
+        final decoded = jsonDecode(raceControlJson);
+        final raceControlEntries = decoded is Map<String, dynamic>
+            ? decoded['messages']
+            : null;
+        if (raceControlEntries is List) {
+          raceControlCache[_raceControlKey(race)] = raceControlEntries
+              .whereType<Map>()
+              .map(
+                (entry) =>
+                    entry.map((key, value) => MapEntry(key.toString(), value)),
+              )
+              .toList(growable: false);
+        }
+      }
+
       for (final session in sessionNames.where((name) => name != 'Race')) {
-        final overviewJson = prefs.getString(
+        final overviewJson = _readCachedPayload(
+          sessionBox,
+          prefs,
           _sessionOverviewKey(race, session),
         );
         if (overviewJson != null) {
@@ -1642,6 +3855,23 @@ class SessionDataManager extends ChangeNotifier {
     }
   }
 
+  Future<void> ensureRaceDataAvailable(Race race, int roundIndex) async {
+    if (_hasRaceDataCached(race)) {
+      return;
+    }
+    await fetchDataForRace(race, roundIndex);
+  }
+
+  Future<void> clearStoredSessionCache() async {
+    cache.clear();
+    raceResultsCache.clear();
+    sessionOverviewCache.clear();
+    raceWeatherCache.clear();
+    raceControlCache.clear();
+    _openF1Cache.clear();
+    await _sessionPayloadBox.clear();
+  }
+
   Future<void> fetchDataForRace(Race race, int roundIndex) async {
     final sessionNames = race.hasSprint
         ? ['Practice 1', 'Sprint Qualifying', 'Sprint', 'Qualifying', 'Race']
@@ -1654,15 +3884,32 @@ class SessionDataManager extends ChangeNotifier {
       }
 
       final key = '${race.country}_${sessionName}_${race.date.year}';
-      try {
-        final results = await _fetchSessionResults(
-          year: race.date.year,
-          roundIndex: roundIndex,
-          sessionName: sessionName,
+      if (sessionName != 'Race') {
+        final staticOverview = await _loadStaticSessionOverviewRows(
+          race,
+          sessionName,
         );
-        _saveResults(key, results);
-      } catch (_) {
-        _saveResults(key, const <SessionResult>[]);
+        if (staticOverview.isNotEmpty) {
+          await _saveSessionOverview(
+            _sessionOverviewKey(race, sessionName),
+            staticOverview,
+          );
+          cache.remove(key);
+          continue;
+        }
+      }
+
+      if (sessionName != 'Race') {
+        try {
+          final results = await _fetchSessionResults(
+            year: race.date.year,
+            roundIndex: roundIndex,
+            sessionName: sessionName,
+          );
+          _saveResults(key, results);
+        } catch (_) {
+          _saveResults(key, const <SessionResult>[]);
+        }
       }
 
       if (sessionName != 'Race' &&
@@ -1689,6 +3936,8 @@ class SessionDataManager extends ChangeNotifier {
     final raceResultsKey = _raceResultsKey(race);
     if (race.date.isAfter(now)) {
       raceResultsCache.remove(raceResultsKey);
+      raceWeatherCache.remove(_raceWeatherKey(race));
+      raceControlCache.remove(_raceControlKey(race));
     } else {
       try {
         final rows = await _fetchRaceResultRows(race);
@@ -1700,6 +3949,28 @@ class SessionDataManager extends ChangeNotifier {
       } catch (_) {
         raceResultsCache.remove(raceResultsKey);
       }
+
+      try {
+        final weatherRows = await _fetchRaceWeatherRows(race);
+        if (weatherRows.isNotEmpty) {
+          await _saveRaceWeather(_raceWeatherKey(race), weatherRows);
+        } else {
+          raceWeatherCache.remove(_raceWeatherKey(race));
+        }
+      } catch (_) {
+        raceWeatherCache.remove(_raceWeatherKey(race));
+      }
+
+      try {
+        final raceControlRows = await _fetchRaceControlRows(race);
+        if (raceControlRows.isNotEmpty) {
+          await _saveRaceControl(_raceControlKey(race), raceControlRows);
+        } else {
+          raceControlCache.remove(_raceControlKey(race));
+        }
+      } catch (_) {
+        raceControlCache.remove(_raceControlKey(race));
+      }
     }
 
     isInitialized = true;
@@ -1708,8 +3979,108 @@ class SessionDataManager extends ChangeNotifier {
 
   String raceResultsKeyFor(Race race) => _raceResultsKey(race);
 
+  String raceWeatherKeyFor(Race race) => _raceWeatherKey(race);
+
+  String raceControlKeyFor(Race race) => _raceControlKey(race);
+
   String sessionOverviewKeyFor(Race race, String sessionName) =>
       _sessionOverviewKey(race, sessionName);
+
+  Future<List<WeekendHubPodiumEntry>> fetchWeekendHubPodium(Race race) async {
+    final raceSession = await _findClosestSessionForRace(
+      race: race,
+      sessionName: 'Race',
+    );
+    if (raceSession == null) {
+      return const <WeekendHubPodiumEntry>[];
+    }
+
+    final raceSessionKey = _asInt(raceSession['session_key']);
+    if (raceSessionKey == null) {
+      return const <WeekendHubPodiumEntry>[];
+    }
+
+    final results = await _fetchOpenF1Collection(
+      'session_result',
+      <String, String>{'session_key': raceSessionKey.toString()},
+    );
+    final drivers = await _fetchOpenF1Collection('drivers', <String, String>{
+      'session_key': raceSessionKey.toString(),
+    });
+    final laps = await _fetchOpenF1Collection('laps', <String, String>{
+      'session_key': raceSessionKey.toString(),
+    });
+    final stints = await _fetchOpenF1Collection('stints', <String, String>{
+      'session_key': raceSessionKey.toString(),
+    });
+
+    if (results.isEmpty || drivers.isEmpty) {
+      return const <WeekendHubPodiumEntry>[];
+    }
+
+    final driverNames = <int, String>{
+      for (final driver in drivers)
+        if (_asInt(driver['driver_number']) != null)
+          _asInt(driver['driver_number'])!: _formatDriverName(driver),
+    };
+    final fastestLapByDriver = _buildFastestLapDetailsMap(laps, stints);
+    final overallFastestLap = fastestLapByDriver.values.isEmpty
+        ? null
+        : fastestLapByDriver.values.reduce(
+            (best, current) =>
+                current.duration < best.duration ? current : best,
+          );
+    final tyreStrategyByDriver = _buildTyreStrategyMap(stints);
+
+    final sortedResults = List<Map<String, dynamic>>.from(results)
+      ..sort((a, b) {
+        final positionA = _asInt(a['position']) ?? 999;
+        final positionB = _asInt(b['position']) ?? 999;
+        if (positionA != positionB) {
+          return positionA.compareTo(positionB);
+        }
+
+        final lapsA = _asInt(a['number_of_laps']) ?? -1;
+        final lapsB = _asInt(b['number_of_laps']) ?? -1;
+        return lapsB.compareTo(lapsA);
+      });
+
+    final winnerDuration = sortedResults
+        .map((entry) => _asDouble(entry['duration']))
+        .whereType<double>()
+        .cast<double?>()
+        .firstWhere((value) => value != null, orElse: () => null);
+
+    return sortedResults
+        .take(3)
+        .map((entry) {
+          final driverNumber = _asInt(entry['driver_number']);
+          final fastestLap = driverNumber == null
+              ? null
+              : fastestLapByDriver[driverNumber];
+          final hasOverallFastestLap =
+              driverNumber != null &&
+              overallFastestLap != null &&
+              fastestLap?.duration == overallFastestLap.duration;
+
+          return WeekendHubPodiumEntry(
+            position: _asInt(entry['position']) ?? 0,
+            driverNumber: driverNumber,
+            driver: driverNumber == null
+                ? '-'
+                : (driverNames[driverNumber] ?? '-'),
+            points: _formatPoints(_asDouble(entry['points']) ?? 0),
+            totalTime: _formatTotalRaceTime(entry, winnerDuration),
+            gapToLeader: _formatTimeOrGap(entry, winnerDuration),
+            fastestLap: _formatLapDuration(fastestLap?.duration),
+            hasFastestLap: hasOverallFastestLap,
+            tyreCompounds: driverNumber == null
+                ? const <String>[]
+                : (tyreStrategyByDriver[driverNumber] ?? const <String>[]),
+          );
+        })
+        .toList(growable: false);
+  }
 
   Future<List<SessionResult>> _fetchSessionResults({
     required int year,
@@ -1816,8 +4187,7 @@ class SessionDataManager extends ChangeNotifier {
 
   Future<void> _saveResults(String key, List<SessionResult> results) async {
     cache[key] = results;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
+    await _sessionPayloadBox.put(
       key,
       jsonEncode(results.map((result) => result.toJson()).toList()),
     );
@@ -1825,10 +4195,31 @@ class SessionDataManager extends ChangeNotifier {
 
   Future<void> _saveRaceResults(String key, List<RaceResultRow> rows) async {
     raceResultsCache[key] = rows;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
+    await _sessionPayloadBox.put(
       key,
       jsonEncode(rows.map((row) => row.toJson()).toList()),
+    );
+  }
+
+  Future<void> _saveRaceWeather(
+    String key,
+    List<Map<String, dynamic>> rows,
+  ) async {
+    raceWeatherCache[key] = rows;
+    await _sessionPayloadBox.put(
+      key,
+      jsonEncode(<String, dynamic>{'samples': rows}),
+    );
+  }
+
+  Future<void> _saveRaceControl(
+    String key,
+    List<Map<String, dynamic>> rows,
+  ) async {
+    raceControlCache[key] = rows;
+    await _sessionPayloadBox.put(
+      key,
+      jsonEncode(<String, dynamic>{'messages': rows}),
     );
   }
 
@@ -1837,15 +4228,98 @@ class SessionDataManager extends ChangeNotifier {
     List<SessionOverviewRow> rows,
   ) async {
     sessionOverviewCache[key] = rows;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
+    await _sessionPayloadBox.put(
       key,
       jsonEncode(rows.map((row) => row.toJson()).toList()),
     );
   }
 
+  String? _readCachedPayload(
+    Box<String> sessionBox,
+    SharedPreferences prefs,
+    String key,
+  ) {
+    final hiveValue = sessionBox.get(key);
+    if (hiveValue != null) {
+      return hiveValue;
+    }
+
+    final legacyValue = prefs.getString(key);
+    if (legacyValue != null) {
+      sessionBox.put(key, legacyValue);
+    }
+    return legacyValue;
+  }
+
+  bool _hasRaceDataCached(Race race) {
+    final now = DateTime.now();
+    final sessionNames = race.hasSprint
+        ? ['Practice 1', 'Sprint Qualifying', 'Sprint', 'Qualifying', 'Race']
+        : ['Practice 1', 'Practice 2', 'Practice 3', 'Qualifying', 'Race'];
+
+    for (final sessionName in sessionNames) {
+      final sessionDate = sessionName == 'Race'
+          ? race.date
+          : _sessionDateFor(race, sessionName);
+      if (sessionDate.isAfter(now)) {
+        continue;
+      }
+
+      if (sessionName == 'Race') {
+        continue;
+      }
+
+      final sessionKey = '${race.country}_${sessionName}_${race.date.year}';
+      final overviewKey = _sessionOverviewKey(race, sessionName);
+      final hasSessionRows =
+          cache.containsKey(sessionKey) ||
+          _sessionPayloadBox.containsKey(sessionKey);
+      final hasOverviewRows =
+          sessionOverviewCache.containsKey(overviewKey) ||
+          _sessionPayloadBox.containsKey(overviewKey);
+
+      if (!hasOverviewRows && !hasSessionRows) {
+        return false;
+      }
+    }
+
+    if (!race.date.isAfter(now)) {
+      final raceResultsKey = _raceResultsKey(race);
+      final hasRaceResults =
+          raceResultsCache.containsKey(raceResultsKey) ||
+          _sessionPayloadBox.containsKey(raceResultsKey);
+      if (!hasRaceResults) {
+        return false;
+      }
+
+      final raceWeatherKey = _raceWeatherKey(race);
+      final hasRaceWeather =
+          raceWeatherCache.containsKey(raceWeatherKey) ||
+          _sessionPayloadBox.containsKey(raceWeatherKey);
+      if (!hasRaceWeather) {
+        return false;
+      }
+
+      final raceControlKey = _raceControlKey(race);
+      final hasRaceControl =
+          raceControlCache.containsKey(raceControlKey) ||
+          _sessionPayloadBox.containsKey(raceControlKey);
+      if (!hasRaceControl) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   String _raceResultsKey(Race race) =>
       '${race.country}_RaceResults_${race.date.year}_v2';
+
+  String _raceWeatherKey(Race race) =>
+      '${race.country}_RaceWeather_${race.date.year}_v1';
+
+  String _raceControlKey(Race race) =>
+      '${race.country}_RaceControl_${race.date.year}_v1';
 
   String _sessionOverviewKey(Race race, String sessionName) =>
       '${race.country}_${sessionName}_${race.date.year}_Overview';
@@ -1873,6 +4347,11 @@ class SessionDataManager extends ChangeNotifier {
     Race race,
     String sessionName,
   ) async {
+    final staticRows = await _loadStaticSessionOverviewRows(race, sessionName);
+    if (staticRows.isNotEmpty) {
+      return staticRows;
+    }
+
     final session = await _findClosestSessionForRace(
       race: race,
       sessionName: sessionName,
@@ -1910,6 +4389,7 @@ class SessionDataManager extends ChangeNotifier {
           _asInt(driver['driver_number'])!: _formatDriverName(driver),
     };
     final fastestLapByDriver = _buildFastestLapDetailsMap(laps, stints);
+    final lapSummaryByDriver = _buildSessionLapSummaryMap(stints);
     final overallFastestLap = fastestLapByDriver.values.isEmpty
         ? null
         : fastestLapByDriver.values.reduce(
@@ -1928,6 +4408,19 @@ class SessionDataManager extends ChangeNotifier {
       return sortedResults.map((entry) {
         final driverNumber = _asInt(entry['driver_number']);
         final isSprint = sessionName == 'Sprint';
+        final driverFastestLap = driverNumber == null
+            ? null
+            : fastestLapByDriver[driverNumber];
+        final lapSummary = driverNumber == null
+            ? null
+            : lapSummaryByDriver[driverNumber];
+        final tyreUsage = driverNumber == null
+            ? null
+            : _tyreUsageForLap(
+                stints,
+                driverNumber,
+                driverFastestLap?.lapNumber,
+              );
 
         return SessionOverviewRow(
           driver: driverNumber == null
@@ -1936,25 +4429,25 @@ class SessionDataManager extends ChangeNotifier {
           position: _formatSessionPosition(entry),
           result: isSprint
               ? _formatSprintResult(entry)
-              : _formatLapDuration(
-                  driverNumber == null
-                      ? null
-                      : fastestLapByDriver[driverNumber]?.duration,
-                ),
-          fastestLap: driverNumber == null
-              ? '-'
-              : _formatLapDuration(fastestLapByDriver[driverNumber]?.duration),
-          tyreCompound: driverNumber == null
-              ? '-'
-              : _formatTyreCompound(fastestLapByDriver[driverNumber]?.compound),
+              : _formatLapDuration(driverFastestLap?.duration),
+          fastestLap: _formatLapDuration(driverFastestLap?.duration),
+          tyreCompound:
+              tyreUsage?.formattedCompound ??
+              _formatTyreCompound(driverFastestLap?.compound),
           points: isSprint
               ? _formatPoints(_asDouble(entry['points']) ?? 0)
               : '-',
           hasFastestLap:
               driverNumber != null &&
               overallFastestLap != null &&
-              fastestLapByDriver[driverNumber]?.duration ==
-                  overallFastestLap.duration,
+              driverFastestLap?.duration == overallFastestLap.duration,
+          usedTyre: tyreUsage?.usedTyre ?? false,
+          tyreAgeAtStart: tyreUsage?.tyreAgeAtStart,
+          totalLaps: lapSummary?.totalLaps,
+          tyreLaps: lapSummary?.lapsByCompound ?? const <String, int>{},
+          tyreLapSequence:
+              lapSummary?.stintSequence ??
+              const <SessionTyreLapBreakdownEntry>[],
         );
       }).toList();
     }
@@ -1966,33 +4459,248 @@ class SessionDataManager extends ChangeNotifier {
       final position = entry.key + 1;
       final driverNumber = entry.value.key;
       final lap = entry.value.value;
+      final lapSummary = lapSummaryByDriver[driverNumber];
+      final tyreUsage = _tyreUsageForLap(stints, driverNumber, lap.lapNumber);
       return SessionOverviewRow(
         driver: driverNames[driverNumber] ?? '-',
         position: position.toString(),
         result: _formatLapDuration(lap.duration),
         fastestLap: _formatLapDuration(lap.duration),
-        tyreCompound: _formatTyreCompound(lap.compound),
+        tyreCompound:
+            tyreUsage?.formattedCompound ?? _formatTyreCompound(lap.compound),
         points: '-',
         hasFastestLap:
             overallFastestLap != null &&
             lap.duration == overallFastestLap.duration,
+        usedTyre: tyreUsage?.usedTyre ?? false,
+        tyreAgeAtStart: tyreUsage?.tyreAgeAtStart,
+        totalLaps: lapSummary?.totalLaps,
+        tyreLaps: lapSummary?.lapsByCompound ?? const <String, int>{},
+        tyreLapSequence:
+            lapSummary?.stintSequence ?? const <SessionTyreLapBreakdownEntry>[],
       );
     }).toList();
   }
 
-  Future<List<RaceResultRow>> _fetchRaceResultRows(Race race) async {
+  _TyreUsageDetails? _tyreUsageForLap(
+    List<Map<String, dynamic>> stints,
+    int driverNumber,
+    int? lapNumber,
+  ) {
+    if (lapNumber == null || lapNumber <= 0) {
+      return null;
+    }
+
+    for (final stint in stints) {
+      if (_asInt(stint['driver_number']) != driverNumber) {
+        continue;
+      }
+
+      final lapStart = _asInt(stint['lap_start']) ?? 0;
+      final lapEnd = _asInt(stint['lap_end']) ?? 0;
+      if (lapNumber < lapStart || lapNumber > lapEnd) {
+        continue;
+      }
+
+      final compound = _formatTyreCompound(stint['compound']?.toString());
+      final tyreAgeAtStart = _asInt(stint['tyre_age_at_start']);
+      return _TyreUsageDetails(
+        compound: compound,
+        tyreAgeAtStart: tyreAgeAtStart,
+      );
+    }
+
+    return null;
+  }
+
+  Future<List<SessionOverviewRow>> _loadStaticSessionOverviewRows(
+    Race race,
+    String sessionName,
+  ) async {
+    final fileName =
+        'sessions_${race.date.year}_round_${raceRoundFor(race)}.json';
+    final candidatePaths = <String>[
+      fileName,
+      'data/$fileName',
+      'data/results/$fileName',
+    ];
+
+    for (final candidatePath in candidatePaths) {
+      try {
+        final uri = Uri.base.resolve(candidatePath);
+        final response = await http
+            .get(uri)
+            .timeout(const Duration(seconds: 4));
+        if (response.statusCode != 200) {
+          continue;
+        }
+
+        final decoded = jsonDecode(response.body);
+        if (decoded is! Map<String, dynamic>) {
+          continue;
+        }
+
+        final sessions = decoded['sessions'];
+        if (sessions is! Map<String, dynamic>) {
+          continue;
+        }
+
+        final sessionRows = sessions[sessionName];
+        if (sessionRows is! List) {
+          continue;
+        }
+
+        final rows = sessionRows
+            .whereType<Map>()
+            .map(
+              (entry) => SessionOverviewRow.fromJson(
+                entry.map((key, value) => MapEntry(key.toString(), value)),
+              ),
+            )
+            .toList(growable: false);
+        if (rows.isNotEmpty) {
+          return rows;
+        }
+      } catch (_) {
+        continue;
+      }
+    }
+
+    return const <SessionOverviewRow>[];
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchRaceWeatherRows(Race race) async {
+    final staticWeather = await _loadStaticRaceWeather(race);
+    if (staticWeather.isNotEmpty) {
+      return staticWeather;
+    }
+
     final raceSession = await _findClosestSessionForRace(
       race: race,
       sessionName: 'Race',
     );
     if (raceSession == null) {
-      return const <RaceResultRow>[];
+      return const <Map<String, dynamic>>[];
+    }
+
+    final raceSessionKey = _asInt(raceSession['session_key']);
+    if (raceSessionKey == null) {
+      return const <Map<String, dynamic>>[];
+    }
+
+    final weather = await _fetchOpenF1Collection('weather', <String, String>{
+      'session_key': raceSessionKey.toString(),
+    });
+    return _buildWeatherSamples(weather);
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchRaceControlRows(Race race) async {
+    final staticMessages = await _loadStaticRaceControl(race);
+    if (staticMessages.isNotEmpty) {
+      return staticMessages;
+    }
+
+    final raceSession = await _findClosestSessionForRace(
+      race: race,
+      sessionName: 'Race',
+    );
+    if (raceSession == null) {
+      return const <Map<String, dynamic>>[];
+    }
+
+    final meetingKey = _asInt(raceSession['meeting_key']);
+    if (meetingKey == null) {
+      return const <Map<String, dynamic>>[];
+    }
+
+    final meetingSessions = await _fetchOpenF1Collection(
+      'sessions',
+      <String, String>{'meeting_key': meetingKey.toString()},
+    );
+    final sortedSessions = List<Map<String, dynamic>>.from(meetingSessions)
+      ..sort((a, b) {
+        final aDate = DateTime.tryParse(a['date_start']?.toString() ?? '');
+        final bDate = DateTime.tryParse(b['date_start']?.toString() ?? '');
+        if (aDate == null && bDate == null) {
+          return 0;
+        }
+        if (aDate == null) {
+          return 1;
+        }
+        if (bDate == null) {
+          return -1;
+        }
+        return aDate.compareTo(bDate);
+      });
+
+    final normalizedMessages = <Map<String, dynamic>>[];
+    for (final session in sortedSessions) {
+      final sessionKey = _asInt(session['session_key']);
+      if (sessionKey == null) {
+        continue;
+      }
+
+        final sessionName = session['session_name']?.toString() ?? 'Unknown';
+      final sessionMessages = await _fetchOpenF1Collection(
+        'race_control',
+        <String, String>{'session_key': sessionKey.toString()},
+      );
+
+      for (final message in sessionMessages) {
+        final normalized = _normalizeRaceControlMessageForWeekend(
+          message,
+          sessionName: sessionName,
+          sessionKey: sessionKey,
+        );
+        if (normalized != null) {
+          normalizedMessages.add(normalized);
+        }
+      }
+    }
+
+    normalizedMessages.sort((a, b) {
+      final aDate = DateTime.tryParse(a['timestampUtc']?.toString() ?? '');
+      final bDate = DateTime.tryParse(b['timestampUtc']?.toString() ?? '');
+      if (aDate != null && bDate != null) {
+        final compare = aDate.compareTo(bDate);
+        if (compare != 0) {
+          return compare;
+        }
+      }
+
+      final aLap = _asInt(a['lap']) ?? -1;
+      final bLap = _asInt(b['lap']) ?? -1;
+      return aLap.compareTo(bLap);
+    });
+
+    return normalizedMessages;
+  }
+
+  Future<List<RaceResultRow>> _fetchRaceResultRows(Race race) async {
+    final staticRows = await _loadStaticRaceResults(race);
+    final staticRowsHaveRichData = staticRows.any(
+      (row) =>
+          row.tyreStints.isNotEmpty ||
+          row.tyreCompounds.isNotEmpty ||
+          row.penaltyDetails.isNotEmpty ||
+          (row.penalty.trim().isNotEmpty && row.penalty.trim() != '-'),
+    );
+    if (staticRows.isNotEmpty && staticRowsHaveRichData) {
+      return staticRows;
+    }
+
+    final raceSession = await _findClosestSessionForRace(
+      race: race,
+      sessionName: 'Race',
+    );
+    if (raceSession == null) {
+      return staticRows;
     }
 
     final meetingKey = _asInt(raceSession['meeting_key']);
     final raceSessionKey = _asInt(raceSession['session_key']);
     if (meetingKey == null || raceSessionKey == null) {
-      return const <RaceResultRow>[];
+      return staticRows;
     }
 
     final meetingSessions = await _fetchOpenF1Collection(
@@ -2051,7 +4759,7 @@ class SessionDataManager extends ChangeNotifier {
           });
 
     if (results.isEmpty || drivers.isEmpty) {
-      return const <RaceResultRow>[];
+      return staticRows;
     }
 
     final Map<int, String> driverNames = {
@@ -2068,7 +4776,23 @@ class SessionDataManager extends ChangeNotifier {
     final Map<int, String> penalties = _buildPenaltyMap(
       allWeekendControlMessages,
     );
+    final sessionNamesByKey = <int, String>{
+      for (final session in meetingSessions)
+        if (_asInt(session['session_key']) != null)
+          _asInt(session['session_key'])!:
+              session['session_name']?.toString() ?? 'Unknown',
+    };
+    final raceControlMessagesByDriver = _buildRaceControlMessagesMap(
+      allWeekendControlMessages,
+      sessionNamesByKey,
+    );
     final fastestLapByDriver = _buildFastestLapDetailsMap(laps, stints);
+    final tyreStrategyByDriver = _buildTyreStrategyMap(stints);
+    final tyreStintsByDriver = _buildRaceTyreStintsMap(stints);
+    final penaltyDetailsByDriver = _buildPenaltyDetailsMap(
+      allWeekendControlMessages,
+      sessionNamesByKey,
+    );
     final overallFastestLap = fastestLapByDriver.values.isEmpty
         ? null
         : fastestLapByDriver.values.reduce(
@@ -2095,11 +4819,25 @@ class SessionDataManager extends ChangeNotifier {
         .cast<double?>()
         .firstWhere((value) => value != null, orElse: () => null);
 
-    return sortedResults.map((entry) {
+    final liveRows = sortedResults.map((entry) {
       final driverNumber = _asInt(entry['driver_number']);
       final startPosition = driverNumber == null
           ? null
           : gridPositions[driverNumber];
+      final penaltyDetails = driverNumber == null
+        ? const <Map<String, dynamic>>[]
+        : (penaltyDetailsByDriver[driverNumber] ?? const <Map<String, dynamic>>[]);
+      final penaltyServedLaps = penaltyDetails
+        .map((detail) => detail['lap'])
+        .whereType<int>()
+        .toSet()
+        .toList(growable: false);
+      final tyreCompounds = driverNumber == null
+        ? const <String>[]
+        : (tyreStrategyByDriver[driverNumber] ?? const <String>[]);
+      final tyreStints = driverNumber == null
+        ? const <Map<String, dynamic>>[]
+        : (tyreStintsByDriver[driverNumber] ?? const <Map<String, dynamic>>[]);
       return RaceResultRow(
         driver: driverNumber == null ? '-' : (driverNames[driverNumber] ?? '-'),
         start: driverNumber == null
@@ -2120,8 +4858,172 @@ class SessionDataManager extends ChangeNotifier {
             overallFastestLap != null &&
             fastestLapByDriver[driverNumber]?.duration ==
                 overallFastestLap.duration,
+        tyreCompounds: tyreCompounds,
+        tyreStints: tyreStints,
+        tyreStrategy: tyreCompounds.isEmpty ? '-' : tyreCompounds.join(' -> '),
+        tyreChangeLaps: const <int>[],
+        penaltyDetails: penaltyDetails,
+        penaltyServed: penaltyDetails.any((detail) => detail['served'] == true),
+        penaltyServedLaps: penaltyServedLaps,
+        weatherSamples: const <Map<String, dynamic>>[],
+        raceControlMessages: driverNumber == null
+            ? const <Map<String, dynamic>>[]
+            : (raceControlMessagesByDriver[driverNumber] ??
+                  const <Map<String, dynamic>>[]),
+        pitStops: const <Map<String, dynamic>>[],
+        totalPitTime: '-',
+        fastestPitStop: null,
+        averagePitTime: '-',
       );
-    }).toList();
+    }).toList(growable: false);
+
+    return liveRows.isNotEmpty ? liveRows : staticRows;
+  }
+
+  Future<List<RaceResultRow>> _loadStaticRaceResults(Race race) async {
+    final fileName =
+        'results_${race.date.year}_round_${raceRoundFor(race)}.json';
+    final candidatePaths = <String>[
+      fileName,
+      'data/$fileName',
+      'data/results/$fileName',
+    ];
+
+    for (final candidatePath in candidatePaths) {
+      try {
+        final uri = Uri.base.resolve(candidatePath);
+        final response = await http
+            .get(uri)
+            .timeout(const Duration(seconds: 4));
+        if (response.statusCode != 200) {
+          continue;
+        }
+
+        final decoded = jsonDecode(response.body);
+        if (decoded is! List) {
+          continue;
+        }
+
+        final rows = decoded
+            .whereType<Map>()
+            .map(
+              (entry) => RaceResultRow.fromJson(
+                entry.map((key, value) => MapEntry(key.toString(), value)),
+              ),
+            )
+            .toList(growable: false);
+        if (rows.isNotEmpty) {
+          return rows;
+        }
+      } catch (_) {
+        continue;
+      }
+    }
+
+    return const <RaceResultRow>[];
+  }
+
+  Future<List<Map<String, dynamic>>> _loadStaticRaceWeather(Race race) async {
+    final fileName =
+        'weather_${race.date.year}_round_${raceRoundFor(race)}.json';
+    final candidatePaths = <String>[
+      fileName,
+      'data/$fileName',
+      'data/results/$fileName',
+    ];
+
+    for (final candidatePath in candidatePaths) {
+      try {
+        final uri = Uri.base.resolve(candidatePath);
+        final response = await http
+            .get(uri)
+            .timeout(const Duration(seconds: 4));
+        if (response.statusCode != 200) {
+          continue;
+        }
+
+        final decoded = jsonDecode(response.body);
+        if (decoded is! Map<String, dynamic>) {
+          continue;
+        }
+
+        dynamic samples = decoded['samples'];
+        if (samples is! List) {
+          final sessions = decoded['sessions'];
+          if (sessions is Map) {
+            final raceSession = sessions['Race'];
+            if (raceSession is Map) {
+              samples = raceSession['samples'];
+            }
+          }
+        }
+        if (samples is! List) {
+          continue;
+        }
+
+        final rows = samples
+            .whereType<Map>()
+            .map(
+              (entry) =>
+                  entry.map((key, value) => MapEntry(key.toString(), value)),
+            )
+            .toList(growable: false);
+        if (rows.isNotEmpty) {
+          return rows;
+        }
+      } catch (_) {
+        continue;
+      }
+    }
+
+    return const <Map<String, dynamic>>[];
+  }
+
+  Future<List<Map<String, dynamic>>> _loadStaticRaceControl(Race race) async {
+    final fileName =
+        'race_control_${race.date.year}_round_${raceRoundFor(race)}.json';
+    final candidatePaths = <String>[
+      fileName,
+      'data/$fileName',
+      'data/results/$fileName',
+    ];
+
+    for (final candidatePath in candidatePaths) {
+      try {
+        final uri = Uri.base.resolve(candidatePath);
+        final response = await http
+            .get(uri)
+            .timeout(const Duration(seconds: 4));
+        if (response.statusCode != 200) {
+          continue;
+        }
+
+        final decoded = jsonDecode(response.body);
+        if (decoded is! Map<String, dynamic>) {
+          continue;
+        }
+
+        final messages = decoded['messages'];
+        if (messages is! List) {
+          continue;
+        }
+
+        final rows = messages
+            .whereType<Map>()
+            .map(
+              (entry) =>
+                  entry.map((key, value) => MapEntry(key.toString(), value)),
+            )
+            .toList(growable: false);
+        if (rows.isNotEmpty) {
+          return rows;
+        }
+      } catch (_) {
+        continue;
+      }
+    }
+
+    return const <Map<String, dynamic>>[];
   }
 
   Map<int, FastestLapDetails> _buildFastestLapDetailsMap(
@@ -2155,6 +5057,185 @@ class SessionDataManager extends ChangeNotifier {
     }
 
     return fastestLapByDriver;
+  }
+
+  Map<int, _SessionLapSummary> _buildSessionLapSummaryMap(
+    List<Map<String, dynamic>> stints,
+  ) {
+    final sortedStints = List<Map<String, dynamic>>.from(stints)
+      ..sort((a, b) {
+        final driverA = _asInt(a['driver_number']) ?? 999;
+        final driverB = _asInt(b['driver_number']) ?? 999;
+        if (driverA != driverB) {
+          return driverA.compareTo(driverB);
+        }
+
+        final stintA = _asInt(a['stint_number']) ?? _asInt(a['lap_start']) ?? 0;
+        final stintB = _asInt(b['stint_number']) ?? _asInt(b['lap_start']) ?? 0;
+        return stintA.compareTo(stintB);
+      });
+    final summaries = <int, _MutableSessionLapSummary>{};
+
+    for (final stint in sortedStints) {
+      final driverNumber = _asInt(stint['driver_number']);
+      if (driverNumber == null) {
+        continue;
+      }
+
+      final lapStart = _asInt(stint['lap_start']);
+      final lapEnd = _asInt(stint['lap_end']);
+      if (lapStart == null || lapEnd == null || lapEnd < lapStart) {
+        continue;
+      }
+
+      final lapCount = (lapEnd - lapStart) + 1;
+      if (lapCount <= 0) {
+        continue;
+      }
+
+      final compound = _formatTyreCompound(stint['compound']?.toString());
+      final summary = summaries.putIfAbsent(
+        driverNumber,
+        () => _MutableSessionLapSummary(),
+      );
+      summary.totalLaps += lapCount;
+      if (compound != '-') {
+        summary.lapsByCompound.update(
+          compound,
+          (value) => value + lapCount,
+          ifAbsent: () => lapCount,
+        );
+        summary.stintSequence.add(
+          SessionTyreLapBreakdownEntry(
+            compound: compound,
+            laps: lapCount,
+            usedTyre: (_asInt(stint['tyre_age_at_start']) ?? 0) > 0,
+          ),
+        );
+      }
+    }
+
+    return {
+      for (final entry in summaries.entries) entry.key: entry.value.build(),
+    };
+  }
+
+  Map<int, List<String>> _buildTyreStrategyMap(
+    List<Map<String, dynamic>> stints,
+  ) {
+    final sortedStints = List<Map<String, dynamic>>.from(stints)
+      ..sort((a, b) {
+        final driverA = _asInt(a['driver_number']) ?? 999;
+        final driverB = _asInt(b['driver_number']) ?? 999;
+        if (driverA != driverB) {
+          return driverA.compareTo(driverB);
+        }
+
+        final stintA = _asInt(a['stint_number']) ?? _asInt(a['lap_start']) ?? 0;
+        final stintB = _asInt(b['stint_number']) ?? _asInt(b['lap_start']) ?? 0;
+        return stintA.compareTo(stintB);
+      });
+
+    final strategies = <int, List<String>>{};
+    for (final stint in sortedStints) {
+      final driverNumber = _asInt(stint['driver_number']);
+      if (driverNumber == null) {
+        continue;
+      }
+
+      final formattedCompound = _formatTyreCompound(
+        stint['compound']?.toString(),
+      );
+      if (formattedCompound == '-') {
+        continue;
+      }
+
+      final compounds = strategies.putIfAbsent(driverNumber, () => <String>[]);
+      if (compounds.isEmpty || compounds.last != formattedCompound) {
+        compounds.add(formattedCompound);
+      }
+    }
+
+    return strategies;
+  }
+
+  Map<int, List<Map<String, dynamic>>> _buildRaceTyreStintsMap(
+    List<Map<String, dynamic>> stints,
+  ) {
+    final sortedStints = List<Map<String, dynamic>>.from(stints)
+      ..sort((a, b) {
+        final driverA = _asInt(a['driver_number']) ?? 999;
+        final driverB = _asInt(b['driver_number']) ?? 999;
+        if (driverA != driverB) {
+          return driverA.compareTo(driverB);
+        }
+
+        final stintA = _asInt(a['stint_number']) ?? _asInt(a['lap_start']) ?? 0;
+        final stintB = _asInt(b['stint_number']) ?? _asInt(b['lap_start']) ?? 0;
+        return stintA.compareTo(stintB);
+      });
+
+    final stintsByDriver = <int, List<Map<String, dynamic>>>{};
+    for (final stint in sortedStints) {
+      final driverNumber = _asInt(stint['driver_number']);
+      if (driverNumber == null) {
+        continue;
+      }
+
+      final lapStart = _asInt(stint['lap_start']);
+      final lapEnd = _asInt(stint['lap_end']);
+      final compound = _formatTyreCompound(stint['compound']?.toString());
+      if (lapStart == null || lapEnd == null || lapEnd < lapStart || compound == '-') {
+        continue;
+      }
+
+      stintsByDriver.putIfAbsent(driverNumber, () => <Map<String, dynamic>>[]).add({
+        'compound': compound,
+        'lapStart': lapStart,
+        'lapEnd': lapEnd,
+        'laps': (lapEnd - lapStart) + 1,
+        'usedTyre': (_asInt(stint['tyre_age_at_start']) ?? 0) > 0,
+      });
+    }
+
+    return stintsByDriver;
+  }
+
+  Map<int, List<Map<String, dynamic>>> _buildPenaltyDetailsMap(
+    List<Map<String, dynamic>> messages,
+    Map<int, String> sessionNamesByKey,
+  ) {
+    final penaltyDetailsByDriver = <int, List<Map<String, dynamic>>>{};
+
+    for (final entry in messages) {
+      final message = entry['message']?.toString().trim() ?? '';
+      if (message.isEmpty) {
+        continue;
+      }
+
+      final driverNumber = _extractPenaltyDriverNumber(entry, message);
+      if (driverNumber == null) {
+        continue;
+      }
+
+      final normalizedPenalty = _normalizePenalty(message);
+      final isPenaltyServed = _isRaceControlPenaltyServedMessage(message);
+      if (normalizedPenalty == null && !isPenaltyServed) {
+        continue;
+      }
+
+      final sessionKey = _asInt(entry['session_key']);
+      penaltyDetailsByDriver.putIfAbsent(driverNumber, () => <Map<String, dynamic>>[]).add({
+        'timestampUtc': entry['date']?.toString(),
+        'lap': _asInt(entry['lap_number']),
+        'sessionName': sessionKey == null ? null : sessionNamesByKey[sessionKey],
+        'message': message,
+        'penalty': normalizedPenalty,
+        'served': isPenaltyServed,
+      });
+    }
+
+    return penaltyDetailsByDriver;
   }
 
   String _compoundForLap(
@@ -2282,6 +5363,139 @@ class SessionDataManager extends ChangeNotifier {
     };
   }
 
+  Map<int, List<Map<String, dynamic>>> _buildRaceControlMessagesMap(
+    List<Map<String, dynamic>> messages,
+    Map<int, String> sessionNamesByKey,
+  ) {
+    final sortedMessages = List<Map<String, dynamic>>.from(messages)
+      ..sort((a, b) {
+        final aDate = DateTime.tryParse(a['date']?.toString() ?? '');
+        final bDate = DateTime.tryParse(b['date']?.toString() ?? '');
+        if (aDate != null && bDate != null) {
+          final compare = aDate.compareTo(bDate);
+          if (compare != 0) {
+            return compare;
+          }
+        }
+
+        final aLap = _asInt(a['lap_number']) ?? -1;
+        final bLap = _asInt(b['lap_number']) ?? -1;
+        return aLap.compareTo(bLap);
+      });
+
+    final result = <int, List<Map<String, dynamic>>>{};
+    for (final entry in sortedMessages) {
+      final message = entry['message']?.toString().trim() ?? '';
+      if (message.isEmpty) {
+        continue;
+      }
+
+      final driverNumber = _extractPenaltyDriverNumber(entry, message);
+      if (driverNumber == null) {
+        continue;
+      }
+
+      final sessionKey = _asInt(entry['session_key']);
+      result.putIfAbsent(driverNumber, () => <Map<String, dynamic>>[]).add({
+        'timestampUtc': entry['date']?.toString(),
+        'lap': _asInt(entry['lap_number']),
+        'category': entry['category']?.toString(),
+        'flag': entry['flag']?.toString(),
+        'scope': entry['scope']?.toString(),
+        'sector': _asInt(entry['sector']),
+        'qualifyingPhase': entry['qualifying_phase']?.toString(),
+        'message': message,
+        'sessionName': sessionKey == null
+            ? null
+            : sessionNamesByKey[sessionKey],
+      });
+    }
+
+    return result;
+  }
+
+  Map<String, dynamic>? _normalizeRaceControlMessageForWeekend(
+    Map<String, dynamic> entry, {
+    required String sessionName,
+    required int sessionKey,
+  }) {
+    final message = entry['message']?.toString().trim() ?? '';
+    if (message.isEmpty) {
+      return null;
+    }
+
+    return {
+      'timestampUtc': entry['date']?.toString(),
+      'lap': _asInt(entry['lap_number']),
+      'category': entry['category']?.toString(),
+      'flag': entry['flag']?.toString(),
+      'scope': entry['scope']?.toString(),
+      'sector': _asInt(entry['sector']),
+      'driverNumber': _extractPenaltyDriverNumber(entry, message),
+      'qualifyingPhase': entry['qualifying_phase']?.toString(),
+      'sessionKey': sessionKey,
+      'sessionName': sessionName,
+      'message': message,
+    };
+  }
+
+  List<Map<String, dynamic>> _buildWeatherSamples(
+    List<Map<String, dynamic>> weatherEntries,
+  ) {
+    if (weatherEntries.isEmpty) {
+      return const <Map<String, dynamic>>[];
+    }
+
+    final sortedEntries = List<Map<String, dynamic>>.from(weatherEntries)
+      ..sort((a, b) {
+        final aDate = DateTime.tryParse(a['date']?.toString() ?? '');
+        final bDate = DateTime.tryParse(b['date']?.toString() ?? '');
+        if (aDate == null && bDate == null) {
+          return 0;
+        }
+        if (aDate == null) {
+          return 1;
+        }
+        if (bDate == null) {
+          return -1;
+        }
+        return aDate.compareTo(bDate);
+      });
+
+    final samplesByBucket = <String, Map<String, dynamic>>{};
+    for (final entry in sortedEntries) {
+      final date = DateTime.tryParse(entry['date']?.toString() ?? '');
+      if (date == null) {
+        continue;
+      }
+
+      final utcDate = date.toUtc();
+      final bucketMinute = (utcDate.minute ~/ 5) * 5;
+      final bucket = DateTime.utc(
+        utcDate.year,
+        utcDate.month,
+        utcDate.day,
+        utcDate.hour,
+        bucketMinute,
+      );
+      final bucketKey = bucket.toIso8601String();
+      samplesByBucket.putIfAbsent(bucketKey, () {
+        return {
+          'timestampUtc': entry['date']?.toString(),
+          'airTemperatureC': _asDouble(entry['air_temperature']),
+          'trackTemperatureC': _asDouble(entry['track_temperature']),
+          'humidity': _asDouble(entry['humidity']),
+          'rainfall': _asDouble(entry['rainfall']),
+          'pressure': _asDouble(entry['pressure']),
+          'windSpeed': _asDouble(entry['wind_speed']),
+          'windDirection': _asInt(entry['wind_direction']),
+        };
+      });
+    }
+
+    return samplesByBucket.values.toList(growable: false);
+  }
+
   int? _extractPenaltyDriverNumber(Map<String, dynamic> entry, String message) {
     final directDriverNumber = _asInt(entry['driver_number']);
     if (directDriverNumber != null) {
@@ -2344,11 +5558,13 @@ class SessionDataManager extends ChangeNotifier {
     }
 
     if (upper.contains('STOP/GO PENALTY') ||
-        upper.contains('STOP AND GO PENALTY')) {
+        upper.contains('STOP AND GO PENALTY') ||
+        upper.contains('STOP-AND-GO PENALTY')) {
       return 'S&G';
     }
 
-    if (upper.contains('DRIVE THROUGH PENALTY')) {
+    if (upper.contains('DRIVE THROUGH PENALTY') ||
+        upper.contains('DRIVE-THROUGH PENALTY')) {
       return 'DT';
     }
 
@@ -2472,6 +5688,63 @@ class SessionDataManager extends ChangeNotifier {
     return '-';
   }
 
+  String _formatTotalRaceTime(
+    Map<String, dynamic> entry,
+    double? winnerDuration,
+  ) {
+    if (_asBool(entry['dns'])) {
+      return 'DNS';
+    }
+    if (_asBool(entry['dnf'])) {
+      return 'DNF';
+    }
+    if (_asBool(entry['dsq']) || _asInt(entry['position']) == null) {
+      return 'NC';
+    }
+
+    final duration = _asDouble(entry['duration']);
+    if (duration != null) {
+      return _formatRaceDuration(duration);
+    }
+
+    final gapSeconds = _extractGapInSeconds(entry['gap_to_leader']);
+    if (gapSeconds != null && winnerDuration != null) {
+      return _formatRaceDuration(winnerDuration + gapSeconds);
+    }
+
+    return _formatTimeOrGap(entry, winnerDuration);
+  }
+
+  double? _extractGapInSeconds(dynamic gap) {
+    if (gap is num) {
+      return gap.toDouble();
+    }
+
+    final gapText = gap?.toString().trim() ?? '';
+    if (gapText.isEmpty) {
+      return null;
+    }
+
+    final normalized = gapText.replaceAll('+', '').replaceAll('s', '').trim();
+    final numericGap = double.tryParse(normalized);
+    if (numericGap != null) {
+      return numericGap;
+    }
+
+    final minuteSecondMatch = RegExp(
+      r'^(\d+):(\d{1,2}(?:\.\d+)?)$',
+    ).firstMatch(normalized);
+    if (minuteSecondMatch != null) {
+      final minutes = int.tryParse(minuteSecondMatch.group(1)!);
+      final seconds = double.tryParse(minuteSecondMatch.group(2)!);
+      if (minutes != null && seconds != null) {
+        return minutes * 60 + seconds;
+      }
+    }
+
+    return null;
+  }
+
   String _normalizeGapText(String gapText) {
     final upper = gapText.toUpperCase();
     final lapMatch = RegExp(r'\+(\d+)\s+LAP(S)?').firstMatch(upper);
@@ -2566,51 +5839,19 @@ class SessionDataManager extends ChangeNotifier {
     }
     return double.tryParse(value?.toString() ?? '');
   }
-
-  String _trimTrailingZero(String value) {
-    if (!value.contains('.')) {
-      return value;
-    }
-    return value
-        .replaceFirst(RegExp(r'\.0+$'), '')
-        .replaceFirst(RegExp(r'(\.[1-9]*)0+$'), r'$1');
-  }
 }
 
-class MainNavigation extends StatefulWidget {
+class AppSettingsMenuButton extends StatelessWidget {
   final ValueChanged<Locale> onSetLocale;
   final VoidCallback onToggleTheme;
 
-  const MainNavigation({
+  const AppSettingsMenuButton({
     required this.onSetLocale,
     required this.onToggleTheme,
     super.key,
   });
 
-  @override
-  State<MainNavigation> createState() => _MainNavigationState();
-}
-
-class _MainNavigationState extends State<MainNavigation> {
-  int _idx = 0;
-  late final PageController _pageController;
-  final GlobalKey<NavigatorState> _racesNavKey = GlobalKey<NavigatorState>();
-  final GlobalKey<NavigatorState> _driversNavKey = GlobalKey<NavigatorState>();
-  final GlobalKey<NavigatorState> _teamsNavKey = GlobalKey<NavigatorState>();
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(initialPage: _idx);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _clearCache() async {
+  Future<void> _clearCache(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     final languageCode = prefs.getString('language_code');
     final isDark = prefs.getBool('is_dark');
@@ -2623,11 +5864,12 @@ class _MainNavigationState extends State<MainNavigation> {
       await prefs.setBool('is_dark', isDark);
     }
 
-    SessionDataManager().cache.clear();
+    await SessionDataManager().clearStoredSessionCache();
+    await Hive.box(HiveBoxes.raceResults).clear();
     SessionDataManager().isInitialized = false;
     await SessionDataManager().init(races);
 
-    if (!mounted) {
+    if (!context.mounted) {
       return;
     }
 
@@ -2637,7 +5879,7 @@ class _MainNavigationState extends State<MainNavigation> {
     ).showSnackBar(SnackBar(content: Text(loc.translate('cache_cleared'))));
   }
 
-  Future<void> _showLanguageDialog() async {
+  Future<void> _showLanguageDialog(BuildContext context) async {
     final Locale? selectedLocale = await showDialog<Locale>(
       context: context,
       builder: (dialogContext) {
@@ -2670,39 +5912,38 @@ class _MainNavigationState extends State<MainNavigation> {
     );
 
     if (selectedLocale != null) {
-      widget.onSetLocale(selectedLocale);
+      onSetLocale(selectedLocale);
     }
   }
 
-  Future<void> _handleSettingsSelection(String value) async {
+  Future<void> _handleSettingsSelection(
+    BuildContext context,
+    String value,
+  ) async {
     switch (value) {
       case 'theme':
-        widget.onToggleTheme();
+        onToggleTheme();
         break;
       case 'language':
-        await _showLanguageDialog();
+        await _showLanguageDialog(context);
         break;
       case 'changelog':
-        if (!mounted) {
-          return;
-        }
-        await Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (_) => const ChangelogScreen()));
+        context.push(_changelogPath());
         break;
       case 'clear_cache':
-        await _clearCache();
+        await _clearCache(context);
         break;
     }
   }
 
-  Widget _buildSettingsMenu(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
 
     return PopupMenuButton<String>(
       icon: const Icon(Icons.settings),
       tooltip: loc.translate('settings'),
-      onSelected: _handleSettingsSelection,
+      onSelected: (value) => _handleSettingsSelection(context, value),
       itemBuilder: (context) => [
         PopupMenuItem<String>(
           value: 'theme',
@@ -2750,33 +5991,37 @@ class _MainNavigationState extends State<MainNavigation> {
       ],
     );
   }
+}
+
+class MainNavigation extends StatelessWidget {
+  final StatefulNavigationShell navigationShell;
+
+  const MainNavigation({required this.navigationShell, super.key});
+
+  Future<void> _openAiAssistant(BuildContext context) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => const AIAssistantSheet(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _openAiAssistant(context),
+        icon: const Icon(Icons.smart_toy_outlined),
+        label: const Text('AI'),
+      ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _idx,
+        currentIndex: navigationShell.currentIndex,
         type: BottomNavigationBarType.fixed,
         onTap: (i) {
-          if (_idx == i) {
-            if (i == 0) {
-              _racesNavKey.currentState?.popUntil((route) => route.isFirst);
-            }
-            if (i == 1) {
-              _driversNavKey.currentState?.popUntil((route) => route.isFirst);
-            }
-            if (i == 2) {
-              _teamsNavKey.currentState?.popUntil((route) => route.isFirst);
-            }
-          } else {
-            _pageController.animateToPage(
-              i,
-              duration: const Duration(milliseconds: 280),
-              curve: Curves.easeInOutCubic,
-            );
-          }
+          navigationShell.goBranch(i);
         },
         items: [
           BottomNavigationBarItem(
@@ -2793,47 +6038,7 @@ class _MainNavigationState extends State<MainNavigation> {
           ),
         ],
       ),
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          if (_idx != index) {
-            setState(() => _idx = index);
-          }
-        },
-        children: [
-          Navigator(
-            key: _racesNavKey,
-            onGenerateRoute: (settings) {
-              return MaterialPageRoute(
-                builder: (context) =>
-                    CircuitsView(settingsMenu: _buildSettingsMenu(context)),
-              );
-            },
-          ),
-          Navigator(
-            key: _driversNavKey,
-            onGenerateRoute: (settings) {
-              return MaterialPageRoute(
-                builder: (context) => StandingsView(
-                  isDriverView: true,
-                  settingsMenu: _buildSettingsMenu(context),
-                ),
-              );
-            },
-          ),
-          Navigator(
-            key: _teamsNavKey,
-            onGenerateRoute: (settings) {
-              return MaterialPageRoute(
-                builder: (context) => StandingsView(
-                  isDriverView: false,
-                  settingsMenu: _buildSettingsMenu(context),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+      body: navigationShell,
     );
   }
 }
@@ -2888,6 +6093,7 @@ class _CircuitsViewState extends State<CircuitsView> {
   Future<void> _primeHomeData() async {
     await _fetchLiveWeather();
     await _preloadLatestRacePodium();
+    await _preloadRecentSessionResults();
   }
 
   Future<void> _preloadLatestRacePodium() async {
@@ -2896,8 +6102,8 @@ class _CircuitsViewState extends State<CircuitsView> {
       return;
     }
 
-    final cacheKey = '${latestRace.country}_Race_${latestRace.date.year}';
-    final cachedResults = SessionDataManager().cache[cacheKey];
+    final cacheKey = SessionDataManager().raceResultsKeyFor(latestRace);
+    final cachedResults = SessionDataManager().raceResultsCache[cacheKey];
     if (cachedResults != null && cachedResults.length >= 3) {
       if (mounted) {
         setState(() {});
@@ -2905,11 +6111,33 @@ class _CircuitsViewState extends State<CircuitsView> {
       return;
     }
 
-    final roundIndex = races.indexOf(latestRace) + 1;
+    final roundIndex = raceRoundFor(latestRace);
     await SessionDataManager().fetchDataForRace(latestRace, roundIndex);
 
     if (mounted) {
       setState(() {});
+    }
+  }
+
+  Future<void> _preloadRecentSessionResults() async {
+    final now = DateTime.now();
+    final targetRaces = races.where((race) {
+      if (race.date.isAfter(now)) {
+        return false;
+      }
+      return race.date.difference(now).inDays.abs() <= 7;
+    }).toList();
+
+    if (targetRaces.isEmpty) {
+      final latestRace = _latestCompletedRace();
+      if (latestRace != null) {
+        targetRaces.add(latestRace);
+      }
+    }
+
+    for (final race in targetRaces) {
+      final roundIndex = raceRoundFor(race);
+      await SessionDataManager().ensureRaceDataAvailable(race, roundIndex);
     }
   }
 
@@ -2947,7 +6175,7 @@ class _CircuitsViewState extends State<CircuitsView> {
     }
 
     for (final race in racesToRefresh) {
-      final roundIndex = races.indexOf(race) + 1;
+      final roundIndex = raceRoundFor(race);
       await SessionDataManager().fetchDataForRace(race, roundIndex);
     }
   }
@@ -2978,12 +6206,96 @@ class _CircuitsViewState extends State<CircuitsView> {
   }
 
   String _getPodiumString(Race race) {
-    final results =
-        SessionDataManager().cache['${race.country}_Race_${race.date.year}'];
-    if (results != null && results.length >= 3) {
-      return '${results[0].driver.split(' ').last} ${getCompactTireEmoji(results[0].tyre)}  ${results[1].driver.split(' ').last} ${getCompactTireEmoji(results[1].tyre)}  ${results[2].driver.split(' ').last} ${getCompactTireEmoji(results[2].tyre)}';
+    final results = _circuitPodiumRows(race);
+    if (results.length >= 3) {
+      return results
+          .take(3)
+          .map((row) => row.driver.split(' ').last)
+          .join('  ');
     }
     return 'Verstappen  Norris  Leclerc';
+  }
+
+  List<RaceResultRow> _circuitPodiumRows(Race race) {
+    final rows =
+        SessionDataManager().raceResultsCache[SessionDataManager()
+            .raceResultsKeyFor(race)] ??
+        const <RaceResultRow>[];
+    final sortedRows = List<RaceResultRow>.from(rows)
+      ..sort((a, b) {
+        final positionA = _extractFinishPosition(a.finish) ?? 999;
+        final positionB = _extractFinishPosition(b.finish) ?? 999;
+        return positionA.compareTo(positionB);
+      });
+    return sortedRows.where((row) {
+      final position = _extractFinishPosition(row.finish);
+      return position != null && position > 0 && position <= 3;
+    }).take(3).toList(growable: false);
+  }
+
+  Widget _buildCircuitPodiumPreview(
+    BuildContext context,
+    Race race, {
+    CrossAxisAlignment alignment = CrossAxisAlignment.end,
+  }) {
+    final theme = Theme.of(context);
+    final podiumRows = _circuitPodiumRows(race);
+    if (podiumRows.isEmpty) {
+      return Text(
+        _getPodiumString(race),
+        textAlign: alignment == CrossAxisAlignment.end
+            ? TextAlign.right
+            : TextAlign.left,
+        style: TextStyle(
+          fontSize: 9,
+          fontWeight: FontWeight.bold,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: alignment,
+      mainAxisSize: MainAxisSize.min,
+      children: podiumRows.map((row) {
+        final position = _extractFinishPosition(row.finish) ?? 0;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 2),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                row.driver.split(' ').last,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 5),
+              _buildCircuitPodiumMedal(position),
+            ],
+          ),
+        );
+      }).toList(growable: false),
+    );
+  }
+
+  Widget _buildCircuitPodiumMedal(int position) {
+    final medal = switch (position) {
+      1 => '🥇',
+      2 => '🥈',
+      3 => '🥉',
+      _ => '🏅',
+    };
+
+    return Text(
+      medal,
+      style: const TextStyle(
+        fontSize: 13,
+        height: 1,
+      ),
+    );
   }
 
   @override
@@ -3006,16 +6318,7 @@ class _CircuitsViewState extends State<CircuitsView> {
           padding: const EdgeInsets.all(16),
           children: [
             GestureDetector(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (c) => CircuitDetailScreen(
-                    race: upcoming,
-                    heroTag: _raceFlagHeroTag(upcoming, source: 'featured'),
-                    settingsMenu: widget.settingsMenu,
-                  ),
-                ),
-              ),
+              onTap: () => context.push(_racePath(upcoming)),
               child: Card(
                 child: Container(
                   padding: const EdgeInsets.all(20),
@@ -3094,16 +6397,20 @@ class _CircuitsViewState extends State<CircuitsView> {
                         height: 30,
                         color: tokens.outline.withOpacity(0.75),
                       ),
-                      Text(
-                        timeStrNext.isEmpty
-                            ? _getPodiumString(upcoming)
-                            : '${loc.translate('startsIn')} $timeStrNext',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.secondary,
-                        ),
-                      ),
+                      timeStrNext.isEmpty
+                          ? _buildCircuitPodiumPreview(
+                              context,
+                              upcoming,
+                              alignment: CrossAxisAlignment.start,
+                            )
+                          : Text(
+                              '${loc.translate('startsIn')} $timeStrNext',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.secondary,
+                              ),
+                            ),
                     ],
                   ),
                 ),
@@ -3116,16 +6423,7 @@ class _CircuitsViewState extends State<CircuitsView> {
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
                 child: InkWell(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (c) => CircuitDetailScreen(
-                        race: r,
-                        heroTag: _raceFlagHeroTag(r, source: 'calendar'),
-                        settingsMenu: widget.settingsMenu,
-                      ),
-                    ),
-                  ),
+                  onTap: () => context.push(_racePath(r)),
                   child: Padding(
                     padding: const EdgeInsets.all(12),
                     child: Row(
@@ -3160,16 +6458,16 @@ class _CircuitsViewState extends State<CircuitsView> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          isFinished ? _getPodiumString(r) : tStr,
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            color: isFinished
-                                ? theme.colorScheme.onSurfaceVariant
-                                : theme.colorScheme.primary,
-                          ),
-                        ),
+                        isFinished
+                            ? _buildCircuitPodiumPreview(context, r)
+                            : Text(
+                                tStr,
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
                       ],
                     ),
                   ),
@@ -3409,45 +6707,30 @@ class _StandingsViewState extends State<StandingsView> {
                   }
                 });
                 if (_selectedForComparison.length == 2) {
-                  Widget comparisonPage;
-                  if (isDriverView) {
-                    comparisonPage = DriverComparisonView(
-                      driver1: _selectedForComparison[0] as Driver,
-                      driver2: _selectedForComparison[1] as Driver,
-                    );
-                  } else {
-                    comparisonPage = TeamComparisonView(
-                      team1: _selectedForComparison[0] as Team,
-                      team2: _selectedForComparison[1] as Team,
-                    );
-                  }
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => comparisonPage),
-                  ).then((_) {
-                    setState(() {
-                      _isCompareMode = false;
-                      _selectedForComparison.clear();
-                    });
-                  });
+                  context
+                      .push(
+                        isDriverView
+                            ? _driverComparePath(
+                                _selectedForComparison[0] as Driver,
+                                _selectedForComparison[1] as Driver,
+                              )
+                            : _teamComparePath(
+                                _selectedForComparison[0] as Team,
+                                _selectedForComparison[1] as Team,
+                              ),
+                      )
+                      .then((_) {
+                        setState(() {
+                          _isCompareMode = false;
+                          _selectedForComparison.clear();
+                        });
+                      });
                 }
               } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (c) => isDriver
-                        ? DriverDetailView(
-                            driver: item as Driver,
-                            heroTag: heroTag,
-                            settingsMenu: widget.settingsMenu,
-                          )
-                        : TeamDetailView(
-                            team: item as Team,
-                            heroTag: heroTag,
-                            settingsMenu: widget.settingsMenu,
-                          ),
-                  ),
+                context.push(
+                  isDriver
+                      ? _driverPath(item as Driver)
+                      : _teamPath(item as Team),
                 );
               }
             },
@@ -3716,6 +6999,10 @@ class DriverComparisonView extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final recentForm1 = _buildDriverRecentFormEntries(driver1.name);
+    final recentForm2 = _buildDriverRecentFormEntries(driver2.name);
+    final starts1 = driver1.starts == 0 ? 1 : driver1.starts;
+    final starts2 = driver2.starts == 0 ? 1 : driver2.starts;
 
     return Scaffold(
       appBar: AppBar(
@@ -3797,6 +7084,31 @@ class DriverComparisonView extends StatelessWidget {
             isDark: isDark,
             lowerIsBetter: true,
           ),
+          ComparisonRow(
+            label: 'Points / start',
+            value1: (driver1.totalPoints / starts1).toStringAsFixed(2),
+            value2: (driver2.totalPoints / starts2).toStringAsFixed(2),
+            isDark: isDark,
+          ),
+          ComparisonRow(
+            label: 'Win rate %',
+            value1: ((driver1.wins / starts1) * 100).toStringAsFixed(1),
+            value2: ((driver2.wins / starts2) * 100).toStringAsFixed(1),
+            isDark: isDark,
+          ),
+          ComparisonRow(
+            label: 'Last 5 points',
+            value1: _formatFormPoints(recentForm1),
+            value2: _formatFormPoints(recentForm2),
+            isDark: isDark,
+          ),
+          ComparisonRow(
+            label: 'Avg finish (L5)',
+            value1: _formatDriverAverageFinish(recentForm1),
+            value2: _formatDriverAverageFinish(recentForm2),
+            isDark: isDark,
+            lowerIsBetter: true,
+          ),
         ],
       ),
     );
@@ -3857,6 +7169,8 @@ class TeamComparisonView extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final entries1 = team1.totalEntries == 0 ? 1 : team1.totalEntries;
+    final entries2 = team2.totalEntries == 0 ? 1 : team2.totalEntries;
 
     return Scaffold(
       appBar: AppBar(title: Text('${team1.name} vs ${team2.name}')),
@@ -3919,6 +7233,24 @@ class TeamComparisonView extends StatelessWidget {
             value2: team2.fastestPitstopTime,
             isDark: isDark,
             lowerIsBetter: true,
+          ),
+          ComparisonRow(
+            label: 'Points / entry',
+            value1: (team1.totalPoints / entries1).toStringAsFixed(2),
+            value2: (team2.totalPoints / entries2).toStringAsFixed(2),
+            isDark: isDark,
+          ),
+          ComparisonRow(
+            label: 'Pole rate %',
+            value1: ((team1.poles / entries1) * 100).toStringAsFixed(1),
+            value2: ((team2.poles / entries2) * 100).toStringAsFixed(1),
+            isDark: isDark,
+          ),
+          ComparisonRow(
+            label: 'Fastest lap rate %',
+            value1: ((team1.fastestLaps / entries1) * 100).toStringAsFixed(1),
+            value2: ((team2.fastestLaps / entries2) * 100).toStringAsFixed(1),
+            isDark: isDark,
           ),
         ],
       ),
@@ -4013,11 +7345,14 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
   Future<void> _fetchWeather() async {
     try {
       await Future.delayed(const Duration(milliseconds: 700));
-      final res = await http.get(
+      final resFuture = http.get(
         Uri.parse(
           'https://api.open-meteo.com/v1/forecast?latitude=${widget.race.lat}&longitude=${widget.race.lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m&daily=precipitation_probability_max&timezone=auto',
         ),
       );
+
+      final res = await resFuture;
+
       if (res.statusCode == 200) {
         final d = json.decode(res.body);
         if (mounted) {
@@ -4602,25 +7937,2513 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
             _buildCircuitTopArea(context, loc),
             const SizedBox(height: 16),
             Card(
-              color: Theme.of(context).colorScheme.primaryContainer,
+              color: Theme.of(context).colorScheme.secondaryContainer,
               child: ListTile(
-                leading: const Icon(Icons.format_list_numbered),
+                leading: const Icon(Icons.view_timeline),
                 title: Text(
-                  loc.translate('session_results'),
+                  loc.translate('weekend_hub'),
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
+                subtitle: Text(loc.translate('weekend_hub_card_subtitle')),
                 trailing: const Icon(Icons.arrow_forward),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        SessionResultsScreen(race: widget.race),
-                  ),
-                ),
+                onTap: () => context.push(_weekendHubPath(widget.race)),
               ),
             ),
             const SizedBox(height: 20),
             _buildResponsiveSections(sections: circuitSections),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class WeekendHubScreen extends StatefulWidget {
+  final Race race;
+
+  const WeekendHubScreen({required this.race, super.key});
+
+  @override
+  State<WeekendHubScreen> createState() => _WeekendHubScreenState();
+}
+
+String _sessionDisplayTitle(BuildContext context, String sessionName) {
+  final loc = AppLocalizations.of(context);
+  switch (sessionName) {
+    case 'Practice 1':
+      return loc.translate('fp1');
+    case 'Practice 2':
+      return loc.translate('fp2');
+    case 'Practice 3':
+      return loc.translate('fp3');
+    case 'Sprint Qualifying':
+      return loc.translate('sprint_quali');
+    case 'Sprint':
+      return loc.translate('sprint');
+    case 'Qualifying':
+      return loc.translate('qualifying');
+    case 'Race':
+      return '🏁 ${loc.translate('race')}';
+    default:
+      return sessionName;
+  }
+}
+
+class _WeekendHubScreenState extends State<WeekendHubScreen> {
+  static const String _allRaceControlScopes = '__all_scopes__';
+  static const int _defaultRaceControlVisibleCount = 10;
+
+  bool _loading = true;
+  String _temperature = '--';
+  int _rainChance = 0;
+  String _windSpeed = '--';
+  List<WeekendHubPodiumEntry> _podiumDetails = const <WeekendHubPodiumEntry>[];
+  final TextEditingController _raceControlSearchController =
+      TextEditingController();
+  String _selectedRaceControlScope = _allRaceControlScopes;
+  String _selectedWeekendSession = 'Race';
+  String _raceControlSearchQuery = '';
+  bool _showAllRaceControlMessages = false;
+  Map<String, List<Map<String, dynamic>>> _weatherBySession =
+      const <String, List<Map<String, dynamic>>>{};
+  Map<String, List<Map<String, dynamic>>> _lapTimelineBySession =
+      const <String, List<Map<String, dynamic>>>{};
+  String? _loadError;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _loadWeekendData();
+    });
+  }
+
+  @override
+  void dispose() {
+    _raceControlSearchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadWeekendData() async {
+    if (mounted) {
+      setState(() {
+        _loading = true;
+        _loadError = null;
+      });
+    }
+
+    var podiumDetails = _fallbackPodiumDetails();
+
+    try {
+      final roundIndex = raceRoundFor(widget.race);
+      await SessionDataManager().ensureRaceDataAvailable(
+        widget.race,
+        roundIndex,
+      );
+      try {
+        final fetchedPodium = await SessionDataManager().fetchWeekendHubPodium(
+          widget.race,
+        );
+        if (fetchedPodium.isNotEmpty) {
+          podiumDetails = fetchedPodium;
+        }
+      } catch (_) {}
+
+      try {
+        await _fetchWeekendWeather();
+      } catch (_) {}
+      try {
+        final weatherData = await _loadStaticWeekendWeatherData();
+        if (weatherData.weatherBySession.isNotEmpty && mounted) {
+          setState(() {
+            _weatherBySession = weatherData.weatherBySession;
+            _lapTimelineBySession = weatherData.lapTimelineBySession;
+          });
+        }
+      } catch (_) {}
+    } catch (_) {
+      _loadError = AppLocalizations.of(context).translate(
+        'weekend_hub_load_error',
+      );
+    }
+
+    if (mounted) {
+      setState(() {
+        _podiumDetails = podiumDetails;
+        _loading = false;
+      });
+    }
+  }
+
+  List<WeekendHubPodiumEntry> _fallbackPodiumDetails() {
+    final rows =
+        SessionDataManager().raceResultsCache[SessionDataManager()
+            .raceResultsKeyFor(widget.race)] ??
+        const <RaceResultRow>[];
+    final sortedRows = List<RaceResultRow>.from(rows)
+      ..sort((a, b) {
+        final positionA = _extractFinishPosition(a.finish) ?? 999;
+        final positionB = _extractFinishPosition(b.finish) ?? 999;
+        return positionA.compareTo(positionB);
+      });
+    return sortedRows
+        .where((row) {
+          final position = _extractFinishPosition(row.finish);
+          return position != null && position > 0 && position <= 3;
+        })
+        .take(3)
+        .map((row) {
+          final position = _extractFinishPosition(row.finish);
+          return WeekendHubPodiumEntry(
+            position: position ?? 0,
+            driverNumber: null,
+            driver: row.driver,
+            points: row.points,
+            totalTime: row.timeOrGap,
+            gapToLeader: row.timeOrGap,
+            fastestLap: row.fastestLap,
+            hasFastestLap: row.hasFastestLap,
+            tyreCompounds:
+                row.tyreCompound == '-' || row.tyreCompound.trim().isEmpty
+                ? const <String>[]
+                : <String>[row.tyreCompound],
+          );
+        })
+        .toList(growable: false);
+  }
+
+  List<WeekendHubPodiumEntry> _sessionTopThree(String sessionName) {
+    if (sessionName == 'Race') {
+      return _podiumDetails.isNotEmpty
+          ? _podiumDetails
+          : _fallbackPodiumDetails();
+    }
+
+    final overviewRows = SessionDataManager().sessionOverviewCache[
+          SessionDataManager().sessionOverviewKeyFor(widget.race, sessionName)
+        ] ??
+        const <SessionOverviewRow>[];
+    if (overviewRows.isNotEmpty) {
+      return overviewRows.take(3).map((row) {
+        final tyreCompounds = row.tyreLapSequence
+            .map((entry) => entry.compound)
+            .where((compound) => compound.trim().isNotEmpty)
+            .toSet()
+            .toList(growable: false);
+        final position = int.tryParse(
+          row.position.replaceAll(RegExp(r'[^0-9]'), ''),
+        );
+        final resultValue = row.result.trim().isEmpty ? '-' : row.result;
+        return WeekendHubPodiumEntry(
+          position: position ?? 0,
+          driverNumber: null,
+          driver: row.driver,
+          points: row.points,
+          totalTime: resultValue,
+          gapToLeader: resultValue,
+          fastestLap: row.fastestLap,
+          hasFastestLap: row.hasFastestLap,
+          tyreCompounds: tyreCompounds.isNotEmpty
+              ? tyreCompounds
+              : (row.tyreCompound.trim().isEmpty || row.tyreCompound == '-')
+              ? const <String>[]
+              : <String>[row.tyreCompound],
+        );
+      }).toList(growable: false);
+    }
+
+    final cachedResults = SessionDataManager().cache[
+          '${widget.race.country}_${sessionName}_${widget.race.date.year}'
+        ] ??
+        const <SessionResult>[];
+    return cachedResults.take(3).toList().asMap().entries.map((entry) {
+      final row = entry.value;
+      final tyreCompounds = row.tyre.trim().isEmpty || row.tyre == '-'
+          ? const <String>[]
+          : <String>[row.tyre];
+      return WeekendHubPodiumEntry(
+        position: entry.key + 1,
+        driverNumber: null,
+        driver: row.driver,
+        points: '-',
+        totalTime: row.time,
+        gapToLeader: row.time,
+        fastestLap: row.time,
+        hasFastestLap: entry.key == 0,
+        tyreCompounds: tyreCompounds,
+      );
+    }).toList(growable: false);
+  }
+
+  Future<void> _fetchWeekendWeather() async {
+    try {
+      final response = await http.get(
+        Uri.parse(
+          'https://api.open-meteo.com/v1/forecast?latitude=${widget.race.lat}&longitude=${widget.race.lon}&current=temperature_2m,wind_speed_10m&daily=precipitation_probability_max&timezone=auto',
+        ),
+      );
+      if (response.statusCode != 200) {
+        return;
+      }
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      _temperature = data['current']['temperature_2m'].toString();
+      _windSpeed = data['current']['wind_speed_10m'].toString();
+      _rainChance = (data['daily']['precipitation_probability_max'][0] as num)
+          .toInt();
+    } catch (_) {}
+  }
+
+  List<MapEntry<String, DateTime>> _sessionSchedule() {
+    final sessions = <MapEntry<String, DateTime>>[
+      MapEntry('Practice 1', widget.race.fp1),
+    ];
+
+    if (widget.race.hasSprint) {
+      sessions.addAll([
+        MapEntry('Sprint Qualifying', widget.race.sprintQuali),
+        MapEntry('Sprint', widget.race.sprintRace),
+      ]);
+    } else {
+      sessions.addAll([
+        MapEntry('Practice 2', widget.race.fp2),
+        MapEntry('Practice 3', widget.race.fp3),
+      ]);
+    }
+
+    sessions.addAll([
+      MapEntry('Qualifying', widget.race.qualifying),
+      MapEntry('Race', widget.race.date),
+    ]);
+    return sessions;
+  }
+
+  String _sessionStatus(DateTime date) {
+    final now = DateTime.now();
+    if (date.isAfter(now)) {
+      return 'session_status_upcoming';
+    }
+    if (now.difference(date) < const Duration(hours: 3)) {
+      return 'session_status_live_recent';
+    }
+    return 'session_status_completed';
+  }
+
+  void _openSingleSessionResults(String sessionName) {
+    context.push(_singleSessionResultsPath(widget.race, sessionName));
+  }
+
+  String _sessionTimeLabel(DateTime date) {
+    final local = date.toLocal();
+    final day = local.day.toString().padLeft(2, '0');
+    final month = local.month.toString().padLeft(2, '0');
+    final hour = local.hour.toString().padLeft(2, '0');
+    final minute = local.minute.toString().padLeft(2, '0');
+    return '$day-$month ${local.year}  $hour:$minute';
+  }
+
+  List<String> _raceControlScopes(
+    List<Map<String, dynamic>> messages,
+    String selectedSession,
+  ) {
+    final scopes = messages
+        .where(
+          (message) =>
+              message['sessionName']?.toString().trim() == selectedSession,
+        )
+        .map((message) => message['scope']?.toString().trim() ?? '')
+        .where((scope) => scope.isNotEmpty)
+        .toSet()
+        .toList(growable: false)
+      ..sort();
+    return <String>[_allRaceControlScopes, ...scopes];
+  }
+
+  List<Map<String, dynamic>> _filterRaceControlMessages(
+    List<Map<String, dynamic>> messages,
+    String selectedSession,
+    String selectedScope,
+  ) {
+    final query = _raceControlSearchQuery.trim().toLowerCase();
+    final filtered = messages.where((message) {
+      final sessionName = message['sessionName']?.toString().trim() ?? '';
+      if (sessionName != selectedSession) {
+        return false;
+      }
+
+      final scope = message['scope']?.toString().trim() ?? '';
+      if (selectedScope != _allRaceControlScopes && scope != selectedScope) {
+        return false;
+      }
+
+      if (query.isEmpty) {
+        return true;
+      }
+
+      final searchHaystack = <String>[
+        message['message']?.toString() ?? '',
+        message['sessionName']?.toString() ?? '',
+        message['scope']?.toString() ?? '',
+        message['category']?.toString() ?? '',
+        message['flag']?.toString() ?? '',
+        message['driverNumber']?.toString() ?? '',
+        message['lap']?.toString() ?? '',
+      ].join(' ').toLowerCase();
+
+      return searchHaystack.contains(query);
+    }).toList(growable: false);
+
+    filtered.sort((a, b) {
+      final aDate = DateTime.tryParse(a['timestampUtc']?.toString() ?? '');
+      final bDate = DateTime.tryParse(b['timestampUtc']?.toString() ?? '');
+      if (aDate != null && bDate != null) {
+        return bDate.compareTo(aDate);
+      }
+      if (aDate == null && bDate == null) {
+        return 0;
+      }
+      return aDate == null ? 1 : -1;
+    });
+
+    return filtered;
+  }
+
+  List<String> _availableWeekendSessions(
+    List<Map<String, dynamic>> raceControlMessages,
+  ) {
+    final scheduledSessions = _sessionSchedule().map((entry) => entry.key).toList();
+    final weatherSessions = _weatherBySession.keys.toSet();
+    final raceControlSessions = raceControlMessages
+        .map((message) => message['sessionName']?.toString().trim() ?? '')
+        .where((session) => session.isNotEmpty)
+        .toSet();
+
+    final available = scheduledSessions
+        .where(
+          (session) =>
+              weatherSessions.contains(session) ||
+              raceControlSessions.contains(session) ||
+              session == 'Race',
+        )
+        .toList(growable: false);
+
+    return available.isEmpty ? scheduledSessions : available;
+  }
+
+  Future<_WeekendWeatherData> _loadStaticWeekendWeatherData() async {
+    final fileName =
+        'weather_${widget.race.date.year}_round_${raceRoundFor(widget.race)}.json';
+    final candidatePaths = <String>[
+      fileName,
+      'data/$fileName',
+      'data/results/$fileName',
+    ];
+
+    for (final candidatePath in candidatePaths) {
+      try {
+        final uri = Uri.base.resolve(candidatePath);
+        final response = await http
+            .get(uri)
+            .timeout(const Duration(seconds: 4));
+        if (response.statusCode != 200) {
+          continue;
+        }
+
+        final decoded = jsonDecode(response.body);
+        if (decoded is! Map<String, dynamic>) {
+          continue;
+        }
+
+        final sessions = decoded['sessions'];
+        if (sessions is Map) {
+          final weatherBySession = <String, List<Map<String, dynamic>>>{};
+          final lapTimelineBySession = <String, List<Map<String, dynamic>>>{};
+          for (final entry in sessions.entries) {
+            final sessionName = entry.key.toString();
+            final sessionData = entry.value;
+            if (sessionData is! Map) {
+              continue;
+            }
+            final samples = sessionData['samples'];
+            if (samples is! List) {
+              continue;
+            }
+            weatherBySession[sessionName] = samples
+                .whereType<Map>()
+                .map(
+                  (sample) => sample.map(
+                    (key, value) => MapEntry(key.toString(), value),
+                  ),
+                )
+                .toList(growable: false);
+
+            final lapTimeline = sessionData['lapTimeline'];
+            if (lapTimeline is List) {
+              lapTimelineBySession[sessionName] = lapTimeline
+                  .whereType<Map>()
+                  .map(
+                    (marker) => marker.map(
+                      (key, value) => MapEntry(key.toString(), value),
+                    ),
+                  )
+                  .toList(growable: false);
+            }
+          }
+          if (weatherBySession.isNotEmpty) {
+            return _WeekendWeatherData(
+              weatherBySession: weatherBySession,
+              lapTimelineBySession: lapTimelineBySession,
+            );
+          }
+        }
+
+        final legacySamples = decoded['samples'];
+        if (legacySamples is List) {
+          return _WeekendWeatherData(
+            weatherBySession: {
+              'Race': legacySamples
+                  .whereType<Map>()
+                  .map(
+                    (sample) => sample.map(
+                      (key, value) => MapEntry(key.toString(), value),
+                    ),
+                  )
+                  .toList(growable: false),
+            },
+            lapTimelineBySession: const <String, List<Map<String, dynamic>>>{},
+          );
+        }
+      } catch (_) {
+        continue;
+      }
+    }
+
+    return const _WeekendWeatherData(
+      weatherBySession: <String, List<Map<String, dynamic>>>{},
+      lapTimelineBySession: <String, List<Map<String, dynamic>>>{},
+    );
+  }
+
+  Widget _buildWeekendSessionSelector(
+    BuildContext context,
+    List<String> availableSessions,
+  ) {
+    final selectedSession = availableSessions.contains(_selectedWeekendSession)
+        ? _selectedWeekendSession
+        : (availableSessions.contains('Race') ? 'Race' : availableSessions.first);
+
+    if (selectedSession != _selectedWeekendSession) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          _selectedWeekendSession = selectedSession;
+          _showAllRaceControlMessages = false;
+        });
+      });
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _themeTokens(context).panelStrong.withOpacity(0.92),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: _themeTokens(context).outline.withOpacity(0.65),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            AppLocalizations.of(context).translate('session'),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          DropdownButtonFormField<String>(
+            initialValue: selectedSession,
+            isExpanded: true,
+            decoration: const InputDecoration(
+              isDense: true,
+              prefixIcon: Icon(Icons.schedule, size: 18),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            ),
+            items: availableSessions
+                .map(
+                  (session) => DropdownMenuItem<String>(
+                    value: session,
+                    child: Text(_sessionDisplayTitle(context, session)),
+                  ),
+                )
+                .toList(growable: false),
+            onChanged: (value) {
+              if (value == null) {
+                return;
+              }
+              setState(() {
+                _selectedWeekendSession = value;
+                _showAllRaceControlMessages = false;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatRaceControlTimestamp(BuildContext context, String? timestampUtc) {
+    if (timestampUtc == null || timestampUtc.trim().isEmpty) {
+      return AppLocalizations.of(context).translate('unknown_time');
+    }
+
+    final date = DateTime.tryParse(timestampUtc)?.toLocal();
+    if (date == null) {
+      return timestampUtc;
+    }
+
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final hour = date.hour.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
+    final second = date.second.toString().padLeft(2, '0');
+    return '$day-$month $hour:$minute:$second';
+  }
+
+  ({Color background, Color border, Color text})? _raceControlMessageStyle(
+    String? rawMessage,
+  ) {
+    final message = rawMessage?.trim().toUpperCase() ?? '';
+    if (message.isEmpty) {
+      return null;
+    }
+
+    if (message.contains('PENALTY SERVED')) {
+      return (
+        background: const Color(0x1A2E7D32),
+        border: const Color(0x662E7D32),
+        text: const Color(0xFF2E7D32),
+      );
+    }
+
+    if (message.contains('NO FURTHER ACTION')) {
+      return (
+        background: const Color(0x1A2E7D32),
+        border: const Color(0x662E7D32),
+        text: const Color(0xFF2E7D32),
+      );
+    }
+
+    if (message.contains('NO FURTHER INVESTIGATION REQUIRED') ||
+        message.contains('REVIEWED NO FURTHER INVESTIGATION')) {
+      return (
+        background: const Color(0x1A2E7D32),
+        border: const Color(0x662E7D32),
+        text: const Color(0xFF2E7D32),
+      );
+    }
+
+    if (message.contains('PENALTY')) {
+      return (
+        background: const Color(0x1AC62828),
+        border: const Color(0x66C62828),
+        text: const Color(0xFFC62828),
+      );
+    }
+
+    if (message.contains(' NOTED') || message.endsWith('NOTED')) {
+      return (
+        background: const Color(0x1AF57C00),
+        border: const Color(0x66F57C00),
+        text: const Color(0xFFF57C00),
+      );
+    }
+
+    if (message.contains('UNDER INVESTIGATION') ||
+        message.contains('WILL BE INVESTIGATED') ||
+        message.contains('SUMMONED')) {
+      return (
+        background: const Color(0x1AF57C00),
+        border: const Color(0x66F57C00),
+        text: const Color(0xFFF57C00),
+      );
+    }
+
+    return null;
+  }
+
+  bool _isRaceControlPenaltyServedMessage(String? rawMessage) {
+    final message = rawMessage?.trim().toUpperCase() ?? '';
+    return message.contains('PENALTY SERVED');
+  }
+
+  bool _isRaceControlPenaltyMessage(String? rawMessage) {
+    final message = rawMessage?.trim().toUpperCase() ?? '';
+    return message.contains('PENALTY') &&
+        !_isRaceControlPenaltyServedMessage(rawMessage);
+  }
+
+  bool _isRaceControlInvestigationMessage(String? rawMessage) {
+    final message = rawMessage?.trim().toUpperCase() ?? '';
+    return message.contains('UNDER INVESTIGATION') ||
+        message.contains('WILL BE INVESTIGATED') ||
+        message.contains('SUMMONED');
+  }
+
+  bool _isRaceControlNotedMessage(String? rawMessage) {
+    final message = rawMessage?.trim().toUpperCase() ?? '';
+    return message.contains(' NOTED') || message.endsWith('NOTED');
+  }
+
+  bool _isRaceControlResolutionMessage(String? rawMessage) {
+    final message = rawMessage?.trim().toUpperCase() ?? '';
+    return message.contains('NO FURTHER ACTION') ||
+        message.contains('NO FURTHER INVESTIGATION REQUIRED') ||
+        message.contains('REVIEWED NO FURTHER INVESTIGATION') ||
+        message.contains('NOTED') ||
+        message.contains('WARNING') ||
+        message.contains('REPRIMAND') ||
+        message.contains('BLACK AND WHITE FLAG') ||
+        message.contains('FINE');
+  }
+
+  int? _raceControlDriverNumberForMessage(Map<String, dynamic> message) {
+    final directDriverNumber = _asInt(message['driverNumber']);
+    if (directDriverNumber != null) {
+      return directDriverNumber;
+    }
+
+    final rawMessage = message['message']?.toString().toUpperCase() ?? '';
+    final match = RegExp(r'CAR\s+(\d+)').firstMatch(rawMessage);
+    return match == null ? null : int.tryParse(match.group(1)!);
+  }
+
+  String _normalizeRaceControlMatchText(String value) {
+    return value
+        .toUpperCase()
+        .replaceAll('INVOLDING', 'INVOLVING')
+        .replaceAll(RegExp(r'[^A-Z0-9]+'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+  }
+
+  String _normalizeRaceControlIncidentSource(String value) {
+    return value
+        .replaceAll(
+          RegExp(r'\bINVOLDING\b', caseSensitive: false),
+          'INVOLVING',
+        )
+        .trim();
+  }
+
+  String _stripRaceControlServedPrefix(String value) {
+    return value.replaceFirst(
+      RegExp(r'^\s*(?:FIA\s+STEWARDS:\s*)?PENALTY\s+SERVED\s*-\s*'),
+      '',
+    );
+  }
+
+  String? _raceControlPenaltyKindKey(String? rawMessage) {
+    final message = rawMessage?.trim().toUpperCase() ?? '';
+    if (message.isEmpty) {
+      return null;
+    }
+
+    final source = _stripRaceControlServedPrefix(message);
+
+    final gridMatch = RegExp(
+      r'(\d+)\s*(?:PLACE|POSITION)\s+GRID\s+(?:PENALTY|DROP)',
+    ).firstMatch(source);
+    if (gridMatch != null) {
+      return 'grid:${gridMatch.group(1)}';
+    }
+
+    final altGridMatch = RegExp(
+      r'GRID\s+(?:PENALTY|DROP)\s+OF\s+(\d+)\s*(?:PLACE|POSITION)',
+    ).firstMatch(source);
+    if (altGridMatch != null) {
+      return 'grid:${altGridMatch.group(1)}';
+    }
+
+    final timeMatch = RegExp(
+      r'(\d+(?:\.\d+)?)\s*SECOND(?:S)?\s+TIME\s+PENALTY',
+    ).firstMatch(source);
+    if (timeMatch != null) {
+      return 'time:${_trimTrailingZero(timeMatch.group(1)!)}';
+    }
+
+    final altTimeMatch = RegExp(
+      r'TIME\s+PENALTY\s+OF\s+(\d+(?:\.\d+)?)\s*SECOND(?:S)?',
+    ).firstMatch(source);
+    if (altTimeMatch != null) {
+      return 'time:${_trimTrailingZero(altTimeMatch.group(1)!)}';
+    }
+
+    final simpleTimeMatch = RegExp(
+      r'PENALTY\s*-\s*(\d+(?:\.\d+)?)\s*SECOND(?:S)?',
+    ).firstMatch(source);
+    if (simpleTimeMatch != null) {
+      return 'time:${_trimTrailingZero(simpleTimeMatch.group(1)!)}';
+    }
+
+    if (source.contains('STOP/GO PENALTY') ||
+        source.contains('STOP AND GO PENALTY') ||
+        source.contains('STOP-AND-GO PENALTY')) {
+      return 'stop-go';
+    }
+
+    if (source.contains('DRIVE THROUGH PENALTY') ||
+        source.contains('DRIVE-THROUGH PENALTY')) {
+      return 'drive-through';
+    }
+
+    return null;
+  }
+
+  String? _raceControlPenaltyReasonKey(String? rawMessage) {
+    final message = rawMessage?.trim();
+    if (message == null || message.isEmpty) {
+      return null;
+    }
+
+    final source = _stripRaceControlServedPrefix(message);
+    final match = RegExp(r'\s-\s(.+)$').firstMatch(source);
+    if (match == null) {
+      return null;
+    }
+
+    final normalized = _normalizeRaceControlMatchText(match.group(1)!);
+    return normalized.isEmpty ? null : normalized;
+  }
+
+  String? _raceControlPenaltySignature(Map<String, dynamic> message) {
+    final rawMessage = message['message']?.toString();
+    final kindKey = _raceControlPenaltyKindKey(rawMessage);
+    if (kindKey == null) {
+      return null;
+    }
+
+    final driverNumber = _raceControlDriverNumberForMessage(message) ?? -1;
+    final reasonKey = _raceControlPenaltyReasonKey(rawMessage) ?? '';
+    return '$driverNumber|$kindKey|$reasonKey';
+  }
+
+  String? _raceControlIncidentSignature(String? rawMessage) {
+    final message = rawMessage?.trim();
+    if (message == null || message.isEmpty) {
+      return null;
+    }
+
+    final source = _normalizeRaceControlIncidentSource(
+      message.replaceFirst(
+        RegExp(r'^\s*FIA\s+STEWARDS:\s*', caseSensitive: false),
+        '',
+      ),
+    );
+    final match = RegExp(
+      r'^(.*?)\s+(UNDER INVESTIGATION|WILL BE INVESTIGATED(?: AFTER THE SESSION| AFTER THE RACE)?|SUMMONED|NO FURTHER ACTION|NO FURTHER INVESTIGATION REQUIRED|REVIEWED NO FURTHER INVESTIGATION|NOTED|WARNING|REPRIMAND|BLACK AND WHITE FLAG|FINE)(?:\s*\-\s*(.*))?$',
+      caseSensitive: false,
+    ).firstMatch(source);
+    if (match == null) {
+      return null;
+    }
+
+    final incidentKey = _normalizeRaceControlMatchText(match.group(1) ?? '');
+    if (incidentKey.isEmpty) {
+      return null;
+    }
+
+    final reasonKey = _normalizeRaceControlMatchText(match.group(3) ?? '');
+    return '$incidentKey|$reasonKey';
+  }
+
+  bool _isRaceControlIncidentFamilyMessage(String? rawMessage) {
+    return _isRaceControlNotedMessage(rawMessage) ||
+        _isRaceControlInvestigationMessage(rawMessage) ||
+        _isRaceControlResolutionMessage(rawMessage);
+  }
+
+  String _raceControlRelationTitle(
+    BuildContext context,
+    String? rawMessage,
+    bool isSource,
+  ) {
+    final loc = AppLocalizations.of(context);
+    if (_isRaceControlPenaltyServedMessage(rawMessage)) {
+      return loc.translate(
+        isSource
+            ? 'race_control_relation_served_penalty'
+            : 'race_control_relation_issued_earlier',
+      );
+    }
+    if (_isRaceControlPenaltyMessage(rawMessage)) {
+      return loc.translate(
+        isSource
+            ? 'race_control_relation_penalty_message'
+            : 'race_control_relation_served_later',
+      );
+    }
+    if (_isRaceControlNotedMessage(rawMessage)) {
+      return loc.translate('race_control_relation_noted');
+    }
+    if (_isRaceControlInvestigationMessage(rawMessage)) {
+      return loc.translate(
+        isSource
+            ? 'race_control_relation_investigation'
+            : 'race_control_relation_outcome',
+      );
+    }
+    if (_isRaceControlResolutionMessage(rawMessage)) {
+      return loc.translate(
+        isSource
+            ? 'race_control_relation_outcome'
+            : 'race_control_relation_investigation',
+      );
+    }
+    return loc.translate(
+      isSource
+          ? 'race_control_relation_message'
+          : 'race_control_relation_linked',
+    );
+  }
+
+  List<Map<String, dynamic>> _relatedRaceControlMessages(
+    List<Map<String, dynamic>> allMessages,
+    String selectedSession,
+    Map<String, dynamic> sourceMessage,
+  ) {
+    final sourceText = sourceMessage['message']?.toString();
+    final penaltySignature = _raceControlPenaltySignature(sourceMessage);
+    final penaltyKindKey = _raceControlPenaltyKindKey(sourceText);
+    final incidentSignature = _raceControlIncidentSignature(sourceText);
+    final sourceDriverNumber = _raceControlDriverNumberForMessage(sourceMessage);
+    if (penaltySignature == null &&
+        penaltyKindKey == null &&
+        incidentSignature == null) {
+      return const <Map<String, dynamic>>[];
+    }
+
+    final sourceIsServed = _isRaceControlPenaltyServedMessage(sourceText);
+    final sourceIsPenalty = _isRaceControlPenaltyMessage(sourceText);
+    final sourceIsInvestigation = _isRaceControlInvestigationMessage(sourceText);
+    final sourceIsResolution = _isRaceControlResolutionMessage(sourceText);
+    if (!sourceIsServed &&
+        !sourceIsPenalty &&
+        !sourceIsInvestigation &&
+        !sourceIsResolution) {
+      return const <Map<String, dynamic>>[];
+    }
+
+    final related = allMessages.where((candidate) {
+      if (identical(candidate, sourceMessage)) {
+        return false;
+      }
+
+      final candidateSession = candidate['sessionName']?.toString().trim() ?? '';
+      if (candidateSession != selectedSession) {
+        return false;
+      }
+
+      final candidateText = candidate['message']?.toString();
+      final candidatePenaltySignature = _raceControlPenaltySignature(candidate);
+      final candidateIncidentSignature = _raceControlIncidentSignature(
+        candidateText,
+      );
+      if (penaltySignature != null || candidatePenaltySignature != null) {
+        if (penaltySignature == null || candidatePenaltySignature == null) {
+          return false;
+        }
+        if (candidatePenaltySignature != penaltySignature) {
+          return false;
+        }
+      } else if (incidentSignature != null || candidateIncidentSignature != null) {
+        if (incidentSignature == null || candidateIncidentSignature == null) {
+          return false;
+        }
+        if (candidateIncidentSignature != incidentSignature) {
+          return false;
+        }
+      } else {
+        final candidatePenaltyKindKey = _raceControlPenaltyKindKey(candidateText);
+        if (candidatePenaltyKindKey != penaltyKindKey) {
+          return false;
+        }
+      }
+
+      final candidateDriverNumber = _raceControlDriverNumberForMessage(candidate);
+      if (sourceDriverNumber != null &&
+          candidateDriverNumber != null &&
+          sourceDriverNumber != candidateDriverNumber) {
+        return false;
+      }
+
+      if (sourceIsServed) {
+        return _isRaceControlPenaltyMessage(candidateText);
+      }
+      if (sourceIsPenalty) {
+        return _isRaceControlPenaltyServedMessage(candidateText);
+      }
+      if (sourceIsInvestigation || sourceIsResolution) {
+        return _isRaceControlIncidentFamilyMessage(candidateText);
+      }
+      return false;
+    }).toList(growable: false)
+      ..sort((a, b) {
+        final aDate = DateTime.tryParse(a['timestampUtc']?.toString() ?? '');
+        final bDate = DateTime.tryParse(b['timestampUtc']?.toString() ?? '');
+        if (aDate != null && bDate != null) {
+          return aDate.compareTo(bDate);
+        }
+        if (aDate == null && bDate == null) {
+          return 0;
+        }
+        return aDate == null ? 1 : -1;
+      });
+
+    return related;
+  }
+
+  Widget _buildRaceControlDetailCard(
+    BuildContext context,
+    String title,
+    Map<String, dynamic> message,
+  ) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final tokens = _themeTokens(context);
+    final style = _raceControlMessageStyle(message['message']?.toString());
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: style?.background ?? tokens.panelStrong,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: style?.border ?? tokens.outline.withOpacity(0.6),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: style?.text ?? theme.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            message['message']?.toString() ?? '-',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: style?.text ?? theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              if (message['lap'] != null)
+                _buildRaceControlTag(
+                  context,
+                  Icons.looks_one,
+                  loc.format('lap_label', {'lap': '${message['lap']}'}),
+                ),
+              if (message['driverNumber'] != null)
+                _buildRaceControlTag(
+                  context,
+                  Icons.directions_car,
+                  loc.format(
+                    'car_label',
+                    {'number': '${message['driverNumber']}'},
+                  ),
+                ),
+              if ((message['flag']?.toString() ?? '').trim().isNotEmpty)
+                _buildRaceControlTag(
+                  context,
+                  Icons.flag,
+                  message['flag']!.toString(),
+                  accentColor: _raceControlFlagColor(message['flag']?.toString()),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _formatRaceControlTimestamp(
+              context,
+              message['timestampUtc']?.toString(),
+            ),
+            style: TextStyle(
+              fontSize: 12,
+              color:
+                  style?.text.withOpacity(0.88) ??
+                  theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showRaceControlMessageDetails(
+    BuildContext context,
+    List<Map<String, dynamic>> allMessages,
+    String selectedSession,
+    Map<String, dynamic> message,
+  ) async {
+    final loc = AppLocalizations.of(context);
+    final relatedMessages = _relatedRaceControlMessages(
+      allMessages,
+      selectedSession,
+      message,
+    );
+    final sourceIsInvestigation = _isRaceControlInvestigationMessage(
+      message['message']?.toString(),
+    );
+    final sourceIsResolution = _isRaceControlResolutionMessage(
+      message['message']?.toString(),
+    );
+    final sourceTitle = _raceControlRelationTitle(
+      context,
+      message['message']?.toString(),
+      true,
+    );
+    final relatedTitle = sourceIsInvestigation || sourceIsResolution
+        ? loc.translate('race_control_related_updates')
+        : _raceControlRelationTitle(
+            context,
+            message['message']?.toString(),
+            false,
+          );
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(loc.translate('race_control_detail')),
+          content: SizedBox(
+            width: 520,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildRaceControlDetailCard(
+                    dialogContext,
+                    sourceTitle,
+                    message,
+                  ),
+                  if (relatedMessages.isNotEmpty) ...[
+                    Text(
+                      relatedTitle,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: Theme.of(dialogContext)
+                            .colorScheme
+                            .onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    ...relatedMessages.map(
+                      (relatedMessage) => _buildRaceControlDetailCard(
+                        dialogContext,
+                        sourceIsInvestigation || sourceIsResolution
+                            ? _raceControlRelationTitle(
+                                dialogContext,
+                                relatedMessage['message']?.toString(),
+                                true,
+                              )
+                            : relatedTitle,
+                        relatedMessage,
+                      ),
+                    ),
+                  ] else ...[
+                    Text(
+                      loc.translate('race_control_no_linked_message'),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(dialogContext)
+                            .colorScheme
+                            .onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(loc.translate('close')),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Color? _raceControlFlagColor(String? flag) {
+    final normalized = flag?.trim().toUpperCase() ?? '';
+    switch (normalized) {
+      case 'BLUE':
+        return const Color(0xFF1E88E5);
+      case 'RED':
+        return const Color(0xFFC62828);
+      case 'DOUBLE YELLOW':
+        return const Color(0xFFF57F17);
+      case 'YELLOW':
+        return const Color(0xFFF9A825);
+      case 'GREEN':
+      case 'CLEAR':
+        return const Color(0xFF2E7D32);
+      default:
+        return null;
+    }
+  }
+
+  Widget _buildRaceControlScopeChips(
+    BuildContext context,
+    List<String> availableScopes,
+    String selectedScope,
+  ) {
+    final loc = AppLocalizations.of(context);
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: availableScopes
+          .map(
+            (scope) => ChoiceChip(
+              label: Text(
+                scope == _allRaceControlScopes
+                    ? loc.translate('all_scopes')
+                    : scope,
+              ),
+              selected: scope == selectedScope,
+              onSelected: (_) {
+                setState(() {
+                  _selectedRaceControlScope = scope;
+                  _showAllRaceControlMessages = false;
+                });
+              },
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+
+  Widget _buildRaceControlSection(
+    BuildContext context,
+    List<Map<String, dynamic>> messages,
+    String selectedSession,
+  ) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final tokens = _themeTokens(context);
+    final availableScopes = _raceControlScopes(messages, selectedSession);
+    final selectedScope = availableScopes.contains(_selectedRaceControlScope)
+        ? _selectedRaceControlScope
+        : _allRaceControlScopes;
+    final filteredMessages = _filterRaceControlMessages(
+      messages,
+      selectedSession,
+      selectedScope,
+    );
+    final visibleMessages = _showAllRaceControlMessages
+        ? filteredMessages
+        : filteredMessages.take(_defaultRaceControlVisibleCount).toList();
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionCardTitle(context, loc.translate('race_control')),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _raceControlSearchController,
+              onChanged: (value) {
+                setState(() {
+                  _raceControlSearchQuery = value;
+                  _showAllRaceControlMessages = false;
+                });
+              },
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search),
+                hintText: loc.translate('race_control_search_hint'),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              loc.translate('scope'),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _buildRaceControlScopeChips(context, availableScopes, selectedScope),
+            const SizedBox(height: 12),
+            Text(
+              loc.format('race_control_message_count', {
+                'visible': '${visibleMessages.length}',
+                'total': '${filteredMessages.length}',
+              }),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (filteredMessages.isEmpty)
+              Text(
+                loc.translate('race_control_empty'),
+                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+              )
+            else
+              Column(
+                children: visibleMessages
+                    .map(
+                      (message) {
+                        final messageStyle = _raceControlMessageStyle(
+                          message['message']?.toString(),
+                        );
+                        final relatedMessages = _relatedRaceControlMessages(
+                          messages,
+                          selectedSession,
+                          message,
+                        );
+                        return Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(14),
+                            onTap: () => _showRaceControlMessageDetails(
+                              context,
+                              messages,
+                              selectedSession,
+                              message,
+                            ),
+                            child: Container(
+                              width: double.infinity,
+                              margin: const EdgeInsets.only(bottom: 10),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color:
+                                    messageStyle?.background ?? tokens.panelStrong,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color:
+                                      messageStyle?.border ??
+                                      tokens.outline.withOpacity(0.6),
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: [
+                                      _buildRaceControlTag(
+                                        context,
+                                        Icons.schedule,
+                                        message['sessionName']?.toString() ??
+                                            loc.translate('unknown'),
+                                      ),
+                                      if ((message['scope']?.toString() ?? '')
+                                          .trim()
+                                          .isNotEmpty)
+                                        _buildRaceControlTag(
+                                          context,
+                                          Icons.center_focus_strong,
+                                          message['scope']!.toString(),
+                                        ),
+                                      if ((message['flag']?.toString() ?? '')
+                                          .trim()
+                                          .isNotEmpty)
+                                        _buildRaceControlTag(
+                                          context,
+                                          Icons.flag,
+                                          message['flag']!.toString(),
+                                          accentColor: _raceControlFlagColor(
+                                            message['flag']?.toString(),
+                                          ),
+                                        ),
+                                      if (message['lap'] != null)
+                                        _buildRaceControlTag(
+                                          context,
+                                          Icons.looks_one,
+                                          loc.format(
+                                            'lap_label',
+                                            {'lap': '${message['lap']}'},
+                                          ),
+                                        ),
+                                      if (message['driverNumber'] != null)
+                                        _buildRaceControlTag(
+                                          context,
+                                          Icons.directions_car,
+                                          loc.format('car_label', {
+                                            'number':
+                                                '${message['driverNumber']}',
+                                          }),
+                                        ),
+                                      if (relatedMessages.isNotEmpty)
+                                        _buildRaceControlTag(
+                                          context,
+                                          Icons.link,
+                                          relatedMessages.length == 1
+                                              ? loc.translate(
+                                                  'linked_update_one',
+                                                )
+                                              : loc.format(
+                                                  'linked_update_many',
+                                                  {
+                                                    'count':
+                                                        '${relatedMessages.length}',
+                                                  },
+                                                ),
+                                        ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    message['message']?.toString() ?? '-',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color:
+                                          messageStyle?.text ??
+                                          theme.colorScheme.onSurface,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    _formatRaceControlTimestamp(
+                                      context,
+                                      message['timestampUtc']?.toString(),
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color:
+                                          messageStyle?.text.withOpacity(0.88) ??
+                                          theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                    .toList(growable: false),
+              ),
+            if (filteredMessages.length > _defaultRaceControlVisibleCount) ...[
+              const SizedBox(height: 4),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _showAllRaceControlMessages = !_showAllRaceControlMessages;
+                    });
+                  },
+                  icon: Icon(
+                    _showAllRaceControlMessages
+                        ? Icons.unfold_less
+                        : Icons.unfold_more,
+                  ),
+                  label: Text(
+                    _showAllRaceControlMessages
+                        ? loc.translate('show_less_messages')
+                        : loc.format('show_all_messages', {
+                            'count': '${filteredMessages.length}',
+                          }),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRaceControlTag(
+    BuildContext context,
+    IconData icon,
+    String label,
+    {Color? accentColor}
+  ) {
+    final theme = Theme.of(context);
+    final effectiveColor = accentColor ?? theme.colorScheme.onSurfaceVariant;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: accentColor == null
+            ? _themeTokens(context).panel
+            : effectiveColor.withOpacity(0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: accentColor == null
+              ? _themeTokens(context).outline.withOpacity(0.55)
+              : effectiveColor.withOpacity(0.34),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: effectiveColor),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: effectiveColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final raceResults =
+        SessionDataManager().raceResultsCache[SessionDataManager()
+            .raceResultsKeyFor(widget.race)] ??
+        const <RaceResultRow>[];
+    final raceWeather =
+        SessionDataManager().raceWeatherCache[SessionDataManager()
+            .raceWeatherKeyFor(widget.race)] ??
+        const <Map<String, dynamic>>[];
+    final raceControlMessages =
+      SessionDataManager().raceControlCache[SessionDataManager()
+        .raceControlKeyFor(widget.race)] ??
+      const <Map<String, dynamic>>[];
+    final availableSessions = _availableWeekendSessions(raceControlMessages);
+    final selectedSession = availableSessions.contains(_selectedWeekendSession)
+        ? _selectedWeekendSession
+        : (availableSessions.contains('Race') ? 'Race' : availableSessions.first);
+    final selectedWeather =
+        _weatherBySession[selectedSession] ??
+        (selectedSession == 'Race'
+            ? raceWeather
+            : const <Map<String, dynamic>>[]);
+    final selectedLapTimeline =
+      _lapTimelineBySession[selectedSession] ??
+      const <Map<String, dynamic>>[];
+    final penalties = raceResults
+        .where(
+          (row) => row.penalty.trim().isNotEmpty && row.penalty.trim() != '-',
+        )
+        .toList(growable: false);
+
+    return Scaffold(
+      appBar: AppBar(title: Text('Weekend Hub')),
+      body: SafeArea(
+        child: _loading
+            ? Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Weekend Hub laden...',
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : RefreshIndicator(
+                onRefresh: _loadWeekendData,
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    _buildWeekendHubHeader(context, availableSessions),
+                    const SizedBox(height: 16),
+                    _buildWeekendHubLowerRow(
+                      context,
+                      selectedSession,
+                      selectedWeather,
+                      selectedLapTimeline,
+                      raceControlMessages,
+                      penalties,
+                    ),
+                  ],
+                ),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildWeekendHubLowerRow(
+    BuildContext context,
+    String selectedSession,
+    List<Map<String, dynamic>> sessionWeather,
+    List<Map<String, dynamic>> sessionLapTimeline,
+    List<Map<String, dynamic>> raceControlMessages,
+    List<RaceResultRow> penalties,
+  ) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final race = _buildRaceOverviewCard(
+          context,
+          selectedSession,
+          sessionWeather,
+          sessionLapTimeline,
+          raceControlMessages,
+        );
+        final raceControl = _buildRaceControlSection(
+          context,
+          raceControlMessages,
+          selectedSession,
+        );
+        final penaltiesCard = _buildPenaltiesCard(context, penalties);
+
+        if (constraints.maxWidth >= 1180) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(flex: 10, child: race),
+              const SizedBox(width: 16),
+              Expanded(flex: 13, child: raceControl),
+              const SizedBox(width: 16),
+              Expanded(flex: 9, child: penaltiesCard),
+            ],
+          );
+        }
+
+        if (constraints.maxWidth >= 760) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(flex: 10, child: race),
+                  const SizedBox(width: 16),
+                  Expanded(flex: 13, child: raceControl),
+                ],
+              ),
+              const SizedBox(height: 16),
+              penaltiesCard,
+            ],
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            race,
+            const SizedBox(height: 16),
+            raceControl,
+            const SizedBox(height: 16),
+            penaltiesCard,
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildWeekendScheduleCard(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final tokens = _themeTokens(context);
+    final schedule = _sessionSchedule();
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: tokens.panelStrong.withOpacity(0.92),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: tokens.outline.withOpacity(0.7)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            loc.translate('weekend_schedule'),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 10),
+          ...schedule.map((entry) {
+            final status = _sessionStatus(entry.value);
+            final canOpenResults = status == 'session_status_completed';
+            final statusColor = canOpenResults
+                ? theme.colorScheme.primary
+                : entry.value.isAfter(DateTime.now())
+                ? theme.colorScheme.primary
+                : theme.colorScheme.secondary;
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(
+                color: tokens.panel.withOpacity(0.88),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: tokens.outline.withOpacity(0.42)),
+              ),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: canOpenResults
+                    ? () => _openSingleSessionResults(entry.key)
+                    : null,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 9,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 28,
+                        height: 28,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: statusColor.withOpacity(0.14),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Icon(
+                          entry.key == 'Race'
+                              ? Icons.flag
+                              : entry.key.contains('Qualifying')
+                              ? Icons.timer
+                              : Icons.schedule,
+                          size: 15,
+                          color: statusColor,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _sessionDisplayTitle(context, entry.key),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              _sessionTimeLabel(entry.value),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        canOpenResults
+                            ? loc.translate('results')
+                            : loc.translate(status),
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: statusColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRaceOverviewCard(
+    BuildContext context,
+    String selectedSession,
+    List<Map<String, dynamic>> sessionWeather,
+    List<Map<String, dynamic>> sessionLapTimeline,
+    List<Map<String, dynamic>> raceControlMessages,
+  ) {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionCardTitle(
+              context,
+              _sessionDisplayTitle(context, selectedSession),
+            ),
+            const SizedBox(height: 12),
+            if (sessionWeather.isNotEmpty) ...[
+              CircuitWeatherPlaybackCard(
+                race: widget.race,
+                sessionName: selectedSession,
+                weatherSamples: sessionWeather,
+                lapTimeline: sessionLapTimeline,
+                raceControlMessages: raceControlMessages,
+              ),
+              const SizedBox(height: 12),
+            ] else ...[
+              Text(
+                'Geen weerdata beschikbaar voor ${_sessionDisplayTitle(context, selectedSession)}.',
+                style: TextStyle(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+            if (_loadError != null) ...[
+              Text(
+                _loadError!,
+                style: TextStyle(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPenaltiesCard(
+    BuildContext context,
+    List<RaceResultRow> penalties,
+  ) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionCardTitle(context, 'Penalties'),
+            const SizedBox(height: 12),
+            if (penalties.isEmpty)
+              const Text('Geen penalties gevonden in de huidige weekend cache.')
+            else
+              Column(
+                children: penalties
+                    .map(
+                      (row) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.warning_amber_rounded,
+                              color: Color(0xFFF57C00),
+                              size: 18,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text('${row.driver}: ${row.penalty}'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHubMetric(String label, String value, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: _themeTokens(context).panelStrong,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: 8),
+          Text('$label: $value'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeekendHubHeader(
+    BuildContext context,
+    List<String> availableSessions,
+  ) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= 860;
+        final isThreeColumn = constraints.maxWidth >= 1180;
+        final summary = _buildWeekendHubSummaryCard(context);
+        final sessionSelector = _buildWeekendSessionSelector(
+          context,
+          availableSessions,
+        );
+        final summaryColumn = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            summary,
+            const SizedBox(height: 12),
+            sessionSelector,
+          ],
+        );
+        final selectedSession = availableSessions.contains(_selectedWeekendSession)
+            ? _selectedWeekendSession
+            : (availableSessions.contains('Race') ? 'Race' : availableSessions.first);
+        final podium = _buildWeekendHubTopThreeCard(
+          context,
+          selectedSession,
+        );
+        final schedule = _buildWeekendScheduleCard(context);
+
+        if (isThreeColumn) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: summaryColumn),
+              const SizedBox(width: 12),
+              Expanded(child: podium),
+              const SizedBox(width: 12),
+              Expanded(child: schedule),
+            ],
+          );
+        }
+
+        if (isWide) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: summaryColumn),
+                  const SizedBox(width: 12),
+                  Expanded(child: podium),
+                ],
+              ),
+              const SizedBox(height: 12),
+              schedule,
+            ],
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            summary,
+            const SizedBox(height: 12),
+            sessionSelector,
+            const SizedBox(height: 16),
+            podium,
+            const SizedBox(height: 16),
+            schedule,
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildWeekendHubSummaryCard(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final tokens = _themeTokens(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: _heroPanelGradient(context),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: tokens.outline.withOpacity(0.7)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionCardTitle(context, loc.translate('circuit')),
+          const SizedBox(height: 12),
+          Text(
+            widget.race.flag,
+            style: const TextStyle(fontSize: 42),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            widget.race.name,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              _buildHubMetric(
+                loc.translate('temp'),
+                '$_temperature°C',
+                Icons.thermostat,
+              ),
+              _buildHubMetric(
+                loc.translate('rain'),
+                '$_rainChance%',
+                Icons.umbrella,
+              ),
+              _buildHubMetric(
+                loc.translate('wind'),
+                '$_windSpeed km/h',
+                Icons.air,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeekendHubTopThreeCard(
+    BuildContext context,
+    String selectedSession,
+  ) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final tokens = _themeTokens(context);
+    final topThree = _sessionTopThree(selectedSession);
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: tokens.panelStrong.withOpacity(0.92),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: tokens.outline.withOpacity(0.7)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            loc.translate('top_3'),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 10),
+          if (topThree.isEmpty)
+            Text(
+              loc.format('session_data_unavailable', {
+                'session': _sessionDisplayTitle(context, selectedSession),
+              }),
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+            )
+          else
+            Column(
+              children: topThree
+                  .map((entry) => _buildTopThreeRow(context, entry))
+                  .toList(growable: false),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTopThreeRow(BuildContext context, WeekendHubPodiumEntry entry) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final tokens = _themeTokens(context);
+    final driverLabel = entry.driverNumber == null
+        ? entry.driver
+        : '#${entry.driverNumber} ${entry.driver}';
+    final accent = _topThreeAccent(entry.position);
+    final timingLabel = entry.position == 1
+      ? loc.translate('total_time')
+      : loc.translate('gap');
+    final timingValue = entry.position == 1 ? entry.totalTime : entry.gapToLeader;
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: tokens.panel.withOpacity(0.88),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: accent.withOpacity(0.55)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 26,
+                height: 26,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: accent.withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: accent.withOpacity(0.45)),
+                ),
+                child: Text(
+                  '${entry.position}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                    color: accent,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  driverLabel,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _buildTopThreeFact(
+                  context,
+                  timingLabel,
+                  timingValue,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildTopThreeFact(
+                  context,
+                  loc.translate('best_lap'),
+                  entry.fastestLap,
+                  highlight: entry.hasFastestLap,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTopThreeFact(
+    BuildContext context,
+    String label,
+    String value, {
+    bool highlight = false,
+  }) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.w700,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: highlight
+                ? const Color(0xFF8E24AA)
+                : theme.colorScheme.onSurface,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _topThreeAccent(int position) {
+    switch (position) {
+      case 1:
+        return const Color(0xFFD4AF37);
+      case 2:
+        return const Color(0xFF9EA7B8);
+      case 3:
+        return const Color(0xFFB87333);
+      default:
+        return const Color(0xFF2196F3);
+    }
+  }
+
+  Widget _buildSectionCardTitle(BuildContext context, String title) {
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w800,
+        color: Theme.of(context).colorScheme.onSurface,
+      ),
+    );
+  }
+}
+
+class AIAssistantSheet extends StatefulWidget {
+  const AIAssistantSheet({super.key});
+
+  @override
+  State<AIAssistantSheet> createState() => _AIAssistantSheetState();
+}
+
+class _AIAssistantSheetState extends State<AIAssistantSheet> {
+  final TextEditingController _controller = TextEditingController();
+  String _response = '';
+  bool _isWorking = false;
+  String? _actionLabel;
+  VoidCallback? _action;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _runPrompt([String? value]) async {
+    final loc = AppLocalizations.of(context);
+    final prompt = (value ?? _controller.text).trim();
+    if (prompt.isEmpty) {
+      return;
+    }
+
+    setState(() {
+      _isWorking = true;
+      _action = null;
+      _actionLabel = null;
+    });
+
+    try {
+      final lower = prompt.toLowerCase();
+
+      if (lower.contains('fetch latest results') ||
+          lower.contains('latest results') ||
+          lower.contains('haal laatste resultaten')) {
+        final latestRace = await _findLatestCompletedRace();
+        if (latestRace == null) {
+          _response = loc.translate('ai_no_completed_race');
+        } else {
+          await RaceRepository.standard().forceRefreshLatestResults();
+          final roundIndex = raceRoundFor(latestRace);
+          await SessionDataManager().fetchDataForRace(latestRace, roundIndex);
+          final rows =
+              SessionDataManager().raceResultsCache[SessionDataManager()
+                  .raceResultsKeyFor(latestRace)] ??
+              const <RaceResultRow>[];
+          final topThree = rows.take(3).map((row) => row.driver).join(' • ');
+          _response = topThree.isEmpty
+              ? loc.translate('ai_latest_results_refreshed')
+              : loc.format('ai_latest_results_podium', {'podium': topThree});
+            _actionLabel = loc.translate('ai_open_latest_results');
+          _action = () {
+            final router = GoRouter.of(context);
+            Navigator.of(context).pop();
+            Future<void>.delayed(const Duration(milliseconds: 150), () {
+              router.push(_raceResultsPath(latestRace));
+            });
+          };
+        }
+      } else if (lower.contains('next weekend') ||
+          lower.contains('show next weekend') ||
+          lower.contains('weekend hub')) {
+        final nextRace = races.firstWhere(
+          (race) => race.date.isAfter(DateTime.now()),
+          orElse: () => races.last,
+        );
+        _response = loc.format('ai_next_weekend', {
+          'race': nextRace.name,
+          'date':
+            '${nextRace.date.day}-${nextRace.date.month}-${nextRace.date.year}',
+        });
+        _actionLabel = loc.translate('ai_open_weekend_hub');
+        _action = () {
+          final router = GoRouter.of(context);
+          Navigator.of(context).pop();
+          Future<void>.delayed(const Duration(milliseconds: 150), () {
+            router.push(_weekendHubPath(nextRace));
+          });
+        };
+      } else if ((lower.contains('compare') || lower.contains('vergelijk')) &&
+          (lower.contains(' vs ') || lower.contains(' tegen '))) {
+        final parts = prompt.split(
+          RegExp(r'\bvs\b|\btegen\b', caseSensitive: false),
+        );
+        if (parts.length < 2) {
+          _response = loc.translate('ai_compare_parse_error');
+        } else {
+          final left = parts.first
+              .replaceAll(
+                RegExp(r'compare|vergelijk', caseSensitive: false),
+                '',
+              )
+              .trim();
+          final right = parts.last.trim();
+          final drivers = {
+            for (final driver in drivers2026) driver.name.toLowerCase(): driver,
+          };
+          final teams = {
+            for (final team in fallbackTeams) team.name.toLowerCase(): team,
+          };
+
+          Driver? driver1;
+          Driver? driver2;
+          Team? team1;
+          Team? team2;
+
+          for (final driver in drivers.values) {
+            if (driver1 == null &&
+                driver.name.toLowerCase().contains(left.toLowerCase())) {
+              driver1 = driver;
+            }
+            if (driver2 == null &&
+                driver.name.toLowerCase().contains(right.toLowerCase())) {
+              driver2 = driver;
+            }
+          }
+
+          for (final team in teams.values) {
+            if (team1 == null &&
+                team.name.toLowerCase().contains(left.toLowerCase())) {
+              team1 = team;
+            }
+            if (team2 == null &&
+                team.name.toLowerCase().contains(right.toLowerCase())) {
+              team2 = team;
+            }
+          }
+
+          if (driver1 != null && driver2 != null) {
+            _response = loc.format('ai_driver_compare_ready', {
+              'left': driver1.name,
+              'right': driver2.name,
+            });
+            _actionLabel = loc.translate('ai_open_driver_compare');
+            _action = () {
+              final router = GoRouter.of(context);
+              Navigator.of(context).pop();
+              Future<void>.delayed(const Duration(milliseconds: 150), () {
+                router.push(_driverComparePath(driver1!, driver2!));
+              });
+            };
+          } else if (team1 != null && team2 != null) {
+            _response = loc.format('ai_team_compare_ready', {
+              'left': team1.name,
+              'right': team2.name,
+            });
+            _actionLabel = loc.translate('ai_open_team_compare');
+            _action = () {
+              final router = GoRouter.of(context);
+              Navigator.of(context).pop();
+              Future<void>.delayed(const Duration(milliseconds: 150), () {
+                router.push(_teamComparePath(team1!, team2!));
+              });
+            };
+          } else {
+            _response = loc.translate('ai_compare_no_match');
+          }
+        }
+      } else if (lower.contains('form') || lower.contains('trend')) {
+        Driver? target;
+        for (final driver in drivers2026) {
+          if (lower.contains(driver.name.toLowerCase()) ||
+              lower.contains(driver.name.split(' ').last.toLowerCase())) {
+            target = driver;
+            break;
+          }
+        }
+
+        if (target == null) {
+          _response = loc.translate('ai_form_no_driver');
+        } else {
+          final entries = _buildDriverRecentFormEntries(target.name);
+          if (entries.isEmpty) {
+            _response = loc.format('ai_form_no_cache', {
+              'driver': target.name,
+            });
+          } else {
+            final summary = entries
+                .map(
+                  (entry) =>
+                      '${entry.race.name.replaceAll(' Grand Prix', '')}: ${entry.label}',
+                )
+                .join(' • ');
+            _response = loc.format('ai_form_summary', {
+              'driver': target.name,
+              'summary': summary,
+            });
+          }
+        }
+      } else {
+        _response = loc.translate('ai_supported_commands');
+      }
+    } catch (error) {
+      _response = loc.format('ai_crash', {'error': '$error'});
+    }
+
+    if (mounted) {
+      setState(() => _isWorking = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final responseText = _response.isEmpty
+        ? loc.translate('ai_example_prompt')
+        : _response;
+
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 12,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              loc.translate('ai_race_engineer'),
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ActionChip(
+                  label: Text(loc.translate('ai_chip_fetch_latest_results')),
+                  onPressed: () => _runPrompt('Fetch latest results'),
+                ),
+                ActionChip(
+                  label: Text(loc.translate('ai_chip_show_next_weekend')),
+                  onPressed: () => _runPrompt('Show next weekend'),
+                ),
+                ActionChip(
+                  label: Text(loc.translate('ai_chip_compare_max_lando')),
+                  onPressed: () =>
+                      _runPrompt('Compare Max Verstappen vs Lando Norris'),
+                ),
+                ActionChip(
+                  label: Text(loc.translate('ai_chip_show_form_piastri')),
+                  onPressed: () => _runPrompt('Show form Oscar Piastri'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _controller,
+              minLines: 1,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: loc.translate('ai_type_command'),
+                suffixIcon: IconButton(
+                  icon: _isWorking
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.send),
+                  onPressed: _isWorking ? null : _runPrompt,
+                ),
+              ),
+              onSubmitted: (_) => _isWorking ? null : _runPrompt(),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: _themeTokens(context).panelStrong,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(responseText),
+            ),
+            if (_action != null && _actionLabel != null) ...[
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: FilledButton.icon(
+                  onPressed: _action,
+                  icon: const Icon(Icons.arrow_forward),
+                  label: Text(_actionLabel!),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -5091,6 +10914,171 @@ class _DriverDetailViewState extends State<DriverDetailView> {
     );
   }
 
+  Widget _buildRecentFormTrend() {
+    final theme = Theme.of(context);
+    final entries = _buildDriverRecentFormEntries(widget.driver.name);
+
+    if (entries.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: Text(
+          'Recent form verschijnt zodra recente race-resultaten in cache staan.',
+          style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+        ),
+      );
+    }
+
+    final maxPoints = entries.fold<double>(0, (best, entry) {
+      return entry.points > best ? entry.points : best;
+    });
+    final resolvedMaxPoints = maxPoints <= 0 ? 25.0 : maxPoints;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 190,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: entries.map((entry) {
+                final barHeight = ((entry.points / resolvedMaxPoints) * 110)
+                    .clamp(18, 110)
+                    .toDouble();
+                final raceLabel = entry.race.name
+                    .replaceAll(' Grand Prix', '')
+                    .split(' ')
+                    .first;
+                return Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          entry.label,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: entry.isPodium
+                                ? const Color(0xFFFFB300)
+                                : theme.colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 250),
+                          width: 28,
+                          height: barHeight,
+                          decoration: BoxDecoration(
+                            color: entry.isDnf
+                                ? const Color(0xFFE53935)
+                                : _getTeamColor(widget.driver.team),
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: _getTeamColor(
+                                  widget.driver.team,
+                                ).withOpacity(0.25),
+                                blurRadius: 8,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          entry.points == entry.points.roundToDouble()
+                              ? entry.points.toInt().toString()
+                              : entry.points.toStringAsFixed(1),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          raceLabel,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (entry.hasFastestLap)
+                              const Icon(
+                                Icons.timer,
+                                size: 12,
+                                color: Color(0xFF8E24AA),
+                              ),
+                            if (entry.hasPenalty)
+                              const Padding(
+                                padding: EdgeInsets.only(left: 4),
+                                child: Icon(
+                                  Icons.warning_amber_rounded,
+                                  size: 12,
+                                  color: Color(0xFFF57C00),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildMiniStatPill(
+                'Last 5 points',
+                _formatFormPoints(entries),
+                Icons.toll,
+              ),
+              _buildMiniStatPill(
+                'Avg finish',
+                _formatDriverAverageFinish(entries),
+                Icons.analytics,
+              ),
+              _buildMiniStatPill(
+                'Podiums',
+                entries.where((entry) => entry.isPodium).length.toString(),
+                Icons.emoji_events,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMiniStatPill(String label, String value, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: _themeTokens(context).panelStrong,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16),
+          const SizedBox(width: 8),
+          Text('$label: $value'),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
@@ -5127,6 +11115,18 @@ class _DriverDetailViewState extends State<DriverDetailView> {
             ),
           ),
         ],
+      ),
+      ExpansionTile(
+        initiallyExpanded: true,
+        title: const Text(
+          'Recent Form Trend',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+            color: Color(0xFF2196F3),
+          ),
+        ),
+        children: [_buildRecentFormTrend()],
       ),
       if (widget.driver.previousTeams.isNotEmpty)
         ExpansionTile(
@@ -5843,77 +11843,28 @@ class _TeamDetailViewState extends State<TeamDetailView> {
   }
 
   Widget _buildAdaptiveTimeline(List<String> entries) {
+    if (entries.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (entries.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
-        return constraints.maxWidth > 600
-            ? _buildHorizontalTimeline(entries)
-            : _buildVerticalTimeline(entries);
+        final shouldUseVertical =
+            constraints.maxWidth < 640 || entries.length > 4;
+        return shouldUseVertical
+            ? _buildVerticalTimeline(entries)
+            : _buildHorizontalTimeline(entries);
       },
     );
   }
 
-  Map<int, double> _resolveTitlePoints(Map<String, Map<int, double>> source) {
-    for (final entry in source.entries) {
-      if (widget.team.name.toLowerCase().contains(entry.key.toLowerCase())) {
-        return entry.value;
-      }
-    }
-    return const <int, double>{};
-  }
-
-  Map<int, List<String>> _resolveTitleDrivers(
-    Map<String, Map<int, List<String>>> source,
-  ) {
-    for (final entry in source.entries) {
-      if (widget.team.name.toLowerCase().contains(entry.key.toLowerCase())) {
-        return entry.value;
-      }
-    }
-    return const <int, List<String>>{};
-  }
-
-  Map<int, String> _resolveChampionDriversByYear() {
-    final champions = <int, String>{};
-
-    for (final titleEntry in widget.team.dcList) {
-      final match = RegExp(r'^(.*?) \((.*)\)$').firstMatch(titleEntry);
-      if (match == null) {
-        continue;
-      }
-
-      final driverName = match.group(1)!;
-      final years = match
-          .group(2)!
-          .split(',')
-          .map((part) => int.tryParse(part.trim()))
-          .whereType<int>();
-
-      for (final year in years) {
-        champions[year] = driverName;
-      }
-    }
-
-    return champions;
-  }
-
-  String _formatTimelinePoints(double points) {
-    if (points == points.roundToDouble()) {
-      return '${points.toInt()} pts';
-    }
-    return '${points.toStringAsFixed(1)} pts';
-  }
-
   Widget _buildAdaptiveStatTimeline(List<Map<String, String>> entries) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     if (entries.isEmpty) {
       return const SizedBox.shrink();
     }
+
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
       children: entries.asMap().entries.map((entry) {
@@ -5999,6 +11950,101 @@ class _TeamDetailViewState extends State<TeamDetailView> {
         );
       }).toList(),
     );
+  }
+
+  Set<String> _teamTitleLookupKeys() {
+    final keys = <String>{widget.team.name};
+
+    for (final previousName in widget.team.previousNames) {
+      keys.add(_splitTeamTimelineEntry(previousName).key);
+    }
+
+    if (widget.team.name == 'Red Bull Racing') {
+      keys.add('Red Bull');
+    }
+
+    return keys;
+  }
+
+  String _normalizeTeamKey(String value) {
+    return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+  }
+
+  Map<int, double> _resolveTitlePoints(Map<String, Map<int, double>> source) {
+    final lookupKeys = _teamTitleLookupKeys()
+        .map(_normalizeTeamKey)
+        .toSet();
+
+    for (final entry in source.entries) {
+      final normalizedEntryKey = _normalizeTeamKey(entry.key);
+      if (lookupKeys.contains(normalizedEntryKey) ||
+          lookupKeys.any(
+            (key) =>
+                key.contains(normalizedEntryKey) ||
+                normalizedEntryKey.contains(key),
+          )) {
+        return entry.value;
+      }
+    }
+
+    return const <int, double>{};
+  }
+
+  Map<int, List<String>> _resolveTitleDrivers(
+    Map<String, Map<int, List<String>>> source,
+  ) {
+    final lookupKeys = _teamTitleLookupKeys()
+        .map(_normalizeTeamKey)
+        .toSet();
+
+    for (final entry in source.entries) {
+      final normalizedEntryKey = _normalizeTeamKey(entry.key);
+      if (lookupKeys.contains(normalizedEntryKey) ||
+          lookupKeys.any(
+            (key) =>
+                key.contains(normalizedEntryKey) ||
+                normalizedEntryKey.contains(key),
+          )) {
+        return entry.value;
+      }
+    }
+
+    return const <int, List<String>>{};
+  }
+
+  Map<int, String> _resolveChampionDriversByYear() {
+    final championsByYear = <int, String>{};
+
+    for (final titleEntry in widget.team.dcList) {
+      final match = RegExp(r'^(.*?) \((.*)\)$').firstMatch(titleEntry);
+      if (match == null) {
+        continue;
+      }
+
+      final driverName = match.group(1)!;
+      final years = match
+          .group(2)!
+          .split(',')
+          .map((part) => int.tryParse(part.trim()))
+          .whereType<int>();
+
+      for (final year in years) {
+        championsByYear[year] = driverName;
+      }
+    }
+
+    return championsByYear;
+  }
+
+  String _formatTimelinePoints(double points) {
+    if (points == 0) {
+      return '0 pts';
+    }
+
+    final formatted = points == points.roundToDouble()
+        ? points.toInt().toString()
+        : points.toStringAsFixed(1);
+    return '$formatted pts';
   }
 
   Widget _buildConstructorTitleTimeline() {
@@ -6472,19 +12518,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
           else
             ...drivers.map(
               (d) => InkWell(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (c) => DriverDetailView(
-                      driver: d,
-                      heroTag: _driverFlagHeroTag(
-                        d,
-                        source: 'team-roster:${widget.team.name}',
-                      ),
-                      settingsMenu: widget.settingsMenu,
-                    ),
-                  ),
-                ),
+                onTap: () => context.push(_driverPath(d)),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   child: Row(
@@ -6953,12 +12987,19 @@ class _SessionResultsScreenState extends State<SessionResultsScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    _ensureDataLoaded();
   }
 
-  Future<void> _fetchData() async {
+  Future<void> _ensureDataLoaded() async {
     setState(() => _isFetching = true);
-    int roundIndex = races.indexOf(widget.race) + 1;
+    final roundIndex = raceRoundFor(widget.race);
+    await SessionDataManager().ensureRaceDataAvailable(widget.race, roundIndex);
+    if (mounted) setState(() => _isFetching = false);
+  }
+
+  Future<void> _refreshData() async {
+    setState(() => _isFetching = true);
+    final roundIndex = raceRoundFor(widget.race);
     await SessionDataManager().fetchDataForRace(widget.race, roundIndex);
     if (mounted) setState(() => _isFetching = false);
   }
@@ -6977,7 +13018,7 @@ class _SessionResultsScreenState extends State<SessionResultsScreen> {
         children: [
           Expanded(
             child: RefreshIndicator(
-              onRefresh: _fetchData,
+              onRefresh: _refreshData,
               child: _isFetching
                   ? _buildSessionResultsSkeleton(context, race: widget.race)
                   : SingleChildScrollView(
@@ -7053,6 +13094,73 @@ class _SessionResultsScreenState extends State<SessionResultsScreen> {
   }
 }
 
+class SingleSessionResultsScreen extends StatefulWidget {
+  final Race race;
+  final String sessionName;
+  final String displayTitle;
+
+  const SingleSessionResultsScreen({
+    required this.race,
+    required this.sessionName,
+    required this.displayTitle,
+    super.key,
+  });
+
+  @override
+  State<SingleSessionResultsScreen> createState() =>
+      _SingleSessionResultsScreenState();
+}
+
+class _SingleSessionResultsScreenState
+    extends State<SingleSessionResultsScreen> {
+  bool _isFetching = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ensureDataLoaded();
+  }
+
+  Future<void> _ensureDataLoaded() async {
+    setState(() => _isFetching = true);
+    final roundIndex = raceRoundFor(widget.race);
+    await SessionDataManager().ensureRaceDataAvailable(widget.race, roundIndex);
+    if (mounted) {
+      setState(() => _isFetching = false);
+    }
+  }
+
+  Future<void> _refreshData() async {
+    setState(() => _isFetching = true);
+    final roundIndex = raceRoundFor(widget.race);
+    await SessionDataManager().fetchDataForRace(widget.race, roundIndex);
+    if (mounted) {
+      setState(() => _isFetching = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.displayTitle)),
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
+        child: _isFetching
+            ? _buildSessionResultsSkeleton(context, race: widget.race)
+            : SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                child: OpenF1SessionWidget(
+                  race: widget.race,
+                  sessionName: widget.sessionName,
+                  displayTitle: widget.displayTitle,
+                ),
+              ),
+      ),
+    );
+  }
+}
+
 class OpenF1SessionWidget extends StatelessWidget {
   final Race race;
   final String sessionName;
@@ -7066,10 +13174,12 @@ class OpenF1SessionWidget extends StatelessWidget {
   });
 
   bool get _isSprintSession => sessionName == 'Sprint';
-  bool get _isPracticeLikeSession =>
+  bool get _isPracticeSession =>
       sessionName == 'Practice 1' ||
       sessionName == 'Practice 2' ||
-      sessionName == 'Practice 3' ||
+      sessionName == 'Practice 3';
+  bool get _isPracticeLikeSession =>
+      _isPracticeSession ||
       sessionName == 'Qualifying' ||
       sessionName == 'Sprint Qualifying';
 
@@ -7077,16 +13187,10 @@ class OpenF1SessionWidget extends StatelessWidget {
     BuildContext context,
     List<RaceResultRow> rows,
   ) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => FullscreenTablePage(
-          title: displayTitle,
-          tableBuilder: (pageContext) =>
-              _buildRaceResultsTable(pageContext, rows),
-        ),
-      ),
-    );
+    if (rows.isEmpty) {
+      return;
+    }
+    context.push(_fullscreenRaceResultsPath(race));
   }
 
   String? _tyreAssetPath(String compound) {
@@ -7113,11 +13217,19 @@ class OpenF1SessionWidget extends StatelessWidget {
     }
   }
 
+  String _baseTyreCompound(String compound) {
+    return compound
+        .replaceAll(RegExp(r'\s*\(used\)\s*', caseSensitive: false), '')
+        .trim();
+  }
+
   Widget _buildTyreCell(BuildContext context, String compound) {
     final theme = Theme.of(context);
     final normalized = compound.trim();
+    final baseCompound = _baseTyreCompound(normalized);
+    final isUsedTyre = normalized.toLowerCase().contains('(used)');
     final isUnknown = normalized.isEmpty || normalized == '-';
-    final assetPath = _tyreAssetPath(normalized);
+    final assetPath = _tyreAssetPath(baseCompound);
 
     if (isUnknown) {
       return Padding(
@@ -7136,14 +13248,40 @@ class OpenF1SessionWidget extends StatelessWidget {
     if (assetPath != null) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: SvgPicture.asset(
-            assetPath,
-            width: 42,
-            height: 24,
-            fit: BoxFit.contain,
-            semanticsLabel: '$normalized tyre',
+        child: SizedBox(
+          width: double.infinity,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SvgPicture.asset(
+                assetPath,
+                width: 34,
+                height: 20,
+                fit: BoxFit.contain,
+                semanticsLabel: '$baseCompound tyre',
+              ),
+              if (isUsedTyre) ...[
+                const SizedBox(width: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    'used',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.onSecondaryContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       );
@@ -7168,6 +13306,794 @@ class OpenF1SessionWidget extends StatelessWidget {
               color: Colors.white,
               letterSpacing: 0.2,
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<SessionTyreLapBreakdownEntry> _fallbackTyreLapSequence(
+    Map<String, int> tyreLaps,
+  ) {
+    const compoundOrder = <String>[
+      'Soft',
+      'Medium',
+      'Hard',
+      'Intermediate',
+      'Wet',
+    ];
+
+    final orderedEntries = <SessionTyreLapBreakdownEntry>[];
+    for (final compound in compoundOrder) {
+      final laps = tyreLaps[compound];
+      if (laps != null && laps > 0) {
+        orderedEntries.add(
+          SessionTyreLapBreakdownEntry(
+            compound: compound,
+            laps: laps,
+            usedTyre: false,
+          ),
+        );
+      }
+    }
+
+    for (final entry in tyreLaps.entries) {
+      if (entry.value <= 0 || compoundOrder.contains(entry.key)) {
+        continue;
+      }
+      orderedEntries.add(
+        SessionTyreLapBreakdownEntry(
+          compound: entry.key,
+          laps: entry.value,
+          usedTyre: false,
+        ),
+      );
+    }
+
+    return orderedEntries;
+  }
+
+  Widget _buildTyreLapBreakdownCell(
+    BuildContext context,
+    List<SessionTyreLapBreakdownEntry> tyreLapSequence,
+    Map<String, int> tyreLaps,
+  ) {
+    final theme = Theme.of(context);
+    final orderedEntries = tyreLapSequence.isNotEmpty
+        ? tyreLapSequence
+              .where((entry) => entry.laps > 0)
+              .toList(growable: false)
+        : _fallbackTyreLapSequence(tyreLaps);
+
+    if (orderedEntries.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
+        child: Text(
+          '-',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            for (var index = 0; index < orderedEntries.length; index++) ...[
+              if (index > 0)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Text(
+                    '→',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              _buildTyreLapEntryChip(context, orderedEntries[index]),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTyreLapEntryChip(
+    BuildContext context,
+    SessionTyreLapBreakdownEntry entry,
+  ) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final assetPath = _tyreAssetPath(entry.compound);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (assetPath != null)
+          SvgPicture.asset(
+            assetPath,
+            width: 34,
+            height: 20,
+            fit: BoxFit.contain,
+            semanticsLabel: '${entry.compound} ${loc.translate('tyre')}',
+          )
+        else
+          Text(
+            entry.compound,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+        const SizedBox(width: 6),
+        Text(
+          '${entry.laps}',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: entry.usedTyre
+                ? const Color(0xFFEF6C00)
+                : theme.colorScheme.onSurface,
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<SessionTyreLapBreakdownEntry> _raceTyreLapSequence(RaceResultRow row) {
+    if (row.tyreStints.isNotEmpty) {
+      return row.tyreStints.map((stint) {
+        final compound = _formatTyreCompound(stint['compound']?.toString());
+        final laps = _asInt(stint['laps']) ?? 0;
+        return SessionTyreLapBreakdownEntry(
+          compound: compound,
+          laps: laps,
+          usedTyre: stint['usedTyre'] == true,
+        );
+      }).where((entry) => entry.compound != '-' && entry.laps > 0).toList(growable: false);
+    }
+
+    return row.tyreCompounds.map((compound) {
+      return SessionTyreLapBreakdownEntry(
+        compound: compound,
+        laps: 0,
+        usedTyre: false,
+      );
+    }).where((entry) => entry.compound.trim().isNotEmpty && entry.compound != '-').toList(growable: false);
+  }
+
+  String _racePenaltyText(RaceResultRow row) {
+    final directPenalty = row.penalty.trim();
+    if (directPenalty.isNotEmpty &&
+        directPenalty != '-' &&
+        directPenalty != '0' &&
+        directPenalty != '0.0') {
+      return directPenalty;
+    }
+
+    final detailPenalties = row.penaltyDetails
+        .map((detail) => detail['penalty']?.toString().trim() ?? '')
+        .where((penalty) => penalty.isNotEmpty && penalty != '-')
+        .toSet()
+        .toList(growable: false);
+    if (detailPenalties.isNotEmpty) {
+      return detailPenalties.join(', ');
+    }
+
+    return '-';
+  }
+
+  Color? _racePositionDeltaColor(String finish) {
+    final match = RegExp(r'\(([+-]\d+)\)').firstMatch(finish);
+    final delta = match == null ? null : int.tryParse(match.group(1)!);
+    if (delta == null || delta == 0) {
+      return null;
+    }
+    return delta > 0 ? const Color(0xFF2E7D32) : const Color(0xFFC62828);
+  }
+
+  Widget _buildRaceFinishCell(
+    BuildContext context,
+    String finish, {
+    TextAlign align = TextAlign.right,
+  }) {
+    final theme = Theme.of(context);
+    final baseColor =
+        finish == 'DNF' || finish == 'DNS' || finish == 'NC'
+        ? const Color(0xFFE53935)
+        : theme.colorScheme.onSurface;
+    final deltaMatch = RegExp(r'^(.*?)(\s*\(([+-]\d+)\))$').firstMatch(finish);
+    final deltaColor = _racePositionDeltaColor(finish);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: align == TextAlign.right
+            ? MainAxisAlignment.end
+            : align == TextAlign.center
+            ? MainAxisAlignment.center
+            : MainAxisAlignment.start,
+        children: [
+          Flexible(
+            child: RichText(
+              textAlign: align,
+              overflow: TextOverflow.ellipsis,
+              text: TextSpan(
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: baseColor,
+                ),
+                children: deltaMatch == null
+                    ? [TextSpan(text: finish)]
+                    : [
+                        TextSpan(text: deltaMatch.group(1) ?? finish),
+                        TextSpan(
+                          text: deltaMatch.group(2) ?? '',
+                          style: TextStyle(color: deltaColor ?? baseColor),
+                        ),
+                      ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRaceTyreStrategyCell(BuildContext context, RaceResultRow row) {
+    final sequence = _raceTyreLapSequence(row);
+    if (sequence.isNotEmpty && sequence.any((entry) => entry.laps > 0)) {
+      return _buildTyreLapBreakdownCell(
+        context,
+        sequence,
+        const <String, int>{},
+      );
+    }
+
+    if (sequence.isNotEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              for (var index = 0; index < sequence.length; index++) ...[
+                if (index > 0)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Text(
+                      '->',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                _buildTyreLapEntryChip(context, sequence[index]),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
+
+    return _buildTyreCell(context, row.tyreCompound);
+  }
+
+  bool _useCompactRaceResultsLayout(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    return mediaQuery.orientation == Orientation.portrait &&
+      mediaQuery.size.width <= 460;
+  }
+
+  Widget _buildCompactRaceDetailRow(
+    BuildContext context, {
+    required String label,
+    required Widget child,
+  }) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 4),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactRaceResultsList(
+    BuildContext context,
+    List<RaceResultRow> rows,
+  ) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final tokens = _themeTokens(context);
+
+    Widget buildValueText(String value, {bool strong = false, Color? color}) {
+      return Text(
+        value,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: strong ? FontWeight.w700 : FontWeight.w500,
+          color: color ?? theme.colorScheme.onSurface,
+        ),
+      );
+    }
+
+    Widget buildCompactHeaderCell(
+      String label, {
+      int flex = 1,
+      TextAlign align = TextAlign.left,
+    }) {
+      return Expanded(
+        flex: flex,
+        child: Text(
+          label,
+          textAlign: align,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            color: theme.colorScheme.primary,
+            letterSpacing: 0.2,
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF171C25) : const Color(0xFFFFFFFF),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: isDark ? Colors.white12 : Colors.black12),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1D2430) : const Color(0xFFEAF5FF),
+                border: Border(
+                  bottom: BorderSide(
+                    color: isDark ? Colors.white12 : Colors.black12,
+                    width: 0.8,
+                  ),
+                ),
+              ),
+              child: Row(
+                children: [
+                  buildCompactHeaderCell(loc.translate('driver'), flex: 6),
+                  buildCompactHeaderCell(
+                    loc.translate('finish'),
+                    flex: 4,
+                    align: TextAlign.center,
+                  ),
+                  buildCompactHeaderCell(
+                    loc.translate('time'),
+                    flex: 4,
+                    align: TextAlign.right,
+                  ),
+                  const SizedBox(width: 24),
+                ],
+              ),
+            ),
+            ...rows.asMap().entries.map((entry) {
+              final rowIndex = entry.key;
+              final row = entry.value;
+              final penaltyText = _racePenaltyText(row);
+
+              return Container(
+                decoration: BoxDecoration(
+                  color: rowIndex.isEven
+                      ? Colors.transparent
+                      : (isDark ? const Color(0xFF141922) : const Color(0xFFF8FBFF)),
+                  border: rowIndex == rows.length - 1
+                      ? null
+                      : Border(
+                          bottom: BorderSide(
+                            color: isDark ? Colors.white12 : Colors.black12,
+                            width: 0.8,
+                          ),
+                        ),
+                ),
+                child: ExpansionTile(
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
+                  collapsedShape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
+                  iconColor: theme.colorScheme.primary,
+                  collapsedIconColor: theme.colorScheme.primary,
+                  tilePadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 0,
+                  ),
+                  childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                  expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                  minTileHeight: 44,
+                  title: Row(
+                    children: [
+                      Expanded(
+                        flex: 6,
+                        child: Text(
+                          row.driver,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        flex: 4,
+                        child: _buildRaceFinishCell(
+                          context,
+                          row.finish,
+                          align: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        flex: 4,
+                        child: Text(
+                          row.timeOrGap,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  children: [
+                    _buildCompactRaceDetailRow(
+                      context,
+                      label: loc.translate('best_lap'),
+                      child: buildValueText(
+                        row.fastestLap,
+                        strong: row.hasFastestLap,
+                        color: row.hasFastestLap
+                            ? const Color(0xFF8E24AA)
+                            : null,
+                      ),
+                    ),
+                    _buildCompactRaceDetailRow(
+                      context,
+                      label: loc.translate('tyre'),
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: tokens.panel.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: _buildRaceTyreStrategyCell(context, row),
+                      ),
+                    ),
+                    _buildCompactRaceDetailRow(
+                      context,
+                      label: loc.translate('points'),
+                      child: buildValueText(row.points, strong: true),
+                    ),
+                    _buildCompactRaceDetailRow(
+                      context,
+                      label: loc.translate('penalty'),
+                      child: buildValueText(
+                        penaltyText,
+                        strong: penaltyText != '-',
+                        color: penaltyText != '-'
+                            ? const Color(0xFFF57C00)
+                            : null,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+      ),
+    );
+  }
+
+  Widget _buildCompactSessionOverviewList(
+    BuildContext context,
+    List<SessionOverviewRow> rows,
+  ) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final tokens = _themeTokens(context);
+
+    Widget buildValueText(String value, {bool strong = false, Color? color}) {
+      return Text(
+        value,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: strong ? FontWeight.w700 : FontWeight.w500,
+          color: color ?? theme.colorScheme.onSurface,
+        ),
+      );
+    }
+
+    Widget buildCompactHeaderCell(
+      String label, {
+      int flex = 1,
+      TextAlign align = TextAlign.left,
+    }) {
+      return Expanded(
+        flex: flex,
+        child: Text(
+          label,
+          textAlign: align,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            color: theme.colorScheme.primary,
+            letterSpacing: 0.2,
+          ),
+        ),
+      );
+    }
+
+    Widget buildDetailPanel(Widget child) {
+      return Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: tokens.panel.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: child,
+      );
+    }
+
+    String headerTitle() {
+      if (_isPracticeSession) {
+        return loc.translate('time');
+      }
+      return _isPracticeLikeSession
+          ? loc.translate('time')
+          : loc.translate('result');
+    }
+
+    String? qualifyingEliminationLabel(int rowIndex, int totalRows) {
+      if (sessionName != 'Qualifying' || totalRows < 13) {
+        return null;
+      }
+      if (rowIndex >= totalRows - 6) {
+        return loc.translate('q1_out');
+      }
+      if (rowIndex >= totalRows - 12) {
+        return loc.translate('q2_out');
+      }
+      return null;
+    }
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF171C25) : const Color(0xFFFFFFFF),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: isDark ? Colors.white12 : Colors.black12),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1D2430) : const Color(0xFFEAF5FF),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: isDark ? Colors.white12 : Colors.black12,
+                      width: 0.8,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    buildCompactHeaderCell(loc.translate('driver'), flex: 6),
+                    buildCompactHeaderCell(
+                      loc.translate('pos'),
+                      flex: 3,
+                      align: TextAlign.center,
+                    ),
+                    buildCompactHeaderCell(
+                      headerTitle(),
+                      flex: 5,
+                      align: TextAlign.right,
+                    ),
+                    const SizedBox(width: 24),
+                  ],
+                ),
+              ),
+              ...rows.asMap().entries.map((entry) {
+                final rowIndex = entry.key;
+                final row = entry.value;
+                final eliminationLabel = qualifyingEliminationLabel(
+                  rowIndex,
+                  rows.length,
+                );
+                final resultColor = row.hasFastestLap
+                    ? const Color(0xFF8E24AA)
+                    : theme.colorScheme.primary;
+
+                return Container(
+                  decoration: BoxDecoration(
+                    color: rowIndex.isEven
+                        ? Colors.transparent
+                        : (isDark
+                              ? const Color(0xFF141922)
+                              : const Color(0xFFF8FBFF)),
+                    border: rowIndex == rows.length - 1
+                        ? null
+                        : Border(
+                            bottom: BorderSide(
+                              color: isDark ? Colors.white12 : Colors.black12,
+                              width: 0.8,
+                            ),
+                          ),
+                  ),
+                  child: ExpansionTile(
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                    collapsedShape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                    iconColor: theme.colorScheme.primary,
+                    collapsedIconColor: theme.colorScheme.primary,
+                    tilePadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 0,
+                    ),
+                    childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                    expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                    minTileHeight: 44,
+                    title: Row(
+                      children: [
+                        Expanded(
+                          flex: 6,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  row.driver,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
+                                ),
+                              ),
+                              if (row.hasFastestLap) ...[
+                                const SizedBox(width: 4),
+                                const Icon(
+                                  Icons.timer,
+                                  size: 14,
+                                  color: Color(0xFF8E24AA),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 3,
+                          child: Text(
+                            row.position,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 5,
+                          child: Text(
+                            row.result,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: resultColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    children: [
+                      if (_isPracticeSession)
+                        _buildCompactRaceDetailRow(
+                          context,
+                          label: loc.translate('laps'),
+                          child: buildValueText(
+                            row.totalLaps?.toString() ?? '-',
+                            strong: true,
+                          ),
+                        ),
+                      _buildCompactRaceDetailRow(
+                        context,
+                        label: loc.translate('tyre'),
+                        child: buildDetailPanel(
+                          _isPracticeSession
+                              ? _buildTyreLapBreakdownCell(
+                                  context,
+                                  row.tyreLapSequence,
+                                  row.tyreLaps,
+                                )
+                              : _buildTyreCell(context, row.tyreCompound),
+                        ),
+                      ),
+                      if (!_isPracticeSession && eliminationLabel != null)
+                        _buildCompactRaceDetailRow(
+                          context,
+                          label: loc.translate('status'),
+                          child: buildValueText(
+                            eliminationLabel,
+                            strong: true,
+                            color: eliminationLabel == loc.translate('q1_out')
+                                ? const Color(0xFFC62828)
+                                : const Color(0xFFEF6C00),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              }),
+            ],
           ),
         ),
       ),
@@ -7291,6 +14217,10 @@ class OpenF1SessionWidget extends StatelessWidget {
     BuildContext context,
     List<SessionOverviewRow> rows,
   ) {
+    if (_useCompactRaceResultsLayout(context) && !_isSprintSession) {
+      return _buildCompactSessionOverviewList(context, rows);
+    }
+
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final headerColor = isDark
@@ -7320,6 +14250,7 @@ class OpenF1SessionWidget extends StatelessWidget {
       bool strong = false,
       Color? color,
       Widget? leading,
+      Widget? trailing,
     }) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
@@ -7342,14 +14273,53 @@ class OpenF1SessionWidget extends StatelessWidget {
                 ),
               ),
             ),
+            if (trailing != null) ...[const SizedBox(width: 6), trailing],
           ],
         ),
       );
     }
 
+    Widget buildQualifyingBadge(
+      String label,
+      Color background,
+      Color foreground,
+    ) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            color: foreground,
+            letterSpacing: 0.2,
+          ),
+        ),
+      );
+    }
+
+    String? qualifyingEliminationLabel(int rowIndex, int totalRows) {
+      if (sessionName != 'Qualifying' || totalRows < 13) {
+        return null;
+      }
+      if (rowIndex >= totalRows - 6) {
+        return 'Q1 out';
+      }
+      if (rowIndex >= totalRows - 12) {
+        return 'Q2 out';
+      }
+      return null;
+    }
+
     final preferredColumnWidths = _isSprintSession
-        ? const <double>[180, 62, 140, 84, 110, 58]
-        : const <double>[190, 62, 130, 84];
+        ? const <double>[180, 62, 140, 132, 110, 58]
+        : _isPracticeSession
+        ? const <double>[160, 48, 104, 72, 250]
+        : const <double>[154, 48, 92, 104];
 
     final headerCells = _isSprintSession
         ? <Widget>[
@@ -7359,6 +14329,14 @@ class OpenF1SessionWidget extends StatelessWidget {
             buildHeaderCell('Band'),
             buildHeaderCell('Snelste ronde'),
             buildHeaderCell('Punten', align: TextAlign.right),
+          ]
+        : _isPracticeSession
+        ? <Widget>[
+            buildHeaderCell('Coureur'),
+            buildHeaderCell('Pos', align: TextAlign.right),
+            buildHeaderCell('Tijd'),
+            buildHeaderCell('Rondes', align: TextAlign.right),
+            buildHeaderCell('Band'),
           ]
         : <Widget>[
             buildHeaderCell('Coureur'),
@@ -7371,10 +14349,26 @@ class OpenF1SessionWidget extends StatelessWidget {
         .asMap()
         .entries
         .map((entry) {
+          final rowIndex = entry.key;
           final row = entry.value;
           final timerIcon = row.hasFastestLap
               ? const Icon(Icons.timer, size: 14, color: Color(0xFF8E24AA))
               : null;
+          final eliminationLabel = qualifyingEliminationLabel(
+            rowIndex,
+            rows.length,
+          );
+          final eliminationBadge = eliminationLabel == null
+              ? null
+              : buildQualifyingBadge(
+                  eliminationLabel,
+                  eliminationLabel == 'Q1 out'
+                      ? const Color(0xFFFFEBEE)
+                      : const Color(0xFFFFF3E0),
+                  eliminationLabel == 'Q1 out'
+                      ? const Color(0xFFC62828)
+                      : const Color(0xFFEF6C00),
+                );
 
           return _isSprintSession
               ? <Widget>[
@@ -7397,8 +14391,37 @@ class OpenF1SessionWidget extends StatelessWidget {
                     strong: true,
                   ),
                 ]
-              : <Widget>[
+              : _isPracticeSession
+              ? <Widget>[
                   buildBodyCell(row.driver, strong: true, leading: timerIcon),
+                  buildBodyCell(
+                    row.position,
+                    align: TextAlign.right,
+                    strong: true,
+                  ),
+                  buildBodyCell(
+                    row.result,
+                    strong: row.hasFastestLap,
+                    color: row.hasFastestLap ? const Color(0xFF8E24AA) : null,
+                  ),
+                  buildBodyCell(
+                    row.totalLaps?.toString() ?? '-',
+                    align: TextAlign.right,
+                    strong: true,
+                  ),
+                  _buildTyreLapBreakdownCell(
+                    context,
+                    row.tyreLapSequence,
+                    row.tyreLaps,
+                  ),
+                ]
+              : <Widget>[
+                  buildBodyCell(
+                    row.driver,
+                    strong: true,
+                    leading: timerIcon,
+                    trailing: eliminationBadge,
+                  ),
                   buildBodyCell(
                     row.position,
                     align: TextAlign.right,
@@ -7421,9 +14444,21 @@ class OpenF1SessionWidget extends StatelessWidget {
       rows: tableRows,
       headerColor: headerColor,
       borderColor: borderColor,
-      rowBackgroundBuilder: (rowIndex) => rowIndex.isEven
-          ? Colors.transparent
-          : (isDark ? const Color(0xFF141922) : const Color(0xFFF8FBFF)),
+      rowBackgroundBuilder: (rowIndex) {
+        final eliminationLabel = qualifyingEliminationLabel(
+          rowIndex,
+          rows.length,
+        );
+        if (eliminationLabel == 'Q1 out') {
+          return isDark ? const Color(0xFF2B1719) : const Color(0xFFFFF2F2);
+        }
+        if (eliminationLabel == 'Q2 out') {
+          return isDark ? const Color(0xFF2B2117) : const Color(0xFFFFF7ED);
+        }
+        return rowIndex.isEven
+            ? Colors.transparent
+            : (isDark ? const Color(0xFF141922) : const Color(0xFFF8FBFF));
+      },
     );
   }
 
@@ -7431,6 +14466,10 @@ class OpenF1SessionWidget extends StatelessWidget {
     BuildContext context,
     List<RaceResultRow> rows,
   ) {
+    if (_useCompactRaceResultsLayout(context)) {
+      return _buildCompactRaceResultsList(context, rows);
+    }
+
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final headerColor = isDark
@@ -7508,20 +14547,8 @@ class OpenF1SessionWidget extends StatelessWidget {
 
     final tableRows = rows
         .map((row) {
-          final penaltyText = (() {
-            final normalized = row.penalty.trim();
-            if (normalized.isEmpty ||
-                normalized == '0' ||
-                normalized == '0.0') {
-              return '-';
-            }
-            return normalized;
-          })();
+          final penaltyText = _racePenaltyText(row);
           final hasPenalty = penaltyText != '-';
-          final statusColor =
-              row.finish == 'DNF' || row.finish == 'DNS' || row.finish == 'NC'
-              ? const Color(0xFFE53935)
-              : theme.colorScheme.onSurface;
 
           return <Widget>[
             buildBodyCell(
@@ -7532,11 +14559,10 @@ class OpenF1SessionWidget extends StatelessWidget {
                   : null,
             ),
             buildBodyCell(row.start, align: TextAlign.right),
-            buildBodyCell(
+            _buildRaceFinishCell(
+              context,
               row.finish,
               align: TextAlign.right,
-              strong: true,
-              color: statusColor,
             ),
             buildBodyCell(row.timeOrGap),
             buildBodyCell(
@@ -7544,7 +14570,7 @@ class OpenF1SessionWidget extends StatelessWidget {
               strong: hasPenalty,
               color: hasPenalty ? const Color(0xFFF57C00) : null,
             ),
-            _buildTyreCell(context, row.tyreCompound),
+            _buildRaceTyreStrategyCell(context, row),
             buildFastestLapCell(row),
             buildBodyCell(row.points, align: TextAlign.right, strong: true),
           ];
@@ -7553,7 +14579,7 @@ class OpenF1SessionWidget extends StatelessWidget {
 
     return _buildStickyResultsTable(
       context,
-      preferredColumnWidths: const [170, 58, 92, 132, 78, 76, 102, 58],
+      preferredColumnWidths: const [170, 58, 92, 132, 88, 220, 102, 58],
       headerCells: headerCells,
       rows: tableRows,
       headerColor: headerColor,
@@ -7608,7 +14634,6 @@ class OpenF1SessionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final key = '${race.country}_${sessionName}_${race.date.year}';
     final raceResultsKey = SessionDataManager().raceResultsKeyFor(race);
@@ -7637,6 +14662,7 @@ class OpenF1SessionWidget extends StatelessWidget {
     return AnimatedBuilder(
       animation: SessionDataManager(),
       builder: (context, child) {
+        final loc = AppLocalizations.of(context);
         final results = SessionDataManager().cache[key];
         final raceResults =
             SessionDataManager().raceResultsCache[raceResultsKey];
@@ -7707,7 +14733,7 @@ class OpenF1SessionWidget extends StatelessWidget {
                     ),
                     IconButton(
                       icon: const Icon(Icons.fullscreen),
-                      tooltip: 'Fullscreen table',
+                      tooltip: loc.translate('fullscreen_table'),
                       onPressed: () =>
                           _openFullscreenRaceResults(context, raceResults),
                     ),
@@ -7805,21 +14831,25 @@ class OpenF1SessionWidget extends StatelessWidget {
   }
 }
 
-class FullscreenTablePage extends StatefulWidget {
+class FullscreenRaceResultsScreen extends StatefulWidget {
+  final Race race;
   final String title;
-  final WidgetBuilder tableBuilder;
 
-  const FullscreenTablePage({
+  const FullscreenRaceResultsScreen({
     super.key,
+    required this.race,
     required this.title,
-    required this.tableBuilder,
   });
 
   @override
-  State<FullscreenTablePage> createState() => _FullscreenTablePageState();
+  State<FullscreenRaceResultsScreen> createState() =>
+      _FullscreenRaceResultsScreenState();
 }
 
-class _FullscreenTablePageState extends State<FullscreenTablePage> {
+class _FullscreenRaceResultsScreenState
+    extends State<FullscreenRaceResultsScreen> {
+  bool _isFetching = false;
+
   @override
   void initState() {
     super.initState();
@@ -7827,6 +14857,25 @@ class _FullscreenTablePageState extends State<FullscreenTablePage> {
       DeviceOrientation.landscapeRight,
       DeviceOrientation.landscapeLeft,
     ]);
+    _ensureDataLoaded();
+  }
+
+  Future<void> _ensureDataLoaded() async {
+    setState(() => _isFetching = true);
+    final roundIndex = raceRoundFor(widget.race);
+    await SessionDataManager().ensureRaceDataAvailable(widget.race, roundIndex);
+    if (mounted) {
+      setState(() => _isFetching = false);
+    }
+  }
+
+  Future<void> _refreshData() async {
+    setState(() => _isFetching = true);
+    final roundIndex = raceRoundFor(widget.race);
+    await SessionDataManager().fetchDataForRace(widget.race, roundIndex);
+    if (mounted) {
+      setState(() => _isFetching = false);
+    }
   }
 
   @override
@@ -7840,6 +14889,13 @@ class _FullscreenTablePageState extends State<FullscreenTablePage> {
 
   @override
   Widget build(BuildContext context) {
+    final tableWidget = OpenF1SessionWidget(
+      race: widget.race,
+      sessionName: 'Race',
+      displayTitle: widget.title,
+    );
+    final raceResultsKey = SessionDataManager().raceResultsKeyFor(widget.race);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -7848,11 +14904,64 @@ class _FullscreenTablePageState extends State<FullscreenTablePage> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: InteractiveViewer(
-        constrained: false,
-        minScale: 0.5,
-        maxScale: 4.0,
-        child: widget.tableBuilder(context),
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
+        child: AnimatedBuilder(
+          animation: SessionDataManager(),
+          builder: (context, _) {
+            final raceResults =
+                SessionDataManager().raceResultsCache[raceResultsKey] ??
+                const <RaceResultRow>[];
+
+            if (_isFetching && raceResults.isEmpty) {
+              return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  const SizedBox(height: 24),
+                  _buildSessionResultsSkeleton(context, race: widget.race),
+                ],
+              );
+            }
+
+            if (raceResults.isEmpty) {
+              return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(24),
+                children: const [
+                  Center(child: Text('No race results available yet.')),
+                ],
+              );
+            }
+
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final viewportWidth = constraints.maxWidth.isFinite
+                    ? constraints.maxWidth
+                    : MediaQuery.sizeOf(context).width;
+                final viewportHeight = constraints.maxHeight.isFinite
+                    ? constraints.maxHeight
+                    : MediaQuery.sizeOf(context).height;
+
+                return InteractiveViewer(
+                  constrained: false,
+                  minScale: 0.5,
+                  maxScale: 4.0,
+                  child: SizedBox(
+                    width: viewportWidth,
+                    height: viewportHeight,
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: tableWidget._buildRaceResultsTable(
+                        context,
+                        raceResults,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
