@@ -1,7 +1,7 @@
-import 'dart:html' as html;
+import 'package:web/web.dart' as web;
 
-String browserUserAgent() => html.window.navigator.userAgent.toLowerCase();
+String browserUserAgent() => web.window.navigator.userAgent.toLowerCase();
 
 void openExternalUrl(String url) {
-  html.window.open(url, '_blank');
+  web.window.open(url, '_blank');
 }

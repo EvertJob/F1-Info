@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:http/http.dart' as http;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
@@ -79,31 +80,32 @@ class AppTheme {
 
   static ThemeData _buildTheme({required Brightness brightness}) {
     final bool isDark = brightness == Brightness.dark;
-    final ColorScheme scheme = ColorScheme.fromSeed(
-      seedColor: _primary,
-      brightness: brightness,
-    ).copyWith(
-      primary: _primary,
-      secondary: _secondary,
-      tertiary: _tertiary,
-      surface: isDark ? const Color(0xFF11141B) : const Color(0xFFFFFFFF),
-      surfaceContainerHighest: isDark
-          ? const Color(0xFF1A1F29)
-          : const Color(0xFFF3F6FB),
-      onSurface: isDark ? const Color(0xFFF4F7FB) : const Color(0xFF11151C),
-      onSurfaceVariant: isDark
-          ? const Color(0xFFAAB6C8)
-          : const Color(0xFF5F6B7A),
-      outline: isDark ? const Color(0xFF2A3340) : const Color(0xFFD8E0EA),
-    );
+    final ColorScheme scheme =
+        ColorScheme.fromSeed(
+          seedColor: _primary,
+          brightness: brightness,
+        ).copyWith(
+          primary: _primary,
+          secondary: _secondary,
+          tertiary: _tertiary,
+          surface: isDark ? const Color(0xFF11141B) : const Color(0xFFFFFFFF),
+          surfaceContainerHighest: isDark
+              ? const Color(0xFF1A1F29)
+              : const Color(0xFFF3F6FB),
+          onSurface: isDark ? const Color(0xFFF4F7FB) : const Color(0xFF11151C),
+          onSurfaceVariant: isDark
+              ? const Color(0xFFAAB6C8)
+              : const Color(0xFF5F6B7A),
+          outline: isDark ? const Color(0xFF2A3340) : const Color(0xFFD8E0EA),
+        );
 
     final F1ThemeTokens tokens = F1ThemeTokens(
       panel: isDark ? const Color(0xFF171C25) : const Color(0xFFF8FAFD),
       panelStrong: isDark ? const Color(0xFF1D2430) : const Color(0xFFFFFFFF),
       outline: isDark ? const Color(0xFF2D3745) : const Color(0xFFDCE3ED),
       accentSoft: isDark
-          ? _primary.withOpacity(0.16)
-          : _primary.withOpacity(0.10),
+          ? _primary.withValues(alpha: 0.16)
+          : _primary.withValues(alpha: 0.10),
       heroStart: isDark ? const Color(0xFF131923) : const Color(0xFFFFFFFF),
       heroEnd: isDark ? const Color(0xFF112841) : const Color(0xFFEAF5FF),
     );
@@ -153,11 +155,11 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: tokens.panelStrong,
         surfaceTintColor: Colors.transparent,
-        shadowColor: Colors.black.withOpacity(isDark ? 0.35 : 0.08),
+        shadowColor: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
         elevation: isDark ? 0 : 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(22),
-          side: BorderSide(color: tokens.outline.withOpacity(0.7)),
+          side: BorderSide(color: tokens.outline.withValues(alpha: 0.7)),
         ),
         margin: EdgeInsets.zero,
       ),
@@ -191,7 +193,7 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: tokens.outline.withOpacity(0.8)),
+          side: BorderSide(color: tokens.outline.withValues(alpha: 0.8)),
         ),
         textStyle: textTheme.bodyMedium,
       ),
@@ -205,7 +207,7 @@ class AppTheme {
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: scheme.primary,
-        linearTrackColor: scheme.primary.withOpacity(0.14),
+        linearTrackColor: scheme.primary.withValues(alpha: 0.14),
       ),
       listTileTheme: ListTileThemeData(
         iconColor: scheme.primary,
@@ -219,14 +221,14 @@ class AppTheme {
         textColor: scheme.primary,
         collapsedTextColor: scheme.primary,
         iconColor: scheme.primary,
-        collapsedIconColor: scheme.primary.withOpacity(0.9),
+        collapsedIconColor: scheme.primary.withValues(alpha: 0.9),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: tokens.outline.withOpacity(0.7)),
+          side: BorderSide(color: tokens.outline.withValues(alpha: 0.7)),
         ),
         collapsedShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: tokens.outline.withOpacity(0.7)),
+          side: BorderSide(color: tokens.outline.withValues(alpha: 0.7)),
         ),
         tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
         childrenPadding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
@@ -248,7 +250,7 @@ class AppTheme {
         ),
       ),
       dividerTheme: DividerThemeData(
-        color: tokens.outline.withOpacity(0.75),
+        color: tokens.outline.withValues(alpha: 0.75),
         thickness: 1,
       ),
       extensions: [tokens],
@@ -305,6 +307,171 @@ Widget _buildFlagHero({
   );
 }
 
+Widget _buildGlyphIcon(String glyph, {double size = 18}) {
+  return Text(
+    glyph,
+    textAlign: TextAlign.center,
+    style: TextStyle(fontSize: size, height: 1),
+  );
+}
+
+Widget _buildSummerBreakFlag({required double size}) {
+  return SizedBox(
+    width: size,
+    height: size,
+    child: CustomPaint(painter: const _SummerBreakFlagPainter()),
+  );
+}
+
+class _SummerBreakFlagPainter extends CustomPainter {
+  const _SummerBreakFlagPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final polePaint = Paint()
+      ..color = const Color(0xFF6D4C41)
+      ..style = PaintingStyle.fill;
+    final poleRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(
+        size.width * 0.08,
+        size.height * 0.12,
+        size.width * 0.07,
+        size.height * 0.76,
+      ),
+      Radius.circular(size.width * 0.03),
+    );
+    canvas.drawRRect(poleRect, polePaint);
+
+    final flagPath = Path()
+      ..moveTo(size.width * 0.16, size.height * 0.24)
+      ..quadraticBezierTo(
+        size.width * 0.34,
+        size.height * 0.06,
+        size.width * 0.54,
+        size.height * 0.24,
+      )
+      ..quadraticBezierTo(
+        size.width * 0.73,
+        size.height * 0.41,
+        size.width * 0.92,
+        size.height * 0.24,
+      )
+      ..lineTo(size.width * 0.92, size.height * 0.74)
+      ..quadraticBezierTo(
+        size.width * 0.73,
+        size.height * 0.91,
+        size.width * 0.54,
+        size.height * 0.74,
+      )
+      ..quadraticBezierTo(
+        size.width * 0.34,
+        size.height * 0.57,
+        size.width * 0.16,
+        size.height * 0.74,
+      )
+      ..close();
+
+    canvas.save();
+    canvas.clipPath(flagPath);
+
+    final lightPaint = Paint()..color = const Color(0xFFF1F1F1);
+    final darkPaint = Paint()..color = const Color(0xFF262626);
+    final columns = 6;
+    final rows = 6;
+    final cellWidth = size.width / columns;
+    final cellHeight = size.height / rows;
+    for (var row = 0; row < rows; row++) {
+      for (var column = 0; column < columns; column++) {
+        final rect = Rect.fromLTWH(
+          column * cellWidth,
+          row * cellHeight,
+          cellWidth + 0.5,
+          cellHeight + 0.5,
+        );
+        canvas.drawRect(rect, (row + column).isEven ? darkPaint : lightPaint);
+      }
+    }
+
+    final sunCenter = Offset(size.width * 0.53, size.height * 0.5);
+    final sunRadius = size.width * 0.19;
+    final rayPaint = Paint()
+      ..color = const Color(0xFFF3C74D)
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = size.width * 0.028;
+    for (var index = 0; index < 8; index++) {
+      final angle = (math.pi * 2 / 8) * index;
+      final start = Offset(
+        sunCenter.dx + math.cos(angle) * sunRadius * 1.18,
+        sunCenter.dy + math.sin(angle) * sunRadius * 1.18,
+      );
+      final end = Offset(
+        sunCenter.dx + math.cos(angle) * sunRadius * 1.55,
+        sunCenter.dy + math.sin(angle) * sunRadius * 1.55,
+      );
+      canvas.drawLine(start, end, rayPaint);
+    }
+
+    final sunLeftPaint = Paint()..color = const Color(0xFFF4CD58);
+    final sunRightPaint = Paint()..color = const Color(0xFFE0AD38);
+    canvas.save();
+    canvas.clipRect(Rect.fromLTWH(0, 0, sunCenter.dx, size.height));
+    canvas.drawCircle(sunCenter, sunRadius, sunLeftPaint);
+    canvas.restore();
+    canvas.save();
+    canvas.clipRect(
+      Rect.fromLTWH(sunCenter.dx, 0, size.width - sunCenter.dx, size.height),
+    );
+    canvas.drawCircle(sunCenter, sunRadius, sunRightPaint);
+    canvas.restore();
+
+    final glassesPaint = Paint()..color = const Color(0xFF263B45);
+    final lensWidth = sunRadius * 0.78;
+    final lensHeight = sunRadius * 0.5;
+    final bridgeWidth = sunRadius * 0.18;
+    final glassesTop = sunCenter.dy - lensHeight * 0.1;
+    final leftLens = RRect.fromRectAndRadius(
+      Rect.fromCenter(
+        center: Offset(sunCenter.dx - lensWidth * 0.34, glassesTop),
+        width: lensWidth * 0.62,
+        height: lensHeight,
+      ),
+      Radius.circular(lensHeight * 0.36),
+    );
+    final rightLens = RRect.fromRectAndRadius(
+      Rect.fromCenter(
+        center: Offset(sunCenter.dx + lensWidth * 0.34, glassesTop),
+        width: lensWidth * 0.62,
+        height: lensHeight,
+      ),
+      Radius.circular(lensHeight * 0.36),
+    );
+    canvas.drawRRect(leftLens, glassesPaint);
+    canvas.drawRRect(rightLens, glassesPaint);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: Offset(sunCenter.dx, glassesTop),
+          width: bridgeWidth,
+          height: lensHeight * 0.22,
+        ),
+        Radius.circular(lensHeight * 0.12),
+      ),
+      glassesPaint,
+    );
+
+    canvas.restore();
+
+    final borderPaint = Paint()
+      ..color = const Color(0xFFEAEAEA)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = size.width * 0.03;
+    canvas.drawPath(flagPath, borderPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 class SkeletonBox extends StatefulWidget {
   final double? width;
   final double height;
@@ -343,8 +510,8 @@ class _SkeletonBoxState extends State<SkeletonBox>
   @override
   Widget build(BuildContext context) {
     final tokens = _themeTokens(context);
-    final baseColor = tokens.panel.withOpacity(0.96);
-    final highlightColor = tokens.panelStrong.withOpacity(0.98);
+    final baseColor = tokens.panel.withValues(alpha: 0.96);
+    final highlightColor = tokens.panelStrong.withValues(alpha: 0.98);
 
     return AnimatedBuilder(
       animation: _controller,
@@ -475,7 +642,7 @@ Widget _buildSessionResultsSkeleton(
               color: _themeTokens(context).panelStrong,
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: _themeTokens(context).outline.withOpacity(0.7),
+                color: _themeTokens(context).outline.withValues(alpha: 0.7),
               ),
             ),
             child: Column(
@@ -727,23 +894,24 @@ _TrackFlagContext _resolveTrackFlagContext(
     return const _TrackFlagContext(state: _trackClearState);
   }
 
-  final relevantMessages = messages
-      .where((message) => _isSessionFlagMessage(message, sessionName))
-      .toList()
-    ..sort((a, b) {
-      final aTime = DateTime.tryParse(a['timestampUtc']?.toString() ?? '');
-      final bTime = DateTime.tryParse(b['timestampUtc']?.toString() ?? '');
-      if (aTime == null && bTime == null) {
-        return 0;
-      }
-      if (aTime == null) {
-        return 1;
-      }
-      if (bTime == null) {
-        return -1;
-      }
-      return aTime.compareTo(bTime);
-    });
+  final relevantMessages =
+      messages
+          .where((message) => _isSessionFlagMessage(message, sessionName))
+          .toList()
+        ..sort((a, b) {
+          final aTime = DateTime.tryParse(a['timestampUtc']?.toString() ?? '');
+          final bTime = DateTime.tryParse(b['timestampUtc']?.toString() ?? '');
+          if (aTime == null && bTime == null) {
+            return 0;
+          }
+          if (aTime == null) {
+            return 1;
+          }
+          if (bTime == null) {
+            return -1;
+          }
+          return aTime.compareTo(bTime);
+        });
 
   if (relevantMessages.isEmpty) {
     return const _TrackFlagContext(state: _trackClearState);
@@ -786,8 +954,9 @@ _TrackFlagContext _resolveTrackFlagContext(
       ..sort((a, b) {
         final flagA = a['flag']?.toString() ?? '';
         final flagB = b['flag']?.toString() ?? '';
-        final severityCompare =
-            _trackFlagSeverity(flagB).compareTo(_trackFlagSeverity(flagA));
+        final severityCompare = _trackFlagSeverity(
+          flagB,
+        ).compareTo(_trackFlagSeverity(flagA));
         if (severityCompare != 0) {
           return severityCompare;
         }
@@ -804,7 +973,8 @@ _TrackFlagContext _resolveTrackFlagContext(
       });
 
     final activeMessage = prioritizedActiveFlags.first;
-    final activeFlag = activeMessage['flag']?.toString().trim().toUpperCase() ?? '';
+    final activeFlag =
+        activeMessage['flag']?.toString().trim().toUpperCase() ?? '';
     final activeReason = activeMessage['message']?.toString().trim();
     if (activeFlag == 'RED') {
       return _TrackFlagContext(state: _trackRedState, message: activeReason);
@@ -884,27 +1054,28 @@ int? _resolveCurrentSessionLap(
   }
 
   int? latestLap;
-  final relevantMessages = messages
-      .where(
-        (message) =>
-            message['sessionName']?.toString().trim().toUpperCase() ==
-            sessionName.trim().toUpperCase(),
-      )
-      .toList()
-    ..sort((a, b) {
-      final aTime = DateTime.tryParse(a['timestampUtc']?.toString() ?? '');
-      final bTime = DateTime.tryParse(b['timestampUtc']?.toString() ?? '');
-      if (aTime == null && bTime == null) {
-        return 0;
-      }
-      if (aTime == null) {
-        return 1;
-      }
-      if (bTime == null) {
-        return -1;
-      }
-      return aTime.compareTo(bTime);
-    });
+  final relevantMessages =
+      messages
+          .where(
+            (message) =>
+                message['sessionName']?.toString().trim().toUpperCase() ==
+                sessionName.trim().toUpperCase(),
+          )
+          .toList()
+        ..sort((a, b) {
+          final aTime = DateTime.tryParse(a['timestampUtc']?.toString() ?? '');
+          final bTime = DateTime.tryParse(b['timestampUtc']?.toString() ?? '');
+          if (aTime == null && bTime == null) {
+            return 0;
+          }
+          if (aTime == null) {
+            return 1;
+          }
+          if (bTime == null) {
+            return -1;
+          }
+          return aTime.compareTo(bTime);
+        });
 
   for (final message in relevantMessages) {
     final messageTime = DateTime.tryParse(
@@ -1120,7 +1291,7 @@ class _WeatherMetricTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: tokens.panel,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: tokens.outline.withOpacity(0.7)),
+        border: Border.all(color: tokens.outline.withValues(alpha: 0.7)),
       ),
       child: Row(
         children: [
@@ -1204,17 +1375,15 @@ class _WeatherTrackOverlayPainter extends CustomPainter {
       final flowProgress = ((progressSeed + (phase * speedFactor)) % 1.0) - 0.5;
       final travel = flowProgress * flowLength * 1.08;
       final lateral =
-          ((lane - 2) * trackBounds.height * 0.16) +
-          (spreadSeed * 26) +
-          wave;
+          ((lane - 2) * trackBounds.height * 0.16) + (spreadSeed * 26) + wave;
       final particleCenter = Offset(
         center.dx + (windVector.dx * travel) + (normalVector.dx * lateral),
         center.dy + (windVector.dy * travel) + (normalVector.dy * lateral),
       );
       final particleSize = 7.0 + (((index * 13) % 7) / 7) * 5;
       final particlePaint = Paint()
-        ..color = primaryColor.withOpacity(
-          (baseOpacity + ((((index * 17) % 100) / 100) * 0.18)).clamp(
+        ..color = primaryColor.withValues(
+          alpha: (baseOpacity + ((((index * 17) % 100) / 100) * 0.18)).clamp(
             0.22,
             0.62,
           ),
@@ -1238,8 +1407,8 @@ class _WeatherTrackOverlayPainter extends CustomPainter {
 
     final streakCount = (18 + (rainIntensity * 6)).round().clamp(18, 72);
     final rainPaint = Paint()
-      ..color = rainColor.withOpacity(
-        (0.18 + (rainIntensity * 0.08)).clamp(0.2, 0.55),
+      ..color = rainColor.withValues(
+        alpha: (0.18 + (rainIntensity * 0.08)).clamp(0.2, 0.55),
       )
       ..strokeWidth = 1.6
       ..strokeCap = StrokeCap.round;
@@ -1351,11 +1520,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
     });
   }
 
-  DateTime? _interpolateDateTime(
-    DateTime? start,
-    DateTime? end,
-    double t,
-  ) {
+  DateTime? _interpolateDateTime(DateTime? start, DateTime? end, double t) {
     if (start == null && end == null) {
       return null;
     }
@@ -1375,8 +1540,14 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
       return _resolvedSamples.first;
     }
 
-    final lowerIndex = _selectedIndex.floor().clamp(0, _resolvedSamples.length - 1);
-    final upperIndex = _selectedIndex.ceil().clamp(0, _resolvedSamples.length - 1);
+    final lowerIndex = _selectedIndex.floor().clamp(
+      0,
+      _resolvedSamples.length - 1,
+    );
+    final upperIndex = _selectedIndex.ceil().clamp(
+      0,
+      _resolvedSamples.length - 1,
+    );
     final lowerSample = _resolvedSamples[lowerIndex];
     final upperSample = _resolvedSamples[upperIndex];
 
@@ -1385,12 +1556,17 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
     }
 
     final t = (_selectedIndex - lowerIndex).clamp(0.0, 1.0);
-    final lowerTime = DateTime.tryParse(lowerSample['timestampUtc']?.toString() ?? '');
-    final upperTime = DateTime.tryParse(upperSample['timestampUtc']?.toString() ?? '');
+    final lowerTime = DateTime.tryParse(
+      lowerSample['timestampUtc']?.toString() ?? '',
+    );
+    final upperTime = DateTime.tryParse(
+      upperSample['timestampUtc']?.toString() ?? '',
+    );
     final interpolatedTime = _interpolateDateTime(lowerTime, upperTime, t);
 
     return {
-      'timestampUtc': interpolatedTime?.toUtc().toIso8601String() ??
+      'timestampUtc':
+          interpolatedTime?.toUtc().toIso8601String() ??
           lowerSample['timestampUtc']?.toString(),
       'airTemperatureC': _lerpNullableDouble(
         (lowerSample['airTemperatureC'] as num?)?.toDouble(),
@@ -1423,11 +1599,10 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
         t,
       ),
       'windDirection': _lerpDegrees(
-            lowerSample['windDirection'] as int?,
-            upperSample['windDirection'] as int?,
-            t,
-          )
-          ?.round(),
+        lowerSample['windDirection'] as int?,
+        upperSample['windDirection'] as int?,
+        t,
+      )?.round(),
       'interpolated': true,
     };
   }
@@ -1469,7 +1644,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
         decoration: BoxDecoration(
           color: tokens.panelStrong,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: tokens.outline.withOpacity(0.7)),
+          border: Border.all(color: tokens.outline.withValues(alpha: 0.7)),
         ),
         child: Text(
           loc.translate('track_playback_no_weather'),
@@ -1504,10 +1679,10 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
     );
     final translatedTrackFlagLabel = loc.translate(trackFlagState.labelKey);
     final trackStatusLabel =
-      trackFlagState.labelKey == _trackClearState.labelKey &&
-        currentLap != null
-      ? loc.format('lap_label', {'lap': '$currentLap'})
-      : translatedTrackFlagLabel;
+        trackFlagState.labelKey == _trackClearState.labelKey &&
+            currentLap != null
+        ? loc.format('lap_label', {'lap': '$currentLap'})
+        : translatedTrackFlagLabel;
 
     return Container(
       width: double.infinity,
@@ -1516,7 +1691,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
       decoration: BoxDecoration(
         color: tokens.panelStrong,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: tokens.outline.withOpacity(0.8)),
+        border: Border.all(color: tokens.outline.withValues(alpha: 0.8)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1559,10 +1734,10 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: trackFlagState.color.withOpacity(0.14),
+                      color: trackFlagState.color.withValues(alpha: 0.14),
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
-                        color: trackFlagState.color.withOpacity(0.34),
+                        color: trackFlagState.color.withValues(alpha: 0.34),
                       ),
                     ),
                     child: Text(
@@ -1609,15 +1784,12 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
             const SizedBox(height: 10),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
-                color: trackFlagState.color.withOpacity(0.12),
+                color: trackFlagState.color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: trackFlagState.color.withOpacity(0.28),
+                  color: trackFlagState.color.withValues(alpha: 0.28),
                 ),
               ),
               child: Text(
@@ -1640,16 +1812,18 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                 end: Alignment.bottomRight,
                 colors: [
                   Color.alphaBlend(
-                    trackFlagState.color.withOpacity(0.14),
-                    tokens.panel.withOpacity(0.92),
+                    trackFlagState.color.withValues(alpha: 0.14),
+                    tokens.panel.withValues(alpha: 0.92),
                   ),
                   Color.alphaBlend(
-                    trackFlagState.color.withOpacity(0.08),
-                    tokens.accentSoft.withOpacity(0.45),
+                    trackFlagState.color.withValues(alpha: 0.08),
+                    tokens.accentSoft.withValues(alpha: 0.45),
                   ),
                 ],
               ),
-              border: Border.all(color: trackFlagState.color.withOpacity(0.45)),
+              border: Border.all(
+                color: trackFlagState.color.withValues(alpha: 0.45),
+              ),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(18),
@@ -1694,10 +1868,10 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                         vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: tokens.panelStrong.withOpacity(0.9),
+                        color: tokens.panelStrong.withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: tokens.outline.withOpacity(0.7),
+                          color: tokens.outline.withValues(alpha: 0.7),
                         ),
                       ),
                       child: Column(
@@ -1739,8 +1913,8 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: theme.colorScheme.primary,
               thumbColor: theme.colorScheme.primary,
-              inactiveTrackColor: tokens.outline.withOpacity(0.5),
-              overlayColor: theme.colorScheme.primary.withOpacity(0.14),
+              inactiveTrackColor: tokens.outline.withValues(alpha: 0.5),
+              overlayColor: theme.colorScheme.primary.withValues(alpha: 0.14),
             ),
             child: Slider(
               min: 0,
@@ -1867,19 +2041,24 @@ class AppLocalizations {
     'settings': 'Instellingen',
     'toggleTheme': 'Wissel Thema',
     'changelog': 'Changelog',
+    'placeholder_page': 'Nieuwe pagina',
+    'placeholder_page_empty': 'Deze pagina is nog leeg.',
     'compare': 'Vergelijken',
     'select_drivers_to_compare': 'Selecteer 2 coureurs',
     'select_teams_to_compare': 'Selecteer 2 teams',
     'compare_overall': 'Overall',
     'compare_season': 'Per seizoen',
     'compare_year': 'Seizoen',
-    'compare_season_unavailable': 'Seizoensdata voor deze vergelijking is niet beschikbaar.',
+    'compare_season_unavailable':
+        'Seizoensdata voor deze vergelijking is niet beschikbaar.',
     'points_progression': 'Puntenverloop',
     'points_after_each_race': 'Stand na elke race',
     'round_short': 'R',
     'dnf_percentage': 'Uitval %',
     'circuits': 'Circuits',
     'standings': 'Standen',
+    'country': 'Land',
+    'date': 'Datum',
     'nextRace': 'Volgende Race',
     'startsIn': 'Start in',
     'week': 'week',
@@ -2100,9 +2279,11 @@ class AppLocalizations {
     'time_gap': 'Tijd / Verschil',
     'fullscreen_table': 'Tabel op volledig scherm',
     'weekend_hub': 'Weekend Hub',
-    'weekend_hub_card_subtitle': 'Schema, weer, podium en penalties in een scherm',
+    'weekend_hub_card_subtitle':
+        'Schema, weer, podium en penalties in een scherm',
     'weekend_hub_loading': 'Weekend Hub laden...',
-    'weekend_hub_load_error': 'Weekend Hub kon niet volledig laden. Cachedata wordt getoond.',
+    'weekend_hub_load_error':
+        'Weekend Hub kon niet volledig laden. Cachedata wordt getoond.',
     'weekend_schedule': 'Weekend schema',
     'session_status_upcoming': 'Aankomend',
     'session_status_live_recent': 'Live / Recent',
@@ -2128,10 +2309,13 @@ class AppLocalizations {
     'all_scopes': 'Alle scopes',
     'race_control': 'Race Control',
     'race_control_detail': 'Race Control detail',
-    'race_control_search_hint': 'Zoek op bericht, vlag, categorie, ronde of coureur',
+    'race_control_search_hint':
+        'Zoek op bericht, vlag, categorie, ronde of coureur',
     'race_control_message_count': '{visible} van {total} berichten',
-    'race_control_empty': 'Geen race control-berichten gevonden voor deze filter of zoekopdracht.',
-    'race_control_no_linked_message': 'Geen gekoppeld steward-bericht gevonden.',
+    'race_control_empty':
+        'Geen race control-berichten gevonden voor deze filter of zoekopdracht.',
+    'race_control_no_linked_message':
+        'Geen gekoppeld steward-bericht gevonden.',
     'race_control_related_updates': 'Gerelateerde steward-updates',
     'race_control_relation_served_penalty': 'Uitgevoerde straf',
     'race_control_relation_issued_earlier': 'Eerder opgelegd',
@@ -2151,7 +2335,8 @@ class AppLocalizations {
     'penalties': 'Penalties',
     'penalties_empty': 'Geen penalties gevonden in de huidige weekendcache.',
     'session_weather_unavailable': 'Geen weerdata beschikbaar voor {session}.',
-    'session_data_unavailable': '{session}-data wordt geladen of is nog niet beschikbaar.',
+    'session_data_unavailable':
+        '{session}-data wordt geladen of is nog niet beschikbaar.',
     'close': 'Sluiten',
     'used_tyre': 'gebruikt',
     'q1_out': 'Q1 uit',
@@ -2161,21 +2346,33 @@ class AppLocalizations {
     'avg_finish_l5': 'Gem. finish (L5)',
     'no_finish_data': 'Geen finishdata',
     'points_per_start': 'Punten / start',
+    'points_per_entry': 'Punten / entry',
     'win_rate': 'Winrate %',
+    'pole_rate': 'Pole %',
+    'fastest_lap_rate': 'Snelste ronde %',
+    'summer_break': 'Zomerstop',
+    'summer_break_subtitle': 'Tussen Hongarije en Nederland ligt de zomerstop.',
+    'previous_winners': 'Eerdere winnaars',
+    'last_winner': 'Winnaar vorig jaar',
     'ai_race_engineer': 'AI Race Engineer',
-    'ai_example_prompt': 'Probeer bijvoorbeeld: "Fetch latest results", "Show next weekend", "Show driver standings", "Open driver Charles Leclerc" of "Show latest penalties".',
+    'ai_example_prompt':
+        'Probeer bijvoorbeeld: "Fetch latest results", "Show next weekend", "Show driver standings", "Open driver Charles Leclerc" of "Show latest penalties".',
     'ai_no_completed_race': 'Er is nog geen verreden race gevonden.',
     'ai_latest_results_refreshed': 'De laatste uitslag is opnieuw opgehaald.',
-    'ai_latest_results_podium': 'Laatste resultaten vernieuwd. Podium: {podium}',
+    'ai_latest_results_podium':
+        'Laatste resultaten vernieuwd. Podium: {podium}',
     'ai_open_latest_results': 'Open laatste resultaten',
     'ai_next_weekend': 'Volgend weekend: {race} op {date}.',
     'ai_open_weekend_hub': 'Open weekend hub',
-    'ai_compare_parse_error': 'Ik kon de vergelijking niet lezen. Gebruik: naam1 vs naam2',
-    'ai_driver_compare_ready': 'Driver comparison klaar voor {left} en {right}.',
+    'ai_compare_parse_error':
+        'Ik kon de vergelijking niet lezen. Gebruik: naam1 vs naam2',
+    'ai_driver_compare_ready':
+        'Driver comparison klaar voor {left} en {right}.',
     'ai_open_driver_compare': 'Open driver compare',
     'ai_team_compare_ready': 'Team comparison klaar voor {left} en {right}.',
     'ai_open_team_compare': 'Open team compare',
-    'ai_compare_no_match': 'Ik kon geen twee geldige drivers of teams vinden voor deze vergelijking.',
+    'ai_compare_no_match':
+        'Ik kon geen twee geldige drivers of teams vinden voor deze vergelijking.',
     'ai_form_no_driver': 'Ik kon geen coureur vinden voor de form-analyse.',
     'ai_form_no_cache': 'Nog geen gecachte recente races voor {driver}.',
     'ai_form_summary': 'Laatste vorm van {driver}: {summary}',
@@ -2189,12 +2386,17 @@ class AppLocalizations {
     'ai_open_team_profile': 'Open teamprofiel',
     'ai_drivers_chart_ready': 'De coureursgrafiek staat klaar voor {year}.',
     'ai_open_drivers_chart': 'Open coureursgrafiek',
-    'ai_next_weekend_weather': 'Weer voor {race}: {temp}C, {rain}% regen, {wind} km/u wind.',
-    'ai_latest_penalties_summary': 'Laatste penalties bij {race}: {count}. {details}',
+    'ai_next_weekend_weather':
+        'Weer voor {race}: {temp}C, {rain}% regen, {wind} km/u wind.',
+    'ai_latest_penalties_summary':
+        'Laatste penalties bij {race}: {count}. {details}',
     'ai_latest_penalties_none': 'Geen penalties gevonden voor {race}.',
-    'ai_latest_race_control_summary': 'Race Control bij {race}: {count} berichten. Laatste update: {message}',
-    'ai_latest_race_control_none': 'Geen Race Control-berichten gevonden voor {race}.',
-    'ai_supported_commands': 'Ondersteunde commando\'s: Fetch latest results, Show next weekend, Compare naam1 vs naam2, Show form [driver], Show driver standings, Show team standings, Open driver [naam], Open team [naam], Show drivers chart, Show latest penalties, Show latest race control.',
+    'ai_latest_race_control_summary':
+        'Race Control bij {race}: {count} berichten. Laatste update: {message}',
+    'ai_latest_race_control_none':
+        'Geen Race Control-berichten gevonden voor {race}.',
+    'ai_supported_commands':
+        'Ondersteunde commando\'s: Fetch latest results, Show next weekend, Compare naam1 vs naam2, Show form [driver], Show driver standings, Show team standings, Open driver [naam], Open team [naam], Show drivers chart, Show latest penalties, Show latest race control.',
     'ai_crash': 'De assistent liep vast op: {error}',
     'ai_chip_fetch_latest_results': 'Fetch latest results',
     'ai_chip_show_next_weekend': 'Show next weekend',
@@ -2211,19 +2413,24 @@ class AppLocalizations {
     'settings': 'Settings',
     'toggleTheme': 'Toggle Theme',
     'changelog': 'Changelog',
+    'placeholder_page': 'New page',
+    'placeholder_page_empty': 'This page is empty for now.',
     'compare': 'Compare',
     'select_drivers_to_compare': 'Select 2 drivers',
     'select_teams_to_compare': 'Select 2 teams',
     'compare_overall': 'Overall',
     'compare_season': 'By season',
     'compare_year': 'Season',
-    'compare_season_unavailable': 'Season data is unavailable for this comparison.',
+    'compare_season_unavailable':
+        'Season data is unavailable for this comparison.',
     'points_progression': 'Points progression',
     'points_after_each_race': 'Standings after each race',
     'round_short': 'R',
     'dnf_percentage': 'DNF %',
     'circuits': 'Circuits',
     'standings': 'Standings',
+    'country': 'Country',
+    'date': 'Date',
     'nextRace': 'Next Race',
     'startsIn': 'Starts in',
     'week': 'week',
@@ -2444,9 +2651,11 @@ class AppLocalizations {
     'time_gap': 'Time / Gap',
     'fullscreen_table': 'Fullscreen table',
     'weekend_hub': 'Weekend Hub',
-    'weekend_hub_card_subtitle': 'Schedule, weather, podium and penalties in one screen',
+    'weekend_hub_card_subtitle':
+        'Schedule, weather, podium and penalties in one screen',
     'weekend_hub_loading': 'Loading Weekend Hub...',
-    'weekend_hub_load_error': 'Weekend Hub could not be fully loaded. Cached data is being shown.',
+    'weekend_hub_load_error':
+        'Weekend Hub could not be fully loaded. Cached data is being shown.',
     'weekend_schedule': 'Weekend schedule',
     'session_status_upcoming': 'Upcoming',
     'session_status_live_recent': 'Live / Recent',
@@ -2472,9 +2681,11 @@ class AppLocalizations {
     'all_scopes': 'All scopes',
     'race_control': 'Race Control',
     'race_control_detail': 'Race Control detail',
-    'race_control_search_hint': 'Search by message, flag, category, lap or driver',
+    'race_control_search_hint':
+        'Search by message, flag, category, lap or driver',
     'race_control_message_count': '{visible} of {total} messages',
-    'race_control_empty': 'No race control messages found for this filter or search.',
+    'race_control_empty':
+        'No race control messages found for this filter or search.',
     'race_control_no_linked_message': 'No linked steward message found.',
     'race_control_related_updates': 'Related steward updates',
     'race_control_relation_served_penalty': 'Served penalty',
@@ -2495,7 +2706,8 @@ class AppLocalizations {
     'penalties': 'Penalties',
     'penalties_empty': 'No penalties found in the current weekend cache.',
     'session_weather_unavailable': 'No weather data available for {session}.',
-    'session_data_unavailable': '{session} data is loading or not available yet.',
+    'session_data_unavailable':
+        '{session} data is loading or not available yet.',
     'close': 'Close',
     'used_tyre': 'used',
     'q1_out': 'Q1 out',
@@ -2505,21 +2717,33 @@ class AppLocalizations {
     'avg_finish_l5': 'Avg finish (L5)',
     'no_finish_data': 'No finish data',
     'points_per_start': 'Points / start',
+    'points_per_entry': 'Points / entry',
     'win_rate': 'Win rate %',
+    'pole_rate': 'Pole rate %',
+    'fastest_lap_rate': 'Fastest lap rate %',
+    'summer_break': 'Summer break',
+    'summer_break_subtitle':
+        'The summer break sits between Hungary and the Netherlands.',
+    'previous_winners': 'Previous winners',
+    'last_winner': 'Last year winner',
     'ai_race_engineer': 'AI Race Engineer',
-    'ai_example_prompt': 'Try for example: "Fetch latest results", "Show next weekend", "Show driver standings", "Open driver Charles Leclerc" or "Show latest penalties".',
+    'ai_example_prompt':
+        'Try for example: "Fetch latest results", "Show next weekend", "Show driver standings", "Open driver Charles Leclerc" or "Show latest penalties".',
     'ai_no_completed_race': 'No completed race has been found yet.',
     'ai_latest_results_refreshed': 'The latest results were refreshed.',
     'ai_latest_results_podium': 'Latest results refreshed. Podium: {podium}',
     'ai_open_latest_results': 'Open latest results',
     'ai_next_weekend': 'Next weekend: {race} on {date}.',
     'ai_open_weekend_hub': 'Open weekend hub',
-    'ai_compare_parse_error': 'I could not read the comparison. Use: name1 vs name2',
-    'ai_driver_compare_ready': 'Driver comparison is ready for {left} and {right}.',
+    'ai_compare_parse_error':
+        'I could not read the comparison. Use: name1 vs name2',
+    'ai_driver_compare_ready':
+        'Driver comparison is ready for {left} and {right}.',
     'ai_open_driver_compare': 'Open driver compare',
     'ai_team_compare_ready': 'Team comparison is ready for {left} and {right}.',
     'ai_open_team_compare': 'Open team compare',
-    'ai_compare_no_match': 'I could not find two valid drivers or teams for this comparison.',
+    'ai_compare_no_match':
+        'I could not find two valid drivers or teams for this comparison.',
     'ai_form_no_driver': 'I could not find a driver for the form analysis.',
     'ai_form_no_cache': 'No cached recent races for {driver} yet.',
     'ai_form_summary': 'Recent form for {driver}: {summary}',
@@ -2533,12 +2757,16 @@ class AppLocalizations {
     'ai_open_team_profile': 'Open team profile',
     'ai_drivers_chart_ready': 'The drivers chart is ready for {year}.',
     'ai_open_drivers_chart': 'Open drivers chart',
-    'ai_next_weekend_weather': 'Weather for {race}: {temp}C, {rain}% rain, {wind} km/h wind.',
-    'ai_latest_penalties_summary': 'Latest penalties at {race}: {count}. {details}',
+    'ai_next_weekend_weather':
+        'Weather for {race}: {temp}C, {rain}% rain, {wind} km/h wind.',
+    'ai_latest_penalties_summary':
+        'Latest penalties at {race}: {count}. {details}',
     'ai_latest_penalties_none': 'No penalties found for {race}.',
-    'ai_latest_race_control_summary': 'Race Control at {race}: {count} messages. Latest update: {message}',
+    'ai_latest_race_control_summary':
+        'Race Control at {race}: {count} messages. Latest update: {message}',
     'ai_latest_race_control_none': 'No Race Control messages found for {race}.',
-    'ai_supported_commands': 'Supported commands: Fetch latest results, Show next weekend, Compare name1 vs name2, Show form [driver], Show driver standings, Show team standings, Open driver [name], Open team [name], Show drivers chart, Show latest penalties, Show latest race control.',
+    'ai_supported_commands':
+        'Supported commands: Fetch latest results, Show next weekend, Compare name1 vs name2, Show form [driver], Show driver standings, Show team standings, Open driver [name], Open team [name], Show drivers chart, Show latest penalties, Show latest race control.',
     'ai_crash': 'The assistant ran into: {error}',
     'ai_chip_fetch_latest_results': 'Fetch latest results',
     'ai_chip_show_next_weekend': 'Show next weekend',
@@ -2701,6 +2929,7 @@ String _circuitsPath() => '/circuits';
 String _driversPath() => '/drivers';
 String _teamsPath() => '/teams';
 String _changelogPath() => '/changelog';
+String _placeholderPagePath() => '/placeholder';
 String _racePath(Race race) => '${_circuitsPath()}/${_raceSlug(race)}';
 String _weekendHubPath(Race race) => '${_racePath(race)}/weekend';
 String _raceResultsPath(Race race) => '${_racePath(race)}/results';
@@ -2724,6 +2953,12 @@ void main() async {
 
 class F1HubApp extends StatefulWidget {
   const F1HubApp({super.key});
+
+  static _F1HubAppState of(BuildContext context) {
+    final state = context.findAncestorStateOfType<_F1HubAppState>();
+    assert(state != null, 'F1HubApp state not found in context');
+    return state!;
+  }
 
   @override
   State<F1HubApp> createState() => _F1HubAppState();
@@ -2965,6 +3200,10 @@ class _F1HubAppState extends State<F1HubApp> {
         path: _changelogPath(),
         builder: (context, state) => const ChangelogScreen(),
       ),
+      GoRoute(
+        path: _placeholderPagePath(),
+        builder: (context, state) => const PlaceholderSettingsScreen(),
+      ),
     ],
   );
 
@@ -3166,7 +3405,10 @@ Widget _sectionHeader(String t, String emoji) => Builder(
             ),
           ),
           Expanded(
-            child: Divider(indent: 15, color: tokens.outline.withOpacity(0.75)),
+            child: Divider(
+              indent: 15,
+              color: tokens.outline.withValues(alpha: 0.75),
+            ),
           ),
         ],
       ),
@@ -3188,13 +3430,13 @@ Widget _statTile(String l, dynamic v, IconData icon) => Builder(
               Icon(
                 icon,
                 size: 16,
-                color: theme.colorScheme.primary.withOpacity(0.8),
+                color: theme.colorScheme.primary.withValues(alpha: 0.8),
               ),
               const SizedBox(width: 12),
               Text(
                 l,
                 style: TextStyle(
-                  color: theme.colorScheme.onSurface.withOpacity(0.82),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.82),
                   fontSize: 13,
                 ),
               ),
@@ -3802,7 +4044,8 @@ class SeasonalDriverComparisonStats {
   factory SeasonalDriverComparisonStats.fromJson(Map<String, dynamic> json) {
     return SeasonalDriverComparisonStats(
       points: (json['points'] as num?)?.toDouble() ?? 0,
-      pointsByRace: (json['pointsByRace'] as List?)
+      pointsByRace:
+          (json['pointsByRace'] as List?)
               ?.whereType<Map>()
               .map(
                 (entry) => SeasonRacePointsEntry.fromJson(
@@ -3856,11 +4099,7 @@ class SeasonRacePointsEntry {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'round': round,
-      'raceName': raceName,
-      'points': points,
-    };
+    return {'round': round, 'raceName': raceName, 'points': points};
   }
 }
 
@@ -3911,7 +4150,9 @@ Future<DriverStandingsChartData?> _fetchDriverStandingsChartData(int year) {
   );
 }
 
-Future<DriverStandingsChartData?> _loadDriverStandingsChartData(int year) async {
+Future<DriverStandingsChartData?> _loadDriverStandingsChartData(
+  int year,
+) async {
   final assetData = await _loadDriverStandingsChartDataFromAsset(year);
   if (assetData != null) {
     return assetData;
@@ -3927,14 +4168,15 @@ Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromAsset(
       'data/results/driver_comparison_stats_2017_2025.json',
     );
     final decoded = jsonDecode(raw) as Map<String, dynamic>;
-    final years = decoded['years'] as Map<String, dynamic>? ??
-        const <String, dynamic>{};
+    final years =
+        decoded['years'] as Map<String, dynamic>? ?? const <String, dynamic>{};
     final yearData = years['$year'] as Map<String, dynamic>?;
     if (yearData == null) {
       return null;
     }
 
-    final drivers = yearData['drivers'] as Map<String, dynamic>? ??
+    final drivers =
+        yearData['drivers'] as Map<String, dynamic>? ??
         const <String, dynamic>{};
     final series = <DriverStandingsChartSeries>[];
     var maxPoints = 0.0;
@@ -3942,7 +4184,9 @@ Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromAsset(
     var index = 0;
     for (final entry in drivers.entries) {
       final stats = SeasonalDriverComparisonStats.fromJson(
-        (entry.value as Map).map((key, value) => MapEntry(key.toString(), value)),
+        (entry.value as Map).map(
+          (key, value) => MapEntry(key.toString(), value),
+        ),
       );
       if (stats.pointsByRace.isEmpty) {
         continue;
@@ -3963,8 +4207,11 @@ Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromAsset(
     }
 
     series.sort(
-      (left, right) => (right.pointsByRace.isEmpty ? 0.0 : right.pointsByRace.last.points)
-          .compareTo(left.pointsByRace.isEmpty ? 0.0 : left.pointsByRace.last.points),
+      (left, right) =>
+          (right.pointsByRace.isEmpty ? 0.0 : right.pointsByRace.last.points)
+              .compareTo(
+                left.pointsByRace.isEmpty ? 0.0 : left.pointsByRace.last.points,
+              ),
     );
     final labels = _buildCircuitLabels(series);
 
@@ -3985,30 +4232,44 @@ Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromApi(
   try {
     final standingsResponse = await http
         .get(
-          Uri.parse('https://api.jolpi.ca/ergast/f1/$year/driverStandings.json'),
+          Uri.parse(
+            'https://api.jolpi.ca/ergast/f1/$year/driverStandings.json',
+          ),
         )
         .timeout(const Duration(seconds: 6));
     final resultsResponse = await http
-        .get(Uri.parse('https://api.jolpi.ca/ergast/f1/$year/results.json?limit=1000'))
+        .get(
+          Uri.parse(
+            'https://api.jolpi.ca/ergast/f1/$year/results.json?limit=1000',
+          ),
+        )
         .timeout(const Duration(seconds: 6));
 
-    if (standingsResponse.statusCode != 200 || resultsResponse.statusCode != 200) {
+    if (standingsResponse.statusCode != 200 ||
+        resultsResponse.statusCode != 200) {
       return null;
     }
 
-    final standingsData = jsonDecode(standingsResponse.body) as Map<String, dynamic>;
-    final standingsLists = standingsData['MRData']?['StandingsTable']?['StandingsLists'] as List? ??
+    final standingsData =
+        jsonDecode(standingsResponse.body) as Map<String, dynamic>;
+    final standingsLists =
+        standingsData['MRData']?['StandingsTable']?['StandingsLists']
+            as List? ??
         const <dynamic>[];
     if (standingsLists.isEmpty) {
       return null;
     }
 
-    final resultsData = jsonDecode(resultsResponse.body) as Map<String, dynamic>;
-    final races = resultsData['MRData']?['RaceTable']?['Races'] as List? ?? const <dynamic>[];
+    final resultsData =
+        jsonDecode(resultsResponse.body) as Map<String, dynamic>;
+    final races =
+        resultsData['MRData']?['RaceTable']?['Races'] as List? ??
+        const <dynamic>[];
     final raceNameByRound = <int, String>{
       for (final race in races.whereType<Map>())
         if (int.tryParse(race['round']?.toString() ?? '') != null)
-          int.parse(race['round'].toString()): race['raceName']?.toString() ?? '-',
+          int.parse(race['round'].toString()):
+              race['raceName']?.toString() ?? '-',
     };
     final availableRounds = raceNameByRound.keys.toList()..sort();
     if (availableRounds.isEmpty) {
@@ -4032,13 +4293,15 @@ Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromApi(
       }
 
       final roundData = jsonDecode(roundResponse.body) as Map<String, dynamic>;
-      final roundStandingsLists = roundData['MRData']?['StandingsTable']?['StandingsLists'] as List? ??
+      final roundStandingsLists =
+          roundData['MRData']?['StandingsTable']?['StandingsLists'] as List? ??
           const <dynamic>[];
       if (roundStandingsLists.isEmpty) {
         continue;
       }
 
-      final driverStandings = roundStandingsLists.first['DriverStandings'] as List? ??
+      final driverStandings =
+          roundStandingsLists.first['DriverStandings'] as List? ??
           const <dynamic>[];
       for (final entry in driverStandings.whereType<Map>()) {
         final driverData = entry['Driver'] as Map? ?? const <String, dynamic>{};
@@ -4049,16 +4312,19 @@ Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromApi(
           continue;
         }
         final normalizedName = _normalizeDriverLookupName(driverName);
-        final points = double.tryParse(entry['points']?.toString() ?? '') ?? 0.0;
+        final points =
+            double.tryParse(entry['points']?.toString() ?? '') ?? 0.0;
         maxPoints = math.max(maxPoints, points);
         displayNameByDriver[normalizedName] = driverName;
-        seriesByDriver.putIfAbsent(normalizedName, () => <SeasonRacePointsEntry>[]).add(
-          SeasonRacePointsEntry(
-            round: round,
-            raceName: raceNameByRound[round] ?? '-',
-            points: points,
-          ),
-        );
+        seriesByDriver
+            .putIfAbsent(normalizedName, () => <SeasonRacePointsEntry>[])
+            .add(
+              SeasonRacePointsEntry(
+                round: round,
+                raceName: raceNameByRound[round] ?? '-',
+                points: points,
+              ),
+            );
       }
     }
 
@@ -4068,14 +4334,16 @@ Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromApi(
 
     final normalizedNames = seriesByDriver.keys.toList()
       ..sort(
-        (left, right) => (seriesByDriver[right]?.last.points ?? 0)
-            .compareTo(seriesByDriver[left]?.last.points ?? 0),
+        (left, right) => (seriesByDriver[right]?.last.points ?? 0).compareTo(
+          seriesByDriver[left]?.last.points ?? 0,
+        ),
       );
     final series = <DriverStandingsChartSeries>[];
     for (var index = 0; index < normalizedNames.length; index++) {
       final normalizedName = normalizedNames[index];
       final driverName = displayNameByDriver[normalizedName] ?? normalizedName;
-      final pointsByRace = seriesByDriver[normalizedName] ?? const <SeasonRacePointsEntry>[];
+      final pointsByRace =
+          seriesByDriver[normalizedName] ?? const <SeasonRacePointsEntry>[];
       series.add(
         DriverStandingsChartSeries(
           driverName: driverName,
@@ -4100,12 +4368,17 @@ List<String> _buildCircuitLabels(List<DriverStandingsChartSeries> series) {
   final labelsByRound = <int, String>{};
   for (final driverSeries in series) {
     for (final entry in driverSeries.pointsByRace) {
-      labelsByRound.putIfAbsent(entry.round, () => _abbreviateRaceLabel(entry.raceName));
+      labelsByRound.putIfAbsent(
+        entry.round,
+        () => _abbreviateRaceLabel(entry.raceName),
+      );
     }
   }
 
   final rounds = labelsByRound.keys.toList()..sort();
-  return rounds.map((round) => labelsByRound[round] ?? round.toString()).toList();
+  return rounds
+      .map((round) => labelsByRound[round] ?? round.toString())
+      .toList();
 }
 
 String _abbreviateRaceLabel(String raceName) {
@@ -4116,7 +4389,9 @@ String _abbreviateRaceLabel(String raceName) {
   final words = cleaned.split(RegExp(r'\s+'));
   if (words.length == 1) {
     final word = words.first;
-    return word.length <= 3 ? word.toUpperCase() : word.substring(0, 3).toUpperCase();
+    return word.length <= 3
+        ? word.toUpperCase()
+        : word.substring(0, 3).toUpperCase();
   }
   return words.take(3).map((word) => word.substring(0, 1).toUpperCase()).join();
 }
@@ -4139,8 +4414,8 @@ _readSeasonalDriverComparisonAssetCache() async {
       'data/results/driver_comparison_stats_2017_2025.json',
     );
     final decoded = jsonDecode(raw) as Map<String, dynamic>;
-    final years = decoded['years'] as Map<String, dynamic>? ??
-        const <String, dynamic>{};
+    final years =
+        decoded['years'] as Map<String, dynamic>? ?? const <String, dynamic>{};
     final resolved = <int, Map<String, SeasonalDriverComparisonStats>>{};
 
     for (final yearEntry in years.entries) {
@@ -4150,16 +4425,18 @@ _readSeasonalDriverComparisonAssetCache() async {
       }
 
       final yearData = yearEntry.value as Map<String, dynamic>;
-      final drivers = yearData['drivers'] as Map<String, dynamic>? ??
+      final drivers =
+          yearData['drivers'] as Map<String, dynamic>? ??
           const <String, dynamic>{};
       resolved[year] = {
         for (final driverEntry in drivers.entries)
-          _normalizeDriverLookupName(driverEntry.key):
-              SeasonalDriverComparisonStats.fromJson(
-                (driverEntry.value as Map).map(
-                  (key, value) => MapEntry(key.toString(), value),
-                ),
-              ),
+          _normalizeDriverLookupName(
+            driverEntry.key,
+          ): SeasonalDriverComparisonStats.fromJson(
+            (driverEntry.value as Map).map(
+              (key, value) => MapEntry(key.toString(), value),
+            ),
+          ),
       };
     }
 
@@ -4224,7 +4501,9 @@ bool _apiDriverEntryMatches(dynamic driverData, String driverName) {
   final normalizedFull = _normalizeDriverLookupName(fullName);
   final normalizedFamily = _normalizeDriverLookupName(familyName);
   final targetParts = normalizedTarget.split(' ');
-  final targetFamily = targetParts.isEmpty ? normalizedTarget : targetParts.last;
+  final targetFamily = targetParts.isEmpty
+      ? normalizedTarget
+      : targetParts.last;
 
   return normalizedFull == normalizedTarget || normalizedFamily == targetFamily;
 }
@@ -4250,7 +4529,8 @@ Future<SeasonalDriverComparisonStats?> _fetchSeasonalDriverComparisonStats(
   final cacheKey = '$year|$driverName';
   return _seasonalDriverComparisonStatsCache.putIfAbsent(cacheKey, () async {
     final assetCache = await _loadSeasonalDriverComparisonAssetCache();
-    final cachedStats = assetCache[year]?[_normalizeDriverLookupName(driverName)];
+    final cachedStats =
+        assetCache[year]?[_normalizeDriverLookupName(driverName)];
     if (cachedStats != null) {
       return cachedStats;
     }
@@ -4269,14 +4549,15 @@ Future<SeasonalDriverComparisonStats?> _fetchSeasonalDriverComparisonStats(
 
     final standingsData = json.decode(standingsResponse.body);
     final standingsLists =
-        standingsData['MRData']?['StandingsTable']?['StandingsLists'] as List? ??
+        standingsData['MRData']?['StandingsTable']?['StandingsLists']
+            as List? ??
         const <dynamic>[];
     if (standingsLists.isEmpty) {
       return null;
     }
 
-    final driverStandings = standingsLists.first['DriverStandings'] as List? ??
-        const <dynamic>[];
+    final driverStandings =
+        standingsLists.first['DriverStandings'] as List? ?? const <dynamic>[];
     Map<String, dynamic>? standingEntry;
     for (final entry in driverStandings.whereType<Map>()) {
       if (_apiDriverEntryMatches(entry['Driver'], driverName)) {
@@ -4315,15 +4596,18 @@ Future<SeasonalDriverComparisonStats?> _fetchSeasonalDriverComparisonStats(
         )
         .timeout(const Duration(seconds: 4));
 
-    if (resultsResponse.statusCode != 200 || qualifyingResponse.statusCode != 200) {
+    if (resultsResponse.statusCode != 200 ||
+        qualifyingResponse.statusCode != 200) {
       return null;
     }
 
     final resultsData = json.decode(resultsResponse.body);
     final qualifyingData = json.decode(qualifyingResponse.body);
     final resultRaces =
-        resultsData['MRData']?['RaceTable']?['Races'] as List? ?? const <dynamic>[];
-    final qualifyingRaces = qualifyingData['MRData']?['RaceTable']?['Races'] as List? ??
+        resultsData['MRData']?['RaceTable']?['Races'] as List? ??
+        const <dynamic>[];
+    final qualifyingRaces =
+        qualifyingData['MRData']?['RaceTable']?['Races'] as List? ??
         const <dynamic>[];
 
     var wins = 0;
@@ -4379,7 +4663,8 @@ Future<SeasonalDriverComparisonStats?> _fetchSeasonalDriverComparisonStats(
       runningPoints += racePoints;
       pointsByRace.add(
         SeasonRacePointsEntry(
-          round: int.tryParse(race['round']?.toString() ?? '') ??
+          round:
+              int.tryParse(race['round']?.toString() ?? '') ??
               pointsByRace.length + 1,
           raceName: race['raceName']?.toString() ?? '-',
           points: runningPoints,
@@ -4397,15 +4682,16 @@ Future<SeasonalDriverComparisonStats?> _fetchSeasonalDriverComparisonStats(
       final qualifyingResult = (qualifyingResults.first as Map).map(
         (key, value) => MapEntry(key.toString(), value),
       );
-      final qualifyingPosition =
-          int.tryParse(qualifyingResult['position']?.toString() ?? '');
+      final qualifyingPosition = int.tryParse(
+        qualifyingResult['position']?.toString() ?? '',
+      );
       if (qualifyingPosition != null && qualifyingPosition > 0) {
         if (qualifyingPosition == 1) {
           poles += 1;
         }
         highestGrid = highestGrid == null
             ? qualifyingPosition
-          : math.min(highestGrid, qualifyingPosition).toInt();
+            : math.min(highestGrid, qualifyingPosition).toInt();
       }
     }
 
@@ -5381,7 +5667,7 @@ class SessionDataManager extends ChangeNotifier {
         continue;
       }
 
-        final sessionName = session['session_name']?.toString() ?? 'Unknown';
+      final sessionName = session['session_name']?.toString() ?? 'Unknown';
       final sessionMessages = await _fetchOpenF1Collection(
         'race_control',
         <String, String>{'session_key': sessionKey.toString()},
@@ -5560,63 +5846,79 @@ class SessionDataManager extends ChangeNotifier {
         .cast<double?>()
         .firstWhere((value) => value != null, orElse: () => null);
 
-    final liveRows = sortedResults.map((entry) {
-      final driverNumber = _asInt(entry['driver_number']);
-      final startPosition = driverNumber == null
-          ? null
-          : gridPositions[driverNumber];
-      final penaltyDetails = driverNumber == null
-        ? const <Map<String, dynamic>>[]
-        : (penaltyDetailsByDriver[driverNumber] ?? const <Map<String, dynamic>>[]);
-      final penaltyServedLaps = penaltyDetails
-        .map((detail) => detail['lap'])
-        .whereType<int>()
-        .toSet()
+    final liveRows = sortedResults
+        .map((entry) {
+          final driverNumber = _asInt(entry['driver_number']);
+          final startPosition = driverNumber == null
+              ? null
+              : gridPositions[driverNumber];
+          final penaltyDetails = driverNumber == null
+              ? const <Map<String, dynamic>>[]
+              : (penaltyDetailsByDriver[driverNumber] ??
+                    const <Map<String, dynamic>>[]);
+          final penaltyServedLaps = penaltyDetails
+              .map((detail) => detail['lap'])
+              .whereType<int>()
+              .toSet()
+              .toList(growable: false);
+          final tyreCompounds = driverNumber == null
+              ? const <String>[]
+              : (tyreStrategyByDriver[driverNumber] ?? const <String>[]);
+          final tyreStints = driverNumber == null
+              ? const <Map<String, dynamic>>[]
+              : (tyreStintsByDriver[driverNumber] ??
+                    const <Map<String, dynamic>>[]);
+          return RaceResultRow(
+            driver: driverNumber == null
+                ? '-'
+                : (driverNames[driverNumber] ?? '-'),
+            start: driverNumber == null
+                ? '-'
+                : (gridPositions[driverNumber]?.toString() ?? '-'),
+            finish: _formatRaceFinish(entry, startPosition),
+            timeOrGap: _formatTimeOrGap(entry, winnerDuration),
+            fastestLap: driverNumber == null
+                ? '-'
+                : _formatLapDuration(
+                    fastestLapByDriver[driverNumber]?.duration,
+                  ),
+            tyreCompound: driverNumber == null
+                ? '-'
+                : _formatTyreCompound(
+                    fastestLapByDriver[driverNumber]?.compound,
+                  ),
+            penalty: driverNumber == null
+                ? '-'
+                : (penalties[driverNumber] ?? '-'),
+            points: _formatPoints(_asDouble(entry['points']) ?? 0),
+            hasFastestLap:
+                driverNumber != null &&
+                overallFastestLap != null &&
+                fastestLapByDriver[driverNumber]?.duration ==
+                    overallFastestLap.duration,
+            tyreCompounds: tyreCompounds,
+            tyreStints: tyreStints,
+            tyreStrategy: tyreCompounds.isEmpty
+                ? '-'
+                : tyreCompounds.join(' -> '),
+            tyreChangeLaps: const <int>[],
+            penaltyDetails: penaltyDetails,
+            penaltyServed: penaltyDetails.any(
+              (detail) => detail['served'] == true,
+            ),
+            penaltyServedLaps: penaltyServedLaps,
+            weatherSamples: const <Map<String, dynamic>>[],
+            raceControlMessages: driverNumber == null
+                ? const <Map<String, dynamic>>[]
+                : (raceControlMessagesByDriver[driverNumber] ??
+                      const <Map<String, dynamic>>[]),
+            pitStops: const <Map<String, dynamic>>[],
+            totalPitTime: '-',
+            fastestPitStop: null,
+            averagePitTime: '-',
+          );
+        })
         .toList(growable: false);
-      final tyreCompounds = driverNumber == null
-        ? const <String>[]
-        : (tyreStrategyByDriver[driverNumber] ?? const <String>[]);
-      final tyreStints = driverNumber == null
-        ? const <Map<String, dynamic>>[]
-        : (tyreStintsByDriver[driverNumber] ?? const <Map<String, dynamic>>[]);
-      return RaceResultRow(
-        driver: driverNumber == null ? '-' : (driverNames[driverNumber] ?? '-'),
-        start: driverNumber == null
-            ? '-'
-            : (gridPositions[driverNumber]?.toString() ?? '-'),
-        finish: _formatRaceFinish(entry, startPosition),
-        timeOrGap: _formatTimeOrGap(entry, winnerDuration),
-        fastestLap: driverNumber == null
-            ? '-'
-            : _formatLapDuration(fastestLapByDriver[driverNumber]?.duration),
-        tyreCompound: driverNumber == null
-            ? '-'
-            : _formatTyreCompound(fastestLapByDriver[driverNumber]?.compound),
-        penalty: driverNumber == null ? '-' : (penalties[driverNumber] ?? '-'),
-        points: _formatPoints(_asDouble(entry['points']) ?? 0),
-        hasFastestLap:
-            driverNumber != null &&
-            overallFastestLap != null &&
-            fastestLapByDriver[driverNumber]?.duration ==
-                overallFastestLap.duration,
-        tyreCompounds: tyreCompounds,
-        tyreStints: tyreStints,
-        tyreStrategy: tyreCompounds.isEmpty ? '-' : tyreCompounds.join(' -> '),
-        tyreChangeLaps: const <int>[],
-        penaltyDetails: penaltyDetails,
-        penaltyServed: penaltyDetails.any((detail) => detail['served'] == true),
-        penaltyServedLaps: penaltyServedLaps,
-        weatherSamples: const <Map<String, dynamic>>[],
-        raceControlMessages: driverNumber == null
-            ? const <Map<String, dynamic>>[]
-            : (raceControlMessagesByDriver[driverNumber] ??
-                  const <Map<String, dynamic>>[]),
-        pitStops: const <Map<String, dynamic>>[],
-        totalPitTime: '-',
-        fastestPitStop: null,
-        averagePitTime: '-',
-      );
-    }).toList(growable: false);
 
     return liveRows.isNotEmpty ? liveRows : staticRows;
   }
@@ -5926,17 +6228,22 @@ class SessionDataManager extends ChangeNotifier {
       final lapStart = _asInt(stint['lap_start']);
       final lapEnd = _asInt(stint['lap_end']);
       final compound = _formatTyreCompound(stint['compound']?.toString());
-      if (lapStart == null || lapEnd == null || lapEnd < lapStart || compound == '-') {
+      if (lapStart == null ||
+          lapEnd == null ||
+          lapEnd < lapStart ||
+          compound == '-') {
         continue;
       }
 
-      stintsByDriver.putIfAbsent(driverNumber, () => <Map<String, dynamic>>[]).add({
-        'compound': compound,
-        'lapStart': lapStart,
-        'lapEnd': lapEnd,
-        'laps': (lapEnd - lapStart) + 1,
-        'usedTyre': (_asInt(stint['tyre_age_at_start']) ?? 0) > 0,
-      });
+      stintsByDriver
+          .putIfAbsent(driverNumber, () => <Map<String, dynamic>>[])
+          .add({
+            'compound': compound,
+            'lapStart': lapStart,
+            'lapEnd': lapEnd,
+            'laps': (lapEnd - lapStart) + 1,
+            'usedTyre': (_asInt(stint['tyre_age_at_start']) ?? 0) > 0,
+          });
     }
 
     return stintsByDriver;
@@ -5966,14 +6273,18 @@ class SessionDataManager extends ChangeNotifier {
       }
 
       final sessionKey = _asInt(entry['session_key']);
-      penaltyDetailsByDriver.putIfAbsent(driverNumber, () => <Map<String, dynamic>>[]).add({
-        'timestampUtc': entry['date']?.toString(),
-        'lap': _asInt(entry['lap_number']),
-        'sessionName': sessionKey == null ? null : sessionNamesByKey[sessionKey],
-        'message': message,
-        'penalty': normalizedPenalty,
-        'served': isPenaltyServed,
-      });
+      penaltyDetailsByDriver
+          .putIfAbsent(driverNumber, () => <Map<String, dynamic>>[])
+          .add({
+            'timestampUtc': entry['date']?.toString(),
+            'lap': _asInt(entry['lap_number']),
+            'sessionName': sessionKey == null
+                ? null
+                : sessionNamesByKey[sessionKey],
+            'message': message,
+            'penalty': normalizedPenalty,
+            'served': isPenaltyServed,
+          });
     }
 
     return penaltyDetailsByDriver;
@@ -6671,6 +6982,9 @@ class AppSettingsMenuButton extends StatelessWidget {
       case 'changelog':
         context.push(_changelogPath());
         break;
+      case 'placeholder_page':
+        context.push(_placeholderPagePath());
+        break;
       case 'clear_cache':
         await _clearCache(context);
         break;
@@ -6682,7 +6996,7 @@ class AppSettingsMenuButton extends StatelessWidget {
     final loc = AppLocalizations.of(context);
 
     return PopupMenuButton<String>(
-      icon: const Icon(Icons.settings),
+      icon: _buildGlyphIcon('⚙', size: 20),
       tooltip: loc.translate('settings'),
       onSelected: (value) => _handleSettingsSelection(context, value),
       itemBuilder: (context) => [
@@ -6690,7 +7004,7 @@ class AppSettingsMenuButton extends StatelessWidget {
           value: 'theme',
           child: Row(
             children: [
-              const Icon(Icons.brightness_6_outlined),
+              _buildGlyphIcon('◐', size: 18),
               const SizedBox(width: 12),
               Text(loc.translate('toggleTheme')),
             ],
@@ -6698,11 +7012,21 @@ class AppSettingsMenuButton extends StatelessWidget {
         ),
         PopupMenuItem<String>(
           value: 'language',
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.language),
-              SizedBox(width: 12),
-              Text('Language'),
+              _buildGlyphIcon('🌐', size: 18),
+              const SizedBox(width: 12),
+              const Text('Language'),
+            ],
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'placeholder_page',
+          child: Row(
+            children: [
+              _buildGlyphIcon('▣', size: 18),
+              const SizedBox(width: 12),
+              Text(loc.translate('placeholder_page')),
             ],
           ),
         ),
@@ -6710,7 +7034,7 @@ class AppSettingsMenuButton extends StatelessWidget {
           value: 'changelog',
           child: Row(
             children: [
-              const Icon(Icons.update),
+              _buildGlyphIcon('↻', size: 18),
               const SizedBox(width: 12),
               Text(loc.translate('changelog')),
             ],
@@ -6720,7 +7044,7 @@ class AppSettingsMenuButton extends StatelessWidget {
           value: 'clear_cache',
           child: Row(
             children: [
-              const Icon(Icons.delete_outline, color: Colors.redAccent),
+              _buildGlyphIcon('🗑', size: 18),
               const SizedBox(width: 12),
               Text(
                 loc.translate('clear_cache'),
@@ -6736,6 +7060,8 @@ class AppSettingsMenuButton extends StatelessWidget {
 
 class MainNavigation extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
+  static const double _desktopShellBreakpoint = 1100;
+  static const double _desktopContentMaxWidth = 1400;
 
   const MainNavigation({required this.navigationShell, super.key});
 
@@ -6751,37 +7077,160 @@ class MainNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
+    final destinations = <NavigationRailDestination>[
+      NavigationRailDestination(
+        icon: _buildGlyphIcon('🏁', size: 20),
+        selectedIcon: _buildGlyphIcon('🏁', size: 20),
+        label: Text(loc.translate('circuits').toUpperCase()),
+      ),
+      NavigationRailDestination(
+        icon: _buildGlyphIcon('👤', size: 20),
+        selectedIcon: _buildGlyphIcon('👤', size: 20),
+        label: Text(loc.translate('drivers').toUpperCase()),
+      ),
+      NavigationRailDestination(
+        icon: _buildGlyphIcon('👥', size: 20),
+        selectedIcon: _buildGlyphIcon('👥', size: 20),
+        label: Text(loc.translate('teams').toUpperCase()),
+      ),
+    ];
 
-    return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openAiAssistant(context),
-        icon: const Icon(Icons.smart_toy_outlined),
-        label: const Text('AI'),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: navigationShell.currentIndex,
-        type: BottomNavigationBarType.fixed,
-        onTap: (i) {
-          navigationShell.goBranch(i);
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.speed),
-            label: loc.translate('circuits').toUpperCase(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isDesktop = constraints.maxWidth >= _desktopShellBreakpoint;
+
+        return Scaffold(
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () => _openAiAssistant(context),
+            icon: _buildGlyphIcon('🤖', size: 18),
+            label: const Text('AI'),
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.person),
-            label: loc.translate('drivers').toUpperCase(),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.group),
-            label: loc.translate('teams').toUpperCase(),
-          ),
-        ],
-      ),
-      body: navigationShell,
+          bottomNavigationBar: isDesktop
+              ? null
+              : BottomNavigationBar(
+                  currentIndex: navigationShell.currentIndex,
+                  type: BottomNavigationBarType.fixed,
+                  onTap: (i) {
+                    navigationShell.goBranch(i);
+                  },
+                  items: <BottomNavigationBarItem>[
+                    BottomNavigationBarItem(
+                      icon: _buildGlyphIcon('🏁', size: 20),
+                      label: loc.translate('circuits').toUpperCase(),
+                    ),
+                    BottomNavigationBarItem(
+                      icon: _buildGlyphIcon('👤', size: 20),
+                      label: loc.translate('drivers').toUpperCase(),
+                    ),
+                    BottomNavigationBarItem(
+                      icon: _buildGlyphIcon('👥', size: 20),
+                      label: loc.translate('teams').toUpperCase(),
+                    ),
+                  ],
+                ),
+          body: isDesktop
+              ? SafeArea(
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 0, 16),
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: NavigationRail(
+                                extended: constraints.maxWidth >= 1320,
+                                minExtendedWidth: 188,
+                                selectedIndex: navigationShell.currentIndex,
+                                groupAlignment: -0.8,
+                                labelType: NavigationRailLabelType.none,
+                                leading: Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 44,
+                                        height: 44,
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                              .withValues(alpha: 0.12),
+                                          borderRadius: BorderRadius.circular(
+                                            14,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.speed_rounded,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
+                                        ),
+                                      ),
+                                      if (constraints.maxWidth >= 1320) ...[
+                                        const SizedBox(height: 10),
+                                        Text(
+                                          loc
+                                              .translate('appTitle')
+                                              .toUpperCase(),
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 1.2,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onSurface,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                                onDestinationSelected: (index) {
+                                  navigationShell.goBranch(index);
+                                },
+                                destinations: destinations,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            AppSettingsMenuButton(
+                              onSetLocale: F1HubApp.of(context)._setLocale,
+                              onToggleTheme: F1HubApp.of(context)._toggleTheme,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const VerticalDivider(width: 1),
+                      Expanded(
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              maxWidth: _desktopContentMaxWidth,
+                            ),
+                            child: navigationShell,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : navigationShell,
+        );
+      },
     );
   }
+}
+
+bool _isDesktopShellLayout(BuildContext context) =>
+    MediaQuery.sizeOf(context).width >= MainNavigation._desktopShellBreakpoint;
+
+List<Widget> _desktopAwareSettingsActions(
+  BuildContext context,
+  Widget settingsMenu,
+) {
+  return _isDesktopShellLayout(context)
+      ? const <Widget>[]
+      : <Widget>[settingsMenu];
 }
 
 /// --- CIRCUITS VIEW (TAB 0 ROOT) ---
@@ -6793,6 +7242,7 @@ class CircuitsView extends StatefulWidget {
 }
 
 class _CircuitsViewState extends State<CircuitsView> {
+  static const double _desktopCircuitsBreakpoint = 1100;
   String liveTemp = "--";
   int liveRain = 0;
   Timer? _timer;
@@ -6957,6 +7407,1048 @@ class _CircuitsViewState extends State<CircuitsView> {
     return 'Verstappen  Norris  Leclerc';
   }
 
+  bool _hasSummerBreakAfter(Race race) {
+    return race.name == 'Hungarian Grand Prix';
+  }
+
+  List<Race> _summerBreakRaces() {
+    final hungarianIndex = races.indexWhere(
+      (race) => race.name == 'Hungarian Grand Prix',
+    );
+    final dutchIndex = races.indexWhere(
+      (race) => race.name == 'Dutch Grand Prix',
+    );
+    if (hungarianIndex == -1 ||
+        dutchIndex == -1 ||
+        dutchIndex <= hungarianIndex) {
+      return const <Race>[];
+    }
+    return <Race>[races[hungarianIndex], races[dutchIndex]];
+  }
+
+  String _calendarDateLabel(DateTime date) {
+    return '${date.day}-${date.month}-${date.year}';
+  }
+
+  List<String> _recentPreviousWinners(Race race, {int count = 3}) {
+    if (race.previousWinners.isEmpty) {
+      return const <String>[];
+    }
+    return race.previousWinners.take(count).toList(growable: false);
+  }
+
+  Widget _buildPreviousWinnersBlock(
+    BuildContext context,
+    Race race, {
+    bool compact = false,
+  }) {
+    final theme = Theme.of(context);
+    final loc = AppLocalizations.of(context);
+    final winners = _recentPreviousWinners(race, count: compact ? 2 : 3);
+    if (winners.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final lastWinner = winners.first;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          compact
+              ? loc.translate('last_winner')
+              : loc.translate('previous_winners'),
+          style: TextStyle(
+            fontSize: 10,
+            letterSpacing: 1.1,
+            fontWeight: FontWeight.w800,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (compact)
+          Text(
+            lastWinner,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.onSurface,
+            ),
+          )
+        else
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: winners
+                .map(
+                  (winner) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: theme.colorScheme.primary.withValues(
+                          alpha: 0.14,
+                        ),
+                      ),
+                    ),
+                    child: Text(
+                      winner,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                )
+                .toList(growable: false),
+          ),
+      ],
+    );
+  }
+
+  List<Widget> _buildCalendarEntries(BuildContext context) {
+    final entries = <Widget>[];
+    for (final race in races) {
+      entries.add(_buildCalendarRaceCard(context, race));
+      if (_hasSummerBreakAfter(race)) {
+        entries.add(_buildSummerBreakCard(context));
+      }
+    }
+    return entries;
+  }
+
+  Widget _buildDesktopOverviewSidebar(BuildContext context, Race upcoming) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final tokens = _themeTokens(context);
+    final latestRace = _latestCompletedRace();
+
+    return Column(
+      children: [
+        Card(
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              color: tokens.panelStrong,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  loc.translate('nextRace').toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 10,
+                    letterSpacing: 1.4,
+                    fontWeight: FontWeight.w800,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  '$liveTemp°C',
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  upcoming.name,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        liveRain > 30 ? Icons.umbrella : Icons.wb_sunny,
+                        size: 18,
+                        color: liveRain > 30 ? Colors.blue : Colors.amber,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '$liveRain% ${loc.translate('rain').toLowerCase()}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (latestRace != null)
+          Card(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: tokens.panel,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'LAST PODIUM',
+                    style: TextStyle(
+                      fontSize: 10,
+                      letterSpacing: 1.4,
+                      fontWeight: FontWeight.w800,
+                      color: theme.colorScheme.secondary,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    loc.translate('gp_${latestRace.name}'),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  _buildCircuitPodiumPreview(
+                    context,
+                    latestRace,
+                    alignment: CrossAxisAlignment.start,
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopCalendarGrid(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final tokens = _themeTokens(context);
+
+    return Card(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: Container(
+        decoration: BoxDecoration(
+          color: tokens.panel,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: tokens.outline.withValues(alpha: 0.5)),
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.82,
+                ),
+                border: Border(
+                  bottom: BorderSide(
+                    color: tokens.outline.withValues(alpha: 0.45),
+                  ),
+                ),
+              ),
+              child: Row(
+                children: [
+                  _buildDesktopCalendarHeaderCell(
+                    context,
+                    label: loc.translate('race'),
+                    flex: 5,
+                  ),
+                  _buildDesktopCalendarHeaderCell(
+                    context,
+                    label: loc.translate('country'),
+                    flex: 3,
+                  ),
+                  _buildDesktopCalendarHeaderCell(
+                    context,
+                    label: loc.translate('date'),
+                    flex: 2,
+                  ),
+                  _buildDesktopCalendarHeaderCell(
+                    context,
+                    label: loc.translate('last_winner'),
+                    flex: 3,
+                  ),
+                  _buildDesktopCalendarHeaderCell(
+                    context,
+                    label: loc.translate('status'),
+                    flex: 3,
+                    alignEnd: true,
+                  ),
+                ],
+              ),
+            ),
+            ..._buildCalendarEntries(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDesktopCalendarHeaderCell(
+    BuildContext context, {
+    required String label,
+    required int flex,
+    bool alignEnd = false,
+  }) {
+    final theme = Theme.of(context);
+
+    return Expanded(
+      flex: flex,
+      child: Align(
+        alignment: alignEnd ? Alignment.centerRight : Alignment.centerLeft,
+        child: Text(
+          label.toUpperCase(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 10,
+            letterSpacing: 1.2,
+            fontWeight: FontWeight.w800,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDesktopCalendarStatusCell(
+    BuildContext context,
+    Race race,
+    bool isFinished,
+    String timeLabel,
+  ) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final statusColor = isFinished
+        ? theme.colorScheme.secondary
+        : theme.colorScheme.primary;
+    final statusLabel = loc.translate(
+      isFinished ? 'session_status_completed' : 'session_status_upcoming',
+    );
+    final statusChip = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: isFinished
+            ? theme.colorScheme.secondary.withValues(alpha: 0.10)
+            : theme.colorScheme.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: isFinished
+              ? theme.colorScheme.secondary.withValues(alpha: 0.24)
+              : theme.colorScheme.primary.withValues(alpha: 0.18),
+        ),
+      ),
+      child: Text(
+        statusLabel,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+          color: statusColor,
+        ),
+      ),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        if (isFinished)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              statusChip,
+              const SizedBox(width: 8),
+              OutlinedButton(
+                onPressed: () => context.push(_weekendHubPath(race)),
+                style: OutlinedButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  minimumSize: const Size(0, 32),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  side: BorderSide(color: statusColor.withValues(alpha: 0.24)),
+                ),
+                child: Text(
+                  loc.translate('results'),
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: statusColor,
+                  ),
+                ),
+              ),
+            ],
+          )
+        else
+          statusChip,
+        const SizedBox(height: 6),
+        Text(
+          isFinished
+              ? _getPodiumString(race)
+              : '${loc.translate('startsIn')} $timeLabel',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.right,
+          style: TextStyle(
+            fontSize: 11,
+            height: 1.25,
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurface.withValues(
+              alpha: isFinished ? 0.86 : 0.78,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeaturedRaceCard(
+    BuildContext context,
+    Race upcoming,
+    String timeStrNext,
+  ) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final tokens = _themeTokens(context);
+
+    return GestureDetector(
+      onTap: () => context.push(_racePath(upcoming)),
+      child: Card(
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: _heroPanelGradient(context),
+            border: Border.all(color: tokens.outline.withValues(alpha: 0.65)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    loc.translate('nextRace').toUpperCase(),
+                    style: TextStyle(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 10,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        '$liveTemp°C ',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                      Icon(
+                        liveRain > 30 ? Icons.umbrella : Icons.wb_sunny,
+                        color: liveRain > 30 ? Colors.blue : Colors.amber,
+                        size: 20,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildFlagHero(
+                    tag: _raceFlagHeroTag(upcoming, source: 'featured'),
+                    flag: _getFlag(
+                      loc.translate('country_${upcoming.country}'),
+                    ),
+                    fontSize: 32,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      loc.translate('gp_${upcoming.name}'),
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                upcoming.name,
+                style: TextStyle(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 14),
+              _buildPreviousWinnersBlock(context, upcoming),
+              Divider(
+                height: 30,
+                color: tokens.outline.withValues(alpha: 0.75),
+              ),
+              timeStrNext.isEmpty
+                  ? _buildCircuitPodiumPreview(
+                      context,
+                      upcoming,
+                      alignment: CrossAxisAlignment.start,
+                    )
+                  : Text(
+                      '${loc.translate('startsIn')} $timeStrNext',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.secondary,
+                      ),
+                    ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCalendarRaceCard(BuildContext context, Race race) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final tokens = _themeTokens(context);
+    final isFinished = race.date.difference(DateTime.now()).isNegative;
+    final tStr = _timeUntil(race.date, context);
+    final showDesktopExtras =
+        MediaQuery.of(context).size.width >= _desktopCircuitsBreakpoint;
+
+    if (showDesktopExtras) {
+      final lastWinner = _recentPreviousWinners(race, count: 1);
+
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => context.push(_racePath(race)),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            decoration: BoxDecoration(
+              gradient: isFinished
+                  ? LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        theme.colorScheme.surfaceContainerHighest.withValues(
+                          alpha: 0.94,
+                        ),
+                        theme.colorScheme.secondaryContainer.withValues(
+                          alpha: 0.52,
+                        ),
+                      ],
+                    )
+                  : LinearGradient(
+                      colors: [
+                        theme.colorScheme.surface.withValues(alpha: 0.94),
+                        theme.colorScheme.surface.withValues(alpha: 0.94),
+                      ],
+                    ),
+              border: Border(
+                left: isFinished
+                    ? BorderSide(
+                        color: theme.colorScheme.secondary.withValues(
+                          alpha: 0.72,
+                        ),
+                        width: 3,
+                      )
+                    : BorderSide.none,
+                bottom: BorderSide(
+                  color: tokens.outline.withValues(alpha: 0.38),
+                ),
+              ),
+              boxShadow: isFinished
+                  ? [
+                      BoxShadow(
+                        color: theme.colorScheme.secondary.withValues(
+                          alpha: 0.06,
+                        ),
+                        blurRadius: 14,
+                        offset: const Offset(0, 3),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 5,
+                  child: Row(
+                    children: [
+                      _buildFlagHero(
+                        tag: _raceFlagHeroTag(race, source: 'calendar'),
+                        flag: race.flag,
+                        fontSize: 28,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              loc.translate('gp_${race.name}'),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 14,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              race.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    loc.translate('country_${race.country}'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    _calendarDateLabel(race.date),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Text(
+                    lastWinner.isEmpty ? '-' : lastWinner.first,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: _buildDesktopCalendarStatusCell(
+                      context,
+                      race,
+                      isFinished,
+                      tStr,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => context.push(_racePath(race)),
+        child: Stack(
+          children: [
+            if (isFinished)
+              Positioned.fill(child: _buildCompletedRaceBackground(context)),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  _buildFlagHero(
+                    tag: _raceFlagHeroTag(race, source: 'calendar'),
+                    flag: race.flag,
+                    fontSize: 32,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          loc.translate('gp_${race.name}'),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          '${race.date.day}-${race.date.month}-${race.date.year}',
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontSize: 11,
+                          ),
+                        ),
+                        if (showDesktopExtras) ...[
+                          const SizedBox(height: 8),
+                          _buildPreviousWinnersBlock(
+                            context,
+                            race,
+                            compact: true,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  isFinished
+                      ? _buildCircuitPodiumPreview(context, race)
+                      : Text(
+                          tStr,
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompletedRaceBackground(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = _themeTokens(context);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.92),
+            tokens.panelStrong.withValues(alpha: 0.8),
+          ],
+        ),
+      ),
+      child: ClipRect(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned(
+              left: -18,
+              top: -20,
+              child: ImageFiltered(
+                imageFilter: ui.ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: theme.colorScheme.primary.withValues(alpha: 0.18),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              right: -24,
+              bottom: -30,
+              child: ImageFiltered(
+                imageFilter: ui.ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+                child: Container(
+                  width: 140,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: theme.colorScheme.secondary.withValues(alpha: 0.14),
+                  ),
+                ),
+              ),
+            ),
+            BackdropFilter(
+              filter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+              child: ColoredBox(color: Colors.white.withValues(alpha: 0.02)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummerBreakCard(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final tokens = _themeTokens(context);
+    final showDesktopLayout =
+        MediaQuery.of(context).size.width >= _desktopCircuitsBreakpoint;
+    final breakRaces = _summerBreakRaces();
+    final startRace = breakRaces.isNotEmpty ? breakRaces.first : null;
+    final endRace = breakRaces.length > 1 ? breakRaces.last : null;
+    final breakDays = startRace != null && endRace != null
+        ? endRace.date.difference(startRace.date).inDays
+        : null;
+    final breakLabel = breakDays == null
+        ? ''
+        : breakDays % 7 == 0
+        ? '${breakDays ~/ 7} ${breakDays ~/ 7 == 1 ? loc.translate('week') : loc.translate('weeks')}'
+        : '$breakDays ${breakDays == 1 ? loc.translate('day') : loc.translate('days')}';
+    final dateLabel = startRace != null && endRace != null
+        ? '${_calendarDateLabel(startRace.date)} - ${_calendarDateLabel(endRace.date)}'
+        : loc.translate('summer_break_subtitle');
+
+    if (showDesktopLayout) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.94),
+              theme.colorScheme.secondaryContainer.withValues(alpha: 0.46),
+            ],
+          ),
+          border: Border(
+            left: BorderSide(
+              color: theme.colorScheme.secondary.withValues(alpha: 0.72),
+              width: 3,
+            ),
+            bottom: BorderSide(color: tokens.outline.withValues(alpha: 0.38)),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: theme.colorScheme.secondary.withValues(alpha: 0.05),
+              blurRadius: 14,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 5,
+              child: Row(
+                children: [
+                  _buildSummerBreakFlag(size: 42),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          loc.translate('summer_break'),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 14,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          loc.translate('summer_break_subtitle'),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Expanded(flex: 3, child: SizedBox.shrink()),
+            Expanded(
+              flex: 2,
+              child: Text(
+                dateLabel,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: Text(
+                '-',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.secondary.withValues(
+                          alpha: 0.10,
+                        ),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: theme.colorScheme.secondary.withValues(
+                            alpha: 0.24,
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        loc.translate('summer_break'),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: theme.colorScheme.secondary,
+                        ),
+                      ),
+                    ),
+                    if (breakLabel.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        breakLabel,
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.78,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            _buildSummerBreakFlag(size: 54),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    loc.translate('summer_break'),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    dateLabel,
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontSize: 11,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    loc.translate('summer_break_subtitle'),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (breakLabel.isNotEmpty) ...[
+              const SizedBox(width: 8),
+              Text(
+                breakLabel,
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   List<RaceResultRow> _circuitPodiumRows(Race race) {
     final rows =
         SessionDataManager().raceResultsCache[SessionDataManager()
@@ -6968,10 +8460,13 @@ class _CircuitsViewState extends State<CircuitsView> {
         final positionB = _extractFinishPosition(b.finish) ?? 999;
         return positionA.compareTo(positionB);
       });
-    return sortedRows.where((row) {
-      final position = _extractFinishPosition(row.finish);
-      return position != null && position > 0 && position <= 3;
-    }).take(3).toList(growable: false);
+    return sortedRows
+        .where((row) {
+          final position = _extractFinishPosition(row.finish);
+          return position != null && position > 0 && position <= 3;
+        })
+        .take(3)
+        .toList(growable: false);
   }
 
   Widget _buildCircuitPodiumPreview(
@@ -6998,27 +8493,29 @@ class _CircuitsViewState extends State<CircuitsView> {
     return Column(
       crossAxisAlignment: alignment,
       mainAxisSize: MainAxisSize.min,
-      children: podiumRows.map((row) {
-        final position = _extractFinishPosition(row.finish) ?? 0;
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 2),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                row.driver.split(' ').last,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+      children: podiumRows
+          .map((row) {
+            final position = _extractFinishPosition(row.finish) ?? 0;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    row.driver.split(' ').last,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  _buildCircuitPodiumMedal(position),
+                ],
               ),
-              const SizedBox(width: 5),
-              _buildCircuitPodiumMedal(position),
-            ],
-          ),
-        );
-      }).toList(growable: false),
+            );
+          })
+          .toList(growable: false),
     );
   }
 
@@ -7030,13 +8527,7 @@ class _CircuitsViewState extends State<CircuitsView> {
       _ => '🏅',
     };
 
-    return Text(
-      medal,
-      style: const TextStyle(
-        fontSize: 13,
-        height: 1,
-      ),
-    );
+    return Text(medal, style: const TextStyle(fontSize: 13, height: 1));
   }
 
   @override
@@ -7044,13 +8535,11 @@ class _CircuitsViewState extends State<CircuitsView> {
     final loc = AppLocalizations.of(context);
     final upcoming = _nextRace();
     final timeStrNext = _timeUntil(upcoming.date, context);
-    final theme = Theme.of(context);
-    final tokens = _themeTokens(context);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(loc.translate('appTitle').toUpperCase()),
-        actions: [widget.settingsMenu],
+        actions: _desktopAwareSettingsActions(context, widget.settingsMenu),
       ),
       body: RefreshIndicator(
         onRefresh: _refreshCircuits,
@@ -7058,163 +8547,46 @@ class _CircuitsViewState extends State<CircuitsView> {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
           children: [
-            GestureDetector(
-              onTap: () => context.push(_racePath(upcoming)),
-              child: Card(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    gradient: _heroPanelGradient(context),
-                    border: Border.all(color: tokens.outline.withOpacity(0.65)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            loc.translate('nextRace').toUpperCase(),
-                            style: TextStyle(
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 10,
-                              letterSpacing: 1.5,
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                '$liveTemp°C ',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.colorScheme.onSurface,
-                                ),
-                              ),
-                              Icon(
-                                liveRain > 30 ? Icons.umbrella : Icons.wb_sunny,
-                                color: liveRain > 30
-                                    ? Colors.blue
-                                    : Colors.amber,
-                                size: 20,
-                              ),
-                            ],
-                          ),
-                        ],
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isDesktop =
+                    constraints.maxWidth >= _desktopCircuitsBreakpoint;
+
+                if (!isDesktop) {
+                  return _buildFeaturedRaceCard(context, upcoming, timeStrNext);
+                }
+
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 5,
+                      child: _buildFeaturedRaceCard(
+                        context,
+                        upcoming,
+                        timeStrNext,
                       ),
-                      const SizedBox(height: 12),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildFlagHero(
-                            tag: _raceFlagHeroTag(upcoming, source: 'featured'),
-                            flag: _getFlag(
-                              loc.translate('country_${upcoming.country}'),
-                            ),
-                            fontSize: 32,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              loc.translate('gp_${upcoming.name}'),
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.onSurface,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        upcoming.name,
-                        style: TextStyle(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontSize: 14,
-                        ),
-                      ),
-                      Divider(
-                        height: 30,
-                        color: tokens.outline.withOpacity(0.75),
-                      ),
-                      timeStrNext.isEmpty
-                          ? _buildCircuitPodiumPreview(
-                              context,
-                              upcoming,
-                              alignment: CrossAxisAlignment.start,
-                            )
-                          : Text(
-                              '${loc.translate('startsIn')} $timeStrNext',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.secondary,
-                              ),
-                            ),
-                    ],
-                  ),
-                ),
-              ),
+                    ),
+                    const SizedBox(width: 16),
+                    SizedBox(
+                      width: 320,
+                      child: _buildDesktopOverviewSidebar(context, upcoming),
+                    ),
+                  ],
+                );
+              },
             ),
             _sectionHeader("2026 Calendar", "📅"),
-            ...races.map((r) {
-              final isFinished = r.date.difference(DateTime.now()).isNegative;
-              final tStr = _timeUntil(r.date, context);
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                child: InkWell(
-                  onTap: () => context.push(_racePath(r)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      children: [
-                        _buildFlagHero(
-                          tag: _raceFlagHeroTag(r, source: 'calendar'),
-                          flag: r.flag,
-                          fontSize: 32,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                loc.translate('gp_${r.name}'),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  color: theme.colorScheme.onSurface,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                "${r.date.day}-${r.date.month}-${r.date.year}",
-                                style: TextStyle(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        isFinished
-                            ? _buildCircuitPodiumPreview(context, r)
-                            : Text(
-                                tStr,
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.colorScheme.primary,
-                                ),
-                              ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            }),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isDesktop =
+                    constraints.maxWidth >= _desktopCircuitsBreakpoint;
+                if (!isDesktop) {
+                  return Column(children: _buildCalendarEntries(context));
+                }
+                return _buildDesktopCalendarGrid(context);
+              },
+            ),
           ],
         ),
       ),
@@ -7237,6 +8609,7 @@ class StandingsView extends StatefulWidget {
 }
 
 class _StandingsViewState extends State<StandingsView> {
+  static const double _desktopStandingsBreakpoint = 980;
   bool _isLoading = false;
   List<Driver> _cachedDrivers = [];
   List<Team> _cachedTeams = [];
@@ -7391,159 +8764,420 @@ class _StandingsViewState extends State<StandingsView> {
     return points.toString();
   }
 
-  Widget _buildList(bool isDriver) {
-    final loc = AppLocalizations.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isDriverView = widget.isDriverView;
-    final int count = isDriver
-        ? (_cachedDrivers.isEmpty
-              ? (driversData[_selectedYear]?.length ?? 0)
-              : _cachedDrivers.length)
-        : (_cachedTeams.isEmpty ? fallbackTeams.length : _cachedTeams.length);
+  List<dynamic> _standingsItems(bool isDriver) {
+    if (isDriver) {
+      return _cachedDrivers.isEmpty
+          ? List<dynamic>.from(driversData[_selectedYear] ?? const <Driver>[])
+          : List<dynamic>.from(_cachedDrivers);
+    }
 
-    return ListView.builder(
-      physics: const AlwaysScrollableScrollPhysics(),
-      itemCount: count,
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      itemBuilder: (c, i) {
-        final item = isDriver
-            ? (_cachedDrivers.isEmpty
-                  ? driversData[_selectedYear]![i]
-                  : _cachedDrivers[i])
-            : (_cachedTeams.isEmpty ? fallbackTeams[i] : _cachedTeams[i]);
-        final String name = isDriver
-            ? (item as Driver).name
-            : (item as Team).name;
-        final num points = isDriver
-            ? (item as Driver).points
-            : (item as Team).points;
-        final String flag = isDriver
-            ? (item as Driver).flag
-            : (item as Team).flag;
-        final String heroTag = isDriver
-            ? _driverFlagHeroTag(item as Driver, source: 'standings')
-            : _teamFlagHeroTag(item as Team, source: 'standings');
-        final String teamName = isDriver
-            ? (item as Driver).team
-            : (item as Team).name;
+    return _cachedTeams.isEmpty
+        ? List<dynamic>.from(fallbackTeams)
+        : List<dynamic>.from(_cachedTeams);
+  }
 
-        final bool isSelected =
-            _isCompareMode && _selectedForComparison.contains(item);
-
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? _getTeamColor(teamName).withOpacity(0.3)
-                : (isDark ? const Color(0xFF16161E) : Colors.white),
-            borderRadius: BorderRadius.circular(12),
-            border: Border(
-              left: BorderSide(color: _getTeamColor(teamName), width: 6),
-            ),
-            boxShadow: isDark
-                ? []
-                : [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 4,
-                      offset: Offset(0, 2),
+  void _handleStandingsTap(dynamic item, bool isDriverView) {
+    if (_isCompareMode) {
+      setState(() {
+        if (_selectedForComparison.contains(item)) {
+          _selectedForComparison.remove(item);
+        } else if (_selectedForComparison.length < 2) {
+          _selectedForComparison.add(item);
+        }
+      });
+      if (_selectedForComparison.length == 2) {
+        context
+            .push(
+              isDriverView
+                  ? _driverComparePath(
+                      _selectedForComparison[0] as Driver,
+                      _selectedForComparison[1] as Driver,
+                    )
+                  : _teamComparePath(
+                      _selectedForComparison[0] as Team,
+                      _selectedForComparison[1] as Team,
                     ),
-                  ],
-          ),
-          child: ListTile(
-            onTap: () {
-              if (_isCompareMode) {
-                setState(() {
-                  if (_selectedForComparison.contains(item)) {
-                    _selectedForComparison.remove(item);
-                  } else if (_selectedForComparison.length < 2) {
-                    _selectedForComparison.add(item);
-                  }
-                });
-                if (_selectedForComparison.length == 2) {
-                  context
-                      .push(
-                        isDriverView
-                            ? _driverComparePath(
-                                _selectedForComparison[0] as Driver,
-                                _selectedForComparison[1] as Driver,
-                              )
-                            : _teamComparePath(
-                                _selectedForComparison[0] as Team,
-                                _selectedForComparison[1] as Team,
-                              ),
-                      )
-                      .then((_) {
-                        setState(() {
-                          _isCompareMode = false;
-                          _selectedForComparison.clear();
-                        });
-                      });
-                }
-              } else {
-                context.push(
-                  isDriver
-                      ? _driverPath(item as Driver)
-                      : _teamPath(item as Team),
-                );
-              }
-            },
-            leading: Text(
-              "${i + 1}",
+            )
+            .then((_) {
+              setState(() {
+                _isCompareMode = false;
+                _selectedForComparison.clear();
+              });
+            });
+      }
+      return;
+    }
+
+    context.push(
+      isDriverView ? _driverPath(item as Driver) : _teamPath(item as Team),
+    );
+  }
+
+  Widget _buildDesktopStandingsHeader(BuildContext context, bool isDriver) {
+    final theme = Theme.of(context);
+    final tokens = _themeTokens(context);
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      decoration: BoxDecoration(
+        color: tokens.panelStrong,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: tokens.outline.withValues(alpha: 0.7)),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 52,
+            child: Text(
+              'POS',
               style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white24 : Colors.black26,
-                fontSize: 16,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.1,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+          ),
+          Expanded(
+            flex: 5,
+            child: Text(
+              isDriver ? 'DRIVER' : 'TEAM',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.1,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: Text(
+              isDriver ? 'TEAM / TITLES' : 'PRINCIPAL / TITLES',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.1,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 96,
+            child: Text(
+              'POINTS',
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.1,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(width: 30),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopStandingsRow(
+    BuildContext context, {
+    required dynamic item,
+    required int index,
+    required bool isDriver,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final driver = isDriver ? item as Driver : null;
+    final team = isDriver ? null : item as Team;
+    final name = isDriver ? driver!.name : team!.name;
+    final flag = isDriver ? driver!.flag : team!.flag;
+    final points = isDriver ? driver!.points : team!.points;
+    final teamName = isDriver ? driver!.team : team!.name;
+    final heroTag = isDriver
+        ? _driverFlagHeroTag(driver!, source: 'standings')
+        : _teamFlagHeroTag(team!, source: 'standings');
+    final isSelected = _isCompareMode && _selectedForComparison.contains(item);
+    final secondaryLabel = isDriver
+        ? driver!.team.toUpperCase()
+        : team!.principalName.toUpperCase();
+    final tertiaryLabel = isDriver
+        ? (driver!.championshipYears.isEmpty
+              ? 'No titles'
+              : driver.championshipYears.join(', '))
+        : 'CC ${team!.ccWins}  DC ${team.dcWins}';
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: isSelected
+            ? _getTeamColor(teamName).withValues(alpha: 0.16)
+            : (isDark ? const Color(0xFF16161E) : Colors.white),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isSelected
+              ? _getTeamColor(teamName).withValues(alpha: 0.6)
+              : (isDark ? Colors.white10 : Colors.black12),
+        ),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => _handleStandingsTap(item, widget.isDriverView),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 52,
+                child: Text(
+                  '${index + 1}',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: isDark ? Colors.white38 : Colors.black38,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 5,
+                child: Row(
                   children: [
                     _buildFlagHero(
                       tag: heroTag,
                       flag: flag,
-                      fontSize: 14,
+                      fontSize: 18,
                       textAlign: TextAlign.left,
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         name.toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontWeight: FontWeight.bold,
                           fontSize: 13,
-                          letterSpacing: 1,
-                          color: isDark ? Colors.white : Colors.black,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.9,
+                          color: theme.colorScheme.onSurface,
                         ),
                       ),
                     ),
                   ],
                 ),
-                if (isDriver && (item as Driver).championshipYears.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4.0),
-                    child: Text(
-                      (item).championshipYears.join(', '),
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: Colors.amber,
-                        fontWeight: FontWeight.bold,
+              ),
+              Expanded(
+                flex: 4,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      secondaryLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: _getTeamColor(teamName),
                       ),
                     ),
+                    const SizedBox(height: 3),
+                    Text(
+                      tertiaryLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: 96,
+                child: Text(
+                  _formatPoints(points),
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 18,
+                    color: Color(0xFF2196F3),
                   ),
+                ),
+              ),
+              SizedBox(
+                width: 30,
+                child: _isCompareMode
+                    ? Icon(
+                        isSelected
+                            ? Icons.check_circle
+                            : Icons.radio_button_unchecked,
+                        size: 18,
+                        color: isSelected
+                            ? _getTeamColor(teamName)
+                            : theme.colorScheme.onSurfaceVariant,
+                      )
+                    : Icon(
+                        Icons.chevron_right_rounded,
+                        size: 18,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMobileStandingsRow(
+    BuildContext context, {
+    required dynamic item,
+    required int index,
+    required bool isDriver,
+  }) {
+    final loc = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final name = isDriver ? (item as Driver).name : (item as Team).name;
+    final points = isDriver ? (item as Driver).points : (item as Team).points;
+    final flag = isDriver ? (item as Driver).flag : (item as Team).flag;
+    final heroTag = isDriver
+        ? _driverFlagHeroTag(item as Driver, source: 'standings')
+        : _teamFlagHeroTag(item as Team, source: 'standings');
+    final teamName = isDriver ? (item as Driver).team : (item as Team).name;
+    final bool isSelected =
+        _isCompareMode && _selectedForComparison.contains(item);
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        color: isSelected
+            ? _getTeamColor(teamName).withValues(alpha: 0.3)
+            : (isDark ? const Color(0xFF16161E) : Colors.white),
+        borderRadius: BorderRadius.circular(12),
+        border: Border(
+          left: BorderSide(color: _getTeamColor(teamName), width: 6),
+        ),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      child: ListTile(
+        onTap: () => _handleStandingsTap(item, widget.isDriverView),
+        leading: Text(
+          '${index + 1}',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white24 : Colors.black26,
+            fontSize: 16,
+          ),
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                _buildFlagHero(
+                  tag: heroTag,
+                  flag: flag,
+                  fontSize: 14,
+                  textAlign: TextAlign.left,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    name.toUpperCase(),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      letterSpacing: 1,
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                  ),
+                ),
               ],
             ),
-            trailing: Text(
-              "${_formatPoints(points)} ${loc.translate('pts')}",
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                color: Color(0xFF2196F3),
+            if (isDriver && (item as Driver).championshipYears.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4.0),
+                child: Text(
+                  item.championshipYears.join(', '),
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: Colors.amber,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-            ),
+          ],
+        ),
+        trailing: Text(
+          '${_formatPoints(points)} ${loc.translate('pts')}',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+            color: Color(0xFF2196F3),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildList(bool isDriver) {
+    final items = _standingsItems(isDriver);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isDesktop = constraints.maxWidth >= _desktopStandingsBreakpoint;
+
+        if (!isDesktop) {
+          return ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: items.length,
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            itemBuilder: (context, index) => _buildMobileStandingsRow(
+              context,
+              item: items[index],
+              index: index,
+              isDriver: isDriver,
+            ),
+          );
+        }
+
+        return ListView.separated(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          itemCount: items.length + 1,
+          separatorBuilder: (context, index) =>
+              SizedBox(height: index == 0 ? 0 : 8),
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return _buildDesktopStandingsHeader(context, isDriver);
+            }
+            return _buildDesktopStandingsRow(
+              context,
+              item: items[index - 1],
+              index: index - 1,
+              isDriver: isDriver,
+            );
+          },
         );
       },
     );
@@ -7607,7 +9241,7 @@ class _StandingsViewState extends State<StandingsView> {
               _selectedForComparison.clear();
             }),
           ),
-          widget.settingsMenu,
+          ..._desktopAwareSettingsActions(context, widget.settingsMenu),
         ],
       ),
       body: _isLoading
@@ -7623,7 +9257,7 @@ class _StandingsViewState extends State<StandingsView> {
                 if (_usingFallback)
                   Container(
                     width: double.infinity,
-                    color: Colors.orangeAccent.withOpacity(0.9),
+                    color: Colors.orangeAccent.withValues(alpha: 0.9),
                     padding: const EdgeInsets.symmetric(
                       vertical: 8,
                       horizontal: 16,
@@ -7731,9 +9365,9 @@ class ComparisonRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: isBetter
           ? BoxDecoration(
-              color: Colors.green.withOpacity(0.15),
+              color: Colors.green.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.green.withOpacity(0.5)),
+              border: Border.all(color: Colors.green.withValues(alpha: 0.5)),
             )
           : null,
       child: Text(
@@ -7768,9 +9402,7 @@ void _openDriverStandingsChartSheet(
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Theme.of(context).colorScheme.surface,
-    constraints: BoxConstraints(
-      maxWidth: maxSheetWidth,
-    ),
+    constraints: BoxConstraints(maxWidth: maxSheetWidth),
     builder: (context) => FractionallySizedBox(
       heightFactor: 0.9,
       child: DriverStandingsChartSheet(
@@ -7801,16 +9433,12 @@ class DriverStandingsChartSheet extends StatefulWidget {
 
 class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
   late int _selectedYear;
-  final Map<int, Set<String>> _selectedDriverNamesByYear =
-      <int, Set<String>>{};
+  final Map<int, Set<String>> _selectedDriverNamesByYear = <int, Set<String>>{};
   int? _hoveredRound;
   Offset? _hoverPosition;
 
   Set<String> _buildDefaultChartSelection(DriverStandingsChartData data) {
-    return data.series
-        .take(8)
-        .map((series) => series.driverName)
-        .toSet();
+    return data.series.take(8).map((series) => series.driverName).toSet();
   }
 
   void _selectTopDrivers(DriverStandingsChartData data, int count) {
@@ -7842,8 +9470,7 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
     final rounds = <int>{
       for (final driverSeries in series)
         ...driverSeries.pointsByRace.map((entry) => entry.round),
-    }.toList()
-      ..sort();
+    }.toList()..sort();
     return rounds;
   }
 
@@ -7888,20 +9515,17 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
     List<DriverStandingsChartSeries> visibleSeries,
     int round,
   ) {
-    final values = visibleSeries
-        .map((series) => MapEntry(series, _pointsForRound(series, round)))
-        .where((entry) => entry.value != null)
-        .map((entry) => MapEntry(entry.key, entry.value!))
-        .toList()
-      ..sort((left, right) => right.value.compareTo(left.value));
+    final values =
+        visibleSeries
+            .map((series) => MapEntry(series, _pointsForRound(series, round)))
+            .where((entry) => entry.value != null)
+            .map((entry) => MapEntry(entry.key, entry.value!))
+            .toList()
+          ..sort((left, right) => right.value.compareTo(left.value));
     return values;
   }
 
-  int? _resolveHoveredRound(
-    List<int> rounds,
-    double localX,
-    double width,
-  ) {
+  int? _resolveHoveredRound(List<int> rounds, double localX, double width) {
     if (rounds.isEmpty || width <= 0) {
       return null;
     }
@@ -7928,12 +9552,14 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
       width: 220,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withOpacity(0.96),
+        color: theme.colorScheme.surface.withValues(alpha: 0.96),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.35)),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.35),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.18),
+            color: Colors.black.withValues(alpha: 0.18),
             blurRadius: 18,
             offset: const Offset(0, 10),
           ),
@@ -7951,52 +9577,57 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
             ),
           ),
           const SizedBox(height: 8),
-          ...values.take(6).toList().asMap().entries.map(
-            (rankedEntry) => Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Row(
-                children: [
-                  Text(
-                    '#${rankedEntry.key + 1}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: rankedEntry.value.key.color,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      rankedEntry.value.key.driverName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: theme.colorScheme.onSurface,
+          ...values
+              .take(6)
+              .toList()
+              .asMap()
+              .entries
+              .map(
+                (rankedEntry) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    children: [
+                      Text(
+                        '#${rankedEntry.key + 1}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: theme.colorScheme.primary,
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: rankedEntry.value.key.color,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          rankedEntry.value.key.driverName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${_formatChartPoints(rankedEntry.value.value)} pts',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${_formatChartPoints(rankedEntry.value.value)} pts',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
         ],
       ),
     );
@@ -8076,7 +9707,9 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                   }
 
                   final data = snapshot.data;
-                  if (snapshot.hasError || data == null || data.series.isEmpty) {
+                  if (snapshot.hasError ||
+                      data == null ||
+                      data.series.isEmpty) {
                     return Center(
                       child: Text(
                         loc.translate('chart_no_data'),
@@ -8092,15 +9725,17 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                     () => _buildDefaultChartSelection(data),
                   );
                   final visibleSeries = data.series
-                      .where((series) => selectedNames.contains(series.driverName))
+                      .where(
+                        (series) => selectedNames.contains(series.driverName),
+                      )
                       .toList(growable: false);
                   final rounds = _sortedChartRoundsForSeries(visibleSeries);
 
                   return Container(
                     decoration: BoxDecoration(
                       color: isDark
-                          ? Colors.white.withOpacity(0.03)
-                          : Colors.black.withOpacity(0.02),
+                          ? Colors.white.withValues(alpha: 0.03)
+                          : Colors.black.withValues(alpha: 0.02),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isDark ? Colors.white10 : Colors.black12,
@@ -8130,11 +9765,13 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                                   ),
                                   ActionChip(
                                     label: Text(loc.translate('top_10')),
-                                    onPressed: () => _selectTopDrivers(data, 10),
+                                    onPressed: () =>
+                                        _selectTopDrivers(data, 10),
                                   ),
                                   ActionChip(
                                     label: Text(loc.translate('show_all')),
-                                    onPressed: () => _setAllDriversVisible(data),
+                                    onPressed: () =>
+                                        _setAllDriversVisible(data),
                                   ),
                                   ActionChip(
                                     label: Text(loc.translate('hide_all')),
@@ -8146,7 +9783,8 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                               Expanded(
                                 child: ListView.separated(
                                   itemCount: data.series.length,
-                                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                                  separatorBuilder: (_, _) =>
+                                      const SizedBox(height: 8),
                                   itemBuilder: (context, index) {
                                     final series = data.series[index];
                                     final isSelected = selectedNames.contains(
@@ -8158,20 +9796,30 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                                         borderRadius: BorderRadius.circular(12),
                                         onTap: () {
                                           setState(() {
-                                            final selection = _selectedDriverNamesByYear
-                                                .putIfAbsent(
-                                                  _selectedYear,
-                                                  () => _buildDefaultChartSelection(data),
-                                                );
-                                            if (selection.contains(series.driverName)) {
-                                              selection.remove(series.driverName);
+                                            final selection =
+                                                _selectedDriverNamesByYear
+                                                    .putIfAbsent(
+                                                      _selectedYear,
+                                                      () =>
+                                                          _buildDefaultChartSelection(
+                                                            data,
+                                                          ),
+                                                    );
+                                            if (selection.contains(
+                                              series.driverName,
+                                            )) {
+                                              selection.remove(
+                                                series.driverName,
+                                              );
                                             } else {
                                               selection.add(series.driverName);
                                             }
                                           });
                                         },
                                         child: AnimatedOpacity(
-                                          duration: const Duration(milliseconds: 180),
+                                          duration: const Duration(
+                                            milliseconds: 180,
+                                          ),
                                           opacity: isSelected ? 1 : 0.38,
                                           child: Container(
                                             padding: const EdgeInsets.symmetric(
@@ -8180,15 +9828,20 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                                             ),
                                             decoration: BoxDecoration(
                                               color: isSelected
-                                                  ? series.color.withOpacity(0.12)
+                                                  ? series.color.withValues(
+                                                      alpha: 0.12,
+                                                    )
                                                   : Colors.transparent,
-                                              borderRadius: BorderRadius.circular(12),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
                                               border: Border.all(
                                                 color: isSelected
-                                                    ? series.color.withOpacity(0.45)
+                                                    ? series.color.withValues(
+                                                        alpha: 0.45,
+                                                      )
                                                     : (isDark
-                                                        ? Colors.white10
-                                                        : Colors.black12),
+                                                          ? Colors.white10
+                                                          : Colors.black12),
                                               ),
                                             ),
                                             child: Row(
@@ -8206,11 +9859,15 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                                                   child: Text(
                                                     series.driverName,
                                                     maxLines: 2,
-                                                    overflow: TextOverflow.ellipsis,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                     style: TextStyle(
                                                       fontSize: 12,
-                                                      fontWeight: FontWeight.w600,
-                                                      color: theme.colorScheme.onSurface,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: theme
+                                                          .colorScheme
+                                                          .onSurface,
                                                     ),
                                                   ),
                                                 ),
@@ -8222,7 +9879,9 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                                                   size: 16,
                                                   color: isSelected
                                                       ? series.color
-                                                      : theme.colorScheme.onSurfaceVariant,
+                                                      : theme
+                                                            .colorScheme
+                                                            .onSurfaceVariant,
                                                 ),
                                               ],
                                             ),
@@ -8246,11 +9905,16 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                               final labelWidth = rounds.isEmpty
                                   ? 24.0
                                   : (chartWidth / rounds.length)
-                                      .clamp(18.0, 42.0)
-                                      .toDouble();
+                                        .clamp(18.0, 42.0)
+                                        .toDouble();
 
                               return Padding(
-                                padding: const EdgeInsets.fromLTRB(8, 16, 16, 16),
+                                padding: const EdgeInsets.fromLTRB(
+                                  8,
+                                  16,
+                                  16,
+                                  16,
+                                ),
                                 child: SizedBox(
                                   width: chartWidth,
                                   child: MouseRegion(
@@ -8263,7 +9927,9 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                                       if (box is! RenderBox) {
                                         return;
                                       }
-                                      final local = box.globalToLocal(event.position);
+                                      final local = box.globalToLocal(
+                                        event.position,
+                                      );
                                       setState(() {
                                         _hoverPosition = local;
                                         _hoveredRound = _resolveHoveredRound(
@@ -8277,7 +9943,8 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                                       behavior: HitTestBehavior.opaque,
                                       onTapDown: (details) {
                                         setState(() {
-                                          _hoverPosition = details.localPosition;
+                                          _hoverPosition =
+                                              details.localPosition;
                                           _hoveredRound = _resolveHoveredRound(
                                             rounds,
                                             details.localPosition.dx,
@@ -8291,15 +9958,18 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                                             children: [
                                               Expanded(
                                                 child: CustomPaint(
-                                                  painter: _DriverStandingsChartPainter(
-                                                    data: data,
-                                                    series: visibleSeries,
-                                                    rounds: rounds,
-                                                    theme: theme,
-                                                    isDark: isDark,
-                                                    hoveredRound: _hoveredRound,
-                                                  ),
-                                                  child: const SizedBox.expand(),
+                                                  painter:
+                                                      _DriverStandingsChartPainter(
+                                                        data: data,
+                                                        series: visibleSeries,
+                                                        rounds: rounds,
+                                                        theme: theme,
+                                                        isDark: isDark,
+                                                        hoveredRound:
+                                                            _hoveredRound,
+                                                      ),
+                                                  child:
+                                                      const SizedBox.expand(),
                                                 ),
                                               ),
                                               const SizedBox(height: 6),
@@ -8312,18 +9982,20 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                                                         width: labelWidth,
                                                         child: Transform.rotate(
                                                           angle: -0.8,
-                                                          alignment: Alignment.topCenter,
+                                                          alignment: Alignment
+                                                              .topCenter,
                                                           child: Text(
                                                             _roundShortLabel(
                                                               data,
                                                               round,
                                                             ),
-                                                            textAlign:
-                                                                TextAlign.center,
+                                                            textAlign: TextAlign
+                                                                .center,
                                                             style: TextStyle(
                                                               fontSize: 9,
                                                               fontWeight:
-                                                                  FontWeight.w700,
+                                                                  FontWeight
+                                                                      .w700,
                                                               color: theme
                                                                   .colorScheme
                                                                   .onSurfaceVariant,
@@ -8340,7 +10012,10 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                                               _hoverPosition != null)
                                             Positioned(
                                               left: (_hoverPosition!.dx + 12)
-                                                  .clamp(8.0, chartWidth - 228.0),
+                                                  .clamp(
+                                                    8.0,
+                                                    chartWidth - 228.0,
+                                                  ),
                                               top: 8,
                                               child: _buildHoverTooltip(
                                                 context,
@@ -8447,7 +10122,7 @@ class _DriverStandingsChartPainter extends CustomPainter {
       if (hoverIndex != null) {
         final hoverX = leftInset + (chartWidth / steps) * hoverIndex;
         final hoverPaint = Paint()
-          ..color = theme.colorScheme.primary.withOpacity(0.5)
+          ..color = theme.colorScheme.primary.withValues(alpha: 0.5)
           ..strokeWidth = 1.4;
         canvas.drawLine(
           Offset(hoverX, topInset),
@@ -8472,9 +10147,8 @@ class _DriverStandingsChartPainter extends CustomPainter {
           continue;
         }
         final x = leftInset + (chartWidth / steps) * roundIndex;
-        final y = topInset +
-            chartHeight -
-            ((entry.points / maxPoints) * chartHeight);
+        final y =
+            topInset + chartHeight - ((entry.points / maxPoints) * chartHeight);
         if (index == 0) {
           path.moveTo(x, y);
         } else {
@@ -8496,9 +10170,8 @@ class _DriverStandingsChartPainter extends CustomPainter {
           continue;
         }
         final x = leftInset + (chartWidth / steps) * roundIndex;
-        final y = topInset +
-            chartHeight -
-            ((entry.points / maxPoints) * chartHeight);
+        final y =
+            topInset + chartHeight - ((entry.points / maxPoints) * chartHeight);
         canvas.drawCircle(Offset(x, y), 2.1, dotPaint);
       }
     }
@@ -8547,14 +10220,16 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
     if (_showOverall || _selectedYear == null) {
       return widget.driver1;
     }
-    return _driverForSeason(widget.driver1.name, _selectedYear!) ?? widget.driver1;
+    return _driverForSeason(widget.driver1.name, _selectedYear!) ??
+        widget.driver1;
   }
 
   Driver get _rightDriver {
     if (_showOverall || _selectedYear == null) {
       return widget.driver2;
     }
-    return _driverForSeason(widget.driver2.name, _selectedYear!) ?? widget.driver2;
+    return _driverForSeason(widget.driver2.name, _selectedYear!) ??
+        widget.driver2;
   }
 
   @override
@@ -8738,7 +10413,9 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
                   leftStats.points == leftStats.points.roundToDouble() ? 0 : 1,
                 ),
                 value2: rightStats.points.toStringAsFixed(
-                  rightStats.points == rightStats.points.roundToDouble() ? 0 : 1,
+                  rightStats.points == rightStats.points.roundToDouble()
+                      ? 0
+                      : 1,
                 ),
                 isDark: isDark,
               ),
@@ -8809,8 +10486,7 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
     final rounds = <int>{
       ...leftStats.pointsByRace.map((entry) => entry.round),
       ...rightStats.pointsByRace.map((entry) => entry.round),
-    }.toList()
-      ..sort();
+    }.toList()..sort();
 
     if (rounds.isEmpty) {
       return const SizedBox.shrink();
@@ -8829,84 +10505,98 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
       padding: const EdgeInsets.only(top: 8),
       child: Container(
         decoration: BoxDecoration(
-          color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.03)
+              : Colors.black.withValues(alpha: 0.02),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isDark ? Colors.white10 : Colors.black12,
-          ),
+          border: Border.all(color: isDark ? Colors.white10 : Colors.black12),
         ),
         child: Theme(
           data: theme.copyWith(dividerColor: Colors.transparent),
           child: ExpansionTile(
-            tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            tilePadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 4,
+            ),
             childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             title: Text(
               loc.translate('points_progression'),
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
             subtitle: Text(loc.translate('points_after_each_race')),
-            children: rounds.map((round) {
-              final leftEntry = leftByRound[round];
-              final rightEntry = rightByRound[round];
-              final leftPoints = leftEntry?.points;
-              final rightPoints = rightEntry?.points;
-              final leftBetter = leftPoints != null && rightPoints != null && leftPoints > rightPoints;
-              final rightBetter = leftPoints != null && rightPoints != null && rightPoints > leftPoints;
-              final raceName = leftEntry?.raceName ?? rightEntry?.raceName ?? '-';
+            children: rounds
+                .map((round) {
+                  final leftEntry = leftByRound[round];
+                  final rightEntry = rightByRound[round];
+                  final leftPoints = leftEntry?.points;
+                  final rightPoints = rightEntry?.points;
+                  final leftBetter =
+                      leftPoints != null &&
+                      rightPoints != null &&
+                      leftPoints > rightPoints;
+                  final rightBetter =
+                      leftPoints != null &&
+                      rightPoints != null &&
+                      rightPoints > leftPoints;
+                  final raceName =
+                      leftEntry?.raceName ?? rightEntry?.raceName ?? '-';
 
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: _buildProgressionValueChip(
-                          _formatSeasonPointsValue(leftPoints),
-                          leftBetter,
-                          isDark,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        children: [
-                          Text(
-                            '${loc.translate('round_short')} $round',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: isDark ? Colors.white60 : Colors.black54,
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: _buildProgressionValueChip(
+                              _formatSeasonPointsValue(leftPoints),
+                              leftBetter,
+                              isDark,
                             ),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            raceName,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: theme.colorScheme.onSurface,
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Column(
+                            children: [
+                              Text(
+                                '${loc.translate('round_short')} $round',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark
+                                      ? Colors.white60
+                                      : Colors.black54,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                raceName,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: _buildProgressionValueChip(
+                              _formatSeasonPointsValue(rightPoints),
+                              rightBetter,
+                              isDark,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: _buildProgressionValueChip(
-                          _formatSeasonPointsValue(rightPoints),
-                          rightBetter,
-                          isDark,
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
-              );
-            }).toList(growable: false),
+                  );
+                })
+                .toList(growable: false),
           ),
         ),
       ),
@@ -8918,12 +10608,14 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: isBetter
-            ? Colors.green.withOpacity(0.14)
-            : (isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.04)),
+            ? Colors.green.withValues(alpha: 0.14)
+            : (isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.04)),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: isBetter
-              ? Colors.green.withOpacity(0.45)
+              ? Colors.green.withValues(alpha: 0.45)
               : (isDark ? Colors.white10 : Colors.black12),
         ),
       ),
@@ -9010,7 +10702,11 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
     );
   }
 
-  Widget _buildHeader(BuildContext context, Driver leftDriver, Driver rightDriver) {
+  Widget _buildHeader(
+    BuildContext context,
+    Driver leftDriver,
+    Driver rightDriver,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -9051,7 +10747,7 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
 }
 
 /// --- TEAM COMPARISON VIEW ----------------------------------------------
-class TeamComparisonView extends StatelessWidget {
+class TeamComparisonView extends StatefulWidget {
   final Team team1;
   final Team team2;
 
@@ -9062,90 +10758,103 @@ class TeamComparisonView extends StatelessWidget {
   });
 
   @override
+  State<TeamComparisonView> createState() => _TeamComparisonViewState();
+}
+
+class _TeamComparisonViewState extends State<TeamComparisonView> {
+  @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final entries1 = team1.totalEntries == 0 ? 1 : team1.totalEntries;
-    final entries2 = team2.totalEntries == 0 ? 1 : team2.totalEntries;
+    final leftTeam = widget.team1;
+    final rightTeam = widget.team2;
+    final entries1 = leftTeam.totalEntries == 0 ? 1 : leftTeam.totalEntries;
+    final entries2 = rightTeam.totalEntries == 0 ? 1 : rightTeam.totalEntries;
 
     return Scaffold(
-      appBar: AppBar(title: Text('${team1.name} vs ${team2.name}')),
+      appBar: AppBar(
+        title: Text('${widget.team1.name} vs ${widget.team2.name}'),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          _buildHeader(context),
+          _buildHeader(context, leftTeam, rightTeam),
           const SizedBox(height: 20),
           ComparisonRow(
             label: loc.translate('cc_wins'),
-            value1: team1.ccWins,
-            value2: team2.ccWins,
+            value1: widget.team1.ccWins,
+            value2: widget.team2.ccWins,
             isDark: isDark,
           ),
           ComparisonRow(
             label: loc.translate('dc_wins'),
-            value1: team1.dcWins,
-            value2: team2.dcWins,
+            value1: widget.team1.dcWins,
+            value2: widget.team2.dcWins,
             isDark: isDark,
           ),
           ComparisonRow(
             label: loc.translate('wins'),
-            value1: team1.podiums,
-            value2: team2.podiums,
+            value1: widget.team1.podiums,
+            value2: widget.team2.podiums,
             isDark: isDark,
           ),
           ComparisonRow(
             label: loc.translate('one_two'),
-            value1: team1.oneTwo,
-            value2: team2.oneTwo,
+            value1: widget.team1.oneTwo,
+            value2: widget.team2.oneTwo,
             isDark: isDark,
           ),
           ComparisonRow(
             label: loc.translate('poles'),
-            value1: team1.poles,
-            value2: team2.poles,
+            value1: widget.team1.poles,
+            value2: widget.team2.poles,
             isDark: isDark,
           ),
           ComparisonRow(
             label: loc.translate('fastest_laps'),
-            value1: team1.fastestLaps,
-            value2: team2.fastestLaps,
+            value1: widget.team1.fastestLaps,
+            value2: widget.team2.fastestLaps,
             isDark: isDark,
           ),
           ComparisonRow(
             label: loc.translate('total_points'),
-            value1: team1.totalPoints,
-            value2: team2.totalPoints,
+            value1: widget.team1.totalPoints,
+            value2: widget.team2.totalPoints,
             isDark: isDark,
           ),
           ComparisonRow(
             label: loc.translate('total_entries'),
-            value1: team1.totalEntries,
-            value2: team2.totalEntries,
+            value1: widget.team1.totalEntries,
+            value2: widget.team2.totalEntries,
             isDark: isDark,
           ),
           ComparisonRow(
             label: loc.translate('fastestPit'),
-            value1: team1.fastestPitstopTime,
-            value2: team2.fastestPitstopTime,
+            value1: widget.team1.fastestPitstopTime,
+            value2: widget.team2.fastestPitstopTime,
             isDark: isDark,
             lowerIsBetter: true,
           ),
           ComparisonRow(
-            label: 'Points / entry',
-            value1: (team1.totalPoints / entries1).toStringAsFixed(2),
-            value2: (team2.totalPoints / entries2).toStringAsFixed(2),
+            label: loc.translate('points_per_entry'),
+            value1: (leftTeam.totalPoints / entries1).toStringAsFixed(2),
+            value2: (rightTeam.totalPoints / entries2).toStringAsFixed(2),
             isDark: isDark,
           ),
           ComparisonRow(
-            label: 'Pole rate %',
-            value1: ((team1.poles / entries1) * 100).toStringAsFixed(1),
-            value2: ((team2.poles / entries2) * 100).toStringAsFixed(1),
+            label: loc.translate('pole_rate'),
+            value1: ((leftTeam.poles / entries1) * 100).toStringAsFixed(1),
+            value2: ((rightTeam.poles / entries2) * 100).toStringAsFixed(1),
             isDark: isDark,
           ),
           ComparisonRow(
-            label: 'Fastest lap rate %',
-            value1: ((team1.fastestLaps / entries1) * 100).toStringAsFixed(1),
-            value2: ((team2.fastestLaps / entries2) * 100).toStringAsFixed(1),
+            label: loc.translate('fastest_lap_rate'),
+            value1: ((leftTeam.fastestLaps / entries1) * 100).toStringAsFixed(
+              1,
+            ),
+            value2: ((rightTeam.fastestLaps / entries2) * 100).toStringAsFixed(
+              1,
+            ),
             isDark: isDark,
           ),
         ],
@@ -9153,11 +10862,11 @@ class TeamComparisonView extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, Team leftTeam, Team rightTeam) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: _buildTeamHeader(team1)),
+        Expanded(child: _buildTeamHeader(leftTeam)),
         const Padding(
           padding: EdgeInsets.only(top: 40.0, left: 8.0, right: 8.0),
           child: Text(
@@ -9165,7 +10874,7 @@ class TeamComparisonView extends StatelessWidget {
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
         ),
-        Expanded(child: _buildTeamHeader(team2)),
+        Expanded(child: _buildTeamHeader(rightTeam)),
       ],
     );
   }
@@ -9278,7 +10987,7 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
       decoration: BoxDecoration(
         gradient: _heroPanelGradient(context),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: tokens.outline.withOpacity(0.7)),
+        border: Border.all(color: tokens.outline.withValues(alpha: 0.7)),
       ),
       child: Column(
         children: [
@@ -9343,9 +11052,9 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: tokens.panelStrong.withOpacity(0.82),
+        color: tokens.panelStrong.withValues(alpha: 0.82),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: tokens.outline.withOpacity(0.7)),
+        border: Border.all(color: tokens.outline.withValues(alpha: 0.7)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -9373,7 +11082,7 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
       decoration: BoxDecoration(
         color: tokens.panelStrong,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: tokens.outline.withOpacity(0.75)),
+        border: Border.all(color: tokens.outline.withValues(alpha: 0.75)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -9821,7 +11530,10 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
     ];
 
     return Scaffold(
-      appBar: AppBar(actions: [widget.settingsMenu], title: Text(title)),
+      appBar: AppBar(
+        actions: _desktopAwareSettingsActions(context, widget.settingsMenu),
+        title: Text(title),
+      ),
       body: RefreshIndicator(
         onRefresh: _fetchWeather,
         child: ListView(
@@ -9924,6 +11636,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
   }
 
   Future<void> _loadWeekendData() async {
+    final loc = AppLocalizations.of(context);
     if (mounted) {
       setState(() {
         _loading = true;
@@ -9961,9 +11674,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
         }
       } catch (_) {}
     } catch (_) {
-      _loadError = AppLocalizations.of(context).translate(
-        'weekend_hub_load_error',
-      );
+      _loadError = loc.translate('weekend_hub_load_error');
     }
 
     if (mounted) {
@@ -10018,60 +11729,69 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
           : _fallbackPodiumDetails();
     }
 
-    final overviewRows = SessionDataManager().sessionOverviewCache[
-          SessionDataManager().sessionOverviewKeyFor(widget.race, sessionName)
-        ] ??
+    final overviewRows =
+        SessionDataManager().sessionOverviewCache[SessionDataManager()
+            .sessionOverviewKeyFor(widget.race, sessionName)] ??
         const <SessionOverviewRow>[];
     if (overviewRows.isNotEmpty) {
-      return overviewRows.take(3).map((row) {
-        final tyreCompounds = row.tyreLapSequence
-            .map((entry) => entry.compound)
-            .where((compound) => compound.trim().isNotEmpty)
-            .toSet()
-            .toList(growable: false);
-        final position = int.tryParse(
-          row.position.replaceAll(RegExp(r'[^0-9]'), ''),
-        );
-        final resultValue = row.result.trim().isEmpty ? '-' : row.result;
-        return WeekendHubPodiumEntry(
-          position: position ?? 0,
-          driverNumber: null,
-          driver: row.driver,
-          points: row.points,
-          totalTime: resultValue,
-          gapToLeader: resultValue,
-          fastestLap: row.fastestLap,
-          hasFastestLap: row.hasFastestLap,
-          tyreCompounds: tyreCompounds.isNotEmpty
-              ? tyreCompounds
-              : (row.tyreCompound.trim().isEmpty || row.tyreCompound == '-')
-              ? const <String>[]
-              : <String>[row.tyreCompound],
-        );
-      }).toList(growable: false);
+      return overviewRows
+          .take(3)
+          .map((row) {
+            final tyreCompounds = row.tyreLapSequence
+                .map((entry) => entry.compound)
+                .where((compound) => compound.trim().isNotEmpty)
+                .toSet()
+                .toList(growable: false);
+            final position = int.tryParse(
+              row.position.replaceAll(RegExp(r'[^0-9]'), ''),
+            );
+            final resultValue = row.result.trim().isEmpty ? '-' : row.result;
+            return WeekendHubPodiumEntry(
+              position: position ?? 0,
+              driverNumber: null,
+              driver: row.driver,
+              points: row.points,
+              totalTime: resultValue,
+              gapToLeader: resultValue,
+              fastestLap: row.fastestLap,
+              hasFastestLap: row.hasFastestLap,
+              tyreCompounds: tyreCompounds.isNotEmpty
+                  ? tyreCompounds
+                  : (row.tyreCompound.trim().isEmpty || row.tyreCompound == '-')
+                  ? const <String>[]
+                  : <String>[row.tyreCompound],
+            );
+          })
+          .toList(growable: false);
     }
 
-    final cachedResults = SessionDataManager().cache[
-          '${widget.race.country}_${sessionName}_${widget.race.date.year}'
-        ] ??
+    final cachedResults =
+        SessionDataManager()
+            .cache['${widget.race.country}_${sessionName}_${widget.race.date.year}'] ??
         const <SessionResult>[];
-    return cachedResults.take(3).toList().asMap().entries.map((entry) {
-      final row = entry.value;
-      final tyreCompounds = row.tyre.trim().isEmpty || row.tyre == '-'
-          ? const <String>[]
-          : <String>[row.tyre];
-      return WeekendHubPodiumEntry(
-        position: entry.key + 1,
-        driverNumber: null,
-        driver: row.driver,
-        points: '-',
-        totalTime: row.time,
-        gapToLeader: row.time,
-        fastestLap: row.time,
-        hasFastestLap: entry.key == 0,
-        tyreCompounds: tyreCompounds,
-      );
-    }).toList(growable: false);
+    return cachedResults
+        .take(3)
+        .toList()
+        .asMap()
+        .entries
+        .map((entry) {
+          final row = entry.value;
+          final tyreCompounds = row.tyre.trim().isEmpty || row.tyre == '-'
+              ? const <String>[]
+              : <String>[row.tyre];
+          return WeekendHubPodiumEntry(
+            position: entry.key + 1,
+            driverNumber: null,
+            driver: row.driver,
+            points: '-',
+            totalTime: row.time,
+            gapToLeader: row.time,
+            fastestLap: row.time,
+            hasFastestLap: entry.key == 0,
+            tyreCompounds: tyreCompounds,
+          );
+        })
+        .toList(growable: false);
   }
 
   Future<void> _fetchWeekendWeather() async {
@@ -10145,16 +11865,17 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     List<Map<String, dynamic>> messages,
     String selectedSession,
   ) {
-    final scopes = messages
-        .where(
-          (message) =>
-              message['sessionName']?.toString().trim() == selectedSession,
-        )
-        .map((message) => message['scope']?.toString().trim() ?? '')
-        .where((scope) => scope.isNotEmpty)
-        .toSet()
-        .toList(growable: false)
-      ..sort();
+    final scopes =
+        messages
+            .where(
+              (message) =>
+                  message['sessionName']?.toString().trim() == selectedSession,
+            )
+            .map((message) => message['scope']?.toString().trim() ?? '')
+            .where((scope) => scope.isNotEmpty)
+            .toSet()
+            .toList(growable: false)
+          ..sort();
     return <String>[_allRaceControlScopes, ...scopes];
   }
 
@@ -10164,33 +11885,36 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     String selectedScope,
   ) {
     final query = _raceControlSearchQuery.trim().toLowerCase();
-    final filtered = messages.where((message) {
-      final sessionName = message['sessionName']?.toString().trim() ?? '';
-      if (sessionName != selectedSession) {
-        return false;
-      }
+    final filtered = messages
+        .where((message) {
+          final sessionName = message['sessionName']?.toString().trim() ?? '';
+          if (sessionName != selectedSession) {
+            return false;
+          }
 
-      final scope = message['scope']?.toString().trim() ?? '';
-      if (selectedScope != _allRaceControlScopes && scope != selectedScope) {
-        return false;
-      }
+          final scope = message['scope']?.toString().trim() ?? '';
+          if (selectedScope != _allRaceControlScopes &&
+              scope != selectedScope) {
+            return false;
+          }
 
-      if (query.isEmpty) {
-        return true;
-      }
+          if (query.isEmpty) {
+            return true;
+          }
 
-      final searchHaystack = <String>[
-        message['message']?.toString() ?? '',
-        message['sessionName']?.toString() ?? '',
-        message['scope']?.toString() ?? '',
-        message['category']?.toString() ?? '',
-        message['flag']?.toString() ?? '',
-        message['driverNumber']?.toString() ?? '',
-        message['lap']?.toString() ?? '',
-      ].join(' ').toLowerCase();
+          final searchHaystack = <String>[
+            message['message']?.toString() ?? '',
+            message['sessionName']?.toString() ?? '',
+            message['scope']?.toString() ?? '',
+            message['category']?.toString() ?? '',
+            message['flag']?.toString() ?? '',
+            message['driverNumber']?.toString() ?? '',
+            message['lap']?.toString() ?? '',
+          ].join(' ').toLowerCase();
 
-      return searchHaystack.contains(query);
-    }).toList(growable: false);
+          return searchHaystack.contains(query);
+        })
+        .toList(growable: false);
 
     filtered.sort((a, b) {
       final aDate = DateTime.tryParse(a['timestampUtc']?.toString() ?? '');
@@ -10210,7 +11934,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
   List<String> _availableWeekendSessions(
     List<Map<String, dynamic>> raceControlMessages,
   ) {
-    final scheduledSessions = _sessionSchedule().map((entry) => entry.key).toList();
+    final scheduledSessions = _sessionSchedule()
+        .map((entry) => entry.key)
+        .toList();
     final weatherSessions = _weatherBySession.keys.toSet();
     final raceControlSessions = raceControlMessages
         .map((message) => message['sessionName']?.toString().trim() ?? '')
@@ -10329,7 +12055,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
   ) {
     final selectedSession = availableSessions.contains(_selectedWeekendSession)
         ? _selectedWeekendSession
-        : (availableSessions.contains('Race') ? 'Race' : availableSessions.first);
+        : (availableSessions.contains('Race')
+              ? 'Race'
+              : availableSessions.first);
 
     if (selectedSession != _selectedWeekendSession) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -10347,10 +12075,10 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _themeTokens(context).panelStrong.withOpacity(0.92),
+        color: _themeTokens(context).panelStrong.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: _themeTokens(context).outline.withOpacity(0.65),
+          color: _themeTokens(context).outline.withValues(alpha: 0.65),
         ),
       ),
       child: Column(
@@ -10371,7 +12099,10 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
             decoration: const InputDecoration(
               isDense: true,
               prefixIcon: Icon(Icons.schedule, size: 18),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
             ),
             items: availableSessions
                 .map(
@@ -10396,7 +12127,10 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     );
   }
 
-  String _formatRaceControlTimestamp(BuildContext context, String? timestampUtc) {
+  String _formatRaceControlTimestamp(
+    BuildContext context,
+    String? timestampUtc,
+  ) {
     if (timestampUtc == null || timestampUtc.trim().isEmpty) {
       return AppLocalizations.of(context).translate('unknown_time');
     }
@@ -10533,10 +12267,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
 
   String _normalizeRaceControlIncidentSource(String value) {
     return value
-        .replaceAll(
-          RegExp(r'\bINVOLDING\b', caseSensitive: false),
-          'INVOLVING',
-        )
+        .replaceAll(RegExp(r'\bINVOLDING\b', caseSensitive: false), 'INVOLVING')
         .trim();
   }
 
@@ -10720,7 +12451,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     final penaltySignature = _raceControlPenaltySignature(sourceMessage);
     final penaltyKindKey = _raceControlPenaltyKindKey(sourceText);
     final incidentSignature = _raceControlIncidentSignature(sourceText);
-    final sourceDriverNumber = _raceControlDriverNumberForMessage(sourceMessage);
+    final sourceDriverNumber = _raceControlDriverNumberForMessage(
+      sourceMessage,
+    );
     if (penaltySignature == null &&
         penaltyKindKey == null &&
         incidentSignature == null) {
@@ -10729,7 +12462,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
 
     final sourceIsServed = _isRaceControlPenaltyServedMessage(sourceText);
     final sourceIsPenalty = _isRaceControlPenaltyMessage(sourceText);
-    final sourceIsInvestigation = _isRaceControlInvestigationMessage(sourceText);
+    final sourceIsInvestigation = _isRaceControlInvestigationMessage(
+      sourceText,
+    );
     final sourceIsResolution = _isRaceControlResolutionMessage(sourceText);
     if (!sourceIsServed &&
         !sourceIsPenalty &&
@@ -10738,71 +12473,89 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       return const <Map<String, dynamic>>[];
     }
 
-    final related = allMessages.where((candidate) {
-      if (identical(candidate, sourceMessage)) {
-        return false;
-      }
+    final related =
+        allMessages
+            .where((candidate) {
+              if (identical(candidate, sourceMessage)) {
+                return false;
+              }
 
-      final candidateSession = candidate['sessionName']?.toString().trim() ?? '';
-      if (candidateSession != selectedSession) {
-        return false;
-      }
+              final candidateSession =
+                  candidate['sessionName']?.toString().trim() ?? '';
+              if (candidateSession != selectedSession) {
+                return false;
+              }
 
-      final candidateText = candidate['message']?.toString();
-      final candidatePenaltySignature = _raceControlPenaltySignature(candidate);
-      final candidateIncidentSignature = _raceControlIncidentSignature(
-        candidateText,
-      );
-      if (penaltySignature != null || candidatePenaltySignature != null) {
-        if (penaltySignature == null || candidatePenaltySignature == null) {
-          return false;
-        }
-        if (candidatePenaltySignature != penaltySignature) {
-          return false;
-        }
-      } else if (incidentSignature != null || candidateIncidentSignature != null) {
-        if (incidentSignature == null || candidateIncidentSignature == null) {
-          return false;
-        }
-        if (candidateIncidentSignature != incidentSignature) {
-          return false;
-        }
-      } else {
-        final candidatePenaltyKindKey = _raceControlPenaltyKindKey(candidateText);
-        if (candidatePenaltyKindKey != penaltyKindKey) {
-          return false;
-        }
-      }
+              final candidateText = candidate['message']?.toString();
+              final candidatePenaltySignature = _raceControlPenaltySignature(
+                candidate,
+              );
+              final candidateIncidentSignature = _raceControlIncidentSignature(
+                candidateText,
+              );
+              if (penaltySignature != null ||
+                  candidatePenaltySignature != null) {
+                if (penaltySignature == null ||
+                    candidatePenaltySignature == null) {
+                  return false;
+                }
+                if (candidatePenaltySignature != penaltySignature) {
+                  return false;
+                }
+              } else if (incidentSignature != null ||
+                  candidateIncidentSignature != null) {
+                if (incidentSignature == null ||
+                    candidateIncidentSignature == null) {
+                  return false;
+                }
+                if (candidateIncidentSignature != incidentSignature) {
+                  return false;
+                }
+              } else {
+                final candidatePenaltyKindKey = _raceControlPenaltyKindKey(
+                  candidateText,
+                );
+                if (candidatePenaltyKindKey != penaltyKindKey) {
+                  return false;
+                }
+              }
 
-      final candidateDriverNumber = _raceControlDriverNumberForMessage(candidate);
-      if (sourceDriverNumber != null &&
-          candidateDriverNumber != null &&
-          sourceDriverNumber != candidateDriverNumber) {
-        return false;
-      }
+              final candidateDriverNumber = _raceControlDriverNumberForMessage(
+                candidate,
+              );
+              if (sourceDriverNumber != null &&
+                  candidateDriverNumber != null &&
+                  sourceDriverNumber != candidateDriverNumber) {
+                return false;
+              }
 
-      if (sourceIsServed) {
-        return _isRaceControlPenaltyMessage(candidateText);
-      }
-      if (sourceIsPenalty) {
-        return _isRaceControlPenaltyServedMessage(candidateText);
-      }
-      if (sourceIsInvestigation || sourceIsResolution) {
-        return _isRaceControlIncidentFamilyMessage(candidateText);
-      }
-      return false;
-    }).toList(growable: false)
-      ..sort((a, b) {
-        final aDate = DateTime.tryParse(a['timestampUtc']?.toString() ?? '');
-        final bDate = DateTime.tryParse(b['timestampUtc']?.toString() ?? '');
-        if (aDate != null && bDate != null) {
-          return aDate.compareTo(bDate);
-        }
-        if (aDate == null && bDate == null) {
-          return 0;
-        }
-        return aDate == null ? 1 : -1;
-      });
+              if (sourceIsServed) {
+                return _isRaceControlPenaltyMessage(candidateText);
+              }
+              if (sourceIsPenalty) {
+                return _isRaceControlPenaltyServedMessage(candidateText);
+              }
+              if (sourceIsInvestigation || sourceIsResolution) {
+                return _isRaceControlIncidentFamilyMessage(candidateText);
+              }
+              return false;
+            })
+            .toList(growable: false)
+          ..sort((a, b) {
+            final aDate = DateTime.tryParse(
+              a['timestampUtc']?.toString() ?? '',
+            );
+            final bDate = DateTime.tryParse(
+              b['timestampUtc']?.toString() ?? '',
+            );
+            if (aDate != null && bDate != null) {
+              return aDate.compareTo(bDate);
+            }
+            if (aDate == null && bDate == null) {
+              return 0;
+            }
+            return aDate == null ? 1 : -1;
+          });
 
     return related;
   }
@@ -10825,7 +12578,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
         color: style?.background ?? tokens.panelStrong,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: style?.border ?? tokens.outline.withOpacity(0.6),
+          color: style?.border ?? tokens.outline.withValues(alpha: 0.6),
         ),
       ),
       child: Column(
@@ -10863,17 +12616,18 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                 _buildRaceControlTag(
                   context,
                   Icons.directions_car,
-                  loc.format(
-                    'car_label',
-                    {'number': '${message['driverNumber']}'},
-                  ),
+                  loc.format('car_label', {
+                    'number': '${message['driverNumber']}',
+                  }),
                 ),
               if ((message['flag']?.toString() ?? '').trim().isNotEmpty)
                 _buildRaceControlTag(
                   context,
                   Icons.flag,
                   message['flag']!.toString(),
-                  accentColor: _raceControlFlagColor(message['flag']?.toString()),
+                  accentColor: _raceControlFlagColor(
+                    message['flag']?.toString(),
+                  ),
                 ),
             ],
           ),
@@ -10886,7 +12640,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
             style: TextStyle(
               fontSize: 12,
               color:
-                  style?.text.withOpacity(0.88) ??
+                  style?.text.withValues(alpha: 0.88) ??
                   theme.colorScheme.onSurfaceVariant,
             ),
           ),
@@ -10949,9 +12703,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w800,
-                        color: Theme.of(dialogContext)
-                            .colorScheme
-                            .onSurfaceVariant,
+                        color: Theme.of(
+                          dialogContext,
+                        ).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -10973,9 +12727,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                       loc.translate('race_control_no_linked_message'),
                       style: TextStyle(
                         fontSize: 12,
-                        color: Theme.of(dialogContext)
-                            .colorScheme
-                            .onSurfaceVariant,
+                        color: Theme.of(
+                          dialogContext,
+                        ).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -11095,7 +12849,11 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            _buildRaceControlScopeChips(context, availableScopes, selectedScope),
+            _buildRaceControlScopeChips(
+              context,
+              availableScopes,
+              selectedScope,
+            ),
             const SizedBox(height: 12),
             Text(
               loc.format('race_control_message_count', {
@@ -11117,139 +12875,134 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
             else
               Column(
                 children: visibleMessages
-                    .map(
-                      (message) {
-                        final messageStyle = _raceControlMessageStyle(
-                          message['message']?.toString(),
-                        );
-                        final relatedMessages = _relatedRaceControlMessages(
-                          messages,
-                          selectedSession,
-                          message,
-                        );
-                        return Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(14),
-                            onTap: () => _showRaceControlMessageDetails(
-                              context,
-                              messages,
-                              selectedSession,
-                              message,
-                            ),
-                            child: Container(
-                              width: double.infinity,
-                              margin: const EdgeInsets.only(bottom: 10),
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
+                    .map((message) {
+                      final messageStyle = _raceControlMessageStyle(
+                        message['message']?.toString(),
+                      );
+                      final relatedMessages = _relatedRaceControlMessages(
+                        messages,
+                        selectedSession,
+                        message,
+                      );
+                      return Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(14),
+                          onTap: () => _showRaceControlMessageDetails(
+                            context,
+                            messages,
+                            selectedSession,
+                            message,
+                          ),
+                          child: Container(
+                            width: double.infinity,
+                            margin: const EdgeInsets.only(bottom: 10),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color:
+                                  messageStyle?.background ??
+                                  tokens.panelStrong,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
                                 color:
-                                    messageStyle?.background ?? tokens.panelStrong,
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                  color:
-                                      messageStyle?.border ??
-                                      tokens.outline.withOpacity(0.6),
-                                ),
+                                    messageStyle?.border ??
+                                    tokens.outline.withValues(alpha: 0.6),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: [
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
+                                    _buildRaceControlTag(
+                                      context,
+                                      Icons.schedule,
+                                      message['sessionName']?.toString() ??
+                                          loc.translate('unknown'),
+                                    ),
+                                    if ((message['scope']?.toString() ?? '')
+                                        .trim()
+                                        .isNotEmpty)
                                       _buildRaceControlTag(
                                         context,
-                                        Icons.schedule,
-                                        message['sessionName']?.toString() ??
-                                            loc.translate('unknown'),
+                                        Icons.center_focus_strong,
+                                        message['scope']!.toString(),
                                       ),
-                                      if ((message['scope']?.toString() ?? '')
-                                          .trim()
-                                          .isNotEmpty)
-                                        _buildRaceControlTag(
-                                          context,
-                                          Icons.center_focus_strong,
-                                          message['scope']!.toString(),
+                                    if ((message['flag']?.toString() ?? '')
+                                        .trim()
+                                        .isNotEmpty)
+                                      _buildRaceControlTag(
+                                        context,
+                                        Icons.flag,
+                                        message['flag']!.toString(),
+                                        accentColor: _raceControlFlagColor(
+                                          message['flag']?.toString(),
                                         ),
-                                      if ((message['flag']?.toString() ?? '')
-                                          .trim()
-                                          .isNotEmpty)
-                                        _buildRaceControlTag(
-                                          context,
-                                          Icons.flag,
-                                          message['flag']!.toString(),
-                                          accentColor: _raceControlFlagColor(
-                                            message['flag']?.toString(),
-                                          ),
-                                        ),
-                                      if (message['lap'] != null)
-                                        _buildRaceControlTag(
-                                          context,
-                                          Icons.looks_one,
-                                          loc.format(
-                                            'lap_label',
-                                            {'lap': '${message['lap']}'},
-                                          ),
-                                        ),
-                                      if (message['driverNumber'] != null)
-                                        _buildRaceControlTag(
-                                          context,
-                                          Icons.directions_car,
-                                          loc.format('car_label', {
-                                            'number':
-                                                '${message['driverNumber']}',
-                                          }),
-                                        ),
-                                      if (relatedMessages.isNotEmpty)
-                                        _buildRaceControlTag(
-                                          context,
-                                          Icons.link,
-                                          relatedMessages.length == 1
-                                              ? loc.translate(
-                                                  'linked_update_one',
-                                                )
-                                              : loc.format(
-                                                  'linked_update_many',
-                                                  {
-                                                    'count':
-                                                        '${relatedMessages.length}',
-                                                  },
-                                                ),
-                                        ),
-                                    ],
+                                      ),
+                                    if (message['lap'] != null)
+                                      _buildRaceControlTag(
+                                        context,
+                                        Icons.looks_one,
+                                        loc.format('lap_label', {
+                                          'lap': '${message['lap']}',
+                                        }),
+                                      ),
+                                    if (message['driverNumber'] != null)
+                                      _buildRaceControlTag(
+                                        context,
+                                        Icons.directions_car,
+                                        loc.format('car_label', {
+                                          'number':
+                                              '${message['driverNumber']}',
+                                        }),
+                                      ),
+                                    if (relatedMessages.isNotEmpty)
+                                      _buildRaceControlTag(
+                                        context,
+                                        Icons.link,
+                                        relatedMessages.length == 1
+                                            ? loc.translate('linked_update_one')
+                                            : loc.format('linked_update_many', {
+                                                'count':
+                                                    '${relatedMessages.length}',
+                                              }),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  message['message']?.toString() ?? '-',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color:
+                                        messageStyle?.text ??
+                                        theme.colorScheme.onSurface,
                                   ),
-                                  const SizedBox(height: 10),
-                                  Text(
-                                    message['message']?.toString() ?? '-',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color:
-                                          messageStyle?.text ??
-                                          theme.colorScheme.onSurface,
-                                    ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  _formatRaceControlTimestamp(
+                                    context,
+                                    message['timestampUtc']?.toString(),
                                   ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    _formatRaceControlTimestamp(
-                                      context,
-                                      message['timestampUtc']?.toString(),
-                                    ),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color:
-                                          messageStyle?.text.withOpacity(0.88) ??
-                                          theme.colorScheme.onSurfaceVariant,
-                                    ),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color:
+                                        messageStyle?.text.withValues(
+                                          alpha: 0.88,
+                                        ) ??
+                                        theme.colorScheme.onSurfaceVariant,
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
-                        );
-                      },
-                    )
+                        ),
+                      );
+                    })
                     .toList(growable: false),
               ),
             if (filteredMessages.length > _defaultRaceControlVisibleCount) ...[
@@ -11259,7 +13012,8 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                 child: TextButton.icon(
                   onPressed: () {
                     setState(() {
-                      _showAllRaceControlMessages = !_showAllRaceControlMessages;
+                      _showAllRaceControlMessages =
+                          !_showAllRaceControlMessages;
                     });
                   },
                   icon: Icon(
@@ -11286,9 +13040,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
   Widget _buildRaceControlTag(
     BuildContext context,
     IconData icon,
-    String label,
-    {Color? accentColor}
-  ) {
+    String label, {
+    Color? accentColor,
+  }) {
     final theme = Theme.of(context);
     final effectiveColor = accentColor ?? theme.colorScheme.onSurfaceVariant;
     return Container(
@@ -11296,12 +13050,12 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       decoration: BoxDecoration(
         color: accentColor == null
             ? _themeTokens(context).panel
-            : effectiveColor.withOpacity(0.14),
+            : effectiveColor.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
           color: accentColor == null
-              ? _themeTokens(context).outline.withOpacity(0.55)
-              : effectiveColor.withOpacity(0.34),
+              ? _themeTokens(context).outline.withValues(alpha: 0.55)
+              : effectiveColor.withValues(alpha: 0.34),
         ),
       ),
       child: Row(
@@ -11334,21 +13088,23 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
             .raceWeatherKeyFor(widget.race)] ??
         const <Map<String, dynamic>>[];
     final raceControlMessages =
-      SessionDataManager().raceControlCache[SessionDataManager()
-        .raceControlKeyFor(widget.race)] ??
-      const <Map<String, dynamic>>[];
+        SessionDataManager().raceControlCache[SessionDataManager()
+            .raceControlKeyFor(widget.race)] ??
+        const <Map<String, dynamic>>[];
     final availableSessions = _availableWeekendSessions(raceControlMessages);
     final selectedSession = availableSessions.contains(_selectedWeekendSession)
         ? _selectedWeekendSession
-        : (availableSessions.contains('Race') ? 'Race' : availableSessions.first);
+        : (availableSessions.contains('Race')
+              ? 'Race'
+              : availableSessions.first);
     final selectedWeather =
         _weatherBySession[selectedSession] ??
         (selectedSession == 'Race'
             ? raceWeather
             : const <Map<String, dynamic>>[]);
     final selectedLapTimeline =
-      _lapTimelineBySession[selectedSession] ??
-      const <Map<String, dynamic>>[];
+        _lapTimelineBySession[selectedSession] ??
+        const <Map<String, dynamic>>[];
     final penalties = raceResults
         .where(
           (row) => row.penalty.trim().isNotEmpty && row.penalty.trim() != '-',
@@ -11475,12 +13231,12 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: tokens.panelStrong.withOpacity(0.92),
+        color: tokens.panelStrong.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: tokens.outline.withOpacity(0.7)),
+        border: Border.all(color: tokens.outline.withValues(alpha: 0.7)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 14,
             offset: const Offset(0, 8),
           ),
@@ -11510,9 +13266,11 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
             return Container(
               margin: const EdgeInsets.only(bottom: 8),
               decoration: BoxDecoration(
-                color: tokens.panel.withOpacity(0.88),
+                color: tokens.panel.withValues(alpha: 0.88),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: tokens.outline.withOpacity(0.42)),
+                border: Border.all(
+                  color: tokens.outline.withValues(alpha: 0.42),
+                ),
               ),
               child: InkWell(
                 borderRadius: BorderRadius.circular(14),
@@ -11531,7 +13289,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                         height: 28,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: statusColor.withOpacity(0.14),
+                          color: statusColor.withValues(alpha: 0.14),
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Icon(
@@ -11628,18 +13386,14 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
             ] else ...[
               Text(
                 'Geen weerdata beschikbaar voor ${_sessionDisplayTitle(context, selectedSession)}.',
-                style: TextStyle(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 12),
             ],
             if (_loadError != null) ...[
               Text(
                 _loadError!,
-                style: TextStyle(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
+                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 12),
             ],
@@ -11726,19 +13480,15 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
         );
         final summaryColumn = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            summary,
-            const SizedBox(height: 12),
-            sessionSelector,
-          ],
+          children: [summary, const SizedBox(height: 12), sessionSelector],
         );
-        final selectedSession = availableSessions.contains(_selectedWeekendSession)
+        final selectedSession =
+            availableSessions.contains(_selectedWeekendSession)
             ? _selectedWeekendSession
-            : (availableSessions.contains('Race') ? 'Race' : availableSessions.first);
-        final podium = _buildWeekendHubTopThreeCard(
-          context,
-          selectedSession,
-        );
+            : (availableSessions.contains('Race')
+                  ? 'Race'
+                  : availableSessions.first);
+        final podium = _buildWeekendHubTopThreeCard(context, selectedSession);
         final schedule = _buildWeekendScheduleCard(context);
 
         if (isThreeColumn) {
@@ -11798,17 +13548,14 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       decoration: BoxDecoration(
         gradient: _heroPanelGradient(context),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: tokens.outline.withOpacity(0.7)),
+        border: Border.all(color: tokens.outline.withValues(alpha: 0.7)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionCardTitle(context, loc.translate('circuit')),
           const SizedBox(height: 12),
-          Text(
-            widget.race.flag,
-            style: const TextStyle(fontSize: 42),
-          ),
+          Text(widget.race.flag, style: const TextStyle(fontSize: 42)),
           const SizedBox(height: 10),
           Text(
             widget.race.name,
@@ -11857,12 +13604,12 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: tokens.panelStrong.withOpacity(0.92),
+        color: tokens.panelStrong.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: tokens.outline.withOpacity(0.7)),
+        border: Border.all(color: tokens.outline.withValues(alpha: 0.7)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 16,
             offset: const Offset(0, 10),
           ),
@@ -11907,18 +13654,20 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
         : '#${entry.driverNumber} ${entry.driver}';
     final accent = _topThreeAccent(entry.position);
     final timingLabel = entry.position == 1
-      ? loc.translate('total_time')
-      : loc.translate('gap');
-    final timingValue = entry.position == 1 ? entry.totalTime : entry.gapToLeader;
+        ? loc.translate('total_time')
+        : loc.translate('gap');
+    final timingValue = entry.position == 1
+        ? entry.totalTime
+        : entry.gapToLeader;
 
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: tokens.panel.withOpacity(0.88),
+        color: tokens.panel.withValues(alpha: 0.88),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: accent.withOpacity(0.55)),
+        border: Border.all(color: accent.withValues(alpha: 0.55)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -11930,9 +13679,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                 height: 26,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: accent.withOpacity(0.18),
+                  color: accent.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: accent.withOpacity(0.45)),
+                  border: Border.all(color: accent.withValues(alpha: 0.45)),
                 ),
                 child: Text(
                   '${entry.position}',
@@ -11962,11 +13711,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
           Row(
             children: [
               Expanded(
-                child: _buildTopThreeFact(
-                  context,
-                  timingLabel,
-                  timingValue,
-                ),
+                child: _buildTopThreeFact(context, timingLabel, timingValue),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -12059,10 +13804,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
   VoidCallback? _action;
 
   String _normalizeAssistantText(String value) {
-    return value
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9]+'), ' ')
-        .trim();
+    return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();
   }
 
   int _assistantMatchScore(String query, String candidate) {
@@ -12172,7 +13914,9 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
     if (driversData.isEmpty) {
       return DateTime.now().year;
     }
-    return driversData.keys.reduce((left, right) => left > right ? left : right);
+    return driversData.keys.reduce(
+      (left, right) => left > right ? left : right,
+    );
   }
 
   String _formatAiPoints(num value) {
@@ -12199,6 +13943,8 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
 
   Future<void> _runPrompt([String? value]) async {
     final loc = AppLocalizations.of(context);
+    final router = GoRouter.of(context);
+    final navigator = Navigator.of(context);
     final prompt = (value ?? _controller.text).trim();
     if (prompt.isEmpty) {
       return;
@@ -12231,10 +13977,9 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           _response = topThree.isEmpty
               ? loc.translate('ai_latest_results_refreshed')
               : loc.format('ai_latest_results_podium', {'podium': topThree});
-            _actionLabel = loc.translate('ai_open_latest_results');
+          _actionLabel = loc.translate('ai_open_latest_results');
           _action = () {
-            final router = GoRouter.of(context);
-            Navigator.of(context).pop();
+            navigator.pop();
             Future<void>.delayed(const Duration(milliseconds: 150), () {
               router.push(_raceResultsPath(latestRace));
             });
@@ -12250,12 +13995,11 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
         _response = loc.format('ai_next_weekend', {
           'race': nextRace.name,
           'date':
-            '${nextRace.date.day}-${nextRace.date.month}-${nextRace.date.year}',
+              '${nextRace.date.day}-${nextRace.date.month}-${nextRace.date.year}',
         });
         _actionLabel = loc.translate('ai_open_weekend_hub');
         _action = () {
-          final router = GoRouter.of(context);
-          Navigator.of(context).pop();
+          navigator.pop();
           Future<void>.delayed(const Duration(milliseconds: 150), () {
             router.push(_weekendHubPath(nextRace));
           });
@@ -12316,8 +14060,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
             });
             _actionLabel = loc.translate('ai_open_driver_compare');
             _action = () {
-              final router = GoRouter.of(context);
-              Navigator.of(context).pop();
+              navigator.pop();
               Future<void>.delayed(const Duration(milliseconds: 150), () {
                 router.push(_driverComparePath(driver1!, driver2!));
               });
@@ -12329,8 +14072,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
             });
             _actionLabel = loc.translate('ai_open_team_compare');
             _action = () {
-              final router = GoRouter.of(context);
-              Navigator.of(context).pop();
+              navigator.pop();
               Future<void>.delayed(const Duration(milliseconds: 150), () {
                 router.push(_teamComparePath(team1!, team2!));
               });
@@ -12354,9 +14096,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
         } else {
           final entries = _buildDriverRecentFormEntries(target.name);
           if (entries.isEmpty) {
-            _response = loc.format('ai_form_no_cache', {
-              'driver': target.name,
-            });
+            _response = loc.format('ai_form_no_cache', {'driver': target.name});
           } else {
             final summary = entries
                 .map(
@@ -12393,8 +14133,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
         });
         _actionLabel = loc.translate('ai_open_driver_standings');
         _action = () {
-          final router = GoRouter.of(context);
-          Navigator.of(context).pop();
+          navigator.pop();
           Future<void>.delayed(const Duration(milliseconds: 150), () {
             router.push(_driversPath());
           });
@@ -12417,8 +14156,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
         });
         _actionLabel = loc.translate('ai_open_team_standings');
         _action = () {
-          final router = GoRouter.of(context);
-          Navigator.of(context).pop();
+          navigator.pop();
           Future<void>.delayed(const Duration(milliseconds: 150), () {
             router.push(_teamsPath());
           });
@@ -12432,11 +14170,13 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
         _response = loc.format('ai_drivers_chart_ready', {'year': '$year'});
         _actionLabel = loc.translate('ai_open_drivers_chart');
         _action = () {
-          final navigator = Navigator.of(context);
           navigator.pop();
           Future<void>.delayed(const Duration(milliseconds: 150), () {
+            if (!mounted) {
+              return;
+            }
             _openDriverStandingsChartSheet(
-              navigator.context,
+              context,
               initialYear: year,
               availableYears: List<int>.generate(
                 10,
@@ -12461,8 +14201,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
         });
         _actionLabel = loc.translate('ai_open_weekend_hub');
         _action = () {
-          final router = GoRouter.of(context);
-          Navigator.of(context).pop();
+          navigator.pop();
           Future<void>.delayed(const Duration(milliseconds: 150), () {
             router.push(_weekendHubPath(nextRace));
           });
@@ -12481,7 +14220,10 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
                   .raceResultsKeyFor(latestRace)] ??
               const <RaceResultRow>[];
           final penalties = rows
-              .where((row) => row.penalty.trim().isNotEmpty && row.penalty.trim() != '-')
+              .where(
+                (row) =>
+                    row.penalty.trim().isNotEmpty && row.penalty.trim() != '-',
+              )
               .toList(growable: false);
           if (penalties.isEmpty) {
             _response = loc.format('ai_latest_penalties_none', {
@@ -12500,8 +14242,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           }
           _actionLabel = loc.translate('ai_open_weekend_hub');
           _action = () {
-            final router = GoRouter.of(context);
-            Navigator.of(context).pop();
+            navigator.pop();
             Future<void>.delayed(const Duration(milliseconds: 150), () {
               router.push(_weekendHubPath(latestRace));
             });
@@ -12534,8 +14275,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           }
           _actionLabel = loc.translate('ai_open_weekend_hub');
           _action = () {
-            final router = GoRouter.of(context);
-            Navigator.of(context).pop();
+            navigator.pop();
             Future<void>.delayed(const Duration(milliseconds: 150), () {
               router.push(_weekendHubPath(latestRace));
             });
@@ -12554,8 +14294,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           });
           _actionLabel = loc.translate('ai_open_driver_profile');
           _action = () {
-            final router = GoRouter.of(context);
-            Navigator.of(context).pop();
+            navigator.pop();
             Future<void>.delayed(const Duration(milliseconds: 150), () {
               router.push(_driverPath(requestedDriver));
             });
@@ -12567,8 +14306,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           });
           _actionLabel = loc.translate('ai_open_team_profile');
           _action = () {
-            final router = GoRouter.of(context);
-            Navigator.of(context).pop();
+            navigator.pop();
             Future<void>.delayed(const Duration(milliseconds: 150), () {
               router.push(_teamPath(requestedTeam));
             });
@@ -12853,7 +14591,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
-                                  color: color.withOpacity(0.5),
+                                  color: color.withValues(alpha: 0.5),
                                   blurRadius: 8,
                                 ),
                               ]
@@ -13238,7 +14976,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
                               BoxShadow(
                                 color: _getTeamColor(
                                   widget.driver.team,
-                                ).withOpacity(0.25),
+                                ).withValues(alpha: 0.25),
                                 blurRadius: 8,
                               ),
                             ],
@@ -13595,7 +15333,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
                         size: 16,
                         color: Theme.of(
                           context,
-                        ).colorScheme.primary.withOpacity(0.8),
+                        ).colorScheme.primary.withValues(alpha: 0.8),
                       ),
                       const SizedBox(width: 12),
                       Text(
@@ -13603,7 +15341,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
                         style: TextStyle(
                           color: Theme.of(
                             context,
-                          ).colorScheme.onSurface.withOpacity(0.82),
+                          ).colorScheme.onSurface.withValues(alpha: 0.82),
                           fontSize: 13,
                         ),
                       ),
@@ -13675,7 +15413,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
                           size: 16,
                           color: Theme.of(
                             context,
-                          ).colorScheme.primary.withOpacity(0.8),
+                          ).colorScheme.primary.withValues(alpha: 0.8),
                         ),
                         const SizedBox(width: 12),
                         Text(
@@ -13683,7 +15421,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
                           style: TextStyle(
                             color: Theme.of(
                               context,
-                            ).colorScheme.onSurface.withOpacity(0.82),
+                            ).colorScheme.onSurface.withValues(alpha: 0.82),
                             fontSize: 13,
                           ),
                         ),
@@ -13724,7 +15462,10 @@ class _DriverDetailViewState extends State<DriverDetailView> {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: Text(title), actions: [widget.settingsMenu]),
+      appBar: AppBar(
+        title: Text(title),
+        actions: _desktopAwareSettingsActions(context, widget.settingsMenu),
+      ),
       body: ListView(
         controller: _scrollController,
         padding: const EdgeInsets.all(20),
@@ -13797,7 +15538,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
                         Expanded(
                           child: Container(
                             width: 2,
-                            color: tokens.outline.withOpacity(0.75),
+                            color: tokens.outline.withValues(alpha: 0.75),
                           ),
                         ),
                     ],
@@ -14229,9 +15970,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
   }
 
   Map<int, double> _resolveTitlePoints(Map<String, Map<int, double>> source) {
-    final lookupKeys = _teamTitleLookupKeys()
-        .map(_normalizeTeamKey)
-        .toSet();
+    final lookupKeys = _teamTitleLookupKeys().map(_normalizeTeamKey).toSet();
 
     for (final entry in source.entries) {
       final normalizedEntryKey = _normalizeTeamKey(entry.key);
@@ -14251,9 +15990,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
   Map<int, List<String>> _resolveTitleDrivers(
     Map<String, Map<int, List<String>>> source,
   ) {
-    final lookupKeys = _teamTitleLookupKeys()
-        .map(_normalizeTeamKey)
-        .toSet();
+    final lookupKeys = _teamTitleLookupKeys().map(_normalizeTeamKey).toSet();
 
     for (final entry in source.entries) {
       final normalizedEntryKey = _normalizeTeamKey(entry.key);
@@ -14714,7 +16451,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
-                                  color: color.withOpacity(0.5),
+                                  color: color.withValues(alpha: 0.5),
                                   blurRadius: 8,
                                 ),
                               ]
@@ -14975,7 +16712,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
                   style: TextStyle(
                     color: Theme.of(
                       context,
-                    ).colorScheme.onSurface.withOpacity(0.82),
+                    ).colorScheme.onSurface.withValues(alpha: 0.82),
                     fontSize: 13,
                   ),
                 ),
@@ -15012,7 +16749,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
                   style: TextStyle(
                     color: Theme.of(
                       context,
-                    ).colorScheme.onSurface.withOpacity(0.82),
+                    ).colorScheme.onSurface.withValues(alpha: 0.82),
                     fontSize: 13,
                   ),
                 ),
@@ -15050,7 +16787,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
                   style: TextStyle(
                     color: Theme.of(
                       context,
-                    ).colorScheme.onSurface.withOpacity(0.82),
+                    ).colorScheme.onSurface.withValues(alpha: 0.82),
                     fontSize: 13,
                   ),
                 ),
@@ -15196,7 +16933,10 @@ class _TeamDetailViewState extends State<TeamDetailView> {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: Text(title), actions: [widget.settingsMenu]),
+      appBar: AppBar(
+        title: Text(title),
+        actions: _desktopAwareSettingsActions(context, widget.settingsMenu),
+      ),
       body: ListView(
         controller: _scrollController,
         padding: const EdgeInsets.all(20),
@@ -15710,24 +17450,32 @@ class OpenF1SessionWidget extends StatelessWidget {
 
   List<SessionTyreLapBreakdownEntry> _raceTyreLapSequence(RaceResultRow row) {
     if (row.tyreStints.isNotEmpty) {
-      return row.tyreStints.map((stint) {
-        final compound = _formatTyreCompound(stint['compound']?.toString());
-        final laps = _asInt(stint['laps']) ?? 0;
-        return SessionTyreLapBreakdownEntry(
-          compound: compound,
-          laps: laps,
-          usedTyre: stint['usedTyre'] == true,
-        );
-      }).where((entry) => entry.compound != '-' && entry.laps > 0).toList(growable: false);
+      return row.tyreStints
+          .map((stint) {
+            final compound = _formatTyreCompound(stint['compound']?.toString());
+            final laps = _asInt(stint['laps']) ?? 0;
+            return SessionTyreLapBreakdownEntry(
+              compound: compound,
+              laps: laps,
+              usedTyre: stint['usedTyre'] == true,
+            );
+          })
+          .where((entry) => entry.compound != '-' && entry.laps > 0)
+          .toList(growable: false);
     }
 
-    return row.tyreCompounds.map((compound) {
-      return SessionTyreLapBreakdownEntry(
-        compound: compound,
-        laps: 0,
-        usedTyre: false,
-      );
-    }).where((entry) => entry.compound.trim().isNotEmpty && entry.compound != '-').toList(growable: false);
+    return row.tyreCompounds
+        .map((compound) {
+          return SessionTyreLapBreakdownEntry(
+            compound: compound,
+            laps: 0,
+            usedTyre: false,
+          );
+        })
+        .where(
+          (entry) => entry.compound.trim().isNotEmpty && entry.compound != '-',
+        )
+        .toList(growable: false);
   }
 
   String _racePenaltyText(RaceResultRow row) {
@@ -15766,8 +17514,7 @@ class OpenF1SessionWidget extends StatelessWidget {
     TextAlign align = TextAlign.right,
   }) {
     final theme = Theme.of(context);
-    final baseColor =
-        finish == 'DNF' || finish == 'DNS' || finish == 'NC'
+    final baseColor = finish == 'DNF' || finish == 'DNS' || finish == 'NC'
         ? const Color(0xFFE53935)
         : theme.colorScheme.onSurface;
     final deltaMatch = RegExp(r'^(.*?)(\s*\(([+-]\d+)\))$').firstMatch(finish);
@@ -15855,7 +17602,7 @@ class OpenF1SessionWidget extends StatelessWidget {
   bool _useCompactRaceResultsLayout(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     return mediaQuery.orientation == Orientation.portrait &&
-      mediaQuery.size.width <= 460;
+        mediaQuery.size.width <= 460;
   }
 
   Widget _buildCompactRaceDetailRow(
@@ -15937,158 +17684,162 @@ class OpenF1SessionWidget extends StatelessWidget {
         child: Theme(
           data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
           child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1D2430) : const Color(0xFFEAF5FF),
-                border: Border(
-                  bottom: BorderSide(
-                    color: isDark ? Colors.white12 : Colors.black12,
-                    width: 0.8,
-                  ),
-                ),
-              ),
-              child: Row(
-                children: [
-                  buildCompactHeaderCell(loc.translate('driver'), flex: 6),
-                  buildCompactHeaderCell(
-                    loc.translate('finish'),
-                    flex: 4,
-                    align: TextAlign.center,
-                  ),
-                  buildCompactHeaderCell(
-                    loc.translate('time'),
-                    flex: 4,
-                    align: TextAlign.right,
-                  ),
-                  const SizedBox(width: 24),
-                ],
-              ),
-            ),
-            ...rows.asMap().entries.map((entry) {
-              final rowIndex = entry.key;
-              final row = entry.value;
-              final penaltyText = _racePenaltyText(row);
-
-              return Container(
+            children: [
+              Container(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
                 decoration: BoxDecoration(
-                  color: rowIndex.isEven
-                      ? Colors.transparent
-                      : (isDark ? const Color(0xFF141922) : const Color(0xFFF8FBFF)),
-                  border: rowIndex == rows.length - 1
-                      ? null
-                      : Border(
-                          bottom: BorderSide(
-                            color: isDark ? Colors.white12 : Colors.black12,
-                            width: 0.8,
-                          ),
-                        ),
+                  color: isDark
+                      ? const Color(0xFF1D2430)
+                      : const Color(0xFFEAF5FF),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: isDark ? Colors.white12 : Colors.black12,
+                      width: 0.8,
+                    ),
+                  ),
                 ),
-                child: ExpansionTile(
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero,
+                child: Row(
+                  children: [
+                    buildCompactHeaderCell(loc.translate('driver'), flex: 6),
+                    buildCompactHeaderCell(
+                      loc.translate('finish'),
+                      flex: 4,
+                      align: TextAlign.center,
+                    ),
+                    buildCompactHeaderCell(
+                      loc.translate('time'),
+                      flex: 4,
+                      align: TextAlign.right,
+                    ),
+                    const SizedBox(width: 24),
+                  ],
+                ),
+              ),
+              ...rows.asMap().entries.map((entry) {
+                final rowIndex = entry.key;
+                final row = entry.value;
+                final penaltyText = _racePenaltyText(row);
+
+                return Container(
+                  decoration: BoxDecoration(
+                    color: rowIndex.isEven
+                        ? Colors.transparent
+                        : (isDark
+                              ? const Color(0xFF141922)
+                              : const Color(0xFFF8FBFF)),
+                    border: rowIndex == rows.length - 1
+                        ? null
+                        : Border(
+                            bottom: BorderSide(
+                              color: isDark ? Colors.white12 : Colors.black12,
+                              width: 0.8,
+                            ),
+                          ),
                   ),
-                  collapsedShape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero,
-                  ),
-                  iconColor: theme.colorScheme.primary,
-                  collapsedIconColor: theme.colorScheme.primary,
-                  tilePadding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 0,
-                  ),
-                  childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                  expandedCrossAxisAlignment: CrossAxisAlignment.start,
-                  minTileHeight: 44,
-                  title: Row(
+                  child: ExpansionTile(
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                    collapsedShape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                    iconColor: theme.colorScheme.primary,
+                    collapsedIconColor: theme.colorScheme.primary,
+                    tilePadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 0,
+                    ),
+                    childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                    expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                    minTileHeight: 44,
+                    title: Row(
+                      children: [
+                        Expanded(
+                          flex: 6,
+                          child: Text(
+                            row.driver,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 4,
+                          child: _buildRaceFinishCell(
+                            context,
+                            row.finish,
+                            align: TextAlign.center,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 4,
+                          child: Text(
+                            row.timeOrGap,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     children: [
-                      Expanded(
-                        flex: 6,
-                        child: Text(
-                          row.driver,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            color: theme.colorScheme.onSurface,
-                          ),
+                      _buildCompactRaceDetailRow(
+                        context,
+                        label: loc.translate('best_lap'),
+                        child: buildValueText(
+                          row.fastestLap,
+                          strong: row.hasFastestLap,
+                          color: row.hasFastestLap
+                              ? const Color(0xFF8E24AA)
+                              : null,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        flex: 4,
-                        child: _buildRaceFinishCell(
-                          context,
-                          row.finish,
-                          align: TextAlign.center,
+                      _buildCompactRaceDetailRow(
+                        context,
+                        label: loc.translate('tyre'),
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: tokens.panel.withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: _buildRaceTyreStrategyCell(context, row),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        flex: 4,
-                        child: Text(
-                          row.timeOrGap,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.right,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: theme.colorScheme.primary,
-                          ),
+                      _buildCompactRaceDetailRow(
+                        context,
+                        label: loc.translate('points'),
+                        child: buildValueText(row.points, strong: true),
+                      ),
+                      _buildCompactRaceDetailRow(
+                        context,
+                        label: loc.translate('penalty'),
+                        child: buildValueText(
+                          penaltyText,
+                          strong: penaltyText != '-',
+                          color: penaltyText != '-'
+                              ? const Color(0xFFF57C00)
+                              : null,
                         ),
                       ),
                     ],
                   ),
-                  children: [
-                    _buildCompactRaceDetailRow(
-                      context,
-                      label: loc.translate('best_lap'),
-                      child: buildValueText(
-                        row.fastestLap,
-                        strong: row.hasFastestLap,
-                        color: row.hasFastestLap
-                            ? const Color(0xFF8E24AA)
-                            : null,
-                      ),
-                    ),
-                    _buildCompactRaceDetailRow(
-                      context,
-                      label: loc.translate('tyre'),
-                      child: Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: tokens.panel.withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: _buildRaceTyreStrategyCell(context, row),
-                      ),
-                    ),
-                    _buildCompactRaceDetailRow(
-                      context,
-                      label: loc.translate('points'),
-                      child: buildValueText(row.points, strong: true),
-                    ),
-                    _buildCompactRaceDetailRow(
-                      context,
-                      label: loc.translate('penalty'),
-                      child: buildValueText(
-                        penaltyText,
-                        strong: penaltyText != '-',
-                        color: penaltyText != '-'
-                            ? const Color(0xFFF57C00)
-                            : null,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-          ],
+                );
+              }),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -16137,7 +17888,7 @@ class OpenF1SessionWidget extends StatelessWidget {
       return Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: tokens.panel.withOpacity(0.5),
+          color: tokens.panel.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(10),
         ),
         child: child,
@@ -16183,7 +17934,9 @@ class OpenF1SessionWidget extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1D2430) : const Color(0xFFEAF5FF),
+                  color: isDark
+                      ? const Color(0xFF1D2430)
+                      : const Color(0xFFEAF5FF),
                   border: Border(
                     bottom: BorderSide(
                       color: isDark ? Colors.white12 : Colors.black12,
@@ -16817,11 +18570,7 @@ class OpenF1SessionWidget extends StatelessWidget {
                   : null,
             ),
             buildBodyCell(row.start, align: TextAlign.right),
-            _buildRaceFinishCell(
-              context,
-              row.finish,
-              align: TextAlign.right,
-            ),
+            _buildRaceFinishCell(context, row.finish, align: TextAlign.right),
             buildBodyCell(row.timeOrGap),
             buildBodyCell(
               penaltyText,
@@ -17335,6 +19084,25 @@ class ChangelogScreen extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class PlaceholderSettingsScreen extends StatelessWidget {
+  const PlaceholderSettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+
+    return Scaffold(
+      appBar: AppBar(title: Text(loc.translate('placeholder_page'))),
+      body: Center(
+        child: Text(
+          loc.translate('placeholder_page_empty'),
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }
