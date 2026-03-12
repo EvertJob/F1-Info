@@ -7099,6 +7099,104 @@ class MainNavigation extends StatelessWidget {
       builder: (context, constraints) {
         final isDesktop = constraints.maxWidth >= _desktopShellBreakpoint;
 
+        Widget content = AnimatedSwitcher(
+          duration: const Duration(milliseconds: 350),
+          switchInCurve: Curves.easeOut,
+          switchOutCurve: Curves.easeIn,
+          transitionBuilder: (child, animation) {
+            // Fade Through: fade out old, fade in + scale up new
+            return FadeTransition(
+              opacity: animation,
+              child: ScaleTransition(
+                scale: Tween<double>(begin: 0.98, end: 1.0).animate(animation),
+                child: child,
+              ),
+            );
+          },
+          child: KeyedSubtree(
+            key: ValueKey(navigationShell.currentIndex),
+            child: isDesktop
+                ? SafeArea(
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 0, 16),
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: NavigationRail(
+                                  extended: constraints.maxWidth >= 1320,
+                                  minExtendedWidth: 188,
+                                  selectedIndex: navigationShell.currentIndex,
+                                  groupAlignment: -0.8,
+                                  labelType: NavigationRailLabelType.none,
+                                  leading: Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          width: 44,
+                                          height: 44,
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                                .withValues(alpha: 0.12),
+                                            borderRadius: BorderRadius.circular(14),
+                                          ),
+                                          child: Icon(
+                                            Icons.speed_rounded,
+                                            color: Theme.of(context).colorScheme.primary,
+                                          ),
+                                        ),
+                                        if (constraints.maxWidth >= 1320) ...[
+                                          const SizedBox(height: 10),
+                                          Text(
+                                            loc.translate('appTitle').toUpperCase(),
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: 1.2,
+                                              color: Theme.of(context).colorScheme.onSurface,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                  onDestinationSelected: (index) {
+                                    navigationShell.goBranch(index);
+                                  },
+                                  destinations: destinations,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              AppSettingsMenuButton(
+                                onSetLocale: F1HubApp.of(context)._setLocale,
+                                onToggleTheme: F1HubApp.of(context)._toggleTheme,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const VerticalDivider(width: 1),
+                        Expanded(
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                maxWidth: _desktopContentMaxWidth,
+                              ),
+                              child: navigationShell,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : navigationShell,
+          ),
+        );
+
         return Scaffold(
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () => _openAiAssistant(context),
@@ -7128,93 +7226,7 @@ class MainNavigation extends StatelessWidget {
                     ),
                   ],
                 ),
-          body: isDesktop
-              ? SafeArea(
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 0, 16),
-                        child: Column(
-                          children: [
-                            Expanded(
-                              child: NavigationRail(
-                                extended: constraints.maxWidth >= 1320,
-                                minExtendedWidth: 188,
-                                selectedIndex: navigationShell.currentIndex,
-                                groupAlignment: -0.8,
-                                labelType: NavigationRailLabelType.none,
-                                leading: Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 44,
-                                        height: 44,
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary
-                                              .withValues(alpha: 0.12),
-                                          borderRadius: BorderRadius.circular(
-                                            14,
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          Icons.speed_rounded,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.primary,
-                                        ),
-                                      ),
-                                      if (constraints.maxWidth >= 1320) ...[
-                                        const SizedBox(height: 10),
-                                        Text(
-                                          loc
-                                              .translate('appTitle')
-                                              .toUpperCase(),
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w800,
-                                            letterSpacing: 1.2,
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onSurface,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                                onDestinationSelected: (index) {
-                                  navigationShell.goBranch(index);
-                                },
-                                destinations: destinations,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            AppSettingsMenuButton(
-                              onSetLocale: F1HubApp.of(context)._setLocale,
-                              onToggleTheme: F1HubApp.of(context)._toggleTheme,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const VerticalDivider(width: 1),
-                      Expanded(
-                        child: Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(
-                              maxWidth: _desktopContentMaxWidth,
-                            ),
-                            child: navigationShell,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              : navigationShell,
+          body: content,
         );
       },
     );
@@ -7228,9 +7240,19 @@ List<Widget> _desktopAwareSettingsActions(
   BuildContext context,
   Widget settingsMenu,
 ) {
-  return _isDesktopShellLayout(context)
-      ? const <Widget>[]
-      : <Widget>[settingsMenu];
+  if (_isDesktopShellLayout(context)) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.login),
+        tooltip: 'Inloggen',
+        onPressed: () {
+          GoRouter.of(context).push('/login');
+        },
+      ),
+      settingsMenu,
+    ];
+  }
+  return <Widget>[settingsMenu];
 }
 
 /// --- CIRCUITS VIEW (TAB 0 ROOT) ---
