@@ -1,0 +1,3199 @@
+{
+  "season": 2026,
+  "round": 1,
+  "raceName": "Australian Grand Prix",
+  "sessions": {
+    "Practice 1": [
+      {
+        "driver": "Charles Leclerc",
+        "position": "1",
+        "result": "1:20.267",
+        "fastestLap": "1:20.267",
+        "tyreCompound": "Soft (used)",
+        "points": "-",
+        "hasFastestLap": true,
+        "usedTyre": true,
+        "tyreAgeAtStart": 8,
+        "totalLaps": 33,
+        "tyreLaps": {
+          "Medium": 16,
+          "Soft": 17
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 16,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 9,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Lewis Hamilton",
+        "position": "2",
+        "result": "1:20.736",
+        "fastestLap": "1:20.736",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 30,
+        "tyreLaps": {
+          "Medium": 22,
+          "Soft": 8
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 16,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 8,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 6,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Max Verstappen",
+        "position": "3",
+        "result": "1:20.789",
+        "fastestLap": "1:20.789",
+        "tyreCompound": "Soft (used)",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": true,
+        "tyreAgeAtStart": 3,
+        "totalLaps": 27,
+        "tyreLaps": {
+          "Medium": 21,
+          "Soft": 6
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 10,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Medium",
+            "laps": 8,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Isack Hadjar",
+        "position": "4",
+        "result": "1:21.087",
+        "fastestLap": "1:21.087",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 24,
+        "tyreLaps": {
+          "Medium": 19,
+          "Soft": 5
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 9,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": true
+          },
+          {
+            "compound": "Medium",
+            "laps": 7,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Arvid Lindblad",
+        "position": "5",
+        "result": "1:21.313",
+        "fastestLap": "1:21.313",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 22,
+        "tyreLaps": {
+          "Medium": 1,
+          "Soft": 21
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 1,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 21,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Oscar Piastri",
+        "position": "6",
+        "result": "1:21.342",
+        "fastestLap": "1:21.342",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 21,
+        "tyreLaps": {
+          "Medium": 13,
+          "Soft": 8
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 5,
+            "usedTyre": true
+          },
+          {
+            "compound": "Medium",
+            "laps": 5,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 8,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "George Russell",
+        "position": "7",
+        "result": "1:21.371",
+        "fastestLap": "1:21.371",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 26,
+        "tyreLaps": {
+          "Medium": 17,
+          "Soft": 9
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 10,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 6,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Kimi Antonelli",
+        "position": "8",
+        "result": "1:21.376",
+        "fastestLap": "1:21.376",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 24,
+        "tyreLaps": {
+          "Medium": 17,
+          "Soft": 7
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 1,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 8,
+            "usedTyre": true
+          },
+          {
+            "compound": "Medium",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 7,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Gabriel Bortoleto",
+        "position": "9",
+        "result": "1:21.696",
+        "fastestLap": "1:21.696",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 23,
+        "tyreLaps": {
+          "Medium": 18,
+          "Soft": 5
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 1,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 7,
+            "usedTyre": true
+          },
+          {
+            "compound": "Medium",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 1,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 6,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Nico Hulkenberg",
+        "position": "10",
+        "result": "1:21.969",
+        "fastestLap": "1:21.969",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 21,
+        "tyreLaps": {
+          "Medium": 10,
+          "Soft": 11
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 2,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 8,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Esteban Ocon",
+        "position": "11",
+        "result": "1:22.161",
+        "fastestLap": "1:22.161",
+        "tyreCompound": "Soft (used)",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": true,
+        "tyreAgeAtStart": 3,
+        "totalLaps": 28,
+        "tyreLaps": {
+          "Medium": 21,
+          "Soft": 7
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 15,
+            "usedTyre": true
+          },
+          {
+            "compound": "Medium",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Carlos Sainz",
+        "position": "12",
+        "result": "1:22.323",
+        "fastestLap": "1:22.323",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 30,
+        "tyreLaps": {
+          "Hard": 15,
+          "Soft": 15
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Hard",
+            "laps": 1,
+            "usedTyre": false
+          },
+          {
+            "compound": "Hard",
+            "laps": 14,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 9,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Liam Lawson",
+        "position": "13",
+        "result": "1:22.613",
+        "fastestLap": "1:22.613",
+        "tyreCompound": "Medium",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 28,
+        "tyreLaps": {
+          "Medium": 21,
+          "Soft": 7
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 13,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 8,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 7,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Oliver Bearman",
+        "position": "14",
+        "result": "1:22.682",
+        "fastestLap": "1:22.682",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 25,
+        "tyreLaps": {
+          "Medium": 19,
+          "Soft": 6
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 16,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Alexander Albon",
+        "position": "15",
+        "result": "1:23.130",
+        "fastestLap": "1:23.130",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 24,
+        "tyreLaps": {
+          "Medium": 18,
+          "Soft": 6
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 18,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Franco Colapinto",
+        "position": "16",
+        "result": "1:23.325",
+        "fastestLap": "1:23.325",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 26,
+        "tyreLaps": {
+          "Medium": 19,
+          "Soft": 7
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 6,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 5,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 7,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 8,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Valtteri Bottas",
+        "position": "17",
+        "result": "1:24.022",
+        "fastestLap": "1:24.022",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 24,
+        "tyreLaps": {
+          "Medium": 9,
+          "Soft": 15
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 15,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Pierre Gasly",
+        "position": "18",
+        "result": "1:24.035",
+        "fastestLap": "1:24.035",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 27,
+        "tyreLaps": {
+          "Medium": 13,
+          "Soft": 14
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 11,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 2,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 14,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Lando Norris",
+        "position": "19",
+        "result": "1:24.391",
+        "fastestLap": "1:24.391",
+        "tyreCompound": "Medium (used)",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": true,
+        "tyreAgeAtStart": 3,
+        "totalLaps": 7,
+        "tyreLaps": {
+          "Medium": 7
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 2,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Medium",
+            "laps": 4,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Sergio Perez",
+        "position": "20",
+        "result": "1:24.620",
+        "fastestLap": "1:24.620",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 14,
+        "tyreLaps": {
+          "Medium": 8,
+          "Soft": 6
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Lance Stroll",
+        "position": "21",
+        "result": "1:50.334",
+        "fastestLap": "1:50.334",
+        "tyreCompound": "Hard",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 3,
+        "tyreLaps": {
+          "Hard": 3
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Hard",
+            "laps": 3,
+            "usedTyre": false
+          }
+        ]
+      }
+    ],
+    "Practice 2": [
+      {
+        "driver": "Oscar Piastri",
+        "position": "1",
+        "result": "1:19.729",
+        "fastestLap": "1:19.729",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": true,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 26,
+        "tyreLaps": {
+          "Hard": 14,
+          "Soft": 12
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Hard",
+            "laps": 10,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 9,
+            "usedTyre": true
+          },
+          {
+            "compound": "Hard",
+            "laps": 4,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Kimi Antonelli",
+        "position": "2",
+        "result": "1:19.943",
+        "fastestLap": "1:19.943",
+        "tyreCompound": "Soft (used)",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": true,
+        "tyreAgeAtStart": 3,
+        "totalLaps": 31,
+        "tyreLaps": {
+          "Hard": 22,
+          "Soft": 9
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Hard",
+            "laps": 7,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Hard",
+            "laps": 15,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "George Russell",
+        "position": "3",
+        "result": "1:20.049",
+        "fastestLap": "1:20.049",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 28,
+        "tyreLaps": {
+          "Hard": 18,
+          "Soft": 10
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Hard",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Hard",
+            "laps": 13,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Lewis Hamilton",
+        "position": "4",
+        "result": "1:20.050",
+        "fastestLap": "1:20.050",
+        "tyreCompound": "Soft (used)",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": true,
+        "tyreAgeAtStart": 4,
+        "totalLaps": 32,
+        "tyreLaps": {
+          "Hard": 23,
+          "Soft": 9
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Hard",
+            "laps": 13,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": true
+          },
+          {
+            "compound": "Hard",
+            "laps": 10,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Charles Leclerc",
+        "position": "5",
+        "result": "1:20.291",
+        "fastestLap": "1:20.291",
+        "tyreCompound": "Soft (used)",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": true,
+        "tyreAgeAtStart": 5,
+        "totalLaps": 30,
+        "tyreLaps": {
+          "Hard": 15,
+          "Soft": 15
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Hard",
+            "laps": 10,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": true
+          },
+          {
+            "compound": "Hard",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Max Verstappen",
+        "position": "6",
+        "result": "1:20.366",
+        "fastestLap": "1:20.366",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 13,
+        "tyreLaps": {
+          "Medium": 10,
+          "Soft": 3
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 5,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Lando Norris",
+        "position": "7",
+        "result": "1:20.794",
+        "fastestLap": "1:20.794",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 29,
+        "tyreLaps": {
+          "Hard": 13,
+          "Soft": 16
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Hard",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Hard",
+            "laps": 6,
+            "usedTyre": true
+          },
+          {
+            "compound": "Hard",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 16,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Arvid Lindblad",
+        "position": "8",
+        "result": "1:20.922",
+        "fastestLap": "1:20.922",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 30,
+        "tyreLaps": {
+          "Medium": 7,
+          "Soft": 23
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Medium",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Medium",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 8,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 15,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Isack Hadjar",
+        "position": "9",
+        "result": "1:20.941",
+        "fastestLap": "1:20.941",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 28,
+        "tyreLaps": {
+          "Medium": 22,
+          "Soft": 6
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 9,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 13,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Esteban Ocon",
+        "position": "10",
+        "result": "1:21.179",
+        "fastestLap": "1:21.179",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 29,
+        "tyreLaps": {
+          "Hard": 23,
+          "Soft": 6
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Hard",
+            "laps": 10,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Hard",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Hard",
+            "laps": 7,
+            "usedTyre": true
+          },
+          {
+            "compound": "Hard",
+            "laps": 5,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Oliver Bearman",
+        "position": "11",
+        "result": "1:21.326",
+        "fastestLap": "1:21.326",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 31,
+        "tyreLaps": {
+          "Hard": 26,
+          "Soft": 5
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Hard",
+            "laps": 10,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Hard",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Hard",
+            "laps": 15,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Nico Hulkenberg",
+        "position": "12",
+        "result": "1:21.351",
+        "fastestLap": "1:21.351",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 34,
+        "tyreLaps": {
+          "Medium": 20,
+          "Soft": 14
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 10,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 9,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 10,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Liam Lawson",
+        "position": "13",
+        "result": "1:21.358",
+        "fastestLap": "1:21.358",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 29,
+        "tyreLaps": {
+          "Medium": 22,
+          "Soft": 7
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 8,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Medium",
+            "laps": 14,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Gabriel Bortoleto",
+        "position": "14",
+        "result": "1:21.668",
+        "fastestLap": "1:21.668",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 28,
+        "tyreLaps": {
+          "Medium": 18,
+          "Soft": 10
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 7,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Medium",
+            "laps": 9,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Alexander Albon",
+        "position": "15",
+        "result": "1:21.847",
+        "fastestLap": "1:21.847",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 32,
+        "tyreLaps": {
+          "Hard": 21,
+          "Soft": 11
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Hard",
+            "laps": 11,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 8,
+            "usedTyre": false
+          },
+          {
+            "compound": "Hard",
+            "laps": 4,
+            "usedTyre": true
+          },
+          {
+            "compound": "Hard",
+            "laps": 6,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Pierre Gasly",
+        "position": "16",
+        "result": "1:22.167",
+        "fastestLap": "1:22.167",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 16,
+        "tyreLaps": {
+          "Medium": 11,
+          "Soft": 5
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 11,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Carlos Sainz",
+        "position": "17",
+        "result": "1:22.253",
+        "fastestLap": "1:22.253",
+        "tyreCompound": "Medium (used)",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": true,
+        "tyreAgeAtStart": 3,
+        "totalLaps": 10,
+        "tyreLaps": {
+          "Medium": 10
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 7,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Franco Colapinto",
+        "position": "18",
+        "result": "1:22.619",
+        "fastestLap": "1:22.619",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 27,
+        "tyreLaps": {
+          "Medium": 21,
+          "Soft": 6
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 10,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 11,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Valtteri Bottas",
+        "position": "19",
+        "result": "1:23.660",
+        "fastestLap": "1:23.660",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 28,
+        "tyreLaps": {
+          "Medium": 22,
+          "Soft": 6
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 7,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 15,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Fernando Alonso",
+        "position": "20",
+        "result": "1:24.662",
+        "fastestLap": "1:24.662",
+        "tyreCompound": "Soft (used)",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": true,
+        "tyreAgeAtStart": 3,
+        "totalLaps": 18,
+        "tyreLaps": {
+          "Soft": 18
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 7,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Lance Stroll",
+        "position": "21",
+        "result": "1:25.816",
+        "fastestLap": "1:25.816",
+        "tyreCompound": "Soft (used)",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": true,
+        "tyreAgeAtStart": 2,
+        "totalLaps": 13,
+        "tyreLaps": {
+          "Soft": 13
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 8,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Sergio Perez",
+        "position": "22",
+        "result": "-",
+        "fastestLap": "-",
+        "tyreCompound": "-",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": null,
+        "totalLaps": 2,
+        "tyreLaps": {
+          "Soft": 2
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": false
+          }
+        ]
+      }
+    ],
+    "Practice 3": [
+      {
+        "driver": "George Russell",
+        "position": "1",
+        "result": "1:19.053",
+        "fastestLap": "1:19.053",
+        "tyreCompound": "Soft (used)",
+        "points": "-",
+        "hasFastestLap": true,
+        "usedTyre": true,
+        "tyreAgeAtStart": 2,
+        "totalLaps": 23,
+        "tyreLaps": {
+          "Soft": 23
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 9,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Lewis Hamilton",
+        "position": "2",
+        "result": "1:19.669",
+        "fastestLap": "1:19.669",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 22,
+        "tyreLaps": {
+          "Soft": 22
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 8,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 10,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Charles Leclerc",
+        "position": "3",
+        "result": "1:19.827",
+        "fastestLap": "1:19.827",
+        "tyreCompound": "Soft (used)",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": true,
+        "tyreAgeAtStart": 9,
+        "totalLaps": 20,
+        "tyreLaps": {
+          "Soft": 20
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Oscar Piastri",
+        "position": "4",
+        "result": "1:20.087",
+        "fastestLap": "1:20.087",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 17,
+        "tyreLaps": {
+          "Soft": 17
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 12,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Isack Hadjar",
+        "position": "5",
+        "result": "1:20.137",
+        "fastestLap": "1:20.137",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 15,
+        "tyreLaps": {
+          "Soft": 15
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 11,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Max Verstappen",
+        "position": "6",
+        "result": "1:20.197",
+        "fastestLap": "1:20.197",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 15,
+        "tyreLaps": {
+          "Soft": 15
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 8,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Kimi Antonelli",
+        "position": "7",
+        "result": "1:20.324",
+        "fastestLap": "1:20.324",
+        "tyreCompound": "Soft (used)",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": true,
+        "tyreAgeAtStart": 4,
+        "totalLaps": 18,
+        "tyreLaps": {
+          "Soft": 18
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 9,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Lando Norris",
+        "position": "8",
+        "result": "1:20.443",
+        "fastestLap": "1:20.443",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 22,
+        "tyreLaps": {
+          "Soft": 22
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 12,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Gabriel Bortoleto",
+        "position": "9",
+        "result": "1:20.459",
+        "fastestLap": "1:20.459",
+        "tyreCompound": "Soft (used)",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": true,
+        "tyreAgeAtStart": 2,
+        "totalLaps": 19,
+        "tyreLaps": {
+          "Soft": 19
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Oliver Bearman",
+        "position": "10",
+        "result": "1:20.778",
+        "fastestLap": "1:20.778",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 18,
+        "tyreLaps": {
+          "Medium": 13,
+          "Soft": 5
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 7,
+            "usedTyre": true
+          },
+          {
+            "compound": "Medium",
+            "laps": 2,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 1,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Arvid Lindblad",
+        "position": "11",
+        "result": "1:20.838",
+        "fastestLap": "1:20.838",
+        "tyreCompound": "Soft (used)",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": true,
+        "tyreAgeAtStart": 2,
+        "totalLaps": 15,
+        "tyreLaps": {
+          "Hard": 9,
+          "Soft": 6
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Hard",
+            "laps": 8,
+            "usedTyre": false
+          },
+          {
+            "compound": "Hard",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Liam Lawson",
+        "position": "12",
+        "result": "1:20.890",
+        "fastestLap": "1:20.890",
+        "tyreCompound": "Hard",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 13,
+        "tyreLaps": {
+          "Hard": 10,
+          "Soft": 3
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Hard",
+            "laps": 9,
+            "usedTyre": false
+          },
+          {
+            "compound": "Hard",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 1,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Esteban Ocon",
+        "position": "13",
+        "result": "1:20.983",
+        "fastestLap": "1:20.983",
+        "tyreCompound": "Soft (used)",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": true,
+        "tyreAgeAtStart": 2,
+        "totalLaps": 19,
+        "tyreLaps": {
+          "Medium": 12,
+          "Soft": 7
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 7,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Nico Hulkenberg",
+        "position": "14",
+        "result": "1:21.067",
+        "fastestLap": "1:21.067",
+        "tyreCompound": "Soft (used)",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": true,
+        "tyreAgeAtStart": 7,
+        "totalLaps": 22,
+        "tyreLaps": {
+          "Soft": 22
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 7,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Pierre Gasly",
+        "position": "15",
+        "result": "1:21.071",
+        "fastestLap": "1:21.071",
+        "tyreCompound": "Soft (used)",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": true,
+        "tyreAgeAtStart": 1,
+        "totalLaps": 26,
+        "tyreLaps": {
+          "Hard": 20,
+          "Soft": 6
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Hard",
+            "laps": 8,
+            "usedTyre": false
+          },
+          {
+            "compound": "Hard",
+            "laps": 11,
+            "usedTyre": true
+          },
+          {
+            "compound": "Hard",
+            "laps": 1,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 1,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": true
+          }
+        ]
+      },
+      {
+        "driver": "Franco Colapinto",
+        "position": "16",
+        "result": "1:21.413",
+        "fastestLap": "1:21.413",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 22,
+        "tyreLaps": {
+          "Hard": 17,
+          "Soft": 5
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Hard",
+            "laps": 8,
+            "usedTyre": false
+          },
+          {
+            "compound": "Hard",
+            "laps": 2,
+            "usedTyre": true
+          },
+          {
+            "compound": "Hard",
+            "laps": 7,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 1,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Alexander Albon",
+        "position": "17",
+        "result": "1:21.664",
+        "fastestLap": "1:21.664",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 17,
+        "tyreLaps": {
+          "Medium": 12,
+          "Soft": 5
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 12,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Fernando Alonso",
+        "position": "18",
+        "result": "1:22.720",
+        "fastestLap": "1:22.720",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 20,
+        "tyreLaps": {
+          "Medium": 6,
+          "Soft": 14
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Valtteri Bottas",
+        "position": "19",
+        "result": "1:23.514",
+        "fastestLap": "1:23.514",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 12,
+        "tyreLaps": {
+          "Soft": 12
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Sergio Perez",
+        "position": "20",
+        "result": "1:24.397",
+        "fastestLap": "1:24.397",
+        "tyreCompound": "Medium",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 21,
+        "tyreLaps": {
+          "Medium": 17,
+          "Soft": 4
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 12,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Carlos Sainz",
+        "position": "21",
+        "result": "-",
+        "fastestLap": "-",
+        "tyreCompound": "-",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": null,
+        "totalLaps": 1,
+        "tyreLaps": {
+          "Soft": 1
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 1,
+            "usedTyre": false
+          }
+        ]
+      }
+    ],
+    "Qualifying": [
+      {
+        "driver": "George Russell",
+        "position": "1",
+        "result": "1:18.518",
+        "fastestLap": "1:18.518",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": true,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 22,
+        "tyreLaps": {
+          "Soft": 22
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 1,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Kimi Antonelli",
+        "position": "2",
+        "result": "1:18.811",
+        "fastestLap": "1:18.811",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 18,
+        "tyreLaps": {
+          "Soft": 18
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Isack Hadjar",
+        "position": "3",
+        "result": "1:19.303",
+        "fastestLap": "1:19.303",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 19,
+        "tyreLaps": {
+          "Soft": 19
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 1,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Charles Leclerc",
+        "position": "4",
+        "result": "1:19.327",
+        "fastestLap": "1:19.327",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 24,
+        "tyreLaps": {
+          "Medium": 7,
+          "Soft": 17
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 2,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Oscar Piastri",
+        "position": "5",
+        "result": "1:19.380",
+        "fastestLap": "1:19.380",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 26,
+        "tyreLaps": {
+          "Soft": 26
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Lando Norris",
+        "position": "6",
+        "result": "1:19.475",
+        "fastestLap": "1:19.475",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 26,
+        "tyreLaps": {
+          "Soft": 26
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Lewis Hamilton",
+        "position": "7",
+        "result": "1:19.478",
+        "fastestLap": "1:19.478",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 25,
+        "tyreLaps": {
+          "Medium": 9,
+          "Soft": 16
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Medium",
+            "laps": 6,
+            "usedTyre": false
+          },
+          {
+            "compound": "Medium",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Liam Lawson",
+        "position": "8",
+        "result": "1:19.994",
+        "fastestLap": "1:19.994",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 24,
+        "tyreLaps": {
+          "Soft": 24
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Arvid Lindblad",
+        "position": "9",
+        "result": "1:19.971",
+        "fastestLap": "1:19.971",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 25,
+        "tyreLaps": {
+          "Soft": 25
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Gabriel Bortoleto",
+        "position": "10",
+        "result": "1:20.221",
+        "fastestLap": "1:20.221",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 14,
+        "tyreLaps": {
+          "Soft": 14
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Nico Hulkenberg",
+        "position": "11",
+        "result": "1:20.303",
+        "fastestLap": "1:20.303",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 18,
+        "tyreLaps": {
+          "Soft": 18
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Oliver Bearman",
+        "position": "12",
+        "result": "1:20.311",
+        "fastestLap": "1:20.311",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 18,
+        "tyreLaps": {
+          "Soft": 18
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Esteban Ocon",
+        "position": "13",
+        "result": "1:20.491",
+        "fastestLap": "1:20.491",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 18,
+        "tyreLaps": {
+          "Soft": 18
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Pierre Gasly",
+        "position": "14",
+        "result": "1:20.501",
+        "fastestLap": "1:20.501",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 18,
+        "tyreLaps": {
+          "Soft": 18
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Alexander Albon",
+        "position": "15",
+        "result": "1:20.941",
+        "fastestLap": "1:20.941",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 19,
+        "tyreLaps": {
+          "Soft": 19
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 1,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": true
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Franco Colapinto",
+        "position": "16",
+        "result": "1:21.200",
+        "fastestLap": "1:21.200",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 18,
+        "tyreLaps": {
+          "Soft": 18
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 6,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 4,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Fernando Alonso",
+        "position": "17",
+        "result": "1:21.969",
+        "fastestLap": "1:21.969",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 10,
+        "tyreLaps": {
+          "Soft": 10
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 5,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Sergio Perez",
+        "position": "18",
+        "result": "1:22.605",
+        "fastestLap": "1:22.605",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 7,
+        "tyreLaps": {
+          "Soft": 7
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 1,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          }
+        ]
+      },
+      {
+        "driver": "Valtteri Bottas",
+        "position": "19",
+        "result": "1:23.244",
+        "fastestLap": "1:23.244",
+        "tyreCompound": "Soft",
+        "points": "-",
+        "hasFastestLap": false,
+        "usedTyre": false,
+        "tyreAgeAtStart": 0,
+        "totalLaps": 8,
+        "tyreLaps": {
+          "Soft": 8
+        },
+        "tyreLapSequence": [
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 2,
+            "usedTyre": false
+          },
+          {
+            "compound": "Soft",
+            "laps": 3,
+            "usedTyre": false
+          }
+        ]
+      }
+    ]
+  }
+}
