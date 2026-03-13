@@ -1,0 +1,11 @@
+{
+  "appTitle": "F1 App",
+  "next_session": "Volgende sessie",
+  "ongoing": "Bezig",
+  "startsIn": "Begint over {time}",
+  "gp_bahrain": "Grand Prix van Bahrein",
+  "country_nl": "Nederland",
+  "lap_label": "Ronde {lap}",
+  "previous_winners": "Vorige winnaars",
+  "last_winner": "Laatste winnaar"
+}

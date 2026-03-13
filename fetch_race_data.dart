@@ -59,8 +59,8 @@ Future<void> main(List<String> arguments) async {
     _printUsage();
     exitCode = 64;
   } on FetchException catch (error) {
-    stderr.writeln('Failed to fetch race data: ${error.message}');
-    exitCode = 1;
+    stderr.writeln('Warning: ${error.message}');
+    // Do not set exitCode, allow process to continue gracefully
   } on SocketException catch (error) {
     stderr.writeln('Network error while fetching race data: ${error.message}');
     exitCode = 1;
@@ -565,8 +565,22 @@ class RaceDataFetcher {
     final raceTable = _requireMap(raceJson['MRData'], 'MRData')['RaceTable'];
     final races = _requireList(_requireMap(raceTable, 'RaceTable'), 'Races');
     if (races.isEmpty) {
-      throw FetchException(
-        'No race results found for season $year round $round.',
+      stderr.writeln('Warning: No race results found for season $year round $round. Partial data may be available.');
+      // Return minimal metadata with placeholders
+      return RaceMetadata(
+        season: year,
+        round: round,
+        raceName: 'Unknown',
+        raceDateUtc: DateTime.now().toUtc(),
+        circuit: CircuitSummary(
+          id: 'unknown',
+          name: 'Unknown',
+          country: 'Unknown',
+          locality: 'Unknown',
+          latitude: null,
+          longitude: null,
+        ),
+        rawRace: const <String, dynamic>{},
       );
     }
 
@@ -596,7 +610,13 @@ class RaceDataFetcher {
   }
 
   Future<GenericRaceSummary> _fetchGenericSummary(RaceMetadata metadata) async {
-    final results = _requireList(metadata.rawRace, 'Results');
+    List results = [];
+    try {
+      results = _requireList(metadata.rawRace, 'Results');
+    } catch (_) {
+      // If missing or not a list, use empty list
+      results = [];
+    }
     final fetchedAt = DateTime.now().toUtc();
 
     return GenericRaceSummary(
@@ -628,7 +648,12 @@ class RaceDataFetcher {
       // Fall back to Jolpica-only formatting when OpenF1 is unavailable.
     }
 
-    final results = _requireList(metadata.rawRace, 'Results');
+    List results = [];
+    try {
+      results = _requireList(metadata.rawRace, 'Results');
+    } catch (_) {
+      results = [];
+    }
     return results
         .map(
           (entry) => AppRaceResultRow.fromErgast(_requireMap(entry, 'Result')),
