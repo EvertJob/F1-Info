@@ -1,0 +1,5 @@
+{
+  "version": "1.0.0+2",
+  "build": "flutter build web",
+  "postbuild": "git add -f build/web && git commit -m 'Auto build: versie verhoogd' && git push origin gh-pages"
+}
