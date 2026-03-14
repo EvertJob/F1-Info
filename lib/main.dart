@@ -803,6 +803,21 @@ String _formatWeatherTimestampLabel(DateTime timestamp) {
   return '$day-$month ${_formatWeatherTimeLabel(timestamp)}';
 }
 
+String _normalizeSessionName(String? raw) {
+  final s = raw?.trim().toLowerCase() ?? '';
+  switch (s) {
+    case 'practice 1': return 'Practice 1';
+    case 'practice 2': return 'Practice 2';
+    case 'practice 3': return 'Practice 3';
+    case 'qualifying': return 'Qualifying';
+    case 'sprint shootout':
+    case 'sprint qualifying': return 'Sprint Qualifying';
+    case 'sprint': return 'Sprint';
+    case 'race': return 'Race';
+    default: return raw?.trim() ?? '';
+  }
+}
+
 @immutable
 class _TrackFlagState {
   final String labelKey;
@@ -868,10 +883,10 @@ String? _trackFlagScopeKey(Map<String, dynamic> message) {
 bool _isSessionFlagMessage(Map<String, dynamic> message, String sessionName) {
   final category = message['category']?.toString().trim().toUpperCase() ?? '';
   final flag = message['flag']?.toString().trim().toUpperCase() ?? '';
-  final session = message['sessionName']?.toString().trim().toUpperCase() ?? '';
+  final session = _normalizeSessionName(message['sessionName']);
   return category == 'FLAG' &&
       flag.isNotEmpty &&
-      session == sessionName.trim().toUpperCase();
+      session == _normalizeSessionName(sessionName);
 }
 
 int _trackFlagSeverity(String flag) {
@@ -1058,8 +1073,8 @@ int? _resolveCurrentSessionLap(
       messages
           .where(
             (message) =>
-                message['sessionName']?.toString().trim().toUpperCase() ==
-                sessionName.trim().toUpperCase(),
+                _normalizeSessionName(message['sessionName']) ==
+                _normalizeSessionName(sessionName),
           )
           .toList()
         ..sort((a, b) {
@@ -1204,26 +1219,23 @@ List<Map<String, dynamic>> _buildInterpolatedWeatherSamples(
   for (var index = 0; index < sortedSamples.length - 1; index++) {
     final current = sortedSamples[index];
     final next = sortedSamples[index + 1];
-    final currentTime = DateTime.tryParse(
-      current['timestampUtc']?.toString() ?? '',
-    );
+    final currentTime = DateTime.tryParse(current['timestampUtc']?.toString() ?? '');
     final nextTime = DateTime.tryParse(next['timestampUtc']?.toString() ?? '');
-    if (currentTime == null ||
-        nextTime == null ||
-        !nextTime.isAfter(currentTime)) {
+    if (currentTime == null || nextTime == null || !nextTime.isAfter(currentTime)) {
       interpolated.add(current);
       continue;
     }
 
     interpolated.add(current);
+    final totalMillis = nextTime.difference(currentTime).inMilliseconds;
     final minutesBetween = nextTime.difference(currentTime).inMinutes;
     if (minutesBetween <= 1) {
       continue;
     }
 
     for (var minute = 1; minute < minutesBetween; minute++) {
-      final t = minute / minutesBetween;
       final targetTime = currentTime.add(Duration(minutes: minute));
+      final t = (targetTime.difference(currentTime).inMilliseconds) / totalMillis;
       interpolated.add({
         'timestampUtc': targetTime.toUtc().toIso8601String(),
         'airTemperatureC': _lerpNullableDouble(
@@ -1256,6 +1268,7 @@ List<Map<String, dynamic>> _buildInterpolatedWeatherSamples(
           (next['windSpeed'] as num?)?.toDouble(),
           t,
         ),
+        // windDirection: always interpolate shortest path, handle nulls gracefully
         'windDirection': _lerpDegrees(
           current['windDirection'] as int?,
           next['windDirection'] as int?,
@@ -1481,9 +1494,8 @@ class CircuitWeatherPlaybackCard extends StatefulWidget {
 }
 
 class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
-    with SingleTickerProviderStateMixin {
-  static const Duration _autoLoopInterval = Duration(milliseconds: 70);
-  static const double _autoLoopStep = 0.08;
+  with TickerProviderStateMixin {
+  static const Duration _autoLoopAnimationDuration = Duration(seconds: 5);
 
   late final AnimationController _controller;
   late List<Map<String, dynamic>> _resolvedSamples;
@@ -1501,23 +1513,59 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
     _startAutoLoop();
   }
 
+  AnimationController? _autoLoopController;
   void _startAutoLoop() {
     _autoLoopTimer?.cancel();
+    _autoLoopController?.dispose();
+    _autoLoopController = null;
     if (_resolvedSamples.length <= 1) {
       return;
     }
 
-    _autoLoopTimer = Timer.periodic(_autoLoopInterval, (_) {
-      if (!mounted || _resolvedSamples.isEmpty) {
-        return;
-      }
+    // Find the next sample at least 5 minutes ahead
+    final currentIndex = _selectedIndex.round();
+    final currentTime = DateTime.tryParse(_resolvedSamples[currentIndex]['timestampUtc']?.toString() ?? '');
+    if (currentTime == null) return;
 
+    int nextIndex = currentIndex;
+    for (int i = currentIndex + 1; i < _resolvedSamples.length; i++) {
+      final t = DateTime.tryParse(_resolvedSamples[i]['timestampUtc']?.toString() ?? '');
+      if (t != null && t.difference(currentTime).inMinutes >= 5) {
+        nextIndex = i;
+        break;
+      }
+    }
+    // If no next 5-min sample, loop to start
+    if (nextIndex == currentIndex) {
+      nextIndex = 0;
+    }
+
+    final double from = _selectedIndex;
+    final double to = nextIndex.toDouble();
+    final controller = AnimationController(
+      vsync: this,
+      duration: _autoLoopAnimationDuration,
+    );
+    _autoLoopController = controller;
+    final animation = Tween<double>(begin: from, end: to).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
+
+    controller.addListener(() {
+      if (!mounted) return;
       setState(() {
-        final maxIndex = (_resolvedSamples.length - 1).toDouble();
-        final nextIndex = _selectedIndex + _autoLoopStep;
-        _selectedIndex = nextIndex > maxIndex ? 0 : nextIndex;
+        _selectedIndex = animation.value;
       });
     });
+    controller.addStatusListener((status) {
+      if (!mounted) return;
+      if (status == AnimationStatus.completed) {
+        controller.dispose();
+        _autoLoopController = null;
+        // Start next interval
+        _startAutoLoop();
+      }
+    });
+    controller.forward();
+    _autoLoopTimer = Timer(_autoLoopAnimationDuration, () {}); // Dummy timer to keep reference
   }
 
   DateTime? _interpolateDateTime(DateTime? start, DateTime? end, double t) {
@@ -1626,6 +1674,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
   @override
   void dispose() {
     _autoLoopTimer?.cancel();
+    _autoLoopController?.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -1923,9 +1972,16 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                 0,
                 (_resolvedSamples.length - 1).toDouble(),
               ),
-              onChangeStart: (_) => _autoLoopTimer?.cancel(),
-              onChanged: (value) => setState(() => _selectedIndex = value),
-              onChangeEnd: (_) => _startAutoLoop(),
+              onChangeStart: (_) {
+                _autoLoopTimer?.cancel();
+              },
+              onChanged: (value) {
+                setState(() => _selectedIndex = value);
+              },
+              onChangeEnd: (_) {
+                // Only restart auto loop if not at the end
+                _startAutoLoop();
+              },
             ),
           ),
           Row(
@@ -4903,101 +4959,87 @@ class SessionDataManager extends ChangeNotifier {
     final sessionNames = race.hasSprint
         ? ['Practice 1', 'Sprint Qualifying', 'Sprint', 'Qualifying', 'Race']
         : ['Practice 1', 'Practice 2', 'Practice 3', 'Qualifying', 'Race'];
-    final now = DateTime.now();
 
     for (final sessionName in sessionNames) {
-      if (sessionName == 'Race' && race.date.isAfter(now)) {
+      if (sessionName == 'Race') {
         continue;
       }
 
       final key = '${race.country}_${sessionName}_${race.date.year}';
-      if (sessionName != 'Race') {
-        final staticOverview = await _loadStaticSessionOverviewRows(
+      final staticOverview = await _loadStaticSessionOverviewRows(
+        race,
+        sessionName,
+      );
+      if (staticOverview.isNotEmpty) {
+        await _saveSessionOverview(
+          _sessionOverviewKey(race, sessionName),
+          staticOverview,
+        );
+        cache.remove(key);
+        continue;
+      }
+
+      try {
+        final results = await _fetchSessionResults(
+          year: race.date.year,
+          roundIndex: roundIndex,
+          sessionName: sessionName,
+        );
+        _saveResults(key, results);
+      } catch (_) {
+        _saveResults(key, const <SessionResult>[]);
+      }
+
+      try {
+        final overviewRows = await _fetchSessionOverviewRows(
           race,
           sessionName,
         );
-        if (staticOverview.isNotEmpty) {
+        if (overviewRows.isNotEmpty) {
           await _saveSessionOverview(
             _sessionOverviewKey(race, sessionName),
-            staticOverview,
+            overviewRows,
           );
-          cache.remove(key);
-          continue;
-        }
-      }
-
-      if (sessionName != 'Race') {
-        try {
-          final results = await _fetchSessionResults(
-            year: race.date.year,
-            roundIndex: roundIndex,
-            sessionName: sessionName,
-          );
-          _saveResults(key, results);
-        } catch (_) {
-          _saveResults(key, const <SessionResult>[]);
-        }
-      }
-
-      if (sessionName != 'Race' &&
-          !_sessionDateFor(race, sessionName).isAfter(now)) {
-        try {
-          final overviewRows = await _fetchSessionOverviewRows(
-            race,
-            sessionName,
-          );
-          if (overviewRows.isNotEmpty) {
-            await _saveSessionOverview(
-              _sessionOverviewKey(race, sessionName),
-              overviewRows,
-            );
-          } else {
-            sessionOverviewCache.remove(_sessionOverviewKey(race, sessionName));
-          }
-        } catch (_) {
+        } else {
           sessionOverviewCache.remove(_sessionOverviewKey(race, sessionName));
         }
+      } catch (_) {
+        sessionOverviewCache.remove(_sessionOverviewKey(race, sessionName));
       }
     }
 
     final raceResultsKey = _raceResultsKey(race);
-    if (race.date.isAfter(now)) {
-      raceResultsCache.remove(raceResultsKey);
-      raceWeatherCache.remove(_raceWeatherKey(race));
-      raceControlCache.remove(_raceControlKey(race));
-    } else {
-      try {
-        final rows = await _fetchRaceResultRows(race);
-        if (rows.isNotEmpty) {
-          await _saveRaceResults(raceResultsKey, rows);
-        } else {
-          raceResultsCache.remove(raceResultsKey);
-        }
-      } catch (_) {
+    try {
+      final rows = await _fetchRaceResultRows(race);
+      if (rows.isNotEmpty) {
+        await _saveRaceResults(raceResultsKey, rows);
+      } else {
         raceResultsCache.remove(raceResultsKey);
       }
+    } catch (_) {
+      raceResultsCache.remove(raceResultsKey);
+    }
 
-      try {
-        final weatherRows = await _fetchRaceWeatherRows(race);
-        if (weatherRows.isNotEmpty) {
-          await _saveRaceWeather(_raceWeatherKey(race), weatherRows);
-        } else {
-          raceWeatherCache.remove(_raceWeatherKey(race));
-        }
-      } catch (_) {
+    try {
+      final weatherRows = await _fetchRaceWeatherRows(race);
+      if (weatherRows.isNotEmpty) {
+        await _saveRaceWeather(_raceWeatherKey(race), weatherRows);
+      } else {
         raceWeatherCache.remove(_raceWeatherKey(race));
       }
+    } catch (_) {
+      raceWeatherCache.remove(_raceWeatherKey(race));
+    }
 
-      try {
-        final raceControlRows = await _fetchRaceControlRows(race);
-        if (raceControlRows.isNotEmpty) {
-          await _saveRaceControl(_raceControlKey(race), raceControlRows);
-        } else {
-          raceControlCache.remove(_raceControlKey(race));
-        }
-      } catch (_) {
+    try {
+      final raceControlRows = await _fetchRaceControlRows(race);
+      if (raceControlRows.isNotEmpty) {
+        await _saveRaceControl(_raceControlKey(race), raceControlRows);
+      } else {
         raceControlCache.remove(_raceControlKey(race));
       }
+    } catch (_) {
+      raceControlCache.remove(_raceControlKey(race));
     }
 
     isInitialized = true;
@@ -5279,19 +5321,11 @@ class SessionDataManager extends ChangeNotifier {
   }
 
   bool _hasRaceDataCached(Race race) {
-    final now = DateTime.now();
     final sessionNames = race.hasSprint
         ? ['Practice 1', 'Sprint Qualifying', 'Sprint', 'Qualifying', 'Race']
         : ['Practice 1', 'Practice 2', 'Practice 3', 'Qualifying', 'Race'];
 
     for (final sessionName in sessionNames) {
-      final sessionDate = sessionName == 'Race'
-          ? race.date
-          : _sessionDateFor(race, sessionName);
-      if (sessionDate.isAfter(now)) {
-        continue;
-      }
-
       if (sessionName == 'Race') {
         continue;
       }
@@ -5310,30 +5344,28 @@ class SessionDataManager extends ChangeNotifier {
       }
     }
 
-    if (!race.date.isAfter(now)) {
-      final raceResultsKey = _raceResultsKey(race);
-      final hasRaceResults =
-          raceResultsCache.containsKey(raceResultsKey) ||
-          _sessionPayloadBox.containsKey(raceResultsKey);
-      if (!hasRaceResults) {
-        return false;
-      }
+    final raceResultsKey = _raceResultsKey(race);
+    final hasRaceResults =
+        raceResultsCache.containsKey(raceResultsKey) ||
+        _sessionPayloadBox.containsKey(raceResultsKey);
+    if (!hasRaceResults) {
+      return false;
+    }
 
-      final raceWeatherKey = _raceWeatherKey(race);
-      final hasRaceWeather =
-          raceWeatherCache.containsKey(raceWeatherKey) ||
-          _sessionPayloadBox.containsKey(raceWeatherKey);
-      if (!hasRaceWeather) {
-        return false;
-      }
+    final raceWeatherKey = _raceWeatherKey(race);
+    final hasRaceWeather =
+        raceWeatherCache.containsKey(raceWeatherKey) ||
+        _sessionPayloadBox.containsKey(raceWeatherKey);
+    if (!hasRaceWeather) {
+      return false;
+    }
 
-      final raceControlKey = _raceControlKey(race);
-      final hasRaceControl =
-          raceControlCache.containsKey(raceControlKey) ||
-          _sessionPayloadBox.containsKey(raceControlKey);
-      if (!hasRaceControl) {
-        return false;
-      }
+    final raceControlKey = _raceControlKey(race);
+    final hasRaceControl =
+        raceControlCache.containsKey(raceControlKey) ||
+        _sessionPayloadBox.containsKey(raceControlKey);
+    if (!hasRaceControl) {
+      return false;
     }
 
     return true;
@@ -5350,25 +5382,6 @@ class SessionDataManager extends ChangeNotifier {
 
   String _sessionOverviewKey(Race race, String sessionName) =>
       '${race.country}_${sessionName}_${race.date.year}_Overview';
-
-  DateTime _sessionDateFor(Race race, String sessionName) {
-    switch (sessionName) {
-      case 'Practice 1':
-        return race.fp1;
-      case 'Practice 2':
-        return race.fp2;
-      case 'Practice 3':
-        return race.fp3;
-      case 'Sprint Qualifying':
-        return race.sprintQuali;
-      case 'Sprint':
-        return race.sprintRace;
-      case 'Qualifying':
-        return race.qualifying;
-      default:
-        return race.date;
-    }
-  }
 
   Future<List<SessionOverviewRow>> _fetchSessionOverviewRows(
     Race race,
@@ -6280,7 +6293,7 @@ class SessionDataManager extends ChangeNotifier {
             'lap': _asInt(entry['lap_number']),
             'sessionName': sessionKey == null
                 ? null
-                : sessionNamesByKey[sessionKey],
+                : _normalizeSessionName(sessionNamesByKey[sessionKey]),
             'message': message,
             'penalty': normalizedPenalty,
             'served': isPenaltyServed,
@@ -6459,7 +6472,7 @@ class SessionDataManager extends ChangeNotifier {
         'message': message,
         'sessionName': sessionKey == null
             ? null
-            : sessionNamesByKey[sessionKey],
+                : _normalizeSessionName(sessionNamesByKey[sessionKey]),
       });
     }
 
@@ -6486,7 +6499,7 @@ class SessionDataManager extends ChangeNotifier {
       'driverNumber': _extractPenaltyDriverNumber(entry, message),
       'qualifyingPhase': entry['qualifying_phase']?.toString(),
       'sessionKey': sessionKey,
-      'sessionName': sessionName,
+      'sessionName': _normalizeSessionName(sessionName),
       'message': message,
     };
   }
@@ -7111,7 +7124,7 @@ class MainNavigation extends StatelessWidget {
                   currentIndex: navigationShell.currentIndex,
                   type: BottomNavigationBarType.fixed,
                   onTap: (i) {
-                    navigationShell.goBranch(i);
+                    navigationShell.goBranch(i, initialLocation: true);
                   },
                   items: <BottomNavigationBarItem>[
                     BottomNavigationBarItem(
@@ -7187,7 +7200,7 @@ class MainNavigation extends StatelessWidget {
                                   ),
                                 ),
                                 onDestinationSelected: (index) {
-                                  navigationShell.goBranch(index);
+                                  navigationShell.goBranch(index, initialLocation: true);
                                 },
                                 destinations: destinations,
                               ),
@@ -11865,17 +11878,24 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     List<Map<String, dynamic>> messages,
     String selectedSession,
   ) {
-    final scopes =
-        messages
-            .where(
-              (message) =>
-                  message['sessionName']?.toString().trim() == selectedSession,
-            )
-            .map((message) => message['scope']?.toString().trim() ?? '')
-            .where((scope) => scope.isNotEmpty)
-            .toSet()
-            .toList(growable: false)
-          ..sort();
+    final sessionMessages = messages
+        .where((message) => _normalizeSessionName(message['sessionName']) == _normalizeSessionName(selectedSession))
+        .toList(growable: false);
+    final scopes = sessionMessages
+        .map((message) => message['scope']?.toString().trim() ?? '')
+        .where((scope) => scope.isNotEmpty)
+        .toSet()
+        .toList(growable: true)
+      ..sort();
+
+    // Voeg (V)SC toe als er VSC/SC-berichten zijn
+    final hasVSC = sessionMessages.any((m) {
+      final msg = (m['message']?.toString() ?? '').toUpperCase();
+      return msg.contains('VSC') || msg.contains('SAFETY CAR');
+    });
+    if (hasVSC) {
+      scopes.add('(V)SC');
+    }
     return <String>[_allRaceControlScopes, ...scopes];
   }
 
@@ -11887,15 +11907,21 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     final query = _raceControlSearchQuery.trim().toLowerCase();
     final filtered = messages
         .where((message) {
-          final sessionName = message['sessionName']?.toString().trim() ?? '';
-          if (sessionName != selectedSession) {
+          final sessionName = _normalizeSessionName(message['sessionName']);
+          if (sessionName != _normalizeSessionName(selectedSession)) {
             return false;
           }
 
           final scope = message['scope']?.toString().trim() ?? '';
-          if (selectedScope != _allRaceControlScopes &&
-              scope != selectedScope) {
-            return false;
+          if (selectedScope != _allRaceControlScopes) {
+            if (selectedScope == '(V)SC') {
+              final msg = (message['message']?.toString() ?? '').toUpperCase();
+              if (!(msg.contains('VSC') || msg.contains('SAFETY CAR'))) {
+                return false;
+              }
+            } else if (scope != selectedScope) {
+              return false;
+            }
           }
 
           if (query.isEmpty) {
@@ -11937,9 +11963,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     final scheduledSessions = _sessionSchedule()
         .map((entry) => entry.key)
         .toList();
-    final weatherSessions = _weatherBySession.keys.toSet();
+      final weatherSessions = _weatherBySession.keys.map(_normalizeSessionName).toSet();
     final raceControlSessions = raceControlMessages
-        .map((message) => message['sessionName']?.toString().trim() ?? '')
+          .map((message) => _normalizeSessionName(message['sessionName']))
         .where((session) => session.isNotEmpty)
         .toSet();
 
@@ -12164,7 +12190,8 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       );
     }
 
-    if (message.contains('NO FURTHER ACTION')) {
+    if (message.contains('NO FURTHER ACTION') || 
+        message.contains('ENDING')) {
       return (
         background: const Color(0x1A2E7D32),
         border: const Color(0x662E7D32),
@@ -12189,7 +12216,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       );
     }
 
-    if (message.contains(' NOTED') || message.endsWith('NOTED')) {
+    if (message.contains(' NOTED') || message.endsWith('NOTED') || message.contains('DEPLOYED')) {
       return (
         background: const Color(0x1AF57C00),
         border: const Color(0x66F57C00),
@@ -12451,111 +12478,117 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     final penaltySignature = _raceControlPenaltySignature(sourceMessage);
     final penaltyKindKey = _raceControlPenaltyKindKey(sourceText);
     final incidentSignature = _raceControlIncidentSignature(sourceText);
-    final sourceDriverNumber = _raceControlDriverNumberForMessage(
-      sourceMessage,
-    );
-    if (penaltySignature == null &&
-        penaltyKindKey == null &&
-        incidentSignature == null) {
+    final sourceDriverNumber = _raceControlDriverNumberForMessage(sourceMessage);
+
+    // VSC/Safety Car koppeling
+    final sourceTextUpper = sourceText?.toUpperCase() ?? '';
+    final isVSC = sourceTextUpper.contains('VSC DEPLOYED') || sourceTextUpper.contains('VSC ENDING');
+    final isSC = sourceTextUpper.contains('SAFETY CAR DEPLOYED') || sourceTextUpper.contains('SAFETY CAR ENDING');
+    if (isVSC || isSC) {
+      final deployed = isVSC ? 'VSC DEPLOYED' : 'SAFETY CAR DEPLOYED';
+      final ending = isVSC ? 'VSC ENDING' : 'SAFETY CAR ENDING';
+      final isSourceDeployed = sourceTextUpper.contains('DEPLOYED');
+      final isSourceEnding = sourceTextUpper.contains('ENDING');
+      final sourceTime = DateTime.tryParse(sourceMessage['timestampUtc']?.toString() ?? '');
+      Map<String, dynamic>? bestMatch;
+      Duration? bestDelta;
+      for (final candidate in allMessages) {
+        if (identical(candidate, sourceMessage)) continue;
+        final candidateSession = _normalizeSessionName(candidate['sessionName']);
+        if (candidateSession != _normalizeSessionName(selectedSession)) continue;
+        final candidateText = (candidate['message']?.toString() ?? '').toUpperCase();
+        final candidateTime = DateTime.tryParse(candidate['timestampUtc']?.toString() ?? '');
+        if (isSourceDeployed && candidateText.contains(ending) && sourceTime != null && candidateTime != null && candidateTime.isAfter(sourceTime)) {
+          final delta = candidateTime.difference(sourceTime);
+          if (bestDelta == null || delta < bestDelta) {
+            bestDelta = delta;
+            bestMatch = candidate;
+          }
+        }
+        if (isSourceEnding && candidateText.contains(deployed) && sourceTime != null && candidateTime != null && candidateTime.isBefore(sourceTime)) {
+          final delta = sourceTime.difference(candidateTime);
+          if (bestDelta == null || delta < bestDelta) {
+            bestDelta = delta;
+            bestMatch = candidate;
+          }
+        }
+      }
+      return bestMatch != null ? [bestMatch] : <Map<String, dynamic>>[];
+    }
+
+    if (penaltySignature == null && penaltyKindKey == null && incidentSignature == null) {
       return const <Map<String, dynamic>>[];
     }
 
     final sourceIsServed = _isRaceControlPenaltyServedMessage(sourceText);
     final sourceIsPenalty = _isRaceControlPenaltyMessage(sourceText);
-    final sourceIsInvestigation = _isRaceControlInvestigationMessage(
-      sourceText,
-    );
+    final sourceIsInvestigation = _isRaceControlInvestigationMessage(sourceText);
     final sourceIsResolution = _isRaceControlResolutionMessage(sourceText);
-    if (!sourceIsServed &&
-        !sourceIsPenalty &&
-        !sourceIsInvestigation &&
-        !sourceIsResolution) {
+    if (!sourceIsServed && !sourceIsPenalty && !sourceIsInvestigation && !sourceIsResolution) {
       return const <Map<String, dynamic>>[];
     }
 
-    final related =
-        allMessages
-            .where((candidate) {
-              if (identical(candidate, sourceMessage)) {
-                return false;
-              }
+    final related = allMessages.where((candidate) {
+      if (identical(candidate, sourceMessage)) {
+        return false;
+      }
 
-              final candidateSession =
-                  candidate['sessionName']?.toString().trim() ?? '';
-              if (candidateSession != selectedSession) {
-                return false;
-              }
+      final candidateSession = _normalizeSessionName(candidate['sessionName']);
+      if (candidateSession != _normalizeSessionName(selectedSession)) {
+        return false;
+      }
 
-              final candidateText = candidate['message']?.toString();
-              final candidatePenaltySignature = _raceControlPenaltySignature(
-                candidate,
-              );
-              final candidateIncidentSignature = _raceControlIncidentSignature(
-                candidateText,
-              );
-              if (penaltySignature != null ||
-                  candidatePenaltySignature != null) {
-                if (penaltySignature == null ||
-                    candidatePenaltySignature == null) {
-                  return false;
-                }
-                if (candidatePenaltySignature != penaltySignature) {
-                  return false;
-                }
-              } else if (incidentSignature != null ||
-                  candidateIncidentSignature != null) {
-                if (incidentSignature == null ||
-                    candidateIncidentSignature == null) {
-                  return false;
-                }
-                if (candidateIncidentSignature != incidentSignature) {
-                  return false;
-                }
-              } else {
-                final candidatePenaltyKindKey = _raceControlPenaltyKindKey(
-                  candidateText,
-                );
-                if (candidatePenaltyKindKey != penaltyKindKey) {
-                  return false;
-                }
-              }
+      final candidateText = candidate['message']?.toString();
+      final candidatePenaltySignature = _raceControlPenaltySignature(candidate);
+      final candidateIncidentSignature = _raceControlIncidentSignature(candidateText);
+      if (penaltySignature != null || candidatePenaltySignature != null) {
+        if (penaltySignature == null || candidatePenaltySignature == null) {
+          return false;
+        }
+        if (candidatePenaltySignature != penaltySignature) {
+          return false;
+        }
+      } else if (incidentSignature != null || candidateIncidentSignature != null) {
+        if (incidentSignature == null || candidateIncidentSignature == null) {
+          return false;
+        }
+        if (candidateIncidentSignature != incidentSignature) {
+          return false;
+        }
+      } else {
+        final candidatePenaltyKindKey = _raceControlPenaltyKindKey(candidateText);
+        if (candidatePenaltyKindKey != penaltyKindKey) {
+          return false;
+        }
+      }
 
-              final candidateDriverNumber = _raceControlDriverNumberForMessage(
-                candidate,
-              );
-              if (sourceDriverNumber != null &&
-                  candidateDriverNumber != null &&
-                  sourceDriverNumber != candidateDriverNumber) {
-                return false;
-              }
+      final candidateDriverNumber = _raceControlDriverNumberForMessage(candidate);
+      if (sourceDriverNumber != null && candidateDriverNumber != null && sourceDriverNumber != candidateDriverNumber) {
+        return false;
+      }
 
-              if (sourceIsServed) {
-                return _isRaceControlPenaltyMessage(candidateText);
-              }
-              if (sourceIsPenalty) {
-                return _isRaceControlPenaltyServedMessage(candidateText);
-              }
-              if (sourceIsInvestigation || sourceIsResolution) {
-                return _isRaceControlIncidentFamilyMessage(candidateText);
-              }
-              return false;
-            })
-            .toList(growable: false)
-          ..sort((a, b) {
-            final aDate = DateTime.tryParse(
-              a['timestampUtc']?.toString() ?? '',
-            );
-            final bDate = DateTime.tryParse(
-              b['timestampUtc']?.toString() ?? '',
-            );
-            if (aDate != null && bDate != null) {
-              return aDate.compareTo(bDate);
-            }
-            if (aDate == null && bDate == null) {
-              return 0;
-            }
-            return aDate == null ? 1 : -1;
-          });
+      if (sourceIsServed) {
+        return _isRaceControlPenaltyMessage(candidateText);
+      }
+      if (sourceIsPenalty) {
+        return _isRaceControlPenaltyServedMessage(candidateText);
+      }
+      if (sourceIsInvestigation || sourceIsResolution) {
+        return _isRaceControlIncidentFamilyMessage(candidateText);
+      }
+      return false;
+    }).toList(growable: false)
+      ..sort((a, b) {
+        final aDate = DateTime.tryParse(a['timestampUtc']?.toString() ?? '');
+        final bDate = DateTime.tryParse(b['timestampUtc']?.toString() ?? '');
+        if (aDate != null && bDate != null) {
+          return aDate.compareTo(bDate);
+        }
+        if (aDate == null && bDate == null) {
+          return 0;
+        }
+        return aDate == null ? 1 : -1;
+      });
 
     return related;
   }
@@ -12919,8 +12952,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                                     _buildRaceControlTag(
                                       context,
                                       Icons.schedule,
-                                      message['sessionName']?.toString() ??
-                                          loc.translate('unknown'),
+                                      _normalizeSessionName(message['sessionName']) == ''
+                                          ? loc.translate('unknown')
+                                          : _normalizeSessionName(message['sessionName']),
                                     ),
                                     if ((message['scope']?.toString() ?? '')
                                         .trim()
@@ -18705,10 +18739,14 @@ class OpenF1SessionWidget extends StatelessWidget {
           ),
         );
 
-        if (sessionName == 'Race' && sessionTime.isAfter(DateTime.now())) {
+        final hasRaceData = raceResults != null && raceResults.isNotEmpty;
+        final hasSessionData = (sessionOverview != null && sessionOverview.isNotEmpty) ||
+            (results != null && results.isNotEmpty);
+
+        if (sessionName == 'Race' && sessionTime.isAfter(DateTime.now()) && !hasRaceData) {
           return const SizedBox.shrink();
         }
-        if (sessionTime.isAfter(DateTime.now())) {
+        if (sessionTime.isAfter(DateTime.now()) && !hasRaceData && !hasSessionData) {
           return buildEmpty(
             displayTitle,
             '${loc.translate('session_future')} ${sessionTime.toString().substring(0, 16)}',

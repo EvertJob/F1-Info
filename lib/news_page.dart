@@ -30,7 +30,9 @@ class _NewsPageState extends State<NewsPage> {
         'https://racingnews365.nl/feed/news.xml',
         'https://www.formula1.com/en/latest/all.xml',
       ];
-      final responses = await Future.wait(feeds.map((url) => http.get(Uri.parse(url))));
+      final responses = await Future.wait(
+        feeds.map((url) => http.get(Uri.parse(url))),
+      );
       final items = <_NewsItem>[];
       for (final response in responses) {
         if (response.statusCode == 200) {
@@ -41,12 +43,14 @@ class _NewsPageState extends State<NewsPage> {
             final link = item.getElement('link')?.text ?? '';
             final pubDate = item.getElement('pubDate')?.text ?? '';
             final description = item.getElement('description')?.text ?? '';
-            items.add(_NewsItem(
-              title: title,
-              link: link,
-              pubDate: pubDate,
-              description: description,
-            ));
+            items.add(
+              _NewsItem(
+                title: title,
+                link: link,
+                pubDate: pubDate,
+                description: description,
+              ),
+            );
           }
         }
       }
@@ -67,49 +71,47 @@ class _NewsPageState extends State<NewsPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('F1 Nieuws'),
-      ),
+      appBar: AppBar(title: const Text('F1 Nieuws')),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(child: Text('Fout bij laden: $_error'))
-              : RefreshIndicator(
-                  onRefresh: _fetchNews,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _items.length,
-                    itemBuilder: (context, index) {
-                      final item = _items[index];
-                      return Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+          ? Center(child: Text('Fout bij laden: $_error'))
+          : RefreshIndicator(
+              onRefresh: _fetchNews,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _items.length,
+                itemBuilder: (context, index) {
+                  final item = _items[index];
+                  return Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 2,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    child: ListTile(
+                      title: Text(
+                        item.title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
                         ),
-                        elevation: 2,
-                        margin: const EdgeInsets.only(bottom: 16),
-                        child: ListTile(
-                          title: Text(
-                            item.title,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                          subtitle: Text(
-                            item.pubDate,
-                            style: TextStyle(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          onTap: () {
-                            // Open link in browser
-                            // ...existing code...
-                          },
+                      ),
+                      subtitle: Text(
+                        item.pubDate,
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
-                      );
-                    },
-                  ),
-                ),
+                      ),
+                      onTap: () {
+                        // Open link in browser
+                        // ...existing code...
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
     );
   }
 }

@@ -2,6 +2,44 @@ part of 'main.dart';
 
 /// --- DATA MODELS ---------------------------------------------------------
 class Race {
+    factory Race.fromJson(Map<String, dynamic> json) {
+      return Race(
+        name: json['name'] as String,
+        country: json['country'] as String,
+        flag: json['flag'] as String,
+        date: DateTime.parse(json['date'] as String),
+        hasSprint: json['hasSprint'] as bool,
+        laps: json['laps'] as int,
+        length: json['length'] as int,
+        distanceToTurn1: json['distanceToTurn1'] as String,
+        weather: WeatherForecast.fromJson(json['weather'] as Map<String, dynamic>),
+        fastestLap: LapRecord.fromJson(json['fastestLap'] as Map<String, dynamic>),
+        slowestLap: LapRecord.fromJson(json['slowestLap'] as Map<String, dynamic>),
+        averageLap: json['averageLap'] as String,
+        topSpeed: json['topSpeed'] as String,
+        averageSpeed: json['averageSpeed'] as String,
+        redFlagChance: json['redFlagChance'] as int,
+        vscChance: json['vscChance'] as int,
+        accidentChance: json['accidentChance'] as int,
+        turn1AccidentChance: json['turn1AccidentChance'] as int,
+        tireWear: json['tireWear'] as String,
+        tireStrategy: json['tireStrategy'] as String,
+        bestCombination: json['bestCombination'] as String,
+        fastestPitstop: PitstopRecord.fromJson(json['fastestPitstop'] as Map<String, dynamic>),
+        circuitDifficulty: json['circuitDifficulty'] as String,
+        overtakingDifficulty: json['overtakingDifficulty'] as String,
+        previousWinners: List<String>.from(json['previousWinners'] as List),
+        maxGForce: json['maxGForce'] as String,
+        avgGForce: json['avgGForce'] as String,
+        firstGrandPrix: json['firstGrandPrix'] as int,
+        contractUntil: json['contractUntil'] as String,
+        characteristicsEn: List<String>.from(json['characteristicsEn'] as List),
+        characteristicsNl: List<String>.from(json['characteristicsNl'] as List),
+        circuitImage: json['circuitImage'] as String,
+        lat: (json['lat'] as num).toDouble(),
+        lon: (json['lon'] as num).toDouble(),
+      );
+    }
   final String name;
   final String country;
   final String flag;
@@ -83,6 +121,17 @@ class Race {
 }
 
 class WeatherForecast {
+    factory WeatherForecast.fromJson(Map<String, dynamic> json) {
+      return WeatherForecast(
+        temperature: json['temperature'] as int,
+        rainChance: json['rainChance'] as int,
+        rainAmount: json['rainAmount'] as int,
+        windSpeed: json['windSpeed'] as int,
+        humidity: json['humidity'] as int,
+        pressure: json['pressure'] as int,
+        feelsLike: json['feelsLike'] as int,
+      );
+    }
   final int temperature;
   final int rainChance;
   final int rainAmount;
@@ -102,6 +151,14 @@ class WeatherForecast {
 }
 
 class LapRecord {
+    factory LapRecord.fromJson(Map<String, dynamic> json) {
+      return LapRecord(
+        json['driver'] as String,
+        json['team'] as String,
+        json['year'] as int,
+        json['time'] as String,
+      );
+    }
   final String driver;
   final String team;
   final int year;
@@ -110,6 +167,13 @@ class LapRecord {
 }
 
 class PitstopRecord {
+    factory PitstopRecord.fromJson(Map<String, dynamic> json) {
+      return PitstopRecord(
+        json['team'] as String,
+        json['year'] as int,
+        json['time'] as String,
+      );
+    }
   final String team;
   final int year;
   final String time;

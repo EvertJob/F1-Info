@@ -1,0 +1,2365 @@
+{
+  "season": 2026,
+  "round": 2,
+  "raceName": "Unknown",
+  "session": "Qualifying",
+  "sessionKey": 11241,
+  "weather": {
+    "sessionKey": 11241,
+    "sampleCount": 78,
+    "lapCount": 21,
+    "lapTimeline": [
+      {
+        "lap": 1,
+        "timestampUtc": "2026-03-14T07:00:04.037Z"
+      },
+      {
+        "lap": 2,
+        "timestampUtc": "2026-03-14T07:01:53.887Z"
+      },
+      {
+        "lap": 3,
+        "timestampUtc": "2026-03-14T07:03:30.705Z"
+      },
+      {
+        "lap": 4,
+        "timestampUtc": "2026-03-14T07:05:37.011Z"
+      },
+      {
+        "lap": 5,
+        "timestampUtc": "2026-03-14T07:07:49.803Z"
+      },
+      {
+        "lap": 6,
+        "timestampUtc": "2026-03-14T07:09:24.129Z"
+      },
+      {
+        "lap": 7,
+        "timestampUtc": "2026-03-14T07:11:18.450Z"
+      },
+      {
+        "lap": 8,
+        "timestampUtc": "2026-03-14T07:13:52.616Z"
+      },
+      {
+        "lap": 9,
+        "timestampUtc": "2026-03-14T07:15:36.941Z"
+      },
+      {
+        "lap": 10,
+        "timestampUtc": "2026-03-14T07:17:11.696Z"
+      },
+      {
+        "lap": 11,
+        "timestampUtc": "2026-03-14T07:29:01.975Z"
+      },
+      {
+        "lap": 12,
+        "timestampUtc": "2026-03-14T07:30:35.953Z"
+      },
+      {
+        "lap": 13,
+        "timestampUtc": "2026-03-14T07:35:58.852Z"
+      },
+      {
+        "lap": 14,
+        "timestampUtc": "2026-03-14T07:37:47.238Z"
+      },
+      {
+        "lap": 15,
+        "timestampUtc": "2026-03-14T07:39:36.156Z"
+      },
+      {
+        "lap": 16,
+        "timestampUtc": "2026-03-14T07:48:47.731Z"
+      },
+      {
+        "lap": 17,
+        "timestampUtc": "2026-03-14T07:50:34.492Z"
+      },
+      {
+        "lap": 18,
+        "timestampUtc": "2026-03-14T07:52:13.747Z"
+      },
+      {
+        "lap": 19,
+        "timestampUtc": "2026-03-14T07:56:31.364Z"
+      },
+      {
+        "lap": 20,
+        "timestampUtc": "2026-03-14T07:58:21.556Z"
+      },
+      {
+        "lap": 21,
+        "timestampUtc": "2026-03-14T07:59:54.459Z"
+      }
+    ],
+    "samples": [
+      {
+        "timestampUtc": "2026-03-14T06:46:27.721000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 32.4,
+        "humidity": 36.2,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 3.8,
+        "windDirection": 68
+      },
+      {
+        "timestampUtc": "2026-03-14T06:47:27.728000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 32.3,
+        "humidity": 36.0,
+        "rainfall": 0.0,
+        "pressure": 1023.7,
+        "windSpeed": 2.7,
+        "windDirection": 68
+      },
+      {
+        "timestampUtc": "2026-03-14T06:48:27.731000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 32.3,
+        "humidity": 36.0,
+        "rainfall": 0.0,
+        "pressure": 1023.7,
+        "windSpeed": 2.7,
+        "windDirection": 68
+      },
+      {
+        "timestampUtc": "2026-03-14T06:49:27.710000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 32.5,
+        "humidity": 35.5,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 3.2,
+        "windDirection": 30
+      },
+      {
+        "timestampUtc": "2026-03-14T06:50:27.713000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 32.5,
+        "humidity": 35.0,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 2.8,
+        "windDirection": 46
+      },
+      {
+        "timestampUtc": "2026-03-14T06:51:27.732000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 32.4,
+        "humidity": 34.5,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 4.0,
+        "windDirection": 60
+      },
+      {
+        "timestampUtc": "2026-03-14T06:52:27.728000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 32.2,
+        "humidity": 34.6,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 2.7,
+        "windDirection": 31
+      },
+      {
+        "timestampUtc": "2026-03-14T06:53:27.726000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 31.8,
+        "humidity": 34.6,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 5.3,
+        "windDirection": 43
+      },
+      {
+        "timestampUtc": "2026-03-14T06:54:27.724000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 31.7,
+        "humidity": 34.9,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 4.9,
+        "windDirection": 49
+      },
+      {
+        "timestampUtc": "2026-03-14T06:55:27.723000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 32.0,
+        "humidity": 35.7,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 3.1,
+        "windDirection": 58
+      },
+      {
+        "timestampUtc": "2026-03-14T06:56:27.714000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 32.2,
+        "humidity": 35.1,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 1.9,
+        "windDirection": 67
+      },
+      {
+        "timestampUtc": "2026-03-14T06:57:27.728000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 32.3,
+        "humidity": 34.6,
+        "rainfall": 0.0,
+        "pressure": 1023.7,
+        "windSpeed": 1.3,
+        "windDirection": 60
+      },
+      {
+        "timestampUtc": "2026-03-14T06:58:27.727000+00:00",
+        "airTemperatureC": 17.8,
+        "trackTemperatureC": 32.0,
+        "humidity": 34.3,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 3.1,
+        "windDirection": 59
+      },
+      {
+        "timestampUtc": "2026-03-14T06:59:27.746000+00:00",
+        "airTemperatureC": 17.8,
+        "trackTemperatureC": 32.0,
+        "humidity": 34.3,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 3.1,
+        "windDirection": 59
+      },
+      {
+        "timestampUtc": "2026-03-14T07:00:27.764000+00:00",
+        "airTemperatureC": 17.8,
+        "trackTemperatureC": 31.8,
+        "humidity": 34.9,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 3.6,
+        "windDirection": 36
+      },
+      {
+        "timestampUtc": "2026-03-14T07:01:27.755000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 32.0,
+        "humidity": 35.0,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 3.5,
+        "windDirection": 52
+      },
+      {
+        "timestampUtc": "2026-03-14T07:02:27.762000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 31.7,
+        "humidity": 35.1,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 2.8,
+        "windDirection": 71
+      },
+      {
+        "timestampUtc": "2026-03-14T07:03:27.768000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 32.1,
+        "humidity": 34.7,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 2.6,
+        "windDirection": 65
+      },
+      {
+        "timestampUtc": "2026-03-14T07:04:27.785000+00:00",
+        "airTemperatureC": 17.8,
+        "trackTemperatureC": 32.3,
+        "humidity": 34.3,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 1.8,
+        "windDirection": 61
+      },
+      {
+        "timestampUtc": "2026-03-14T07:05:27.774000+00:00",
+        "airTemperatureC": 17.8,
+        "trackTemperatureC": 32.3,
+        "humidity": 34.5,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 2.6,
+        "windDirection": 64
+      },
+      {
+        "timestampUtc": "2026-03-14T07:06:27.776000+00:00",
+        "airTemperatureC": 17.8,
+        "trackTemperatureC": 31.8,
+        "humidity": 33.9,
+        "rainfall": 0.0,
+        "pressure": 1023.4,
+        "windSpeed": 5.2,
+        "windDirection": 59
+      },
+      {
+        "timestampUtc": "2026-03-14T07:07:27.772000+00:00",
+        "airTemperatureC": 17.9,
+        "trackTemperatureC": 31.6,
+        "humidity": 33.3,
+        "rainfall": 0.0,
+        "pressure": 1023.4,
+        "windSpeed": 3.3,
+        "windDirection": 59
+      },
+      {
+        "timestampUtc": "2026-03-14T07:08:27.775000+00:00",
+        "airTemperatureC": 17.9,
+        "trackTemperatureC": 31.7,
+        "humidity": 33.1,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 3.1,
+        "windDirection": 65
+      },
+      {
+        "timestampUtc": "2026-03-14T07:09:27.776000+00:00",
+        "airTemperatureC": 17.9,
+        "trackTemperatureC": 31.9,
+        "humidity": 33.5,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 1.9,
+        "windDirection": 67
+      },
+      {
+        "timestampUtc": "2026-03-14T07:10:27.795000+00:00",
+        "airTemperatureC": 17.9,
+        "trackTemperatureC": 31.9,
+        "humidity": 33.5,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 1.9,
+        "windDirection": 67
+      },
+      {
+        "timestampUtc": "2026-03-14T07:11:27.825000+00:00",
+        "airTemperatureC": 17.8,
+        "trackTemperatureC": 32.1,
+        "humidity": 33.6,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 2.1,
+        "windDirection": 65
+      },
+      {
+        "timestampUtc": "2026-03-14T07:12:27.842000+00:00",
+        "airTemperatureC": 17.8,
+        "trackTemperatureC": 32.3,
+        "humidity": 33.4,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 1.7,
+        "windDirection": 72
+      },
+      {
+        "timestampUtc": "2026-03-14T07:13:27.843000+00:00",
+        "airTemperatureC": 17.9,
+        "trackTemperatureC": 32.3,
+        "humidity": 33.4,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 2.1,
+        "windDirection": 88
+      },
+      {
+        "timestampUtc": "2026-03-14T07:14:27.838000+00:00",
+        "airTemperatureC": 18.0,
+        "trackTemperatureC": 32.2,
+        "humidity": 33.0,
+        "rainfall": 0.0,
+        "pressure": 1023.7,
+        "windSpeed": 1.6,
+        "windDirection": 64
+      },
+      {
+        "timestampUtc": "2026-03-14T07:15:27.832000+00:00",
+        "airTemperatureC": 18.0,
+        "trackTemperatureC": 32.2,
+        "humidity": 33.5,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 2.6,
+        "windDirection": 52
+      },
+      {
+        "timestampUtc": "2026-03-14T07:16:27.856000+00:00",
+        "airTemperatureC": 18.0,
+        "trackTemperatureC": 32.3,
+        "humidity": 34.1,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 1.9,
+        "windDirection": 57
+      },
+      {
+        "timestampUtc": "2026-03-14T07:17:27.867000+00:00",
+        "airTemperatureC": 18.0,
+        "trackTemperatureC": 32.1,
+        "humidity": 33.8,
+        "rainfall": 0.0,
+        "pressure": 1023.7,
+        "windSpeed": 1.1,
+        "windDirection": 69
+      },
+      {
+        "timestampUtc": "2026-03-14T07:18:27.871000+00:00",
+        "airTemperatureC": 18.0,
+        "trackTemperatureC": 32.2,
+        "humidity": 33.8,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 1.5,
+        "windDirection": 87
+      },
+      {
+        "timestampUtc": "2026-03-14T07:19:27.879000+00:00",
+        "airTemperatureC": 18.1,
+        "trackTemperatureC": 31.9,
+        "humidity": 33.3,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 1.0,
+        "windDirection": 66
+      },
+      {
+        "timestampUtc": "2026-03-14T07:20:27.877000+00:00",
+        "airTemperatureC": 18.1,
+        "trackTemperatureC": 32.0,
+        "humidity": 32.4,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 1.1,
+        "windDirection": 125
+      },
+      {
+        "timestampUtc": "2026-03-14T07:21:27.880000+00:00",
+        "airTemperatureC": 18.1,
+        "trackTemperatureC": 32.0,
+        "humidity": 32.4,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 1.1,
+        "windDirection": 125
+      },
+      {
+        "timestampUtc": "2026-03-14T07:22:27.868000+00:00",
+        "airTemperatureC": 18.3,
+        "trackTemperatureC": 32.2,
+        "humidity": 32.4,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 2.4,
+        "windDirection": 74
+      },
+      {
+        "timestampUtc": "2026-03-14T07:23:27.876000+00:00",
+        "airTemperatureC": 18.1,
+        "trackTemperatureC": 31.5,
+        "humidity": 33.4,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 2.3,
+        "windDirection": 61
+      },
+      {
+        "timestampUtc": "2026-03-14T07:24:27.878000+00:00",
+        "airTemperatureC": 18.0,
+        "trackTemperatureC": 31.2,
+        "humidity": 34.1,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 3.8,
+        "windDirection": 58
+      },
+      {
+        "timestampUtc": "2026-03-14T07:25:27.872000+00:00",
+        "airTemperatureC": 17.9,
+        "trackTemperatureC": 30.9,
+        "humidity": 34.7,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 3.8,
+        "windDirection": 41
+      },
+      {
+        "timestampUtc": "2026-03-14T07:26:27.912000+00:00",
+        "airTemperatureC": 17.8,
+        "trackTemperatureC": 30.4,
+        "humidity": 35.3,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 1.4,
+        "windDirection": 49
+      },
+      {
+        "timestampUtc": "2026-03-14T07:27:27.917000+00:00",
+        "airTemperatureC": 17.8,
+        "trackTemperatureC": 30.5,
+        "humidity": 35.2,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 2.3,
+        "windDirection": 79
+      },
+      {
+        "timestampUtc": "2026-03-14T07:28:27.932000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 30.6,
+        "humidity": 35.0,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 3.8,
+        "windDirection": 41
+      },
+      {
+        "timestampUtc": "2026-03-14T07:29:27.937000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 30.3,
+        "humidity": 35.2,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 4.5,
+        "windDirection": 44
+      },
+      {
+        "timestampUtc": "2026-03-14T07:30:27.931000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 30.3,
+        "humidity": 35.0,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 2.7,
+        "windDirection": 37
+      },
+      {
+        "timestampUtc": "2026-03-14T07:31:27.918000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 30.5,
+        "humidity": 35.1,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 3.7,
+        "windDirection": 47
+      },
+      {
+        "timestampUtc": "2026-03-14T07:32:27.906000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 30.5,
+        "humidity": 35.1,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 3.7,
+        "windDirection": 47
+      },
+      {
+        "timestampUtc": "2026-03-14T07:33:27.937000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 29.9,
+        "humidity": 34.8,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 4.3,
+        "windDirection": 62
+      },
+      {
+        "timestampUtc": "2026-03-14T07:34:27.968000+00:00",
+        "airTemperatureC": 17.8,
+        "trackTemperatureC": 29.4,
+        "humidity": 34.4,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 5.3,
+        "windDirection": 40
+      },
+      {
+        "timestampUtc": "2026-03-14T07:35:27.973000+00:00",
+        "airTemperatureC": 17.8,
+        "trackTemperatureC": 29.6,
+        "humidity": 34.5,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 2.8,
+        "windDirection": 30
+      },
+      {
+        "timestampUtc": "2026-03-14T07:36:27.979000+00:00",
+        "airTemperatureC": 17.8,
+        "trackTemperatureC": 29.5,
+        "humidity": 34.7,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 4.5,
+        "windDirection": 42
+      },
+      {
+        "timestampUtc": "2026-03-14T07:37:27.999000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 29.8,
+        "humidity": 35.3,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 3.9,
+        "windDirection": 50
+      },
+      {
+        "timestampUtc": "2026-03-14T07:38:28.011000+00:00",
+        "airTemperatureC": 17.8,
+        "trackTemperatureC": 30.1,
+        "humidity": 35.5,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 4.1,
+        "windDirection": 38
+      },
+      {
+        "timestampUtc": "2026-03-14T07:39:28.032000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 29.9,
+        "humidity": 34.3,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 2.8,
+        "windDirection": 65
+      },
+      {
+        "timestampUtc": "2026-03-14T07:40:28.020000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 29.9,
+        "humidity": 34.4,
+        "rainfall": 0.0,
+        "pressure": 1023.4,
+        "windSpeed": 3.0,
+        "windDirection": 59
+      },
+      {
+        "timestampUtc": "2026-03-14T07:41:28.033000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 29.6,
+        "humidity": 34.4,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 5.4,
+        "windDirection": 40
+      },
+      {
+        "timestampUtc": "2026-03-14T07:42:28.046000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 29.3,
+        "humidity": 34.6,
+        "rainfall": 0.0,
+        "pressure": 1023.4,
+        "windSpeed": 3.6,
+        "windDirection": 47
+      },
+      {
+        "timestampUtc": "2026-03-14T07:43:28.053000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 29.3,
+        "humidity": 34.6,
+        "rainfall": 0.0,
+        "pressure": 1023.4,
+        "windSpeed": 3.6,
+        "windDirection": 47
+      },
+      {
+        "timestampUtc": "2026-03-14T07:44:28.052000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 30.0,
+        "humidity": 35.0,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 2.6,
+        "windDirection": 65
+      },
+      {
+        "timestampUtc": "2026-03-14T07:45:28.091000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 29.9,
+        "humidity": 34.9,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 1.2,
+        "windDirection": 18
+      },
+      {
+        "timestampUtc": "2026-03-14T07:46:28.075000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 29.9,
+        "humidity": 34.7,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 3.5,
+        "windDirection": 58
+      },
+      {
+        "timestampUtc": "2026-03-14T07:47:28.097000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 29.5,
+        "humidity": 34.1,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 4.0,
+        "windDirection": 47
+      },
+      {
+        "timestampUtc": "2026-03-14T07:48:28.109000+00:00",
+        "airTemperatureC": 17.5,
+        "trackTemperatureC": 29.9,
+        "humidity": 34.1,
+        "rainfall": 0.0,
+        "pressure": 1023.4,
+        "windSpeed": 2.7,
+        "windDirection": 60
+      },
+      {
+        "timestampUtc": "2026-03-14T07:49:28.086000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 29.8,
+        "humidity": 34.3,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 1.5,
+        "windDirection": 88
+      },
+      {
+        "timestampUtc": "2026-03-14T07:50:28.098000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 30.0,
+        "humidity": 34.2,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 1.0,
+        "windDirection": 63
+      },
+      {
+        "timestampUtc": "2026-03-14T07:51:28.115000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 29.9,
+        "humidity": 34.0,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 0.7,
+        "windDirection": 39
+      },
+      {
+        "timestampUtc": "2026-03-14T07:52:28.121000+00:00",
+        "airTemperatureC": 17.8,
+        "trackTemperatureC": 30.0,
+        "humidity": 33.8,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 1.0,
+        "windDirection": 74
+      },
+      {
+        "timestampUtc": "2026-03-14T07:53:28.135000+00:00",
+        "airTemperatureC": 17.9,
+        "trackTemperatureC": 29.9,
+        "humidity": 33.3,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 1.6,
+        "windDirection": 101
+      },
+      {
+        "timestampUtc": "2026-03-14T07:54:28.147000+00:00",
+        "airTemperatureC": 17.9,
+        "trackTemperatureC": 29.9,
+        "humidity": 33.3,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 1.6,
+        "windDirection": 101
+      },
+      {
+        "timestampUtc": "2026-03-14T07:55:28.147000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 30.1,
+        "humidity": 33.0,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 2.4,
+        "windDirection": 60
+      },
+      {
+        "timestampUtc": "2026-03-14T07:56:28.161000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 30.0,
+        "humidity": 33.5,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 1.4,
+        "windDirection": 59
+      },
+      {
+        "timestampUtc": "2026-03-14T07:57:28.176000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 29.4,
+        "humidity": 33.9,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 0.9,
+        "windDirection": 76
+      },
+      {
+        "timestampUtc": "2026-03-14T07:58:28.159000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 30.0,
+        "humidity": 34.2,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 2.1,
+        "windDirection": 54
+      },
+      {
+        "timestampUtc": "2026-03-14T07:59:28.195000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 29.6,
+        "humidity": 34.5,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 2.8,
+        "windDirection": 54
+      },
+      {
+        "timestampUtc": "2026-03-14T08:00:28.209000+00:00",
+        "airTemperatureC": 17.7,
+        "trackTemperatureC": 29.5,
+        "humidity": 34.5,
+        "rainfall": 0.0,
+        "pressure": 1023.4,
+        "windSpeed": 2.3,
+        "windDirection": 63
+      },
+      {
+        "timestampUtc": "2026-03-14T08:01:28.208000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 29.5,
+        "humidity": 34.5,
+        "rainfall": 0.0,
+        "pressure": 1023.5,
+        "windSpeed": 0.8,
+        "windDirection": 33
+      },
+      {
+        "timestampUtc": "2026-03-14T08:02:28.198000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 29.5,
+        "humidity": 34.7,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 1.9,
+        "windDirection": 38
+      },
+      {
+        "timestampUtc": "2026-03-14T08:03:28.208000+00:00",
+        "airTemperatureC": 17.6,
+        "trackTemperatureC": 29.5,
+        "humidity": 34.8,
+        "rainfall": 0.0,
+        "pressure": 1023.6,
+        "windSpeed": 1.8,
+        "windDirection": 39
+      }
+    ]
+  },
+  "raceControlMessages": [
+    {
+      "timestampUtc": "2026-03-14T06:45:59+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": null,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "RISK OF RAIN FOR F1 QUALIFYING IS 0%"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:00:00+00:00",
+      "lap": null,
+      "category": "Flag",
+      "flag": "GREEN",
+      "scope": "Track",
+      "sector": null,
+      "driverNumber": null,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "GREEN LIGHT - PIT EXIT OPEN"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:00:00.209000+00:00",
+      "lap": null,
+      "category": "SessionStatus",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": null,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "SESSION STARTED"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:11:51+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": 55,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "CAR 55 (SAI) TIME 1:36.698 DELETED - TRACK LIMITS AT TURN 2 LAP 7 15:10:19"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:12:12+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": 63,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "CAR 63 (RUS) LAP DELETED - TRACK LIMITS AT TURN 2 LAP 4 15:10:15 (PIT)"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:14:10+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": 44,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "CAR 44 (HAM) LAP DELETED - TRACK LIMITS AT TURN 14 LAP 7 15:13:18"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:18:00+00:00",
+      "lap": null,
+      "category": "Flag",
+      "flag": "CHEQUERED",
+      "scope": "Track",
+      "sector": null,
+      "driverNumber": null,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "CHEQUERED FLAG"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:18:00.217000+00:00",
+      "lap": null,
+      "category": "SessionStatus",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": null,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "SESSION FINISHED"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:18:11+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": 87,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "FIRST CAR TO TAKE THE FLAG - CAR 87 (BEA)"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:21:24+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": null,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "TURN 15 INCIDENT INVOLVING CARS 5 (BOR) AND 6 (HAD) NOTED - IMPEDING"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:21:56+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": null,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "FIA STEWARDS: Q1 INCIDENT INVOLVING CARS 3 (VER), 27 (HUL), 5 (BOR), 31 (OCO), 87 (BEA), 41 (LIN) AND 18 (STR) NOTED - FAILING TO FOLLOW RACE DIRECTORS INSTRUCTIONS - MAXIMUM DELTA TIME"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:22:21+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": null,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "FIA STEWARDS: Q1 INCIDENT INVOLVING CARS 3 (VER), 27 (HUL), 5 (BOR), 31 (OCO), 87 (BEA), 41 (LIN) AND 18 (STR) WILL BE INVESTIGATED AFTER THE SESSION - FAILING TO FOLLOW RACE DIRECTORS INSTRUCTIONS - MAXIMUM DELTA TIME"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:25:00+00:00",
+      "lap": null,
+      "category": "Flag",
+      "flag": "GREEN",
+      "scope": "Track",
+      "sector": null,
+      "driverNumber": null,
+      "qualifyingPhase": "2",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "GREEN LIGHT - PIT EXIT OPEN"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:25:00.204000+00:00",
+      "lap": null,
+      "category": "SessionStatus",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": null,
+      "qualifyingPhase": "2",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "SESSION STARTED"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:26:33+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": null,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "FIA STEWARDS: TURN 15 INCIDENT INVOLVING CARS 5 (BOR) AND 6 (HAD) REVIEWED NO FURTHER INVESTIGATION - IMPEDING"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:39:20+00:00",
+      "lap": null,
+      "category": "Flag",
+      "flag": "DOUBLE YELLOW",
+      "scope": "Sector",
+      "sector": 19,
+      "driverNumber": null,
+      "qualifyingPhase": "2",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "DOUBLE YELLOW IN TRACK SECTOR 19"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:39:28+00:00",
+      "lap": null,
+      "category": "Flag",
+      "flag": "YELLOW",
+      "scope": "Sector",
+      "sector": 18,
+      "driverNumber": null,
+      "qualifyingPhase": "2",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "YELLOW IN TRACK SECTOR 18"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:39:44+00:00",
+      "lap": null,
+      "category": "Flag",
+      "flag": "CLEAR",
+      "scope": "Sector",
+      "sector": 19,
+      "driverNumber": null,
+      "qualifyingPhase": "2",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "CLEAR IN TRACK SECTOR 19"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:39:48+00:00",
+      "lap": null,
+      "category": "Flag",
+      "flag": "CLEAR",
+      "scope": "Sector",
+      "sector": 18,
+      "driverNumber": null,
+      "qualifyingPhase": "2",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "CLEAR IN TRACK SECTOR 18"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:40:00+00:00",
+      "lap": null,
+      "category": "Flag",
+      "flag": "CHEQUERED",
+      "scope": "Track",
+      "sector": null,
+      "driverNumber": null,
+      "qualifyingPhase": "2",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "CHEQUERED FLAG"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:40:00.210000+00:00",
+      "lap": null,
+      "category": "SessionStatus",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": null,
+      "qualifyingPhase": "2",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "SESSION FINISHED"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:40:28+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": 10,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "FIRST CAR TO TAKE THE FLAG - CAR 10 (GAS)"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:40:58+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": 41,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "CAR 41 (LIN) TIME 1:38.588 DELETED - DOUBLE YELLOW AT TURN 16"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:41:13+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": 30,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "CAR 30 (LAW) TIME 1:36.237 DELETED - DOUBLE YELLOW AT TURN 16"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:41:29+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": 31,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "CAR 31 (OCO) TIME 1:37.148 DELETED - DOUBLE YELLOW AT TURN 16"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:42:02+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": 63,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "CAR 63 (RUS) TIME 1:57.937 DELETED - DOUBLE YELLOW AT TURN 16"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:42:41+00:00",
+      "lap": null,
+      "category": "Flag",
+      "flag": "DOUBLE YELLOW",
+      "scope": "Sector",
+      "sector": 19,
+      "driverNumber": null,
+      "qualifyingPhase": "2",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "DOUBLE YELLOW IN TRACK SECTOR 19"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:42:59+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": 12,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "FIA STEWARDS: Q2 INCIDENT INVOLVING CAR 12 (ANT) NOTED - FAILING TO FOLLOW RACE DIRECTORS INSTRUCTIONS - MAXIMUM DELTA TIME"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:43:40+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": 12,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "FIA STEWARDS: Q2 INCIDENT INVOLVING CAR 12 (ANT) WILL BE INVESTIGATED AFTER THE SESSION - FAILING TO FOLLOW RACE DIRECTORS INSTRUCTIONS - MAXIMUM DELTA TIME"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:43:58+00:00",
+      "lap": null,
+      "category": "Flag",
+      "flag": "CLEAR",
+      "scope": "Sector",
+      "sector": 19,
+      "driverNumber": null,
+      "qualifyingPhase": "2",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "CLEAR IN TRACK SECTOR 19"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:47:00+00:00",
+      "lap": null,
+      "category": "Flag",
+      "flag": "GREEN",
+      "scope": "Track",
+      "sector": null,
+      "driverNumber": null,
+      "qualifyingPhase": "3",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "GREEN LIGHT - PIT EXIT OPEN"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:47:00.210000+00:00",
+      "lap": null,
+      "category": "SessionStatus",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": null,
+      "qualifyingPhase": "3",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "SESSION STARTED"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:47:44+00:00",
+      "lap": null,
+      "category": "Flag",
+      "flag": "YELLOW",
+      "scope": "Sector",
+      "sector": 4,
+      "driverNumber": null,
+      "qualifyingPhase": "3",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "YELLOW IN TRACK SECTOR 4"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:47:44+00:00",
+      "lap": null,
+      "category": "Flag",
+      "flag": "DOUBLE YELLOW",
+      "scope": "Sector",
+      "sector": 4,
+      "driverNumber": null,
+      "qualifyingPhase": "3",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "DOUBLE YELLOW IN TRACK SECTOR 4"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:47:48+00:00",
+      "lap": null,
+      "category": "Flag",
+      "flag": "YELLOW",
+      "scope": "Sector",
+      "sector": 3,
+      "driverNumber": null,
+      "qualifyingPhase": "3",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "YELLOW IN TRACK SECTOR 3"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:48:19+00:00",
+      "lap": null,
+      "category": "Flag",
+      "flag": "CLEAR",
+      "scope": "Sector",
+      "sector": 3,
+      "driverNumber": null,
+      "qualifyingPhase": "3",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "CLEAR IN TRACK SECTOR 3"
+    },
+    {
+      "timestampUtc": "2026-03-14T07:48:21+00:00",
+      "lap": null,
+      "category": "Flag",
+      "flag": "CLEAR",
+      "scope": "Sector",
+      "sector": 4,
+      "driverNumber": null,
+      "qualifyingPhase": "3",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "CLEAR IN TRACK SECTOR 4"
+    },
+    {
+      "timestampUtc": "2026-03-14T08:00:00+00:00",
+      "lap": null,
+      "category": "Flag",
+      "flag": "CHEQUERED",
+      "scope": "Track",
+      "sector": null,
+      "driverNumber": null,
+      "qualifyingPhase": "3",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "CHEQUERED FLAG"
+    },
+    {
+      "timestampUtc": "2026-03-14T08:00:00.208000+00:00",
+      "lap": null,
+      "category": "SessionStatus",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": null,
+      "qualifyingPhase": "3",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "SESSION FINISHED"
+    },
+    {
+      "timestampUtc": "2026-03-14T08:00:08+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": 87,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "FIRST CAR TO TAKE THE FLAG - CAR 87 (BEA)"
+    },
+    {
+      "timestampUtc": "2026-03-14T08:03:40+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": 63,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "FIA STEWARDS: Q3 INCIDENT INVOLVING CAR 63 (RUS) NOTED - FAILING TO FOLLOW RACE DIRECTORS INSTRUCTIONS - MAXIMUM DELTA TIME"
+    },
+    {
+      "timestampUtc": "2026-03-14T08:03:49+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": 63,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "FIA STEWARDS: Q3 INCIDENT INVOLVING CAR 63 (RUS) WILL BE INVESTIGATED AFTER THE SESSION - FAILING TO FOLLOW RACE DIRECTORS INSTRUCTIONS - MAXIMUM DELTA TIME"
+    },
+    {
+      "timestampUtc": "2026-03-14T08:04:14+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": null,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "FIA STEWARDS: Q1 INCIDENT INVOLVING CARS 3 (VER), 27 (HUL), 5 (BOR), 31 (OCO), 87 (BEA), 41 (LIN) AND 18 (STR) NO FURTHER ACTION - FAILING TO FOLLOW RACE DIRECTORS INSTRUCTIONS - MAXIMUM DELTA TIME"
+    },
+    {
+      "timestampUtc": "2026-03-14T08:04:19+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": 12,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "FIA STEWARDS: Q2 INCIDENT INVOLVING CAR 12 (ANT) NO FURTHER ACTION - FAILING TO FOLLOW RACE DIRECTORS INSTRUCTIONS - MAXIMUM DELTA TIME"
+    },
+    {
+      "timestampUtc": "2026-03-14T08:04:23+00:00",
+      "lap": null,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "driverNumber": 63,
+      "qualifyingPhase": null,
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "FIA STEWARDS: Q3 INCIDENT INVOLVING CAR 63 (RUS) NO FURTHER ACTION - FAILING TO FOLLOW RACE DIRECTORS INSTRUCTIONS - MAXIMUM DELTA TIME"
+    },
+    {
+      "timestampUtc": "2026-03-14T08:08:51+00:00",
+      "lap": null,
+      "category": "Flag",
+      "flag": "DOUBLE YELLOW",
+      "scope": "Sector",
+      "sector": 8,
+      "driverNumber": null,
+      "qualifyingPhase": "3",
+      "sessionKey": 11241,
+      "sessionName": "Qualifying",
+      "message": "DOUBLE YELLOW IN TRACK SECTOR 8"
+    }
+  ],
+  "drivers": [
+    {
+      "driver": "Kimi Antonelli",
+      "position": "1",
+      "result": "1:32.064",
+      "fastestLap": "1:32.064",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": true,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 15,
+      "tyreLaps": {
+        "Soft": 15
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": true
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "George Russell",
+      "position": "2",
+      "result": "1:32.286",
+      "fastestLap": "1:32.286",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 13,
+      "tyreLaps": {
+        "Soft": 13
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": true
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 1,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Lewis Hamilton",
+      "position": "3",
+      "result": "1:32.415",
+      "fastestLap": "1:32.415",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 19,
+      "tyreLaps": {
+        "Medium": 3,
+        "Soft": 16
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Medium",
+          "laps": 3,
+          "usedTyre": true
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": true
+        },
+        {
+          "compound": "Soft",
+          "laps": 4,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Charles Leclerc",
+      "position": "4",
+      "result": "1:32.428",
+      "fastestLap": "1:32.428",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 20,
+      "tyreLaps": {
+        "Soft": 20
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Soft",
+          "laps": 4,
+          "usedTyre": true
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": true
+        },
+        {
+          "compound": "Soft",
+          "laps": 4,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Oscar Piastri",
+      "position": "5",
+      "result": "1:32.550",
+      "fastestLap": "1:32.550",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 20,
+      "tyreLaps": {
+        "Soft": 20
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": true
+        },
+        {
+          "compound": "Soft",
+          "laps": 5,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Lando Norris",
+      "position": "6",
+      "result": "1:32.608",
+      "fastestLap": "1:32.608",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 20,
+      "tyreLaps": {
+        "Soft": 20
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": true
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": true
+        },
+        {
+          "compound": "Soft",
+          "laps": 5,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Pierre Gasly",
+      "position": "7",
+      "result": "1:32.873",
+      "fastestLap": "1:32.873",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 21,
+      "tyreLaps": {
+        "Soft": 21
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": true
+        },
+        {
+          "compound": "Soft",
+          "laps": 6,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Max Verstappen",
+      "position": "8",
+      "result": "1:33.002",
+      "fastestLap": "1:33.002",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 20,
+      "tyreLaps": {
+        "Medium": 5,
+        "Soft": 15
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Medium",
+          "laps": 5,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": true
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Isack Hadjar",
+      "position": "9",
+      "result": "1:33.121",
+      "fastestLap": "1:33.121",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 20,
+      "tyreLaps": {
+        "Medium": 5,
+        "Soft": 15
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Medium",
+          "laps": 5,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": true
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Oliver Bearman",
+      "position": "10",
+      "result": "1:33.197",
+      "fastestLap": "1:33.197",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 19,
+      "tyreLaps": {
+        "Soft": 19
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": true
+        },
+        {
+          "compound": "Soft",
+          "laps": 5,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 2,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Nico Hulkenberg",
+      "position": "11",
+      "result": "1:33.354",
+      "fastestLap": "1:33.354",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 12,
+      "tyreLaps": {
+        "Medium": 1,
+        "Soft": 11
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Medium",
+          "laps": 1,
+          "usedTyre": true
+        },
+        {
+          "compound": "Soft",
+          "laps": 5,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Franco Colapinto",
+      "position": "12",
+      "result": "1:33.357",
+      "fastestLap": "1:33.357",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 15,
+      "tyreLaps": {
+        "Soft": 15
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Esteban Ocon",
+      "position": "13",
+      "result": "1:33.538",
+      "fastestLap": "1:33.538",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 14,
+      "tyreLaps": {
+        "Soft": 14
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": true
+        },
+        {
+          "compound": "Soft",
+          "laps": 5,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Liam Lawson",
+      "position": "14",
+      "result": "1:33.765",
+      "fastestLap": "1:33.765",
+      "tyreCompound": "Soft (used)",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": true,
+      "tyreAgeAtStart": 3,
+      "totalLaps": 15,
+      "tyreLaps": {
+        "Soft": 15
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 6,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": true
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Arvid Lindblad",
+      "position": "15",
+      "result": "1:33.784",
+      "fastestLap": "1:33.784",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 15,
+      "tyreLaps": {
+        "Soft": 15
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Soft",
+          "laps": 6,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Gabriel Bortoleto",
+      "position": "16",
+      "result": "1:33.549",
+      "fastestLap": "1:33.549",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 14,
+      "tyreLaps": {
+        "Soft": 14
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Soft",
+          "laps": 1,
+          "usedTyre": true
+        },
+        {
+          "compound": "Soft",
+          "laps": 5,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 2,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Carlos Sainz",
+      "position": "17",
+      "result": "1:34.317",
+      "fastestLap": "1:34.317",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 10,
+      "tyreLaps": {
+        "Soft": 10
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Soft",
+          "laps": 4,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Alexander Albon",
+      "position": "18",
+      "result": "1:34.772",
+      "fastestLap": "1:34.772",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 10,
+      "tyreLaps": {
+        "Soft": 10
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Soft",
+          "laps": 4,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Fernando Alonso",
+      "position": "19",
+      "result": "1:35.203",
+      "fastestLap": "1:35.203",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 9,
+      "tyreLaps": {
+        "Soft": 9
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Valtteri Bottas",
+      "position": "20",
+      "result": "1:35.436",
+      "fastestLap": "1:35.436",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 9,
+      "tyreLaps": {
+        "Soft": 9
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Lance Stroll",
+      "position": "21",
+      "result": "1:35.995",
+      "fastestLap": "1:35.995",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 9,
+      "tyreLaps": {
+        "Soft": 9
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    },
+    {
+      "driver": "Sergio Perez",
+      "position": "22",
+      "result": "1:36.906",
+      "fastestLap": "1:36.906",
+      "tyreCompound": "Soft",
+      "points": "-",
+      "hasFastestLap": false,
+      "usedTyre": false,
+      "tyreAgeAtStart": 0,
+      "totalLaps": 6,
+      "tyreLaps": {
+        "Soft": 6
+      },
+      "tyreLapSequence": [
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        },
+        {
+          "compound": "Soft",
+          "laps": 3,
+          "usedTyre": false
+        }
+      ]
+    }
+  ]
+}
