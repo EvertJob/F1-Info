@@ -1,0 +1,108 @@
+[
+  {
+    "driver": "Kimi Antonelli",
+    "start": "1",
+    "finish": "P1",
+    "timeOrGap": "1:33:15.607",
+    "fastestLap": "1:35.275",
+    "tyreCompound": "-",
+    "penalty": "+10s",
+    "points": "25",
+    "hasFastestLap": true,
+    "tyreCompounds": [],
+    "tyreStints": [],
+    "tyreStrategy": "-",
+    "tyreChangeLaps": [],
+    "penaltyDetails": [
+      {
+        "penalty": "+10s",
+        "reason": "Causing A Collision",
+        "issuedLap": 7,
+        "served": true,
+        "servedLap": 15
+      }
+    ],
+    "penaltyServed": true,
+    "penaltyServedLaps": [
+      15
+    ],
+    "raceControlMessages": [
+      {
+        "timestampUtc": "2026-03-14T03:14:26+00:00",
+        "lap": 7,
+        "category": "Other",
+        "flag": null,
+        "scope": null,
+        "sector": null,
+        "qualifyingPhase": null,
+        "message": "FIA STEWARDS: 10 SECOND TIME PENALTY FOR CAR 12 (ANT) - CAUSING A COLLISION",
+        "sessionName": "Sprint"
+      },
+      {
+        "timestampUtc": "2026-03-14T03:28:37+00:00",
+        "lap": 15,
+        "category": "Other",
+        "flag": null,
+        "scope": null,
+        "sector": null,
+        "qualifyingPhase": null,
+        "message": "FIA STEWARDS: PENALTY SERVED - 10 SECOND TIME PENALTY FOR CAR 12 (ANT) - CAUSING A COLLISION",
+        "sessionName": "Sprint"
+      },
+      {
+        "timestampUtc": "2026-03-14T07:42:59+00:00",
+        "lap": null,
+        "category": "Other",
+        "flag": null,
+        "scope": null,
+        "sector": null,
+        "qualifyingPhase": null,
+        "message": "FIA STEWARDS: Q2 INCIDENT INVOLVING CAR 12 (ANT) NOTED - FAILING TO FOLLOW RACE DIRECTORS INSTRUCTIONS - MAXIMUM DELTA TIME",
+        "sessionName": "Qualifying"
+      },
+      {
+        "timestampUtc": "2026-03-14T07:43:40+00:00",
+        "lap": null,
+        "category": "Other",
+        "flag": null,
+        "scope": null,
+        "sector": null,
+        "qualifyingPhase": null,
+        "message": "FIA STEWARDS: Q2 INCIDENT INVOLVING CAR 12 (ANT) WILL BE INVESTIGATED AFTER THE SESSION - FAILING TO FOLLOW RACE DIRECTORS INSTRUCTIONS - MAXIMUM DELTA TIME",
+        "sessionName": "Qualifying"
+      },
+      {
+        "timestampUtc": "2026-03-14T08:04:19+00:00",
+        "lap": null,
+        "category": "Other",
+        "flag": null,
+        "scope": null,
+        "sector": null,
+        "qualifyingPhase": null,
+        "message": "FIA STEWARDS: Q2 INCIDENT INVOLVING CAR 12 (ANT) NO FURTHER ACTION - FAILING TO FOLLOW RACE DIRECTORS INSTRUCTIONS - MAXIMUM DELTA TIME",
+        "sessionName": "Qualifying"
+      },
+      {
+        "timestampUtc": "2026-03-15T08:32:48+00:00",
+        "lap": 54,
+        "category": "Other",
+        "flag": null,
+        "scope": null,
+        "sector": null,
+        "qualifyingPhase": null,
+        "message": "CAR 12 (ANT) TIME 1:37.530 DELETED - TRACK LIMITS AT TURN 14 LAP 53 16:32:14",
+        "sessionName": "Race"
+      }
+    ],
+    "pitStops": [],
+    "totalPitTime": "23.000",
+    "fastestPitStop": {
+      "lap": 10,
+      "timestampUtc": "2026-03-15T07:20:48.777000+00:00",
+      "duration": "23.000",
+      "durationSeconds": 23.0
+    },
+    "averagePitTime": "23.000"
+  },
+  ...
+]

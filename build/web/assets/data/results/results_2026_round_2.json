@@ -1,7 +1,7 @@
 [
   {
     "driver": "Kimi Antonelli",
-    "start": "-",
+    "start": "1",
     "finish": "P1",
     "timeOrGap": "1:33:15.607",
     "fastestLap": "1:35.275",
@@ -106,7 +106,7 @@
   },
   {
     "driver": "George Russell",
-    "start": "-",
+    "start": "2",
     "finish": "P2",
     "timeOrGap": "+5.515s",
     "fastestLap": "1:35.400",
@@ -200,7 +200,7 @@
   },
   {
     "driver": "Lewis Hamilton",
-    "start": "-",
+    "start": "3",
     "finish": "P3",
     "timeOrGap": "+25.267s",
     "fastestLap": "1:36.092",
@@ -295,7 +295,7 @@
   },
   {
     "driver": "Charles Leclerc",
-    "start": "-",
+    "start": "4",
     "finish": "P4",
     "timeOrGap": "+28.894s",
     "fastestLap": "1:36.011",
@@ -346,7 +346,7 @@
   },
   {
     "driver": "Oliver Bearman",
-    "start": "-",
+    "start": "5",
     "finish": "P5",
     "timeOrGap": "+57.268s",
     "fastestLap": "1:36.429",
@@ -419,7 +419,7 @@
   },
   {
     "driver": "Pierre Gasly",
-    "start": "-",
+    "start": "6",
     "finish": "P6",
     "timeOrGap": "+59.647s",
     "fastestLap": "1:36.505",
@@ -492,7 +492,7 @@
   },
   {
     "driver": "Liam Lawson",
-    "start": "-",
+    "start": "7",
     "finish": "P7",
     "timeOrGap": "+80.588s",
     "fastestLap": "1:37.096",
@@ -532,7 +532,7 @@
   },
   {
     "driver": "Isack Hadjar",
-    "start": "-",
+    "start": "8",
     "finish": "P8",
     "timeOrGap": "+87.247s",
     "fastestLap": "1:37.311",
@@ -620,7 +620,7 @@
   },
   {
     "driver": "Carlos Sainz",
-    "start": "-",
+    "start": "9",
     "finish": "P9",
     "timeOrGap": "+1 lap",
     "fastestLap": "1:37.981",
@@ -682,7 +682,7 @@
   },
   {
     "driver": "Franco Colapinto",
-    "start": "-",
+    "start": "10",
     "finish": "P10",
     "timeOrGap": "+1 lap",
     "fastestLap": "1:36.783",
@@ -755,7 +755,7 @@
   },
   {
     "driver": "Nico Hulkenberg",
-    "start": "-",
+    "start": "11",
     "finish": "P11",
     "timeOrGap": "+1 lap",
     "fastestLap": "1:36.180",
@@ -827,7 +827,7 @@
   },
   {
     "driver": "Arvid Lindblad",
-    "start": "-",
+    "start": "12",
     "finish": "P12",
     "timeOrGap": "+1 lap",
     "fastestLap": "1:36.099",
@@ -899,7 +899,7 @@
   },
   {
     "driver": "Valtteri Bottas",
-    "start": "-",
+    "start": "13",
     "finish": "P13",
     "timeOrGap": "+1 lap",
     "fastestLap": "1:38.393",
@@ -994,7 +994,7 @@
   },
   {
     "driver": "Esteban Ocon",
-    "start": "-",
+    "start": "14",
     "finish": "P14",
     "timeOrGap": "+1 lap",
     "fastestLap": "1:35.964",
@@ -1125,7 +1125,7 @@
   },
   {
     "driver": "Sergio Perez",
-    "start": "-",
+    "start": "15",
     "finish": "P15",
     "timeOrGap": "+1 lap",
     "fastestLap": "1:38.523",
@@ -1260,7 +1260,7 @@
   },
   {
     "driver": "Max Verstappen",
-    "start": "-",
+    "start": "16",
     "finish": "DNF",
     "timeOrGap": "DNF",
     "fastestLap": "1:37.046",
@@ -1322,7 +1322,7 @@
   },
   {
     "driver": "Fernando Alonso",
-    "start": "-",
+    "start": "17",
     "finish": "DNF",
     "timeOrGap": "DNF",
     "fastestLap": "1:39.721",
@@ -1421,7 +1421,7 @@
   },
   {
     "driver": "Lance Stroll",
-    "start": "-",
+    "start": "18",
     "finish": "DNF",
     "timeOrGap": "DNF",
     "fastestLap": "1:40.883",
@@ -1467,7 +1467,7 @@
   },
   {
     "driver": "Oscar Piastri",
-    "start": "-",
+    "start": "19",
     "finish": "DNS",
     "timeOrGap": "DNS",
     "fastestLap": "-",
@@ -1512,7 +1512,7 @@
   },
   {
     "driver": "Lando Norris",
-    "start": "-",
+    "start": "20",
     "finish": "DNS",
     "timeOrGap": "DNS",
     "fastestLap": "-",
@@ -1557,7 +1557,7 @@
   },
   {
     "driver": "Gabriel Bortoleto",
-    "start": "-",
+    "start": "21",
     "finish": "DNS",
     "timeOrGap": "DNS",
     "fastestLap": "-",
@@ -1613,7 +1613,7 @@
   },
   {
     "driver": "Alexander Albon",
-    "start": "-",
+    "start": "22",
     "finish": "DNS",
     "timeOrGap": "DNS",
     "fastestLap": "-",
