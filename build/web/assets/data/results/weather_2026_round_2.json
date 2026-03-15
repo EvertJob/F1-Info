@@ -1,7 +1,7 @@
 {
   "season": 2026,
   "round": 2,
-  "raceName": "Unknown",
+  "raceName": "Chinese Grand Prix",
   "source": "OpenF1 weather",
   "availableSessions": [
     "Practice 1",
@@ -3379,10 +3379,1756 @@
     },
     "Race": {
       "sessionKey": 11245,
-      "sampleCount": 0,
-      "lapCount": 0,
-      "lapTimeline": [],
-      "samples": []
+      "sampleCount": 152,
+      "lapCount": 56,
+      "lapTimeline": [
+        {
+          "lap": 1,
+          "timestampUtc": "2026-03-15T07:03:59.830Z"
+        },
+        {
+          "lap": 2,
+          "timestampUtc": "2026-03-15T07:07:18.779Z"
+        },
+        {
+          "lap": 3,
+          "timestampUtc": "2026-03-15T07:08:56.676Z"
+        },
+        {
+          "lap": 4,
+          "timestampUtc": "2026-03-15T07:10:34.091Z"
+        },
+        {
+          "lap": 5,
+          "timestampUtc": "2026-03-15T07:12:11.736Z"
+        },
+        {
+          "lap": 6,
+          "timestampUtc": "2026-03-15T07:13:48.823Z"
+        },
+        {
+          "lap": 7,
+          "timestampUtc": "2026-03-15T07:15:26.248Z"
+        },
+        {
+          "lap": 8,
+          "timestampUtc": "2026-03-15T07:17:03.619Z"
+        },
+        {
+          "lap": 9,
+          "timestampUtc": "2026-03-15T07:18:40.894Z"
+        },
+        {
+          "lap": 10,
+          "timestampUtc": "2026-03-15T07:20:27.639Z"
+        },
+        {
+          "lap": 11,
+          "timestampUtc": "2026-03-15T07:23:14.898Z"
+        },
+        {
+          "lap": 12,
+          "timestampUtc": "2026-03-15T07:25:44.750Z"
+        },
+        {
+          "lap": 13,
+          "timestampUtc": "2026-03-15T07:28:15.332Z"
+        },
+        {
+          "lap": 14,
+          "timestampUtc": "2026-03-15T07:29:54.178Z"
+        },
+        {
+          "lap": 15,
+          "timestampUtc": "2026-03-15T07:31:32.378Z"
+        },
+        {
+          "lap": 16,
+          "timestampUtc": "2026-03-15T07:33:09.065Z"
+        },
+        {
+          "lap": 17,
+          "timestampUtc": "2026-03-15T07:34:45.631Z"
+        },
+        {
+          "lap": 18,
+          "timestampUtc": "2026-03-15T07:36:22.750Z"
+        },
+        {
+          "lap": 19,
+          "timestampUtc": "2026-03-15T07:37:59.534Z"
+        },
+        {
+          "lap": 20,
+          "timestampUtc": "2026-03-15T07:39:36.298Z"
+        },
+        {
+          "lap": 21,
+          "timestampUtc": "2026-03-15T07:41:13.210Z"
+        },
+        {
+          "lap": 22,
+          "timestampUtc": "2026-03-15T07:42:49.784Z"
+        },
+        {
+          "lap": 23,
+          "timestampUtc": "2026-03-15T07:44:26.643Z"
+        },
+        {
+          "lap": 24,
+          "timestampUtc": "2026-03-15T07:46:03.134Z"
+        },
+        {
+          "lap": 25,
+          "timestampUtc": "2026-03-15T07:47:39.655Z"
+        },
+        {
+          "lap": 26,
+          "timestampUtc": "2026-03-15T07:49:16.229Z"
+        },
+        {
+          "lap": 27,
+          "timestampUtc": "2026-03-15T07:50:52.734Z"
+        },
+        {
+          "lap": 28,
+          "timestampUtc": "2026-03-15T07:52:29.335Z"
+        },
+        {
+          "lap": 29,
+          "timestampUtc": "2026-03-15T07:54:05.698Z"
+        },
+        {
+          "lap": 30,
+          "timestampUtc": "2026-03-15T07:55:41.896Z"
+        },
+        {
+          "lap": 31,
+          "timestampUtc": "2026-03-15T07:57:18.022Z"
+        },
+        {
+          "lap": 32,
+          "timestampUtc": "2026-03-15T07:58:54.101Z"
+        },
+        {
+          "lap": 33,
+          "timestampUtc": "2026-03-15T08:00:30.472Z"
+        },
+        {
+          "lap": 34,
+          "timestampUtc": "2026-03-15T08:02:06.509Z"
+        },
+        {
+          "lap": 35,
+          "timestampUtc": "2026-03-15T08:03:42.492Z"
+        },
+        {
+          "lap": 36,
+          "timestampUtc": "2026-03-15T08:05:18.478Z"
+        },
+        {
+          "lap": 37,
+          "timestampUtc": "2026-03-15T08:06:54.618Z"
+        },
+        {
+          "lap": 38,
+          "timestampUtc": "2026-03-15T08:08:30.232Z"
+        },
+        {
+          "lap": 39,
+          "timestampUtc": "2026-03-15T08:10:05.753Z"
+        },
+        {
+          "lap": 40,
+          "timestampUtc": "2026-03-15T08:11:41.896Z"
+        },
+        {
+          "lap": 41,
+          "timestampUtc": "2026-03-15T08:13:17.263Z"
+        },
+        {
+          "lap": 42,
+          "timestampUtc": "2026-03-15T08:14:53.151Z"
+        },
+        {
+          "lap": 43,
+          "timestampUtc": "2026-03-15T08:16:29.063Z"
+        },
+        {
+          "lap": 44,
+          "timestampUtc": "2026-03-15T08:18:04.441Z"
+        },
+        {
+          "lap": 45,
+          "timestampUtc": "2026-03-15T08:19:39.886Z"
+        },
+        {
+          "lap": 46,
+          "timestampUtc": "2026-03-15T08:21:15.227Z"
+        },
+        {
+          "lap": 47,
+          "timestampUtc": "2026-03-15T08:22:50.770Z"
+        },
+        {
+          "lap": 48,
+          "timestampUtc": "2026-03-15T08:24:26.483Z"
+        },
+        {
+          "lap": 49,
+          "timestampUtc": "2026-03-15T08:26:01.983Z"
+        },
+        {
+          "lap": 50,
+          "timestampUtc": "2026-03-15T08:27:37.655Z"
+        },
+        {
+          "lap": 51,
+          "timestampUtc": "2026-03-15T08:29:13.592Z"
+        },
+        {
+          "lap": 52,
+          "timestampUtc": "2026-03-15T08:30:48.893Z"
+        },
+        {
+          "lap": 53,
+          "timestampUtc": "2026-03-15T08:32:26.433Z"
+        },
+        {
+          "lap": 54,
+          "timestampUtc": "2026-03-15T08:34:02.630Z"
+        },
+        {
+          "lap": 55,
+          "timestampUtc": "2026-03-15T08:35:39.028Z"
+        },
+        {
+          "lap": 56,
+          "timestampUtc": "2026-03-15T08:37:15.852Z"
+        }
+      ],
+      "samples": [
+        {
+          "timestampUtc": "2026-03-15T06:08:35.739000+00:00",
+          "airTemperatureC": 16.3,
+          "trackTemperatureC": 26.5,
+          "humidity": 51.1,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 2.1,
+          "windDirection": 91
+        },
+        {
+          "timestampUtc": "2026-03-15T06:09:35.754000+00:00",
+          "airTemperatureC": 16.3,
+          "trackTemperatureC": 26.0,
+          "humidity": 51.1,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 1.5,
+          "windDirection": 111
+        },
+        {
+          "timestampUtc": "2026-03-15T06:10:35.757000+00:00",
+          "airTemperatureC": 16.3,
+          "trackTemperatureC": 26.1,
+          "humidity": 51.3,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 2.0,
+          "windDirection": 99
+        },
+        {
+          "timestampUtc": "2026-03-15T06:11:35.746000+00:00",
+          "airTemperatureC": 16.3,
+          "trackTemperatureC": 25.4,
+          "humidity": 51.4,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 1.8,
+          "windDirection": 91
+        },
+        {
+          "timestampUtc": "2026-03-15T06:12:35.741000+00:00",
+          "airTemperatureC": 16.3,
+          "trackTemperatureC": 25.4,
+          "humidity": 51.3,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 2.7,
+          "windDirection": 65
+        },
+        {
+          "timestampUtc": "2026-03-15T06:13:35.746000+00:00",
+          "airTemperatureC": 16.2,
+          "trackTemperatureC": 25.4,
+          "humidity": 51.6,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.8,
+          "windDirection": 56
+        },
+        {
+          "timestampUtc": "2026-03-15T06:14:35.769000+00:00",
+          "airTemperatureC": 16.2,
+          "trackTemperatureC": 25.2,
+          "humidity": 51.7,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.4,
+          "windDirection": 60
+        },
+        {
+          "timestampUtc": "2026-03-15T06:15:35.770000+00:00",
+          "airTemperatureC": 16.1,
+          "trackTemperatureC": 25.2,
+          "humidity": 51.9,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 1.5,
+          "windDirection": 55
+        },
+        {
+          "timestampUtc": "2026-03-15T06:16:35.758000+00:00",
+          "airTemperatureC": 16.2,
+          "trackTemperatureC": 25.1,
+          "humidity": 51.8,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.4,
+          "windDirection": 108
+        },
+        {
+          "timestampUtc": "2026-03-15T06:17:35.751000+00:00",
+          "airTemperatureC": 16.2,
+          "trackTemperatureC": 24.8,
+          "humidity": 51.8,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 0.7,
+          "windDirection": 120
+        },
+        {
+          "timestampUtc": "2026-03-15T06:18:35.788000+00:00",
+          "airTemperatureC": 16.1,
+          "trackTemperatureC": 25.3,
+          "humidity": 52.5,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 0.9,
+          "windDirection": 99
+        },
+        {
+          "timestampUtc": "2026-03-15T06:19:35.793000+00:00",
+          "airTemperatureC": 16.1,
+          "trackTemperatureC": 25.1,
+          "humidity": 52.1,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 1.8,
+          "windDirection": 109
+        },
+        {
+          "timestampUtc": "2026-03-15T06:20:35.790000+00:00",
+          "airTemperatureC": 16.1,
+          "trackTemperatureC": 24.6,
+          "humidity": 51.2,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 1.3,
+          "windDirection": 129
+        },
+        {
+          "timestampUtc": "2026-03-15T06:21:35.777000+00:00",
+          "airTemperatureC": 16.1,
+          "trackTemperatureC": 25.1,
+          "humidity": 52.2,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 1.1,
+          "windDirection": 87
+        },
+        {
+          "timestampUtc": "2026-03-15T06:22:35.774000+00:00",
+          "airTemperatureC": 16.2,
+          "trackTemperatureC": 24.8,
+          "humidity": 52.2,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.5,
+          "windDirection": 110
+        },
+        {
+          "timestampUtc": "2026-03-15T06:23:35.796000+00:00",
+          "airTemperatureC": 16.1,
+          "trackTemperatureC": 25.1,
+          "humidity": 52.3,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.3,
+          "windDirection": 92
+        },
+        {
+          "timestampUtc": "2026-03-15T06:24:35.800000+00:00",
+          "airTemperatureC": 16.1,
+          "trackTemperatureC": 24.9,
+          "humidity": 52.1,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.9,
+          "windDirection": 70
+        },
+        {
+          "timestampUtc": "2026-03-15T06:25:35.803000+00:00",
+          "airTemperatureC": 16.1,
+          "trackTemperatureC": 24.7,
+          "humidity": 52.5,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.1,
+          "windDirection": 104
+        },
+        {
+          "timestampUtc": "2026-03-15T06:26:35.817000+00:00",
+          "airTemperatureC": 16.1,
+          "trackTemperatureC": 25.0,
+          "humidity": 52.6,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 1.5,
+          "windDirection": 115
+        },
+        {
+          "timestampUtc": "2026-03-15T06:27:35.817000+00:00",
+          "airTemperatureC": 16.1,
+          "trackTemperatureC": 25.4,
+          "humidity": 53.1,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 0.3,
+          "windDirection": 43
+        },
+        {
+          "timestampUtc": "2026-03-15T06:28:35.831000+00:00",
+          "airTemperatureC": 16.1,
+          "trackTemperatureC": 25.7,
+          "humidity": 53.5,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.5,
+          "windDirection": 174
+        },
+        {
+          "timestampUtc": "2026-03-15T06:29:35.849000+00:00",
+          "airTemperatureC": 16.2,
+          "trackTemperatureC": 25.6,
+          "humidity": 53.2,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.0,
+          "windDirection": 166
+        },
+        {
+          "timestampUtc": "2026-03-15T06:30:35.845000+00:00",
+          "airTemperatureC": 16.3,
+          "trackTemperatureC": 27.6,
+          "humidity": 52.5,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 1.9,
+          "windDirection": 79
+        },
+        {
+          "timestampUtc": "2026-03-15T06:31:35.868000+00:00",
+          "airTemperatureC": 16.3,
+          "trackTemperatureC": 26.8,
+          "humidity": 50.8,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 3.0,
+          "windDirection": 84
+        },
+        {
+          "timestampUtc": "2026-03-15T06:32:35.875000+00:00",
+          "airTemperatureC": 16.4,
+          "trackTemperatureC": 25.3,
+          "humidity": 50.5,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 2.0,
+          "windDirection": 70
+        },
+        {
+          "timestampUtc": "2026-03-15T06:33:35.893000+00:00",
+          "airTemperatureC": 16.3,
+          "trackTemperatureC": 25.0,
+          "humidity": 52.0,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.8,
+          "windDirection": 97
+        },
+        {
+          "timestampUtc": "2026-03-15T06:34:35.894000+00:00",
+          "airTemperatureC": 16.2,
+          "trackTemperatureC": 24.7,
+          "humidity": 51.9,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.4,
+          "windDirection": 72
+        },
+        {
+          "timestampUtc": "2026-03-15T06:35:35.879000+00:00",
+          "airTemperatureC": 16.2,
+          "trackTemperatureC": 24.6,
+          "humidity": 52.0,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 2.4,
+          "windDirection": 97
+        },
+        {
+          "timestampUtc": "2026-03-15T06:36:35.907000+00:00",
+          "airTemperatureC": 16.1,
+          "trackTemperatureC": 24.4,
+          "humidity": 52.5,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 2.6,
+          "windDirection": 100
+        },
+        {
+          "timestampUtc": "2026-03-15T06:37:35.920000+00:00",
+          "airTemperatureC": 16.0,
+          "trackTemperatureC": 24.2,
+          "humidity": 52.8,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 1.7,
+          "windDirection": 93
+        },
+        {
+          "timestampUtc": "2026-03-15T06:38:35.920000+00:00",
+          "airTemperatureC": 15.9,
+          "trackTemperatureC": 24.5,
+          "humidity": 52.9,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 2.0,
+          "windDirection": 102
+        },
+        {
+          "timestampUtc": "2026-03-15T06:39:35.922000+00:00",
+          "airTemperatureC": 15.9,
+          "trackTemperatureC": 24.5,
+          "humidity": 52.9,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 2.0,
+          "windDirection": 102
+        },
+        {
+          "timestampUtc": "2026-03-15T06:40:35.920000+00:00",
+          "airTemperatureC": 15.8,
+          "trackTemperatureC": 24.1,
+          "humidity": 53.4,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 2.3,
+          "windDirection": 103
+        },
+        {
+          "timestampUtc": "2026-03-15T06:41:35.920000+00:00",
+          "airTemperatureC": 15.8,
+          "trackTemperatureC": 24.2,
+          "humidity": 54.1,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 1.8,
+          "windDirection": 94
+        },
+        {
+          "timestampUtc": "2026-03-15T06:42:35.919000+00:00",
+          "airTemperatureC": 15.9,
+          "trackTemperatureC": 24.0,
+          "humidity": 54.1,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 1.6,
+          "windDirection": 99
+        },
+        {
+          "timestampUtc": "2026-03-15T06:43:35.932000+00:00",
+          "airTemperatureC": 16.0,
+          "trackTemperatureC": 24.1,
+          "humidity": 54.1,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.6,
+          "windDirection": 88
+        },
+        {
+          "timestampUtc": "2026-03-15T06:44:35.932000+00:00",
+          "airTemperatureC": 16.0,
+          "trackTemperatureC": 24.5,
+          "humidity": 54.1,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.0,
+          "windDirection": 88
+        },
+        {
+          "timestampUtc": "2026-03-15T06:45:35.918000+00:00",
+          "airTemperatureC": 16.0,
+          "trackTemperatureC": 24.4,
+          "humidity": 54.3,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.4,
+          "windDirection": 111
+        },
+        {
+          "timestampUtc": "2026-03-15T06:46:35.948000+00:00",
+          "airTemperatureC": 16.0,
+          "trackTemperatureC": 24.5,
+          "humidity": 53.2,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 0.9,
+          "windDirection": 87
+        },
+        {
+          "timestampUtc": "2026-03-15T06:47:35.953000+00:00",
+          "airTemperatureC": 16.0,
+          "trackTemperatureC": 24.2,
+          "humidity": 53.6,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.0,
+          "windDirection": 70
+        },
+        {
+          "timestampUtc": "2026-03-15T06:48:35.953000+00:00",
+          "airTemperatureC": 15.9,
+          "trackTemperatureC": 24.6,
+          "humidity": 53.7,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 1.3,
+          "windDirection": 101
+        },
+        {
+          "timestampUtc": "2026-03-15T06:49:35.960000+00:00",
+          "airTemperatureC": 15.9,
+          "trackTemperatureC": 24.0,
+          "humidity": 53.7,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 1.1,
+          "windDirection": 145
+        },
+        {
+          "timestampUtc": "2026-03-15T06:50:35.976000+00:00",
+          "airTemperatureC": 15.9,
+          "trackTemperatureC": 24.0,
+          "humidity": 54.2,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.0,
+          "windDirection": 100
+        },
+        {
+          "timestampUtc": "2026-03-15T06:51:35.974000+00:00",
+          "airTemperatureC": 15.9,
+          "trackTemperatureC": 24.2,
+          "humidity": 53.6,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 1.9,
+          "windDirection": 100
+        },
+        {
+          "timestampUtc": "2026-03-15T06:52:35.984000+00:00",
+          "airTemperatureC": 15.9,
+          "trackTemperatureC": 24.4,
+          "humidity": 53.4,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 1.6,
+          "windDirection": 87
+        },
+        {
+          "timestampUtc": "2026-03-15T06:53:35.964000+00:00",
+          "airTemperatureC": 16.0,
+          "trackTemperatureC": 24.5,
+          "humidity": 52.9,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.2,
+          "windDirection": 103
+        },
+        {
+          "timestampUtc": "2026-03-15T06:54:35.974000+00:00",
+          "airTemperatureC": 16.0,
+          "trackTemperatureC": 24.8,
+          "humidity": 53.1,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 0.9,
+          "windDirection": 89
+        },
+        {
+          "timestampUtc": "2026-03-15T06:55:35.974000+00:00",
+          "airTemperatureC": 16.1,
+          "trackTemperatureC": 24.7,
+          "humidity": 52.8,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 3.1,
+          "windDirection": 63
+        },
+        {
+          "timestampUtc": "2026-03-15T06:56:35.989000+00:00",
+          "airTemperatureC": 16.2,
+          "trackTemperatureC": 24.3,
+          "humidity": 52.3,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 1.1,
+          "windDirection": 81
+        },
+        {
+          "timestampUtc": "2026-03-15T06:57:36.009000+00:00",
+          "airTemperatureC": 16.1,
+          "trackTemperatureC": 24.3,
+          "humidity": 52.4,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.9,
+          "windDirection": 55
+        },
+        {
+          "timestampUtc": "2026-03-15T06:58:36.018000+00:00",
+          "airTemperatureC": 16.1,
+          "trackTemperatureC": 23.9,
+          "humidity": 52.9,
+          "rainfall": 0.0,
+          "pressure": 1024.3,
+          "windSpeed": 3.8,
+          "windDirection": 91
+        },
+        {
+          "timestampUtc": "2026-03-15T06:59:36.039000+00:00",
+          "airTemperatureC": 16.0,
+          "trackTemperatureC": 23.5,
+          "humidity": 52.9,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.0,
+          "windDirection": 92
+        },
+        {
+          "timestampUtc": "2026-03-15T07:00:36.043000+00:00",
+          "airTemperatureC": 15.8,
+          "trackTemperatureC": 23.6,
+          "humidity": 53.6,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.0,
+          "windDirection": 108
+        },
+        {
+          "timestampUtc": "2026-03-15T07:01:36.055000+00:00",
+          "airTemperatureC": 15.8,
+          "trackTemperatureC": 23.5,
+          "humidity": 54.6,
+          "rainfall": 0.0,
+          "pressure": 1024.3,
+          "windSpeed": 2.0,
+          "windDirection": 96
+        },
+        {
+          "timestampUtc": "2026-03-15T07:02:36.061000+00:00",
+          "airTemperatureC": 15.7,
+          "trackTemperatureC": 23.0,
+          "humidity": 54.2,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 1.9,
+          "windDirection": 94
+        },
+        {
+          "timestampUtc": "2026-03-15T07:03:36.070000+00:00",
+          "airTemperatureC": 15.7,
+          "trackTemperatureC": 23.2,
+          "humidity": 54.8,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.6,
+          "windDirection": 90
+        },
+        {
+          "timestampUtc": "2026-03-15T07:04:36.075000+00:00",
+          "airTemperatureC": 15.6,
+          "trackTemperatureC": 23.3,
+          "humidity": 55.2,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.8,
+          "windDirection": 72
+        },
+        {
+          "timestampUtc": "2026-03-15T07:05:36.066000+00:00",
+          "airTemperatureC": 15.6,
+          "trackTemperatureC": 22.7,
+          "humidity": 55.5,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 2.5,
+          "windDirection": 105
+        },
+        {
+          "timestampUtc": "2026-03-15T07:06:36.092000+00:00",
+          "airTemperatureC": 15.6,
+          "trackTemperatureC": 22.5,
+          "humidity": 55.3,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 4.5,
+          "windDirection": 102
+        },
+        {
+          "timestampUtc": "2026-03-15T07:07:36.112000+00:00",
+          "airTemperatureC": 15.5,
+          "trackTemperatureC": 23.0,
+          "humidity": 55.8,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 1.8,
+          "windDirection": 107
+        },
+        {
+          "timestampUtc": "2026-03-15T07:08:36.107000+00:00",
+          "airTemperatureC": 15.5,
+          "trackTemperatureC": 23.3,
+          "humidity": 55.4,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 3.3,
+          "windDirection": 98
+        },
+        {
+          "timestampUtc": "2026-03-15T07:09:36.122000+00:00",
+          "airTemperatureC": 15.5,
+          "trackTemperatureC": 23.0,
+          "humidity": 55.4,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 2.5,
+          "windDirection": 105
+        },
+        {
+          "timestampUtc": "2026-03-15T07:10:36.114000+00:00",
+          "airTemperatureC": 15.5,
+          "trackTemperatureC": 23.2,
+          "humidity": 55.7,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.2,
+          "windDirection": 85
+        },
+        {
+          "timestampUtc": "2026-03-15T07:11:36.110000+00:00",
+          "airTemperatureC": 15.5,
+          "trackTemperatureC": 23.1,
+          "humidity": 55.3,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 3.7,
+          "windDirection": 92
+        },
+        {
+          "timestampUtc": "2026-03-15T07:12:36.110000+00:00",
+          "airTemperatureC": 15.6,
+          "trackTemperatureC": 22.9,
+          "humidity": 55.6,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 2.2,
+          "windDirection": 107
+        },
+        {
+          "timestampUtc": "2026-03-15T07:13:36.113000+00:00",
+          "airTemperatureC": 15.6,
+          "trackTemperatureC": 22.9,
+          "humidity": 55.6,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 3.3,
+          "windDirection": 96
+        },
+        {
+          "timestampUtc": "2026-03-15T07:14:36.120000+00:00",
+          "airTemperatureC": 15.6,
+          "trackTemperatureC": 22.4,
+          "humidity": 55.8,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 2.4,
+          "windDirection": 111
+        },
+        {
+          "timestampUtc": "2026-03-15T07:15:36.123000+00:00",
+          "airTemperatureC": 15.6,
+          "trackTemperatureC": 22.8,
+          "humidity": 55.9,
+          "rainfall": 0.0,
+          "pressure": 1024.3,
+          "windSpeed": 2.1,
+          "windDirection": 88
+        },
+        {
+          "timestampUtc": "2026-03-15T07:16:36.155000+00:00",
+          "airTemperatureC": 15.6,
+          "trackTemperatureC": 22.6,
+          "humidity": 55.9,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 2.1,
+          "windDirection": 111
+        },
+        {
+          "timestampUtc": "2026-03-15T07:17:36.177000+00:00",
+          "airTemperatureC": 15.6,
+          "trackTemperatureC": 22.6,
+          "humidity": 56.0,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 2.6,
+          "windDirection": 110
+        },
+        {
+          "timestampUtc": "2026-03-15T07:18:36.177000+00:00",
+          "airTemperatureC": 15.5,
+          "trackTemperatureC": 22.5,
+          "humidity": 55.9,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 3.3,
+          "windDirection": 104
+        },
+        {
+          "timestampUtc": "2026-03-15T07:19:36.176000+00:00",
+          "airTemperatureC": 15.5,
+          "trackTemperatureC": 22.4,
+          "humidity": 56.2,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 1.5,
+          "windDirection": 92
+        },
+        {
+          "timestampUtc": "2026-03-15T07:20:36.171000+00:00",
+          "airTemperatureC": 15.5,
+          "trackTemperatureC": 22.5,
+          "humidity": 56.0,
+          "rainfall": 0.0,
+          "pressure": 1024.3,
+          "windSpeed": 2.0,
+          "windDirection": 70
+        },
+        {
+          "timestampUtc": "2026-03-15T07:21:36.162000+00:00",
+          "airTemperatureC": 15.5,
+          "trackTemperatureC": 22.8,
+          "humidity": 55.5,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 0.8,
+          "windDirection": 77
+        },
+        {
+          "timestampUtc": "2026-03-15T07:22:36.187000+00:00",
+          "airTemperatureC": 15.5,
+          "trackTemperatureC": 22.8,
+          "humidity": 55.4,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.9,
+          "windDirection": 96
+        },
+        {
+          "timestampUtc": "2026-03-15T07:23:36.175000+00:00",
+          "airTemperatureC": 15.5,
+          "trackTemperatureC": 22.7,
+          "humidity": 55.3,
+          "rainfall": 0.0,
+          "pressure": 1024.7,
+          "windSpeed": 0.0,
+          "windDirection": 0
+        },
+        {
+          "timestampUtc": "2026-03-15T07:24:36.171000+00:00",
+          "airTemperatureC": 15.5,
+          "trackTemperatureC": 22.5,
+          "humidity": 55.6,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 0.9,
+          "windDirection": 140
+        },
+        {
+          "timestampUtc": "2026-03-15T07:25:36.168000+00:00",
+          "airTemperatureC": 15.5,
+          "trackTemperatureC": 22.0,
+          "humidity": 55.2,
+          "rainfall": 0.0,
+          "pressure": 1024.7,
+          "windSpeed": 2.1,
+          "windDirection": 98
+        },
+        {
+          "timestampUtc": "2026-03-15T07:26:36.177000+00:00",
+          "airTemperatureC": 15.5,
+          "trackTemperatureC": 22.0,
+          "humidity": 55.1,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 1.7,
+          "windDirection": 131
+        },
+        {
+          "timestampUtc": "2026-03-15T07:27:36.195000+00:00",
+          "airTemperatureC": 15.4,
+          "trackTemperatureC": 22.0,
+          "humidity": 55.6,
+          "rainfall": 0.0,
+          "pressure": 1024.7,
+          "windSpeed": 1.9,
+          "windDirection": 142
+        },
+        {
+          "timestampUtc": "2026-03-15T07:28:36.210000+00:00",
+          "airTemperatureC": 15.4,
+          "trackTemperatureC": 22.4,
+          "humidity": 56.3,
+          "rainfall": 0.0,
+          "pressure": 1024.7,
+          "windSpeed": 1.1,
+          "windDirection": 112
+        },
+        {
+          "timestampUtc": "2026-03-15T07:29:36.214000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 22.1,
+          "humidity": 56.4,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 2.8,
+          "windDirection": 98
+        },
+        {
+          "timestampUtc": "2026-03-15T07:30:36.197000+00:00",
+          "airTemperatureC": 15.4,
+          "trackTemperatureC": 21.6,
+          "humidity": 56.2,
+          "rainfall": 0.0,
+          "pressure": 1024.7,
+          "windSpeed": 2.8,
+          "windDirection": 116
+        },
+        {
+          "timestampUtc": "2026-03-15T07:31:36.212000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 22.0,
+          "humidity": 56.8,
+          "rainfall": 0.0,
+          "pressure": 1024.7,
+          "windSpeed": 1.6,
+          "windDirection": 102
+        },
+        {
+          "timestampUtc": "2026-03-15T07:32:36.235000+00:00",
+          "airTemperatureC": 15.2,
+          "trackTemperatureC": 21.9,
+          "humidity": 56.6,
+          "rainfall": 0.0,
+          "pressure": 1024.7,
+          "windSpeed": 3.2,
+          "windDirection": 114
+        },
+        {
+          "timestampUtc": "2026-03-15T07:33:36.215000+00:00",
+          "airTemperatureC": 15.2,
+          "trackTemperatureC": 21.9,
+          "humidity": 56.7,
+          "rainfall": 0.0,
+          "pressure": 1024.7,
+          "windSpeed": 1.0,
+          "windDirection": 126
+        },
+        {
+          "timestampUtc": "2026-03-15T07:34:36.209000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 21.8,
+          "humidity": 56.5,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 2.2,
+          "windDirection": 105
+        },
+        {
+          "timestampUtc": "2026-03-15T07:35:36.224000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 21.6,
+          "humidity": 56.2,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 1.6,
+          "windDirection": 101
+        },
+        {
+          "timestampUtc": "2026-03-15T07:36:36.238000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 21.6,
+          "humidity": 56.4,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 2.0,
+          "windDirection": 98
+        },
+        {
+          "timestampUtc": "2026-03-15T07:37:36.215000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 21.9,
+          "humidity": 56.6,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 2.9,
+          "windDirection": 93
+        },
+        {
+          "timestampUtc": "2026-03-15T07:38:36.238000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 21.5,
+          "humidity": 56.8,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.7,
+          "windDirection": 108
+        },
+        {
+          "timestampUtc": "2026-03-15T07:39:36.236000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 21.7,
+          "humidity": 56.7,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.2,
+          "windDirection": 94
+        },
+        {
+          "timestampUtc": "2026-03-15T07:40:36.266000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 21.8,
+          "humidity": 56.9,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 2.8,
+          "windDirection": 92
+        },
+        {
+          "timestampUtc": "2026-03-15T07:41:36.271000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 21.7,
+          "humidity": 57.0,
+          "rainfall": 0.0,
+          "pressure": 1024.3,
+          "windSpeed": 2.4,
+          "windDirection": 110
+        },
+        {
+          "timestampUtc": "2026-03-15T07:42:36.268000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 21.6,
+          "humidity": 56.2,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 3.0,
+          "windDirection": 97
+        },
+        {
+          "timestampUtc": "2026-03-15T07:43:36.269000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 21.6,
+          "humidity": 56.2,
+          "rainfall": 0.0,
+          "pressure": 1024.3,
+          "windSpeed": 1.5,
+          "windDirection": 89
+        },
+        {
+          "timestampUtc": "2026-03-15T07:44:36.263000+00:00",
+          "airTemperatureC": 15.4,
+          "trackTemperatureC": 21.7,
+          "humidity": 56.4,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.3,
+          "windDirection": 101
+        },
+        {
+          "timestampUtc": "2026-03-15T07:45:36.279000+00:00",
+          "airTemperatureC": 15.4,
+          "trackTemperatureC": 21.8,
+          "humidity": 56.2,
+          "rainfall": 0.0,
+          "pressure": 1024.3,
+          "windSpeed": 2.8,
+          "windDirection": 94
+        },
+        {
+          "timestampUtc": "2026-03-15T07:46:36.321000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 21.7,
+          "humidity": 56.3,
+          "rainfall": 0.0,
+          "pressure": 1024.3,
+          "windSpeed": 2.2,
+          "windDirection": 93
+        },
+        {
+          "timestampUtc": "2026-03-15T07:47:36.312000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 21.6,
+          "humidity": 56.2,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.4,
+          "windDirection": 95
+        },
+        {
+          "timestampUtc": "2026-03-15T07:48:36.333000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 21.8,
+          "humidity": 56.5,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.3,
+          "windDirection": 63
+        },
+        {
+          "timestampUtc": "2026-03-15T07:49:36.327000+00:00",
+          "airTemperatureC": 15.4,
+          "trackTemperatureC": 21.8,
+          "humidity": 56.3,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.6,
+          "windDirection": 92
+        },
+        {
+          "timestampUtc": "2026-03-15T07:50:36.328000+00:00",
+          "airTemperatureC": 15.4,
+          "trackTemperatureC": 21.8,
+          "humidity": 56.0,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.2,
+          "windDirection": 70
+        },
+        {
+          "timestampUtc": "2026-03-15T07:51:36.352000+00:00",
+          "airTemperatureC": 15.4,
+          "trackTemperatureC": 21.7,
+          "humidity": 56.0,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.0,
+          "windDirection": 67
+        },
+        {
+          "timestampUtc": "2026-03-15T07:52:36.353000+00:00",
+          "airTemperatureC": 15.4,
+          "trackTemperatureC": 21.5,
+          "humidity": 55.6,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.3,
+          "windDirection": 85
+        },
+        {
+          "timestampUtc": "2026-03-15T07:53:36.421000+00:00",
+          "airTemperatureC": 15.4,
+          "trackTemperatureC": 21.6,
+          "humidity": 55.6,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 3.0,
+          "windDirection": 77
+        },
+        {
+          "timestampUtc": "2026-03-15T07:54:36.345000+00:00",
+          "airTemperatureC": 15.4,
+          "trackTemperatureC": 21.0,
+          "humidity": 55.8,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 3.1,
+          "windDirection": 96
+        },
+        {
+          "timestampUtc": "2026-03-15T07:55:36.349000+00:00",
+          "airTemperatureC": 15.4,
+          "trackTemperatureC": 21.2,
+          "humidity": 55.8,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.6,
+          "windDirection": 77
+        },
+        {
+          "timestampUtc": "2026-03-15T07:56:36.365000+00:00",
+          "airTemperatureC": 15.4,
+          "trackTemperatureC": 21.2,
+          "humidity": 55.8,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.6,
+          "windDirection": 77
+        },
+        {
+          "timestampUtc": "2026-03-15T07:57:36.392000+00:00",
+          "airTemperatureC": 15.2,
+          "trackTemperatureC": 21.1,
+          "humidity": 56.5,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 2.3,
+          "windDirection": 93
+        },
+        {
+          "timestampUtc": "2026-03-15T07:58:36.388000+00:00",
+          "airTemperatureC": 15.2,
+          "trackTemperatureC": 21.1,
+          "humidity": 56.6,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.6,
+          "windDirection": 84
+        },
+        {
+          "timestampUtc": "2026-03-15T07:59:36.406000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 21.1,
+          "humidity": 56.8,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 2.2,
+          "windDirection": 84
+        },
+        {
+          "timestampUtc": "2026-03-15T08:00:36.428000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 21.3,
+          "humidity": 56.5,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 2.4,
+          "windDirection": 96
+        },
+        {
+          "timestampUtc": "2026-03-15T08:01:36.433000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 20.8,
+          "humidity": 56.2,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.7,
+          "windDirection": 86
+        },
+        {
+          "timestampUtc": "2026-03-15T08:02:36.452000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 21.1,
+          "humidity": 56.1,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.8,
+          "windDirection": 109
+        },
+        {
+          "timestampUtc": "2026-03-15T08:03:36.445000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 21.0,
+          "humidity": 56.1,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 1.6,
+          "windDirection": 108
+        },
+        {
+          "timestampUtc": "2026-03-15T08:04:36.471000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 21.0,
+          "humidity": 55.9,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 1.6,
+          "windDirection": 98
+        },
+        {
+          "timestampUtc": "2026-03-15T08:05:36.478000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 20.9,
+          "humidity": 55.5,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 2.7,
+          "windDirection": 87
+        },
+        {
+          "timestampUtc": "2026-03-15T08:06:36.493000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 20.3,
+          "humidity": 55.4,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 2.4,
+          "windDirection": 121
+        },
+        {
+          "timestampUtc": "2026-03-15T08:07:36.481000+00:00",
+          "airTemperatureC": 15.3,
+          "trackTemperatureC": 20.3,
+          "humidity": 55.4,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 2.4,
+          "windDirection": 121
+        },
+        {
+          "timestampUtc": "2026-03-15T08:08:36.516000+00:00",
+          "airTemperatureC": 15.2,
+          "trackTemperatureC": 20.8,
+          "humidity": 56.0,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 1.8,
+          "windDirection": 77
+        },
+        {
+          "timestampUtc": "2026-03-15T08:09:36.512000+00:00",
+          "airTemperatureC": 15.1,
+          "trackTemperatureC": 20.9,
+          "humidity": 56.6,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 3.1,
+          "windDirection": 83
+        },
+        {
+          "timestampUtc": "2026-03-15T08:10:36.489000+00:00",
+          "airTemperatureC": 15.2,
+          "trackTemperatureC": 20.8,
+          "humidity": 56.7,
+          "rainfall": 0.0,
+          "pressure": 1024.3,
+          "windSpeed": 3.3,
+          "windDirection": 101
+        },
+        {
+          "timestampUtc": "2026-03-15T08:11:36.482000+00:00",
+          "airTemperatureC": 15.2,
+          "trackTemperatureC": 20.3,
+          "humidity": 56.3,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 3.1,
+          "windDirection": 88
+        },
+        {
+          "timestampUtc": "2026-03-15T08:12:36.498000+00:00",
+          "airTemperatureC": 15.2,
+          "trackTemperatureC": 20.5,
+          "humidity": 55.9,
+          "rainfall": 0.0,
+          "pressure": 1024.3,
+          "windSpeed": 2.6,
+          "windDirection": 92
+        },
+        {
+          "timestampUtc": "2026-03-15T08:13:36.517000+00:00",
+          "airTemperatureC": 15.1,
+          "trackTemperatureC": 20.5,
+          "humidity": 56.3,
+          "rainfall": 0.0,
+          "pressure": 1024.3,
+          "windSpeed": 3.2,
+          "windDirection": 93
+        },
+        {
+          "timestampUtc": "2026-03-15T08:14:36.491000+00:00",
+          "airTemperatureC": 15.1,
+          "trackTemperatureC": 20.5,
+          "humidity": 56.5,
+          "rainfall": 0.0,
+          "pressure": 1024.3,
+          "windSpeed": 2.7,
+          "windDirection": 88
+        },
+        {
+          "timestampUtc": "2026-03-15T08:15:36.519000+00:00",
+          "airTemperatureC": 15.1,
+          "trackTemperatureC": 20.6,
+          "humidity": 56.5,
+          "rainfall": 0.0,
+          "pressure": 1024.3,
+          "windSpeed": 2.7,
+          "windDirection": 86
+        },
+        {
+          "timestampUtc": "2026-03-15T08:16:36.529000+00:00",
+          "airTemperatureC": 15.1,
+          "trackTemperatureC": 20.3,
+          "humidity": 56.3,
+          "rainfall": 0.0,
+          "pressure": 1024.2,
+          "windSpeed": 3.3,
+          "windDirection": 91
+        },
+        {
+          "timestampUtc": "2026-03-15T08:17:36.545000+00:00",
+          "airTemperatureC": 15.1,
+          "trackTemperatureC": 20.4,
+          "humidity": 56.6,
+          "rainfall": 0.0,
+          "pressure": 1024.3,
+          "windSpeed": 2.7,
+          "windDirection": 61
+        },
+        {
+          "timestampUtc": "2026-03-15T08:18:36.542000+00:00",
+          "airTemperatureC": 15.1,
+          "trackTemperatureC": 20.4,
+          "humidity": 56.6,
+          "rainfall": 0.0,
+          "pressure": 1024.3,
+          "windSpeed": 2.7,
+          "windDirection": 61
+        },
+        {
+          "timestampUtc": "2026-03-15T08:19:36.547000+00:00",
+          "airTemperatureC": 15.1,
+          "trackTemperatureC": 20.4,
+          "humidity": 56.9,
+          "rainfall": 0.0,
+          "pressure": 1024.3,
+          "windSpeed": 3.3,
+          "windDirection": 77
+        },
+        {
+          "timestampUtc": "2026-03-15T08:20:36.563000+00:00",
+          "airTemperatureC": 15.1,
+          "trackTemperatureC": 20.5,
+          "humidity": 56.5,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 3.9,
+          "windDirection": 81
+        },
+        {
+          "timestampUtc": "2026-03-15T08:21:36.564000+00:00",
+          "airTemperatureC": 15.1,
+          "trackTemperatureC": 20.2,
+          "humidity": 57.0,
+          "rainfall": 0.0,
+          "pressure": 1024.3,
+          "windSpeed": 2.5,
+          "windDirection": 83
+        },
+        {
+          "timestampUtc": "2026-03-15T08:22:36.552000+00:00",
+          "airTemperatureC": 15.1,
+          "trackTemperatureC": 20.2,
+          "humidity": 56.9,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 3.3,
+          "windDirection": 77
+        },
+        {
+          "timestampUtc": "2026-03-15T08:23:36.583000+00:00",
+          "airTemperatureC": 15.1,
+          "trackTemperatureC": 20.0,
+          "humidity": 57.2,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 2.8,
+          "windDirection": 87
+        },
+        {
+          "timestampUtc": "2026-03-15T08:24:36.583000+00:00",
+          "airTemperatureC": 15.0,
+          "trackTemperatureC": 20.1,
+          "humidity": 57.4,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.4,
+          "windDirection": 91
+        },
+        {
+          "timestampUtc": "2026-03-15T08:25:36.588000+00:00",
+          "airTemperatureC": 15.0,
+          "trackTemperatureC": 20.2,
+          "humidity": 57.4,
+          "rainfall": 0.0,
+          "pressure": 1024.4,
+          "windSpeed": 2.0,
+          "windDirection": 93
+        },
+        {
+          "timestampUtc": "2026-03-15T08:26:36.568000+00:00",
+          "airTemperatureC": 15.0,
+          "trackTemperatureC": 20.3,
+          "humidity": 57.5,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 3.0,
+          "windDirection": 76
+        },
+        {
+          "timestampUtc": "2026-03-15T08:27:36.608000+00:00",
+          "airTemperatureC": 15.0,
+          "trackTemperatureC": 20.2,
+          "humidity": 57.3,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 2.9,
+          "windDirection": 77
+        },
+        {
+          "timestampUtc": "2026-03-15T08:28:36.598000+00:00",
+          "airTemperatureC": 15.0,
+          "trackTemperatureC": 20.1,
+          "humidity": 57.4,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 3.1,
+          "windDirection": 84
+        },
+        {
+          "timestampUtc": "2026-03-15T08:29:36.597000+00:00",
+          "airTemperatureC": 15.0,
+          "trackTemperatureC": 20.1,
+          "humidity": 57.4,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 3.1,
+          "windDirection": 84
+        },
+        {
+          "timestampUtc": "2026-03-15T08:30:36.581000+00:00",
+          "airTemperatureC": 14.9,
+          "trackTemperatureC": 20.0,
+          "humidity": 57.3,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 4.1,
+          "windDirection": 95
+        },
+        {
+          "timestampUtc": "2026-03-15T08:31:36.592000+00:00",
+          "airTemperatureC": 14.9,
+          "trackTemperatureC": 20.0,
+          "humidity": 57.6,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 3.0,
+          "windDirection": 85
+        },
+        {
+          "timestampUtc": "2026-03-15T08:32:36.630000+00:00",
+          "airTemperatureC": 15.0,
+          "trackTemperatureC": 19.9,
+          "humidity": 57.4,
+          "rainfall": 0.0,
+          "pressure": 1024.7,
+          "windSpeed": 2.5,
+          "windDirection": 93
+        },
+        {
+          "timestampUtc": "2026-03-15T08:33:36.635000+00:00",
+          "airTemperatureC": 15.0,
+          "trackTemperatureC": 20.0,
+          "humidity": 57.4,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 2.4,
+          "windDirection": 84
+        },
+        {
+          "timestampUtc": "2026-03-15T08:34:36.631000+00:00",
+          "airTemperatureC": 15.0,
+          "trackTemperatureC": 19.9,
+          "humidity": 57.3,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 2.2,
+          "windDirection": 67
+        },
+        {
+          "timestampUtc": "2026-03-15T08:35:36.649000+00:00",
+          "airTemperatureC": 15.0,
+          "trackTemperatureC": 20.1,
+          "humidity": 57.5,
+          "rainfall": 0.0,
+          "pressure": 1024.6,
+          "windSpeed": 2.8,
+          "windDirection": 86
+        },
+        {
+          "timestampUtc": "2026-03-15T08:36:36.641000+00:00",
+          "airTemperatureC": 15.0,
+          "trackTemperatureC": 19.9,
+          "humidity": 57.5,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 3.1,
+          "windDirection": 97
+        },
+        {
+          "timestampUtc": "2026-03-15T08:37:36.636000+00:00",
+          "airTemperatureC": 14.9,
+          "trackTemperatureC": 19.7,
+          "humidity": 57.5,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 2.3,
+          "windDirection": 112
+        },
+        {
+          "timestampUtc": "2026-03-15T08:38:36.635000+00:00",
+          "airTemperatureC": 14.9,
+          "trackTemperatureC": 19.9,
+          "humidity": 57.7,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 3.3,
+          "windDirection": 92
+        },
+        {
+          "timestampUtc": "2026-03-15T08:39:36.643000+00:00",
+          "airTemperatureC": 14.9,
+          "trackTemperatureC": 19.9,
+          "humidity": 57.8,
+          "rainfall": 0.0,
+          "pressure": 1024.5,
+          "windSpeed": 3.3,
+          "windDirection": 79
+        }
+      ]
     }
   }
 }
