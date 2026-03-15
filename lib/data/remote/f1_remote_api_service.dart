@@ -1,88 +1,54 @@
+
 import 'dart:convert';
-
-import 'package:http/http.dart' as http;
-
+import 'package:flutter/services.dart' show rootBundle;
 import '../local/models/race_result.dart';
 
-class F1RemoteApiService {
-  /// Placeholder remote service.
-  ///
-  /// The default implementation reads Jolpica/Ergast-compatible JSON so the
-  /// repository can be wired immediately, but this class is isolated so you can
-  /// swap in OpenF1-specific endpoints later without touching cache logic.
-  F1RemoteApiService({
-    http.Client? client,
-    this.ergastBaseUrl = 'https://api.jolpi.ca/ergast/f1',
-  }) : _client = client ?? http.Client();
 
-  final http.Client _client;
-  final String ergastBaseUrl;
+class F1RemoteApiService {
+  F1RemoteApiService();
+
 
   Future<List<RaceResult>> fetchRaceResults({
     required int season,
     required int round,
   }) async {
-    final uri = Uri.parse('$ergastBaseUrl/$season/$round/results.json');
-    final response = await _client.get(uri);
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw RemoteDataException(
-        'Failed to fetch race results for season $season round $round.',
-      );
+    final assetPath = 'assets/data/results/${season}_$round.json';
+    try {
+      final jsonString = await rootBundle.loadString(assetPath);
+      return _parseLocalResults(jsonString, season: season, round: round);
+    } catch (e) {
+      throw RemoteDataException('Failed to load local results for $season round $round: $e');
     }
-
-    return _parseErgastResults(
-      response.body,
-      fallbackSeason: season,
-      fallbackRound: round,
-    );
   }
+
 
   Future<List<RaceResult>> fetchLatestRaceResults() async {
-    final uri = Uri.parse('$ergastBaseUrl/current/last/results.json');
-    final response = await _client.get(uri);
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw const RemoteDataException('Failed to fetch latest race results.');
-    }
-
-    return _parseErgastResults(response.body);
+    // Zoek het laatste beschikbare bestand in assets/data/results/
+    // Dit vereist dat je een lijst van beschikbare races bijhoudt, of een conventie gebruikt.
+    // Hier een simpele placeholder die altijd 2025_22.json probeert te laden:
+    const latestSeason = 2025;
+    const latestRound = 22;
+    return fetchRaceResults(season: latestSeason, round: latestRound);
   }
 
-  List<RaceResult> _parseErgastResults(
-    String body, {
-    int? fallbackSeason,
-    int? fallbackRound,
-  }) {
-    final decoded = jsonDecode(body) as Map<String, dynamic>;
-    final mrData = decoded['MRData'] as Map<String, dynamic>? ?? const {};
-    final raceTable = mrData['RaceTable'] as Map<String, dynamic>? ?? const {};
-    final races = (raceTable['Races'] as List<dynamic>? ?? const [])
-        .cast<Map<String, dynamic>>();
 
-    if (races.isEmpty) {
+  List<RaceResult> _parseLocalResults(
+    String body, {
+    required int season,
+    required int round,
+  }) {
+    final decoded = jsonDecode(body);
+    if (decoded is List) {
+      // Verwacht een lijst van resultaten direct
+      return decoded.map<RaceResult>((json) => RaceResult.fromJson(json)).toList(growable: false);
+    } else if (decoded is Map<String, dynamic> && decoded['results'] is List) {
+      // Of een object met een 'results' key
+      return (decoded['results'] as List)
+          .map<RaceResult>((json) => RaceResult.fromJson(json))
+          .toList(growable: false);
+    } else {
       return const <RaceResult>[];
     }
-
-    final race = races.first;
-    final season =
-        int.tryParse((race['season'] ?? fallbackSeason ?? 0).toString()) ?? 0;
-    final round =
-        int.tryParse((race['round'] ?? fallbackRound ?? 0).toString()) ?? 0;
-    final grandPrixName = (race['raceName'] ?? '').toString();
-    final results = (race['Results'] as List<dynamic>? ?? const [])
-        .cast<Map<String, dynamic>>();
-
-    return results
-        .map(
-          (json) => RaceResult.fromErgastJson(
-            json,
-            season: season,
-            round: round,
-            grandPrixName: grandPrixName,
-          ),
-        )
-        .toList(growable: false);
   }
 }
 

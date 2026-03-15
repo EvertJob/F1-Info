@@ -643,9 +643,11 @@ class RaceDataFetcher {
       final enrichedRows = await _fetchOpenF1RaceRows(metadata);
       if (enrichedRows.isNotEmpty) {
         return enrichedRows;
+      } else {
+        stdout.writeln('[INFO] Geen OpenF1 resultaten gevonden voor ${metadata.season} ronde ${metadata.round}.');
       }
-    } catch (_) {
-      // Fall back to Jolpica-only formatting when OpenF1 is unavailable.
+    } catch (e) {
+      stdout.writeln('[INFO] OpenF1 data niet beschikbaar (${e.runtimeType}): fallback naar Jolpica.');
     }
 
     List results = [];
@@ -653,6 +655,9 @@ class RaceDataFetcher {
       results = _requireList(metadata.rawRace, 'Results');
     } catch (_) {
       results = [];
+    }
+    if (results.isEmpty) {
+      stdout.writeln('[INFO] Geen Jolpica/Ergast resultaten gevonden voor ${metadata.season} ronde ${metadata.round}.');
     }
     return results
         .map(
@@ -881,6 +886,15 @@ class RaceDataFetcher {
               .map((detail) => detail.servedLap)
               .whereType<int>()
               .toList(growable: false);
+
+          // Logging voor ontbrekende banden/pit data
+          final driverName = driverNumber == null ? '-' : (driverNames[driverNumber] ?? '-');
+          if (driverNumber != null && (tyreStints.isEmpty)) {
+            stdout.writeln('[WAARSCHUWING] Geen tyre stints voor $driverName ($driverNumber)');
+          }
+          if (driverNumber != null && (pitEventsByDriver[driverNumber] == null || (pitEventsByDriver[driverNumber]?.isEmpty ?? true))) {
+            stdout.writeln('[WAARSCHUWING] Geen pitstops voor $driverName ($driverNumber)');
+          }
 
           return AppRaceResultRow(
             driver: driverNumber == null

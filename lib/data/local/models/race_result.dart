@@ -1,4 +1,6 @@
-import 'package:hive/hive.dart';
+
+
+  import 'package:hive/hive.dart';
 
 class RaceResultFields {
   static const int season = 0;
@@ -13,6 +15,7 @@ class RaceResultFields {
   static const int status = 9;
   static const int fastestLap = 10;
 }
+
 
 class RaceResult {
   /// Normalized race result row used by both Hive and the repository layer.
@@ -41,6 +44,24 @@ class RaceResult {
   final double points;
   final String status;
   final bool fastestLap;
+
+  factory RaceResult.fromJson(Map<String, dynamic> json) {
+    return RaceResult(
+      season: json['season'] as int? ?? 0,
+      round: json['round'] as int? ?? 0,
+      grandPrixName: json['grandPrixName'] as String? ?? '',
+      sessionName: json['sessionName'] as String? ?? 'Race',
+      driverCode: json['driverCode'] as String? ?? '',
+      driverName: json['driverName'] as String? ?? '',
+      teamName: json['teamName'] as String? ?? '',
+      position: json['position'] as int? ?? 0,
+      points: (json['points'] is int)
+          ? (json['points'] as int).toDouble()
+          : (json['points'] as num?)?.toDouble() ?? 0.0,
+      status: json['status'] as String? ?? '',
+      fastestLap: json['fastestLap'] as bool? ?? false,
+    );
+  }
 
   factory RaceResult.fromErgastJson(
     Map<String, dynamic> json, {

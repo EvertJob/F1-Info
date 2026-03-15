@@ -1,12 +1,13 @@
+
+import 'dart:async';
+import 'dart:convert';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:async';
-import 'dart:convert';
-import 'dart:math' as math;
-import 'dart:ui' as ui;
 import 'package:http/http.dart' as http;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
@@ -17,6 +18,24 @@ import 'data/local/hive/hive_bootstrap.dart';
 import 'browser_bridge.dart' as browser_bridge;
 
 part 'f1_data.dart';
+
+// Normalizes driver names for lookup (diacritics, special chars, etc.)
+String _normalizeDriverLookupName(String value) {
+  final replacements = <String, String>{
+    'ß': 'ss',
+    'ý': 'y',
+    'ÿ': 'y',
+    'ř': 'r',
+    'š': 's',
+    'č': 'c',
+    'ž': 'z',
+  };
+  var normalized = value.trim().toLowerCase();
+  replacements.forEach((source, target) {
+    normalized = normalized.replaceAll(source, target);
+  });
+  return normalized.replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();
+}
 
 @immutable
 class F1ThemeTokens extends ThemeExtension<F1ThemeTokens> {
@@ -58,93 +77,78 @@ class F1ThemeTokens extends ThemeExtension<F1ThemeTokens> {
   @override
   F1ThemeTokens lerp(ThemeExtension<F1ThemeTokens>? other, double t) {
     if (other is! F1ThemeTokens) return this;
-
     return F1ThemeTokens(
-      panel: Color.lerp(panel, other.panel, t) ?? panel,
-      panelStrong: Color.lerp(panelStrong, other.panelStrong, t) ?? panelStrong,
-      outline: Color.lerp(outline, other.outline, t) ?? outline,
-      accentSoft: Color.lerp(accentSoft, other.accentSoft, t) ?? accentSoft,
-      heroStart: Color.lerp(heroStart, other.heroStart, t) ?? heroStart,
-      heroEnd: Color.lerp(heroEnd, other.heroEnd, t) ?? heroEnd,
+      panel: Color.lerp(panel, other.panel, t)!,
+      panelStrong: Color.lerp(panelStrong, other.panelStrong, t)!,
+      outline: Color.lerp(outline, other.outline, t)!,
+      accentSoft: Color.lerp(accentSoft, other.accentSoft, t)!,
+      heroStart: Color.lerp(heroStart, other.heroStart, t)!,
+      heroEnd: Color.lerp(heroEnd, other.heroEnd, t)!,
     );
   }
 }
 
-class AppTheme {
-  static const Color _primary = Color(0xFF2EA6FF);
-  static const Color _secondary = Color(0xFFFF5A36);
-  static const Color _tertiary = Color(0xFFFFC857);
+abstract final class AppTheme {
+  static const Color _primary = Color(0xFFE10600);
 
-  static final ThemeData lightTheme = _buildTheme(brightness: Brightness.light);
-  static final ThemeData darkTheme = _buildTheme(brightness: Brightness.dark);
+  static ThemeData get lightTheme => _buildTheme(
+        base: ThemeData.light(),
+        isDark: false,
+        tokens: const F1ThemeTokens(
+          panel: Color(0xFFF8FAFD),
+          panelStrong: Color(0xFFFFFFFF),
+          outline: Color(0xFFDCE3ED),
+          accentSoft: Color(0x1A2EA6FF),
+          heroStart: Color(0xFFFFFFFF),
+          heroEnd: Color(0xFFEAF5FF),
+        ),
+      );
 
-  static ThemeData _buildTheme({required Brightness brightness}) {
-    final bool isDark = brightness == Brightness.dark;
-    final ColorScheme scheme =
-        ColorScheme.fromSeed(
-          seedColor: _primary,
-          brightness: brightness,
-        ).copyWith(
-          primary: _primary,
-          secondary: _secondary,
-          tertiary: _tertiary,
-          surface: isDark ? const Color(0xFF11141B) : const Color(0xFFFFFFFF),
-          surfaceContainerHighest: isDark
-              ? const Color(0xFF1A1F29)
-              : const Color(0xFFF3F6FB),
-          onSurface: isDark ? const Color(0xFFF4F7FB) : const Color(0xFF11151C),
-          onSurfaceVariant: isDark
-              ? const Color(0xFFAAB6C8)
-              : const Color(0xFF5F6B7A),
-          outline: isDark ? const Color(0xFF2A3340) : const Color(0xFFD8E0EA),
-        );
+  static ThemeData get darkTheme => _buildTheme(
+        base: ThemeData.dark(),
+        isDark: true,
+        tokens: const F1ThemeTokens(
+          panel: Color(0xFF1C2330),
+          panelStrong: Color(0xFF202733),
+          outline: Color(0xFF323B4A),
+          accentSoft: Color(0x332EA6FF),
+          heroStart: Color(0xFF202733),
+          heroEnd: Color(0xFF161A22),
+        ),
+      );
 
-    final F1ThemeTokens tokens = F1ThemeTokens(
-      panel: isDark ? const Color(0xFF171C25) : const Color(0xFFF8FAFD),
-      panelStrong: isDark ? const Color(0xFF1D2430) : const Color(0xFFFFFFFF),
-      outline: isDark ? const Color(0xFF2D3745) : const Color(0xFFDCE3ED),
-      accentSoft: isDark
-          ? _primary.withValues(alpha: 0.16)
-          : _primary.withValues(alpha: 0.10),
-      heroStart: isDark ? const Color(0xFF131923) : const Color(0xFFFFFFFF),
-      heroEnd: isDark ? const Color(0xFF112841) : const Color(0xFFEAF5FF),
-    );
-
-    final ThemeData base = ThemeData(
-      useMaterial3: true,
-      brightness: brightness,
-      colorScheme: scheme,
-      scaffoldBackgroundColor: isDark
-          ? const Color(0xFF090C12)
-          : const Color(0xFFF2F5FA),
-      visualDensity: VisualDensity.standard,
-    );
-
-    final TextTheme textTheme = base.textTheme.copyWith(
-      titleLarge: base.textTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.w800,
-        letterSpacing: 1.1,
-        color: scheme.onSurface,
-      ),
-      titleMedium: base.textTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.w700,
-        color: scheme.onSurface,
-      ),
+  static ThemeData _buildTheme({
+    required ThemeData base,
+    required bool isDark,
+    required F1ThemeTokens tokens,
+  }) {
+    final scheme = base.colorScheme;
+    final textTheme = base.textTheme.copyWith(
+      displayLarge: base.textTheme.displayLarge?.copyWith(fontFamily: 'TitilliumWeb'),
+      displayMedium: base.textTheme.displayMedium?.copyWith(fontFamily: 'TitilliumWeb'),
+      displaySmall: base.textTheme.displaySmall?.copyWith(fontFamily: 'TitilliumWeb'),
+      headlineLarge: base.textTheme.headlineLarge?.copyWith(fontFamily: 'TitilliumWeb'),
+      headlineMedium: base.textTheme.headlineMedium?.copyWith(fontFamily: 'TitilliumWeb'),
+      headlineSmall: base.textTheme.headlineSmall?.copyWith(fontFamily: 'TitilliumWeb'),
+      titleLarge: base.textTheme.titleLarge?.copyWith(fontFamily: 'TitilliumWeb'),
+      titleMedium: base.textTheme.titleMedium?.copyWith(fontFamily: 'TitilliumWeb'),
+      titleSmall: base.textTheme.titleSmall?.copyWith(fontFamily: 'TitilliumWeb'),
       bodyLarge: base.textTheme.bodyLarge?.copyWith(
-        height: 1.35,
         color: scheme.onSurface,
+        fontFamily: 'TitilliumWeb',
       ),
-      bodyMedium: base.textTheme.bodyMedium?.copyWith(
-        height: 1.35,
-        color: scheme.onSurface,
-      ),
+      bodyMedium: base.textTheme.bodyMedium?.copyWith(fontFamily: 'TitilliumWeb'),
       bodySmall: base.textTheme.bodySmall?.copyWith(
         color: scheme.onSurfaceVariant,
+        fontFamily: 'TitilliumWeb',
       ),
       labelLarge: base.textTheme.labelLarge?.copyWith(
         fontWeight: FontWeight.w700,
         letterSpacing: 0.5,
+        fontFamily: 'TitilliumWeb',
       ),
+      labelMedium: base.textTheme.labelMedium?.copyWith(fontFamily: 'TitilliumWeb'),
+      labelSmall: base.textTheme.labelSmall?.copyWith(fontFamily: 'TitilliumWeb'),
     );
 
     return base.copyWith(
@@ -3004,6 +3008,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await HiveBootstrap.initialize();
   await SessionDataManager().init(races);
+  // Preload all JSON files in the background (do not await)
+  // This ensures all race/session data is loaded without blocking the UI
+  // ignore: unawaited_futures
+  SessionDataManager().fetchAllData();
   runApp(const F1HubApp());
 }
 
@@ -4209,216 +4217,152 @@ Future<DriverStandingsChartData?> _fetchDriverStandingsChartData(int year) {
 Future<DriverStandingsChartData?> _loadDriverStandingsChartData(
   int year,
 ) async {
-  final assetData = await _loadDriverStandingsChartDataFromAsset(year);
-  if (assetData != null) {
-    return assetData;
-  }
-  return _loadDriverStandingsChartDataFromApi(year);
+  return _loadDriverStandingsChartDataFromAsset(year);
 }
 
 Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromAsset(
   int year,
 ) async {
   try {
-    final raw = await rootBundle.loadString(
-      'data/results/driver_comparison_stats_2017_2025.json',
-    );
-    final decoded = jsonDecode(raw) as Map<String, dynamic>;
-    final years =
-        decoded['years'] as Map<String, dynamic>? ?? const <String, dynamic>{};
-    final yearData = years['$year'] as Map<String, dynamic>?;
-    if (yearData == null) {
-      return null;
-    }
-
-    final drivers =
-        yearData['drivers'] as Map<String, dynamic>? ??
-        const <String, dynamic>{};
-    final series = <DriverStandingsChartSeries>[];
-    var maxPoints = 0.0;
-
-    var index = 0;
-    for (final entry in drivers.entries) {
-      final stats = SeasonalDriverComparisonStats.fromJson(
-        (entry.value as Map).map(
-          (key, value) => MapEntry(key.toString(), value),
-        ),
-      );
-      if (stats.pointsByRace.isEmpty) {
-        continue;
-      }
-      maxPoints = math.max(maxPoints, stats.points);
-      series.add(
-        DriverStandingsChartSeries(
-          driverName: entry.key,
-          pointsByRace: stats.pointsByRace,
-          color: _chartColorForDriver(entry.key, year, index),
-        ),
-      );
-      index += 1;
-    }
-
-    if (series.isEmpty) {
-      return null;
-    }
-
-    series.sort(
-      (left, right) =>
-          (right.pointsByRace.isEmpty ? 0.0 : right.pointsByRace.last.points)
-              .compareTo(
-                left.pointsByRace.isEmpty ? 0.0 : left.pointsByRace.last.points,
-              ),
-    );
-    final labels = _buildCircuitLabels(series);
-
-    return DriverStandingsChartData(
-      year: year,
-      circuitLabels: labels,
-      series: series,
-      maxPoints: maxPoints <= 0 ? 1 : maxPoints,
-    );
-  } catch (_) {
-    return null;
-  }
-}
-
-Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromApi(
-  int year,
-) async {
-  try {
-    final standingsResponse = await http
-        .get(
-          Uri.parse(
-            'https://api.jolpi.ca/ergast/f1/$year/driverStandings.json',
-          ),
-        )
-        .timeout(const Duration(seconds: 6));
-    final resultsResponse = await http
-        .get(
-          Uri.parse(
-            'https://api.jolpi.ca/ergast/f1/$year/results.json?limit=1000',
-          ),
-        )
-        .timeout(const Duration(seconds: 6));
-
-    if (standingsResponse.statusCode != 200 ||
-        resultsResponse.statusCode != 200) {
-      return null;
-    }
-
-    final standingsData =
-        jsonDecode(standingsResponse.body) as Map<String, dynamic>;
-    final standingsLists =
-        standingsData['MRData']?['StandingsTable']?['StandingsLists']
-            as List? ??
-        const <dynamic>[];
-    if (standingsLists.isEmpty) {
-      return null;
-    }
-
-    final resultsData =
-        jsonDecode(resultsResponse.body) as Map<String, dynamic>;
-    final races =
-        resultsData['MRData']?['RaceTable']?['Races'] as List? ??
-        const <dynamic>[];
-    final raceNameByRound = <int, String>{
-      for (final race in races.whereType<Map>())
-        if (int.tryParse(race['round']?.toString() ?? '') != null)
-          int.parse(race['round'].toString()):
-              race['raceName']?.toString() ?? '-',
-    };
-    final availableRounds = raceNameByRound.keys.toList()..sort();
-    if (availableRounds.isEmpty) {
-      return null;
-    }
-
-    final seriesByDriver = <String, List<SeasonRacePointsEntry>>{};
-    final displayNameByDriver = <String, String>{};
-    var maxPoints = 0.0;
-
-    for (final round in availableRounds) {
-      final roundResponse = await http
-          .get(
-            Uri.parse(
-              'https://api.jolpi.ca/ergast/f1/$year/$round/driverStandings.json',
-            ),
-          )
-          .timeout(const Duration(seconds: 6));
-      if (roundResponse.statusCode != 200) {
-        continue;
-      }
-
-      final roundData = jsonDecode(roundResponse.body) as Map<String, dynamic>;
-      final roundStandingsLists =
-          roundData['MRData']?['StandingsTable']?['StandingsLists'] as List? ??
-          const <dynamic>[];
-      if (roundStandingsLists.isEmpty) {
-        continue;
-      }
-
-      final driverStandings =
-          roundStandingsLists.first['DriverStandings'] as List? ??
-          const <dynamic>[];
-      for (final entry in driverStandings.whereType<Map>()) {
-        final driverData = entry['Driver'] as Map? ?? const <String, dynamic>{};
-        final givenName = driverData['givenName']?.toString() ?? '';
-        final familyName = driverData['familyName']?.toString() ?? '';
-        final driverName = '$givenName $familyName'.trim();
-        if (driverName.isEmpty) {
-          continue;
+    if (year == 2026) {
+      final raw = await rootBundle.loadString('data/results/drivers_standings_2026.json');
+      final List<dynamic> data = jsonDecode(raw);
+      // Map: driver_number -> driverName
+      final Map<int, String> driverNumberToName = {};
+      // Try to get driver names from driversData[2026] if available
+      if (driversData.containsKey(2026)) {
+        for (final driver in driversData[2026]!) {
+          driverNumberToName[driver.number] = driver.name;
         }
-        final normalizedName = _normalizeDriverLookupName(driverName);
-        final points =
-            double.tryParse(entry['points']?.toString() ?? '') ?? 0.0;
-        maxPoints = math.max(maxPoints, points);
-        displayNameByDriver[normalizedName] = driverName;
-        seriesByDriver
-            .putIfAbsent(normalizedName, () => <SeasonRacePointsEntry>[])
-            .add(
-              SeasonRacePointsEntry(
-                round: round,
-                raceName: raceNameByRound[round] ?? '-',
-                points: points,
-              ),
-            );
       }
-    }
-
-    if (seriesByDriver.isEmpty) {
-      return null;
-    }
-
-    final normalizedNames = seriesByDriver.keys.toList()
-      ..sort(
-        (left, right) => (seriesByDriver[right]?.last.points ?? 0).compareTo(
-          seriesByDriver[left]?.last.points ?? 0,
-        ),
-      );
-    final series = <DriverStandingsChartSeries>[];
-    for (var index = 0; index < normalizedNames.length; index++) {
-      final normalizedName = normalizedNames[index];
-      final driverName = displayNameByDriver[normalizedName] ?? normalizedName;
-      final pointsByRace =
-          seriesByDriver[normalizedName] ?? const <SeasonRacePointsEntry>[];
-      series.add(
-        DriverStandingsChartSeries(
+      // Group by session_key (race)
+      final Map<int, List<Map<String, dynamic>>> bySession = {};
+      for (final entry in data) {
+        final map = entry as Map<String, dynamic>;
+        final sessionKey = map['session_key'] as int?;
+        if (sessionKey != null) {
+          bySession.putIfAbsent(sessionKey, () => []).add(map);
+        }
+      }
+      // Sort sessions by session_key (assume chronological)
+      final sessionKeys = bySession.keys.toList()..sort();
+      // Build driver points progression
+      final Map<String, List<SeasonRacePointsEntry>> driverPointsByRace = {};
+      final Map<String, double> driverTotalPoints = {};
+      int round = 1;
+      for (final sessionKey in sessionKeys) {
+        final raceEntries = bySession[sessionKey]!;
+        for (final entry in raceEntries) {
+          final driverNumber = entry['driver_number'];
+          if (driverNumber == null) continue;
+          final driverName = driverNumberToName[driverNumber] ?? 'Driver $driverNumber';
+          final points = (entry['points_current'] as num?)?.toDouble() ?? 0.0;
+          final raceName = 'Race $round';
+          driverPointsByRace.putIfAbsent(driverName, () => []);
+          driverPointsByRace[driverName]!.add(SeasonRacePointsEntry(
+            round: round,
+            raceName: raceName,
+            points: points,
+          ));
+          driverTotalPoints[driverName] = points;
+        }
+        round++;
+      }
+      // Build chart series
+      final List<DriverStandingsChartSeries> series = [];
+      double maxPoints = 0.0;
+      int index = 0;
+      for (final entry in driverPointsByRace.entries) {
+        final driverName = entry.key;
+        final pointsByRace = entry.value;
+        final totalPoints = driverTotalPoints[driverName] ?? 0.0;
+        maxPoints = math.max(maxPoints, totalPoints);
+        series.add(DriverStandingsChartSeries(
           driverName: driverName,
           pointsByRace: pointsByRace,
           color: _chartColorForDriver(driverName, year, index),
-        ),
+        ));
+        index++;
+      }
+      if (series.isEmpty) {
+        return null;
+      }
+      series.sort((left, right) =>
+        (right.pointsByRace.isEmpty ? 0.0 : right.pointsByRace.last.points)
+          .compareTo(left.pointsByRace.isEmpty ? 0.0 : left.pointsByRace.last.points));
+      final labels = [for (var i = 1; i < round; i++) 'R$i'];
+      return DriverStandingsChartData(
+        year: year,
+        circuitLabels: labels,
+        series: series,
+        maxPoints: maxPoints <= 0 ? 1 : maxPoints,
+      );
+    } else {
+      final raw = await rootBundle.loadString(
+        'data/results/driver_comparison_stats_2017_2025.json',
+      );
+      final decoded = jsonDecode(raw) as Map<String, dynamic>;
+      final years =
+          decoded['years'] as Map<String, dynamic>? ?? const <String, dynamic>{};
+      final yearData = years['$year'] as Map<String, dynamic>?;
+      if (yearData == null) {
+        return null;
+      }
+
+      final drivers =
+          yearData['drivers'] as Map<String, dynamic>? ??
+          const <String, dynamic>{};
+      final series = <DriverStandingsChartSeries>[];
+      var maxPoints = 0.0;
+
+      var index = 0;
+      for (final entry in drivers.entries) {
+        final stats = SeasonalDriverComparisonStats.fromJson(
+          (entry.value as Map).map(
+            (key, value) => MapEntry(key.toString(), value),
+          ),
+        );
+        if (stats.pointsByRace.isEmpty) {
+          continue;
+        }
+        maxPoints = math.max(maxPoints, stats.points);
+        series.add(
+          DriverStandingsChartSeries(
+            driverName: entry.key,
+            pointsByRace: stats.pointsByRace,
+            color: _chartColorForDriver(entry.key, year, index),
+          ),
+        );
+        index += 1;
+      }
+
+      if (series.isEmpty) {
+        return null;
+      }
+
+      series.sort(
+        (left, right) =>
+            (right.pointsByRace.isEmpty ? 0.0 : right.pointsByRace.last.points)
+                .compareTo(
+                  left.pointsByRace.isEmpty ? 0.0 : left.pointsByRace.last.points,
+                ),
+      );
+      final labels = _buildCircuitLabels(series);
+
+      return DriverStandingsChartData(
+        year: year,
+        circuitLabels: labels,
+        series: series,
+        maxPoints: maxPoints <= 0 ? 1 : maxPoints,
       );
     }
-
-    return DriverStandingsChartData(
-      year: year,
-      circuitLabels: _buildCircuitLabels(series),
-      series: series,
-      maxPoints: maxPoints <= 0 ? 1 : maxPoints,
-    );
   } catch (_) {
     return null;
   }
 }
+
+
+// All API calls removed. Only local data is used.
 
 List<String> _buildCircuitLabels(List<DriverStandingsChartSeries> series) {
   final labelsByRound = <int, String>{};
@@ -4484,65 +4428,20 @@ _readSeasonalDriverComparisonAssetCache() async {
       final drivers =
           yearData['drivers'] as Map<String, dynamic>? ??
           const <String, dynamic>{};
-      resolved[year] = {
-        for (final driverEntry in drivers.entries)
-          _normalizeDriverLookupName(
-            driverEntry.key,
-          ): SeasonalDriverComparisonStats.fromJson(
-            (driverEntry.value as Map).map(
-              (key, value) => MapEntry(key.toString(), value),
-            ),
+      final driverStats = <String, SeasonalDriverComparisonStats>{};
+      for (final entry in drivers.entries) {
+        driverStats[entry.key] = SeasonalDriverComparisonStats.fromJson(
+          (entry.value as Map).map(
+            (key, value) => MapEntry(key.toString(), value),
           ),
-      };
+        );
+      }
+      resolved[year] = driverStats;
     }
-
     return resolved;
   } catch (_) {
-    return const <int, Map<String, SeasonalDriverComparisonStats>>{};
+    return {};
   }
-}
-
-String _normalizeDriverLookupName(String value) {
-  const replacements = <String, String>{
-    'ä': 'a',
-    'á': 'a',
-    'à': 'a',
-    'â': 'a',
-    'å': 'a',
-    'æ': 'ae',
-    'ç': 'c',
-    'é': 'e',
-    'è': 'e',
-    'ê': 'e',
-    'ë': 'e',
-    'í': 'i',
-    'ì': 'i',
-    'î': 'i',
-    'ï': 'i',
-    'ñ': 'n',
-    'ö': 'o',
-    'ó': 'o',
-    'ò': 'o',
-    'ô': 'o',
-    'ø': 'o',
-    'ü': 'u',
-    'ú': 'u',
-    'ù': 'u',
-    'û': 'u',
-    'ß': 'ss',
-    'ý': 'y',
-    'ÿ': 'y',
-    'ř': 'r',
-    'š': 's',
-    'č': 'c',
-    'ž': 'z',
-  };
-
-  var normalized = value.trim().toLowerCase();
-  replacements.forEach((source, target) {
-    normalized = normalized.replaceAll(source, target);
-  });
-  return normalized.replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();
 }
 
 bool _apiDriverEntryMatches(dynamic driverData, String driverName) {
@@ -5162,70 +5061,8 @@ class SessionDataManager extends ChangeNotifier {
       return const <SessionResult>[];
     }
 
-    final response = await http
-        .get(
-          Uri.parse(
-            'https://api.jolpi.ca/ergast/f1/$year/$roundIndex/$endpoint.json',
-          ),
-        )
-        .timeout(const Duration(seconds: 5));
-
-    if (response.statusCode != 200) {
-      return const <SessionResult>[];
-    }
-
-    final Map<String, dynamic> decoded =
-        jsonDecode(response.body) as Map<String, dynamic>;
-    final List<dynamic> racesData =
-        (((decoded['MRData'] as Map<String, dynamic>?)?['RaceTable']
-                as Map<String, dynamic>?)?['Races']
-            as List<dynamic>?) ??
-        const <dynamic>[];
-    if (racesData.isEmpty) {
-      return const <SessionResult>[];
-    }
-
-    final Map<String, dynamic> raceData =
-        racesData.first as Map<String, dynamic>;
-    final List<dynamic> rawResults =
-        (raceData[resultsKey] as List<dynamic>?) ?? const <dynamic>[];
-
-    return rawResults
-        .map(
-          (entry) =>
-              _parseSessionResult(entry as Map<String, dynamic>, sessionName),
-        )
-        .toList();
-  }
-
-  SessionResult _parseSessionResult(
-    Map<String, dynamic> entry,
-    String sessionName,
-  ) {
-    final driverData = entry['Driver'] as Map<String, dynamic>?;
-    final givenName = driverData?['givenName']?.toString() ?? '';
-    final familyName = driverData?['familyName']?.toString() ?? '';
-    final driverName = '$givenName $familyName'.trim();
-
-    String time = '-';
-    if (sessionName == 'Qualifying') {
-      time =
-          entry['Q3']?.toString() ??
-          entry['Q2']?.toString() ??
-          entry['Q1']?.toString() ??
-          entry['status']?.toString() ??
-          '-';
-    } else {
-      final timeData = entry['Time'] as Map<String, dynamic>?;
-      time =
-          timeData?['time']?.toString() ?? entry['status']?.toString() ?? '-';
-    }
-
-    return SessionResult(
-      driver: driverName.isEmpty ? '-' : driverName,
-      time: time,
-      tyre: '',
-    );
+    // API call removed. Only local data is used.
+    return const <SessionResult>[];
   }
 
   String? _endpointForSession(String sessionName) {
@@ -6381,25 +6218,8 @@ class SessionDataManager extends ChangeNotifier {
       }
     }
 
-    final response = await http.get(uri).timeout(const Duration(seconds: 8));
-    _lastOpenF1RequestAt = DateTime.now();
-    if (response.statusCode != 200) {
-      return const <Map<String, dynamic>>[];
-    }
-
-    final decoded = jsonDecode(response.body);
-    if (decoded is! List) {
-      return const <Map<String, dynamic>>[];
-    }
-
-    final result = decoded
-        .whereType<Map>()
-        .map(
-          (entry) => entry.map((key, value) => MapEntry(key.toString(), value)),
-        )
-        .toList();
-    _openF1Cache[cacheKey] = result;
-    return result;
+    // API call removed. Use local data or return empty result.
+    return const <Map<String, dynamic>>[];
   }
 
   Map<int, String> _buildPenaltyMap(List<Map<String, dynamic>> messages) {
@@ -7147,73 +6967,86 @@ class MainNavigation extends StatelessWidget {
                     children: [
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 16, 0, 16),
-                        child: Column(
-                          children: [
-                            Expanded(
-                              child: NavigationRail(
-                                extended: constraints.maxWidth >= 1320,
-                                minExtendedWidth: 188,
-                                selectedIndex: navigationShell.currentIndex,
-                                groupAlignment: -0.8,
-                                labelType: NavigationRailLabelType.none,
-                                leading: Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 44,
-                                        height: 44,
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary
-                                              .withValues(alpha: 0.12),
-                                          borderRadius: BorderRadius.circular(
-                                            14,
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          Icons.speed_rounded,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.primary,
-                                        ),
-                                      ),
-                                      if (constraints.maxWidth >= 1320) ...[
-                                        const SizedBox(height: 10),
-                                        Text(
-                                          loc
-                                              .translate('appTitle')
-                                              .toUpperCase(),
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w800,
-                                            letterSpacing: 1.2,
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onSurface,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                                onDestinationSelected: (index) {
-                                  navigationShell.goBranch(index, initialLocation: true);
-                                },
-                                destinations: destinations,
+                        child: Container(
+                          margin: const EdgeInsets.fromLTRB(4, 16, 0, 16),
+                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).extension<F1ThemeTokens>()?.panelStrong,
+                            borderRadius: BorderRadius.circular(22),
+                            border: Border.all(
+                            color: Theme.of(context).extension<F1ThemeTokens>()?.outline.withValues(alpha: 0.7) ?? Colors.grey.withValues(alpha: 0.7),
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                              color: Colors.black.withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.18 : 0.08),
+                                blurRadius: 12,
+                                offset: const Offset(0, 2),
                               ),
-                            ),
-                            const SizedBox(height: 12),
-                            AppSettingsMenuButton(
-                              onSetLocale: F1HubApp.of(context)._setLocale,
-                              onToggleTheme: F1HubApp.of(context)._toggleTheme,
-                            ),
-                          ],
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Expanded(
+                                child: NavigationRail(
+                                  backgroundColor: Colors.transparent,
+                                  extended: constraints.maxWidth >= 1320,
+                                  minExtendedWidth: 188,
+                                  selectedIndex: navigationShell.currentIndex,
+                                  groupAlignment: -0.8,
+                                  labelType: NavigationRailLabelType.none,
+                                  leading: Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          width: 44,
+                                          height: 44,
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                            .withValues(alpha: 0.12),
+                                            borderRadius: BorderRadius.circular(14),
+                                          ),
+                                          child: Icon(
+                                            Icons.speed_rounded,
+                                            color: Theme.of(context).colorScheme.primary,
+                                          ),
+                                        ),
+                                        if (constraints.maxWidth >= 1320) ...[
+                                          const SizedBox(height: 10),
+                                          Text(
+                                            loc.translate('appTitle').toUpperCase(),
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: 1.2,
+                                              color: Theme.of(context).colorScheme.onSurface,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                  onDestinationSelected: (index) {
+                                    navigationShell.goBranch(index, initialLocation: true);
+                                  },
+                                  destinations: destinations,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              AppSettingsMenuButton(
+                                onSetLocale: F1HubApp.of(context)._setLocale,
+                                onToggleTheme: F1HubApp.of(context)._toggleTheme,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      const VerticalDivider(width: 1),
+                      // Removed VerticalDivider to eliminate the line right from the menu
                       Expanded(
                         child: Center(
                           child: ConstrainedBox(
@@ -7255,6 +7088,11 @@ class CircuitsView extends StatefulWidget {
 }
 
 class _CircuitsViewState extends State<CircuitsView> {
+    bool _hasResultsForRace(Race race) {
+      final cacheKey = SessionDataManager().raceResultsKeyFor(race);
+      final cachedResults = SessionDataManager().raceResultsCache[cacheKey];
+      return cachedResults != null && cachedResults.isNotEmpty;
+    }
   static const double _desktopCircuitsBreakpoint = 1100;
   String liveTemp = "--";
   int liveRain = 0;
@@ -7277,6 +7115,18 @@ class _CircuitsViewState extends State<CircuitsView> {
 
   Race _nextRace() {
     final now = DateTime.now();
+    // Zoek eerst een race die vandaag is en 'Ongoing' is
+    final ongoing = races.where((r) {
+      final isToday = r.date.year == now.year && r.date.month == now.month && r.date.day == now.day;
+      final isFinished = r.date.isBefore(now);
+      // 4 uur window voor 'Ongoing' (zoals in _buildCalendarRaceCard)
+      final isOngoing = isToday && !isFinished && (now.difference(r.date).inHours.abs() <= 4);
+      return isOngoing;
+    }).toList();
+    if (ongoing.isNotEmpty) {
+      return ongoing.first;
+    }
+    // Anders: eerstvolgende race in de toekomst
     try {
       return races.firstWhere((r) => r.date.isAfter(now));
     } catch (e) {
@@ -7348,19 +7198,11 @@ class _CircuitsViewState extends State<CircuitsView> {
   Future<void> _fetchLiveWeather() async {
     try {
       await Future.delayed(const Duration(milliseconds: 700));
-      final nextTrack = _nextRace();
-      final res = await http.get(
-        Uri.parse(
-          'https://api.open-meteo.com/v1/forecast?latitude=${nextTrack.lat}&longitude=${nextTrack.lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m&daily=precipitation_probability_max&timezone=auto',
-        ),
-      );
-      if (res.statusCode == 200) {
-        final d = json.decode(res.body);
-        setState(() {
-          liveTemp = d['current']['temperature_2m'].toString();
-          liveRain = d['daily']['precipitation_probability_max'][0];
-        });
-      }
+      // API call removed. Use local data or set default values.
+      setState(() {
+        liveTemp = '-';
+        liveRain = 0;
+      });
     } catch (_) {}
   }
 
@@ -7411,13 +7253,18 @@ class _CircuitsViewState extends State<CircuitsView> {
 
   String _getPodiumString(Race race) {
     final results = _circuitPodiumRows(race);
+    final medals = ['🥇', '🥈', '🥉'];
     if (results.length >= 3) {
-      return results
-          .take(3)
-          .map((row) => row.driver.split(' ').last)
+      final top3 = results.take(3).toList();
+      return top3
+          .asMap()
+          .map((i, row) => MapEntry(i, '${medals[i]} ${row.driver.split(' ').last}'))
+          .values
           .join('  ');
     }
-    return 'Verstappen  Norris  Leclerc';
+    // fallback with medals if not enough results
+    final fallback = ['Verstappen', 'Norris', 'Leclerc'];
+    return List.generate(3, (i) => '${medals[i]} ${fallback[i]}').join('  ');
   }
 
   bool _hasSummerBreakAfter(Race race) {
@@ -7757,91 +7604,81 @@ class _CircuitsViewState extends State<CircuitsView> {
     BuildContext context,
     Race race,
     bool isFinished,
+    bool isOngoing,
     String timeLabel,
   ) {
     final loc = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final statusColor = isFinished
-        ? theme.colorScheme.secondary
-        : theme.colorScheme.primary;
-    final statusLabel = loc.translate(
-      isFinished ? 'session_status_completed' : 'session_status_upcoming',
-    );
-    final statusChip = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: isFinished
-            ? theme.colorScheme.secondary.withValues(alpha: 0.10)
-            : theme.colorScheme.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: isFinished
-              ? theme.colorScheme.secondary.withValues(alpha: 0.24)
-              : theme.colorScheme.primary.withValues(alpha: 0.18),
-        ),
-      ),
-      child: Text(
-        statusLabel,
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w800,
-          color: statusColor,
-        ),
-      ),
-    );
+    final isCancelled = race.name == 'Bahrain Grand Prix' || race.name == 'Saudi Arabian Grand Prix';
+    // statusChip variable removed (no longer used)
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        if (isFinished)
+    final hasResults = _hasResultsForRace(race);
+    final isToday = DateTime.now().year == race.date.year && DateTime.now().month == race.date.month && DateTime.now().day == race.date.day;
+    Widget chip(String label, Color color, Color border, Color textColor) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: border),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: textColor),
+        ),
+      );
+    }
+    if (isFinished && hasResults) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              statusChip,
+              chip('Ended', Colors.green.withOpacity(0.10), Colors.green.withOpacity(0.24), Colors.green),
               const SizedBox(width: 8),
               OutlinedButton(
                 onPressed: () => context.push(_weekendHubPath(race)),
                 style: OutlinedButton.styleFrom(
                   visualDensity: VisualDensity.compact,
                   minimumSize: const Size(0, 32),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  side: BorderSide(color: statusColor.withValues(alpha: 0.24)),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  side: BorderSide(color: Colors.green.withOpacity(0.24)),
                 ),
                 child: Text(
                   loc.translate('results'),
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: statusColor,
-                  ),
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.green),
                 ),
               ),
             ],
-          )
-        else
-          statusChip,
-        const SizedBox(height: 6),
-        Text(
-          isFinished
-              ? _getPodiumString(race)
-              : '${loc.translate('startsIn')} $timeLabel',
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.right,
-          style: TextStyle(
-            fontSize: 11,
-            height: 1.25,
-            fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onSurface.withValues(
-              alpha: isFinished ? 0.86 : 0.78,
-            ),
           ),
-        ),
-      ],
-    );
+          const SizedBox(height: 6),
+          if (race.date.year != 2026)
+            Text(
+              _getPodiumString(race),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: 11,
+                height: 1.25,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.86),
+              ),
+            ),
+        ],
+      );
+    } else if (!isCancelled && (isOngoing || (isToday && !hasResults))) {
+      return chip('Ongoing', Colors.orange.withOpacity(0.10), Colors.orange.withOpacity(0.24), Colors.orange);
+    } else if (!isCancelled && !isFinished) {
+      return chip('${loc.translate('startsIn')} $timeLabel', theme.colorScheme.primary.withOpacity(0.10), theme.colorScheme.primary.withOpacity(0.18), theme.colorScheme.primary);
+    } else if (isCancelled) {
+      return chip('Cancelled', Colors.red.withOpacity(0.08), Colors.red.withOpacity(0.24), Colors.red);
+    } else if (isFinished && !hasResults) {
+      return chip('Ended', Colors.green.withOpacity(0.10), Colors.green.withOpacity(0.24), Colors.green);
+    } else {
+      return chip('Unknown', Colors.grey.withOpacity(0.10), Colors.grey.withOpacity(0.24), Colors.grey);
+    }
   }
 
   Widget _buildFeaturedRaceCard(
@@ -7852,6 +7689,7 @@ class _CircuitsViewState extends State<CircuitsView> {
     final loc = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final tokens = _themeTokens(context);
+    final isCancelled = upcoming.name == 'Bahrain Grand Prix' || upcoming.name == 'Saudi Arabian Grand Prix';
 
     return GestureDetector(
       onTap: () => context.push(_racePath(upcoming)),
@@ -7866,6 +7704,34 @@ class _CircuitsViewState extends State<CircuitsView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Status chip at the top right
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isCancelled
+                        ? Colors.red.withValues(alpha: 0.08)
+                        : theme.colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: isCancelled
+                          ? Colors.red.withValues(alpha: 0.24)
+                          : theme.colorScheme.primary.withValues(alpha: 0.18),
+                      ),
+                    ),
+                    child: Text(
+                      isCancelled ? 'Cancelled' : loc.translate('session_status_upcoming'),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: isCancelled ? Colors.red : theme.colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -7933,20 +7799,24 @@ class _CircuitsViewState extends State<CircuitsView> {
                 height: 30,
                 color: tokens.outline.withValues(alpha: 0.75),
               ),
-              timeStrNext.isEmpty
-                  ? _buildCircuitPodiumPreview(
-                      context,
-                      upcoming,
-                      alignment: CrossAxisAlignment.start,
-                    )
-                  : Text(
-                      '${loc.translate('startsIn')} $timeStrNext',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.secondary,
-                      ),
-                    ),
+              // Only show 'Starts in' if not Bahrain or Saudi Arabian GP
+              if (upcoming.name == 'Bahrain Grand Prix' || upcoming.name == 'Saudi Arabian Grand Prix')
+                const SizedBox.shrink()
+              else if (timeStrNext.isEmpty)
+                _buildCircuitPodiumPreview(
+                  context,
+                  upcoming,
+                  alignment: CrossAxisAlignment.start,
+                )
+              else
+                Text(
+                  '${loc.translate('startsIn')} $timeStrNext',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.secondary,
+                  ),
+                ),
             ],
           ),
         ),
@@ -7958,10 +7828,17 @@ class _CircuitsViewState extends State<CircuitsView> {
     final loc = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final tokens = _themeTokens(context);
-    final isFinished = race.date.difference(DateTime.now()).isNegative;
+    final now = DateTime.now();
+    final isFinished = race.date.isBefore(now);
+    final isOngoing = !isFinished &&
+        now.year == race.date.year &&
+        now.month == race.date.month &&
+        now.day == race.date.day &&
+        (now.difference(race.date).inHours.abs() <= 4); // 4 hour window for 'Ongoing'
+    final isCancelled = race.name == 'Bahrain Grand Prix' || race.name == 'Saudi Arabian Grand Prix';
     final tStr = _timeUntil(race.date, context);
     final showDesktopExtras =
-        MediaQuery.of(context).size.width >= _desktopCircuitsBreakpoint;
+      MediaQuery.of(context).size.width >= _desktopCircuitsBreakpoint;
 
     if (showDesktopExtras) {
       final lastWinner = _recentPreviousWinners(race, count: 1);
@@ -7973,25 +7850,7 @@ class _CircuitsViewState extends State<CircuitsView> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
             decoration: BoxDecoration(
-              gradient: isFinished
-                  ? LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        theme.colorScheme.surfaceContainerHighest.withValues(
-                          alpha: 0.94,
-                        ),
-                        theme.colorScheme.secondaryContainer.withValues(
-                          alpha: 0.52,
-                        ),
-                      ],
-                    )
-                  : LinearGradient(
-                      colors: [
-                        theme.colorScheme.surface.withValues(alpha: 0.94),
-                        theme.colorScheme.surface.withValues(alpha: 0.94),
-                      ],
-                    ),
+              color: Colors.white,
               border: Border(
                 left: isFinished
                     ? BorderSide(
@@ -8005,17 +7864,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                   color: tokens.outline.withValues(alpha: 0.38),
                 ),
               ),
-              boxShadow: isFinished
-                  ? [
-                      BoxShadow(
-                        color: theme.colorScheme.secondary.withValues(
-                          alpha: 0.06,
-                        ),
-                        blurRadius: 14,
-                        offset: const Offset(0, 3),
-                      ),
-                    ]
-                  : null,
+              boxShadow: null,
             ),
             child: Row(
               children: [
@@ -8103,6 +7952,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                       context,
                       race,
                       isFinished,
+                      isOngoing,
                       tStr,
                     ),
                   ),
@@ -8121,8 +7971,7 @@ class _CircuitsViewState extends State<CircuitsView> {
         onTap: () => context.push(_racePath(race)),
         child: Stack(
           children: [
-            if (isFinished)
-              Positioned.fill(child: _buildCompletedRaceBackground(context)),
+            Positioned.fill(child: _buildCompletedRaceBackground(context)),
             Padding(
               padding: const EdgeInsets.all(12),
               child: Row(
@@ -8165,16 +8014,33 @@ class _CircuitsViewState extends State<CircuitsView> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  isFinished
-                      ? _buildCircuitPodiumPreview(context, race)
-                      : Text(
-                          tStr,
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
+                  (() {
+                    final hasResults = _hasResultsForRace(race);
+                    final isToday = DateTime.now().year == race.date.year && DateTime.now().month == race.date.month && DateTime.now().day == race.date.day;
+                    if (race.date.year == 2026) {
+                      if (isCancelled) {
+                        return Text('Cancelled', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.red));
+                      } else if (isOngoing || (isToday && !hasResults)) {
+                        return Text('Ongoing', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.orange));
+                      } else if (isFinished && hasResults) {
+                        return _buildCircuitPodiumPreview(context, race);
+                      } else if (isFinished && !hasResults) {
+                        return Text('Ended', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.green));
+                      } else {
+                        return Text(tStr, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: theme.colorScheme.primary));
+                      }
+                    } else {
+                      if (isFinished && hasResults) {
+                        return _buildCircuitPodiumPreview(context, race);
+                      } else if (isCancelled) {
+                        return Text('Cancelled', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.red));
+                      } else if (isOngoing || (isToday && !hasResults)) {
+                        return Text('Ongoing', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.orange));
+                      } else {
+                        return Text(tStr, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: theme.colorScheme.primary));
+                      }
+                    }
+                  })(),
                 ],
               ),
             ),
@@ -8185,60 +8051,9 @@ class _CircuitsViewState extends State<CircuitsView> {
   }
 
   Widget _buildCompletedRaceBackground(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = _themeTokens(context);
-
     return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.92),
-            tokens.panelStrong.withValues(alpha: 0.8),
-          ],
-        ),
-      ),
-      child: ClipRect(
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Positioned(
-              left: -18,
-              top: -20,
-              child: ImageFiltered(
-                imageFilter: ui.ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                child: Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: theme.colorScheme.primary.withValues(alpha: 0.18),
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              right: -24,
-              bottom: -30,
-              child: ImageFiltered(
-                imageFilter: ui.ImageFilter.blur(sigmaX: 28, sigmaY: 28),
-                child: Container(
-                  width: 140,
-                  height: 140,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: theme.colorScheme.secondary.withValues(alpha: 0.14),
-                  ),
-                ),
-              ),
-            ),
-            BackdropFilter(
-              filter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-              child: ColoredBox(color: Colors.white.withValues(alpha: 0.02)),
-            ),
-          ],
-        ),
+        color: Colors.white,
       ),
     );
   }
@@ -8503,44 +8318,38 @@ class _CircuitsViewState extends State<CircuitsView> {
       );
     }
 
-    return Column(
-      crossAxisAlignment: alignment,
+    // Show all podium drivers on a single line with medals
+    final medals = ['🥇', '🥈', '🥉'];
+    return Row(
       mainAxisSize: MainAxisSize.min,
-      children: podiumRows
-          .map((row) {
-            final position = _extractFinishPosition(row.finish) ?? 0;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 2),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    row.driver.split(' ').last,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(width: 5),
-                  _buildCircuitPodiumMedal(position),
-                ],
+      mainAxisAlignment: alignment == CrossAxisAlignment.end
+          ? MainAxisAlignment.end
+          : MainAxisAlignment.start,
+      children: List.generate(
+        podiumRows.length,
+        (i) => Padding(
+          padding: EdgeInsets.only(right: i < podiumRows.length - 1 ? 12 : 0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                medals[i],
+                style: const TextStyle(fontSize: 13, height: 1),
               ),
-            );
-          })
-          .toList(growable: false),
+              const SizedBox(width: 3),
+              Text(
+                podiumRows[i].driver.split(' ').last,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
-  }
-
-  Widget _buildCircuitPodiumMedal(int position) {
-    final medal = switch (position) {
-      1 => '🥇',
-      2 => '🥈',
-      3 => '🥉',
-      _ => '🏅',
-    };
-
-    return Text(medal, style: const TextStyle(fontSize: 13, height: 1));
   }
 
   @override
@@ -8643,73 +8452,90 @@ class _StandingsViewState extends State<StandingsView> {
   }
 
   Future<void> _fetchStandings({bool forceRefresh = false}) async {
-    final prefs = await SharedPreferences.getInstance();
-    final cacheKeyDrivers = 'api_drivers_cache_$_selectedYear';
-    final cacheKeyTeams = 'api_teams_cache_$_selectedYear';
-    final cacheTimeKey = 'api_cache_time_$_selectedYear';
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final lastFetch = prefs.getInt(cacheTimeKey) ?? 0;
-
-    if (!forceRefresh && now - lastFetch < 24 * 60 * 60 * 1000) {
-      final cachedD = prefs.getString(cacheKeyDrivers);
-      final cachedT = prefs.getString(cacheKeyTeams);
-      if (cachedD != null && cachedT != null) {
-        try {
-          _processStandingsData(json.decode(cachedD), json.decode(cachedT));
-          return;
-        } catch (_) {}
-      }
-    }
-
-    setState(() => _isLoading = true);
-    try {
-      await Future.delayed(const Duration(milliseconds: 700));
-      final driverRes = await http
-          .get(
-            Uri.parse(
-              'https://api.jolpi.ca/ergast/f1/$_selectedYear/driverStandings.json',
+    if (_selectedYear == 2026 && widget.isDriverView) {
+      setState(() => _isLoading = true);
+      try {
+        final raw = await DefaultAssetBundle.of(context).loadString('data/results/drivers_standings_2026.json');
+        final jsonData = json.decode(raw);
+        final standings = jsonData['standings'] as List<dynamic>;
+        final localDrivers = driversData[2026] ?? [];
+        List<Driver> mergedDrivers = [];
+        for (final entry in standings) {
+          final name = entry['driver'] as String;
+          final points = (entry['points'] as num).toDouble();
+          final local = localDrivers.firstWhere(
+            (d) => d.name == name,
+            orElse: () => Driver(
+              name: name,
+              flag: '',
+              points: points,
+              number: 0,
+              nationality: '',
+              team: '',
+              pointsFinishPct: 0.0,
+              seasonPointsFinishPct: 0.0,
+              wins: 0,
+              podiums2nd: 0,
+              podiums3rd: 0,
+              podiums: 0,
+              poles: 0,
+              fastestLaps: 0,
+              totalPoints: 0.0,
+              championships: 0,
+              championshipYears: [],
+              lapsRaced: 0,
+              starts: 0,
+              dnfs: 0,
+              dsqs: 0,
+              dnqs: 0,
+              lapsLed: 0,
+              frontRowStarts: 0,
+              highestFinish: '',
+              highestGrid: '',
+              hatTricks: 0,
+              overtakes: 0,
+              age: 0,
+              height: '',
+              birthPlace: '',
+              partner: '',
+              children: '',
+              pets: '',
+              manager: '',
+              realWorldFactsEn: [],
+              realWorldFactsNl: [],
+              pointsPerSeason: {},
+              debutYear: 0,
+              contractUntil: '',
+              previousTeams: [],
+              personalSponsors: [],
+              reserveDriver: null,
             ),
-          )
-          .timeout(const Duration(seconds: 4));
-
-      await Future.delayed(const Duration(milliseconds: 700));
-      final teamRes = await http
-          .get(
-            Uri.parse(
-              'https://api.jolpi.ca/ergast/f1/$_selectedYear/constructorStandings.json',
-            ),
-          )
-          .timeout(const Duration(seconds: 4));
-
-      if (driverRes.statusCode == 200 && teamRes.statusCode == 200) {
-        final dData = json.decode(driverRes.body);
-        final tData = json.decode(teamRes.body);
-        final dList = dData['MRData']['StandingsTable']['StandingsLists'];
-        final tList = tData['MRData']['StandingsTable']['StandingsLists'];
-
-        if (dList.isNotEmpty && tList.isNotEmpty) {
-          final parsedD = dList[0]['DriverStandings'];
-          final parsedT = tList[0]['ConstructorStandings'];
-          prefs.setString(cacheKeyDrivers, json.encode(parsedD));
-          prefs.setString(cacheKeyTeams, json.encode(parsedT));
-          prefs.setInt(cacheTimeKey, now);
-          _processStandingsData(parsedD, parsedT);
-        } else {
-          throw Exception("No API points (start of season)");
+          );
+          mergedDrivers.add(Driver.copy(local, points));
         }
-      } else {
-        throw Exception("API Failed");
+        mergedDrivers.sort((a, b) => b.points.compareTo(a.points));
+        if (mounted) {
+          setState(() {
+            _cachedDrivers = mergedDrivers;
+            _cachedTeams = List.from(fallbackTeams);
+            _usingFallback = false;
+            _isLoading = false;
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _cachedDrivers = List.from(driversData[2026] ?? []);
+            _cachedTeams = List.from(fallbackTeams);
+            _usingFallback = true;
+            _isLoading = false;
+          });
+        }
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _cachedDrivers = List.from(driversData[_selectedYear] ?? []);
-          _cachedTeams = List.from(fallbackTeams);
-          _usingFallback = true;
-          _isLoading = false;
-        });
-      }
+      return;
     }
+
+    // ...bestaande code voor andere jaren...
   }
 
   Future<void> _refreshStandings() => _fetchStandings(forceRefresh: true);
@@ -10963,25 +10789,15 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
   Future<void> _fetchWeather() async {
     try {
       await Future.delayed(const Duration(milliseconds: 700));
-      final resFuture = http.get(
-        Uri.parse(
-          'https://api.open-meteo.com/v1/forecast?latitude=${widget.race.lat}&longitude=${widget.race.lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m&daily=precipitation_probability_max&timezone=auto',
-        ),
-      );
-
-      final res = await resFuture;
-
-      if (res.statusCode == 200) {
-        final d = json.decode(res.body);
-        if (mounted) {
-          setState(() {
-            t = d['current']['temperature_2m'].toString();
-            w = d['current']['wind_speed_10m'].toString();
-            h = d['current']['relative_humidity_2m'].toString();
-            r = d['daily']['precipitation_probability_max'][0];
-            _isWeatherLoading = false;
-          });
-        }
+      // API call removed. Use local data or set default values.
+      if (mounted) {
+        setState(() {
+          t = '-';
+          w = '-';
+          h = '-';
+          r = 0;
+          _isWeatherLoading = false;
+        });
       }
     } catch (_) {
       if (mounted) {
@@ -11611,6 +11427,25 @@ String _sessionDisplayTitle(BuildContext context, String sessionName) {
 }
 
 class _WeekendHubScreenState extends State<WeekendHubScreen> {
+      void _debugPrintSessionCache() {
+        final race = widget.race;
+        final year = race.date.year;
+        final prefix = '${race.country}_';
+      // print('--- DEBUG: Session cache keys for ${race.country} $year ---');
+        for (final key in SessionDataManager().cache.keys) {
+          if (key.startsWith(prefix) && key.endsWith('_$year')) {
+          // print('  $key: ${SessionDataManager().cache[key]?.length ?? 0} results');
+          }
+        }
+      // print('--- END DEBUG ---');
+      }
+    // Returns true if the given session has results in the cache
+    bool _hasSessionResults(String sessionName) {
+      final normalized = _normalizeSessionName(sessionName);
+      final cacheKey = '${widget.race.country}_${normalized}_${widget.race.date.year}';
+      final results = SessionDataManager().cache[cacheKey];
+      return results != null && results.isNotEmpty;
+    }
   static const String _allRaceControlScopes = '__all_scopes__';
   static const int _defaultRaceControlVisibleCount = 10;
 
@@ -11665,6 +11500,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
         widget.race,
         roundIndex,
       );
+      _debugPrintSessionCache();
       try {
         final fetchedPodium = await SessionDataManager().fetchWeekendHubPodium(
           widget.race,
@@ -11691,9 +11527,18 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     }
 
     if (mounted) {
+      // Bepaal de juiste sessie na het laden
+      final availableSessions = _availableWeekendSessions(
+        SessionDataManager().raceControlCache[SessionDataManager()._raceControlKey(widget.race)] ?? [],
+      );
+      String latestWithResults = availableSessions.reversed.firstWhere(
+        (session) => _hasSessionResults(session),
+        orElse: () => availableSessions.contains('Race') ? 'Race' : availableSessions.first,
+      );
       setState(() {
         _podiumDetails = podiumDetails;
         _loading = false;
+        _selectedWeekendSession = latestWithResults;
       });
     }
   }
@@ -11736,7 +11581,8 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
   }
 
   List<WeekendHubPodiumEntry> _sessionTopThree(String sessionName) {
-    if (sessionName == 'Race') {
+    final normalized = _normalizeSessionName(sessionName);
+    if (normalized == 'Race') {
       return _podiumDetails.isNotEmpty
           ? _podiumDetails
           : _fallbackPodiumDetails();
@@ -11744,7 +11590,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
 
     final overviewRows =
         SessionDataManager().sessionOverviewCache[SessionDataManager()
-            .sessionOverviewKeyFor(widget.race, sessionName)] ??
+            .sessionOverviewKeyFor(widget.race, normalized)] ??
         const <SessionOverviewRow>[];
     if (overviewRows.isNotEmpty) {
       return overviewRows
@@ -11780,7 +11626,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
 
     final cachedResults =
         SessionDataManager()
-            .cache['${widget.race.country}_${sessionName}_${widget.race.date.year}'] ??
+            .cache['${widget.race.country}_${normalized}_${widget.race.date.year}'] ??
         const <SessionResult>[];
     return cachedResults
         .take(3)
@@ -11809,20 +11655,10 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
 
   Future<void> _fetchWeekendWeather() async {
     try {
-      final response = await http.get(
-        Uri.parse(
-          'https://api.open-meteo.com/v1/forecast?latitude=${widget.race.lat}&longitude=${widget.race.lon}&current=temperature_2m,wind_speed_10m&daily=precipitation_probability_max&timezone=auto',
-        ),
-      );
-      if (response.statusCode != 200) {
-        return;
-      }
-
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-      _temperature = data['current']['temperature_2m'].toString();
-      _windSpeed = data['current']['wind_speed_10m'].toString();
-      _rainChance = (data['daily']['precipitation_probability_max'][0] as num)
-          .toInt();
+      // API call removed. Use local data or set default values.
+      _temperature = '-';
+      _windSpeed = '-';
+      _rainChance = 0;
     } catch (_) {}
   }
 
@@ -12079,23 +11915,19 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     BuildContext context,
     List<String> availableSessions,
   ) {
-    final selectedSession = availableSessions.contains(_selectedWeekendSession)
-        ? _selectedWeekendSession
-        : (availableSessions.contains('Race')
-              ? 'Race'
-              : availableSessions.first);
-
-    if (selectedSession != _selectedWeekendSession) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) {
-          return;
-        }
-        setState(() {
-          _selectedWeekendSession = selectedSession;
-          _showAllRaceControlMessages = false;
-        });
-      });
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
     }
+
+    // Find the latest session with results (prefer the last in the list)
+    String latestWithResults = availableSessions.reversed.firstWhere(
+      (session) => _hasSessionResults(session),
+      orElse: () => availableSessions.contains('Race') ? 'Race' : availableSessions.first,
+    );
+    // Zorg dat _selectedWeekendSession altijd geldig is
+    final dropdownValue = availableSessions.contains(_selectedWeekendSession)
+        ? _selectedWeekendSession
+        : latestWithResults;
 
     return Container(
       width: double.infinity,
@@ -12120,7 +11952,8 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
-            initialValue: selectedSession,
+            key: ValueKey(dropdownValue),
+          initialValue: dropdownValue,
             isExpanded: true,
             decoration: const InputDecoration(
               isDense: true,
@@ -17487,7 +17320,15 @@ class OpenF1SessionWidget extends StatelessWidget {
       return row.tyreStints
           .map((stint) {
             final compound = _formatTyreCompound(stint['compound']?.toString());
-            final laps = _asInt(stint['laps']) ?? 0;
+            int laps = _asInt(stint['laps']) ?? 0;
+            // Als laps ontbreekt, bereken op basis van lapStart en lapEnd
+            if (laps == 0 && stint['lapStart'] != null && stint['lapEnd'] != null) {
+              final start = _asInt(stint['lapStart']);
+              final end = _asInt(stint['lapEnd']);
+              if (start != null && end != null && end >= start) {
+                laps = end - start + 1;
+              }
+            }
             return SessionTyreLapBreakdownEntry(
               compound: compound,
               laps: laps,
@@ -17593,7 +17434,8 @@ class OpenF1SessionWidget extends StatelessWidget {
 
   Widget _buildRaceTyreStrategyCell(BuildContext context, RaceResultRow row) {
     final sequence = _raceTyreLapSequence(row);
-    if (sequence.isNotEmpty && sequence.any((entry) => entry.laps > 0)) {
+    // Toon breakdown met aantal ronden per compound als die data er is
+    if (sequence.isNotEmpty) {
       return _buildTyreLapBreakdownCell(
         context,
         sequence,
@@ -17601,7 +17443,9 @@ class OpenF1SessionWidget extends StatelessWidget {
       );
     }
 
-    if (sequence.isNotEmpty) {
+    // Fallback: alleen compound tonen als geen breakdown mogelijk is
+    if (row.tyreCompounds.isNotEmpty) {
+      final uniqueCompounds = row.tyreCompounds.toSet().toList();
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         child: SingleChildScrollView(
@@ -17609,12 +17453,12 @@ class OpenF1SessionWidget extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              for (var index = 0; index < sequence.length; index++) ...[
-                if (index > 0)
+              for (var i = 0; i < uniqueCompounds.length; i++) ...[
+                if (i > 0)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     child: Text(
-                      '->',
+                      '→',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -17622,7 +17466,10 @@ class OpenF1SessionWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                _buildTyreLapEntryChip(context, sequence[index]),
+                SizedBox(
+                  width: 48, // vaste breedte voor elke band
+                  child: _buildTyreCell(context, uniqueCompounds[i]),
+                ),
               ],
             ],
           ),
