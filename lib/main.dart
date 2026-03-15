@@ -3944,6 +3944,7 @@ class WeekendHubPodiumEntry {
 
 class DriverFormEntry {
   final Race race;
+  final String sessionName; // 'Race' of 'Sprint'
   final int? finishPosition;
   final double points;
   final bool hasFastestLap;
@@ -3951,6 +3952,7 @@ class DriverFormEntry {
 
   const DriverFormEntry({
     required this.race,
+    required this.sessionName,
     required this.finishPosition,
     required this.points,
     required this.hasFastestLap,
@@ -3988,50 +3990,73 @@ double _parsePointsValue(String points) {
   return double.tryParse(points.trim()) ?? 0;
 }
 
-List<DriverFormEntry> _buildDriverRecentFormEntries(String driverName) {
+/// Retourneert een lijst van lijsten: per raceweekend maximaal 2 entries (Sprint, Race)
+List<List<DriverFormEntry>> _buildDriverRecentFormEntries(String driverName) {
   final now = DateTime.now();
   final completedRaces = races.where((race) => !race.date.isAfter(now)).toList()
     ..sort((a, b) => b.date.compareTo(a.date));
 
-  final entries = <DriverFormEntry>[];
+  final List<List<DriverFormEntry>> result = [];
   for (final race in completedRaces) {
-    final key = SessionDataManager().raceResultsKeyFor(race);
-    final rows = SessionDataManager().raceResultsCache[key];
-    if (rows == null || rows.isEmpty) {
-      continue;
-    }
-
-    RaceResultRow? row;
-    for (final candidate in rows) {
-      if (_driverNameMatches(candidate.driver, driverName)) {
-        row = candidate;
-        break;
+      final List<DriverFormEntry> weekendEntries = [];
+    // Eerst sprint (indien aanwezig)
+    if (race.hasSprint) {
+      final sprintKey = '${race.country}_Sprint_${race.date.year}';
+      final sprintRows = SessionDataManager().raceResultsCache[sprintKey];
+      if (sprintRows != null && sprintRows.isNotEmpty) {
+        RaceResultRow? sprintRow;
+        for (final candidate in sprintRows) {
+          if (_driverNameMatches(candidate.driver, driverName)) {
+            sprintRow = candidate;
+            break;
+          }
+        }
+        if (sprintRow != null) {
+          weekendEntries.add(DriverFormEntry(
+            race: race,
+            sessionName: 'Sprint',
+            finishPosition: _extractFinishPosition(sprintRow.finish),
+            points: _parsePointsValue(sprintRow.points),
+            hasFastestLap: sprintRow.hasFastestLap,
+            hasPenalty: sprintRow.penalty.trim() != '-' && sprintRow.penalty.trim().isNotEmpty,
+          ));
+        }
       }
     }
-    if (row == null) {
-      continue;
+    // Daarna hoofdrace
+    final raceKey = SessionDataManager().raceResultsKeyFor(race);
+    final raceRows = SessionDataManager().raceResultsCache[raceKey];
+    if (raceRows != null && raceRows.isNotEmpty) {
+      RaceResultRow? raceRow;
+      for (final candidate in raceRows) {
+        if (_driverNameMatches(candidate.driver, driverName)) {
+          raceRow = candidate;
+          break;
+        }
+      }
+      if (raceRow != null) {
+        weekendEntries.add(DriverFormEntry(
+          race: race,
+          sessionName: 'Race',
+          finishPosition: _extractFinishPosition(raceRow.finish),
+          points: _parsePointsValue(raceRow.points),
+          hasFastestLap: raceRow.hasFastestLap,
+          hasPenalty: raceRow.penalty.trim() != '-' && raceRow.penalty.trim().isNotEmpty,
+        ));
+      }
     }
-
-    entries.add(
-      DriverFormEntry(
-        race: race,
-        finishPosition: _extractFinishPosition(row.finish),
-        points: _parsePointsValue(row.points),
-        hasFastestLap: row.hasFastestLap,
-        hasPenalty: row.penalty.trim() != '-' && row.penalty.trim().isNotEmpty,
-      ),
-    );
-
-    if (entries.length == 5) {
+    if (weekendEntries.isNotEmpty) {
+      result.add(weekendEntries);
+    }
+    if (result.length == 5) {
       break;
     }
   }
-
-  return entries;
+  return result;
 }
 
-double? _averageDriverFinish(List<DriverFormEntry> entries) {
-  final finishes = entries
+double? _averageDriverFinish(List<List<DriverFormEntry>> entryGroups) {
+  final finishes = entryGroups.expand((e) => e)
       .where((entry) => entry.finishPosition != null)
       .map((entry) => entry.finishPosition!.toDouble())
       .toList();
@@ -4041,20 +4066,20 @@ double? _averageDriverFinish(List<DriverFormEntry> entries) {
   return finishes.reduce((a, b) => a + b) / finishes.length;
 }
 
-double _sumDriverPoints(List<DriverFormEntry> entries) {
-  return entries.fold<double>(0, (sum, entry) => sum + entry.points);
+double _sumDriverPoints(List<List<DriverFormEntry>> entryGroups) {
+  return entryGroups.expand((e) => e).fold<double>(0, (sum, entry) => sum + entry.points);
 }
 
-String _formatDriverAverageFinish(List<DriverFormEntry> entries) {
-  final average = _averageDriverFinish(entries);
+String _formatDriverAverageFinish(List<List<DriverFormEntry>> entryGroups) {
+  final average = _averageDriverFinish(entryGroups);
   if (average == null) {
     return '-';
   }
   return average.toStringAsFixed(1);
 }
 
-String _formatFormPoints(List<DriverFormEntry> entries) {
-  final total = _sumDriverPoints(entries);
+String _formatFormPoints(List<List<DriverFormEntry>> entryGroups) {
+  final total = _sumDriverPoints(entryGroups);
   return total == total.roundToDouble()
       ? total.toInt().toString()
       : total.toStringAsFixed(1);
@@ -4799,13 +4824,28 @@ class SessionDataManager extends ChangeNotifier {
             ? decoded['messages']
             : null;
         if (raceControlEntries is List) {
-          raceControlCache[_raceControlKey(race)] = raceControlEntries
+          // Sorteer op tijd indien mogelijk (bijv. op 'utc' of 'date' veld)
+          final entries = raceControlEntries
               .whereType<Map>()
-              .map(
-                (entry) =>
-                    entry.map((key, value) => MapEntry(key.toString(), value)),
-              )
+              .map((entry) => entry.map((key, value) => MapEntry(key.toString(), value)))
               .toList(growable: false);
+          // Sorteer op tijd als veld aanwezig is
+          entries.sort((a, b) {
+            final aTime = a['utc'] ?? a['date'] ?? '';
+            final bTime = b['utc'] ?? b['date'] ?? '';
+            return aTime.compareTo(bTime);
+          });
+          // Voeg previousId en nextId toe
+          for (var i = 0; i < entries.length; i++) {
+            final prev = i > 0 ? entries[i - 1] : null;
+            final next = i < entries.length - 1 ? entries[i + 1] : null;
+            // Gebruik een uniek veld als id, anders index
+            final id = entries[i]['id'] ?? i.toString();
+            entries[i]['id'] = id;
+            entries[i]['previousId'] = prev != null ? (prev['id'] ?? (i - 1).toString()) : null;
+            entries[i]['nextId'] = next != null ? (next['id'] ?? (i + 1).toString()) : null;
+          }
+          raceControlCache[_raceControlKey(race)] = entries;
         }
       }
 
@@ -8553,48 +8593,6 @@ class _StandingsViewState extends State<StandingsView> {
     _fetchStandings();
   }
 
-  void _processStandingsData(List apiDrivers, List apiTeams) {
-    List<Driver> mergedDrivers = [];
-    final localDrivers = driversData[_selectedYear] ?? [];
-    for (var localD in localDrivers) {
-      final apiMatch = apiDrivers.firstWhere(
-        (apiD) => localD.name.toLowerCase().contains(
-          (apiD['Driver']['familyName'] ?? '').toLowerCase(),
-        ),
-        orElse: () => null,
-      );
-      double pts = apiMatch != null
-          ? (double.tryParse(apiMatch['points'].toString()) ?? 0)
-          : 0;
-      mergedDrivers.add(Driver.copy(localD, pts));
-    }
-
-    List<Team> mergedTeams = [];
-    for (var localT in fallbackTeams) {
-      final apiMatch = apiTeams.firstWhere(
-        (apiT) => localT.name.toLowerCase().contains(
-          (apiT['Constructor']['name'] ?? '').toLowerCase().split(' ').first,
-        ),
-        orElse: () => null,
-      );
-      int pts = apiMatch != null
-          ? (double.tryParse(apiMatch['points'].toString())?.toInt() ?? 0)
-          : 0;
-      mergedTeams.add(Team.copy(localT, pts));
-    }
-
-    mergedDrivers.sort((a, b) => b.points.compareTo(a.points));
-    mergedTeams.sort((a, b) => b.points.compareTo(a.points));
-
-    if (mounted) {
-      setState(() {
-        _cachedDrivers = mergedDrivers;
-        _cachedTeams = mergedTeams;
-        _usingFallback = false;
-        _isLoading = false;
-      });
-    }
-  }
 
   String _formatPoints(num points) {
     if (points is double && points == points.roundToDouble()) {
@@ -12023,8 +12021,10 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       );
     }
 
+    // Groen voor SC IN THIS LAP en ENDING en NO FURTHER ACTION
     if (message.contains('NO FURTHER ACTION') || 
-        message.contains('ENDING')) {
+        message.contains('ENDING') ||
+        message.contains('SAFETY CAR IN THIS LAP')) {
       return (
         background: const Color(0x1A2E7D32),
         border: const Color(0x662E7D32),
@@ -12316,12 +12316,14 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     // VSC/Safety Car koppeling
     final sourceTextUpper = sourceText?.toUpperCase() ?? '';
     final isVSC = sourceTextUpper.contains('VSC DEPLOYED') || sourceTextUpper.contains('VSC ENDING');
-    final isSC = sourceTextUpper.contains('SAFETY CAR DEPLOYED') || sourceTextUpper.contains('SAFETY CAR ENDING');
+    final isSC = sourceTextUpper.contains('SAFETY CAR DEPLOYED') || sourceTextUpper.contains('SAFETY CAR ENDING') || sourceTextUpper.contains('SAFETY CAR IN THIS LAP');
     if (isVSC || isSC) {
       final deployed = isVSC ? 'VSC DEPLOYED' : 'SAFETY CAR DEPLOYED';
+      // Voor SC: zowel ENDING als IN THIS LAP zijn "einde"
       final ending = isVSC ? 'VSC ENDING' : 'SAFETY CAR ENDING';
+      final inThisLap = isVSC ? null : 'SAFETY CAR IN THIS LAP';
       final isSourceDeployed = sourceTextUpper.contains('DEPLOYED');
-      final isSourceEnding = sourceTextUpper.contains('ENDING');
+      final isSourceEnding = sourceTextUpper.contains('ENDING') || sourceTextUpper.contains('IN THIS LAP');
       final sourceTime = DateTime.tryParse(sourceMessage['timestampUtc']?.toString() ?? '');
       Map<String, dynamic>? bestMatch;
       Duration? bestDelta;
@@ -12331,13 +12333,17 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
         if (candidateSession != _normalizeSessionName(selectedSession)) continue;
         final candidateText = (candidate['message']?.toString() ?? '').toUpperCase();
         final candidateTime = DateTime.tryParse(candidate['timestampUtc']?.toString() ?? '');
-        if (isSourceDeployed && candidateText.contains(ending) && sourceTime != null && candidateTime != null && candidateTime.isAfter(sourceTime)) {
+        // Koppel deployed -> ending/in this lap
+        if (isSourceDeployed && (
+              candidateText.contains(ending) || (inThisLap != null && candidateText.contains(inThisLap))
+            ) && sourceTime != null && candidateTime != null && candidateTime.isAfter(sourceTime)) {
           final delta = candidateTime.difference(sourceTime);
           if (bestDelta == null || delta < bestDelta) {
             bestDelta = delta;
             bestMatch = candidate;
           }
         }
+        // Koppel ending/in this lap -> deployed
         if (isSourceEnding && candidateText.contains(deployed) && sourceTime != null && candidateTime != null && candidateTime.isBefore(sourceTime)) {
           final delta = sourceTime.difference(candidateTime);
           if (bestDelta == null || delta < bestDelta) {
@@ -13270,49 +13276,97 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     );
   }
 
-  Widget _buildPenaltiesCard(
-    BuildContext context,
-    List<RaceResultRow> penalties,
-  ) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSectionCardTitle(context, 'Penalties'),
-            const SizedBox(height: 12),
-            if (penalties.isEmpty)
-              const Text('Geen penalties gevonden in de huidige weekend cache.')
-            else
-              Column(
-                children: penalties
-                    .map(
-                      (row) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.warning_amber_rounded,
-                              color: Color(0xFFF57C00),
-                              size: 18,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text('${row.driver}: ${row.penalty}'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-          ],
-        ),
-      ),
-    );
+Widget _buildPenaltiesCard(
+  BuildContext context,
+  List<RaceResultRow> penalties,
+) {
+  // Verzamel alle penalty entries met reden en timestamp
+  final penaltyEntries = <Map<String, dynamic>>[];
+  for (final row in penalties) {
+    for (final detail in row.penaltyDetails) {
+      penaltyEntries.add({
+        'driver': row.driver,
+        'penalty': detail['penalty'] ?? row.penalty,
+        'reason': detail['reason'],
+        'issuedLap': detail['issuedLap'],
+        'timestamp': _findPenaltyTimestamp(row, detail),
+      });
+    }
   }
+  // Sorteer op timestamp (oudste onderaan, nieuwste bovenaan)
+  penaltyEntries.sort((a, b) {
+    final aTime = a['timestamp'] as DateTime?;
+    final bTime = b['timestamp'] as DateTime?;
+    if (aTime == null && bTime == null) return 0;
+    if (aTime == null) return 1;
+    if (bTime == null) return -1;
+    return bTime.compareTo(aTime); // nieuwste bovenaan
+  });
+
+  return Card(
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionCardTitle(context, 'Penalties'),
+          const SizedBox(height: 12),
+          if (penaltyEntries.isEmpty)
+            const Text('Geen penalties gevonden in de huidige weekend cache.')
+          else
+            Column(
+              children: penaltyEntries
+                  .map(
+                    (entry) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.warning_amber_rounded,
+                            color: Color(0xFFF57C00),
+                            size: 18,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('${entry['driver']}: ${entry['penalty']}'),
+                                if (entry['reason'] != null && (entry['reason'] as String).trim().isNotEmpty)
+                                  Text('Reden: ${entry['reason']}', style: const TextStyle(fontSize: 13, color: Color(0xFF888888))),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+        ],
+      ),
+    ),
+  );
+}
+
+// Zoek timestamp van penalty detail via raceControlMessages
+DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) {
+  // Zoek naar een raceControlMessage die overeenkomt met penalty en reden
+  for (final msg in row.raceControlMessages) {
+    final message = (msg['message'] ?? '').toString().toUpperCase();
+    final penalty = (detail['penalty'] ?? '').toString().replaceAll(' ', '').toUpperCase();
+    final reason = (detail['reason'] ?? '').toString().toUpperCase();
+    if (message.contains(penalty) && (reason.isEmpty || message.contains(reason))) {
+      final ts = msg['timestampUtc']?.toString();
+      if (ts != null && ts.isNotEmpty) {
+        final dt = DateTime.tryParse(ts);
+        if (dt != null) return dt;
+      }
+    }
+  }
+  return null;
+}
 
   Widget _buildHubMetric(String label, String value, IconData icon) {
     return Container(
@@ -13965,7 +14019,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           if (entries.isEmpty) {
             _response = loc.format('ai_form_no_cache', {'driver': target.name});
           } else {
-            final summary = entries
+            final summary = entries.expand((e) => e)
                 .map(
                   (entry) =>
                       '${entry.race.name.replaceAll(' Grand Prix', '')}: ${entry.label}',
@@ -14779,9 +14833,9 @@ class _DriverDetailViewState extends State<DriverDetailView> {
 
   Widget _buildRecentFormTrend() {
     final theme = Theme.of(context);
-    final entries = _buildDriverRecentFormEntries(widget.driver.name);
+    final entryGroups = _buildDriverRecentFormEntries(widget.driver.name);
 
-    if (entries.isEmpty) {
+    if (entryGroups.isEmpty) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         child: Text(
@@ -14791,7 +14845,9 @@ class _DriverDetailViewState extends State<DriverDetailView> {
       );
     }
 
-    final maxPoints = entries.fold<double>(0, (best, entry) {
+    // Bepaal max punten voor schaal (over sprint en race entries)
+    final allEntries = entryGroups.expand((e) => e).toList();
+    final maxPoints = allEntries.fold<double>(0, (best, entry) {
       return entry.points > best ? entry.points : best;
     });
     final resolvedMaxPoints = maxPoints <= 0 ? 25.0 : maxPoints;
@@ -14802,14 +14858,12 @@ class _DriverDetailViewState extends State<DriverDetailView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            height: 190,
+            height: 210,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: entries.map((entry) {
-                final barHeight = ((entry.points / resolvedMaxPoints) * 110)
-                    .clamp(18, 110)
-                    .toDouble();
-                final raceLabel = entry.race.name
+              children: entryGroups.map((entries) {
+                // Per weekend: 1 of 2 entries (sprint, race)
+                final raceLabel = entries.first.race.name
                     .replaceAll(' Grand Prix', '')
                     .split(' ')
                     .first;
@@ -14819,48 +14873,85 @@ class _DriverDetailViewState extends State<DriverDetailView> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Text(
-                          entry.label,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: entry.isPodium
-                                ? const Color(0xFFFFB300)
-                                : theme.colorScheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 250),
-                          width: 28,
-                          height: barHeight,
-                          decoration: BoxDecoration(
-                            color: entry.isDnf
-                                ? const Color(0xFFE53935)
-                                : _getTeamColor(widget.driver.team),
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(
-                                color: _getTeamColor(
-                                  widget.driver.team,
-                                ).withValues(alpha: 0.25),
-                                blurRadius: 8,
+                        ...entries.map((entry) => Column(
+                          children: [
+                            Text(
+                              entry.label,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: entry.isPodium
+                                    ? const Color(0xFFFFB300)
+                                    : theme.colorScheme.onSurface,
                               ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          entry.points == entry.points.roundToDouble()
-                              ? entry.points.toInt().toString()
-                              : entry.points.toStringAsFixed(1),
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: theme.colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
+                            ),
+                            const SizedBox(height: 4),
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              width: 28,
+                              height: ((entry.points / resolvedMaxPoints) * 60)
+                                  .clamp(14, 60)
+                                  .toDouble(),
+                              decoration: BoxDecoration(
+                                color: entry.isDnf
+                                    ? const Color(0xFFE53935)
+                                    : _getTeamColor(widget.driver.team),
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: _getTeamColor(
+                                      widget.driver.team,
+                                    ).withOpacity(0.25),
+                                    blurRadius: 8,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              entry.points == entry.points.roundToDouble()
+                                  ? entry.points.toInt().toString()
+                                  : entry.points.toStringAsFixed(1),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: theme.colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              entry.sessionName == 'Sprint' ? 'Sprint' : 'Race',
+                              style: TextStyle(
+                                fontSize: 9,
+                                color: entry.sessionName == 'Sprint'
+                                    ? Colors.deepOrange
+                                    : theme.colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                if (entry.hasFastestLap)
+                                  const Icon(
+                                    Icons.timer,
+                                    size: 12,
+                                    color: Color(0xFF8E24AA),
+                                  ),
+                                if (entry.hasPenalty)
+                                  const Padding(
+                                    padding: EdgeInsets.only(left: 4),
+                                    child: Icon(
+                                      Icons.warning_amber_rounded,
+                                      size: 12,
+                                      color: Color(0xFFF57C00),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                          ],
+                        )),
                         Text(
                           raceLabel,
                           textAlign: TextAlign.center,
@@ -14868,27 +14959,6 @@ class _DriverDetailViewState extends State<DriverDetailView> {
                             fontSize: 10,
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (entry.hasFastestLap)
-                              const Icon(
-                                Icons.timer,
-                                size: 12,
-                                color: Color(0xFF8E24AA),
-                              ),
-                            if (entry.hasPenalty)
-                              const Padding(
-                                padding: EdgeInsets.only(left: 4),
-                                child: Icon(
-                                  Icons.warning_amber_rounded,
-                                  size: 12,
-                                  color: Color(0xFFF57C00),
-                                ),
-                              ),
-                          ],
                         ),
                       ],
                     ),
@@ -14904,17 +14974,17 @@ class _DriverDetailViewState extends State<DriverDetailView> {
             children: [
               _buildMiniStatPill(
                 'Last 5 points',
-                _formatFormPoints(entries),
+                _formatFormPoints(entryGroups),
                 Icons.toll,
               ),
               _buildMiniStatPill(
                 'Avg finish',
-                _formatDriverAverageFinish(entries),
+                _formatDriverAverageFinish(entryGroups),
                 Icons.analytics,
               ),
               _buildMiniStatPill(
                 'Podiums',
-                entries.where((entry) => entry.isPodium).length.toString(),
+                entryGroups.expand((e) => e).where((entry) => entry.isPodium).length.toString(),
                 Icons.emoji_events,
               ),
             ],
