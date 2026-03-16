@@ -58716,19 +58716,19 @@ $0(){var s=A.aK("\\s+Grand Prix$",!1,!1)
 return A.m5(this.a,"/circuits/"+A.e1(A.bQ(this.b.a,s,"")),t.X)},
 $S:0}
 A.aL7.prototype={
-$0(){var s=this,r=null,q="Cancelled",p=s.a,o=s.b,n=p.YC(o),m=o.d,l=A.bn(new A.c4(Date.now(),0,!1))===A.bn(m)&&A.hn(new A.c4(Date.now(),0,!1))===A.hn(m)&&A.hm(new A.c4(Date.now(),0,!1))===A.hm(m)
-if(A.bn(m)===2026)if(s.c)return A.r(q,r,r,r,A.Z(r,r,B.cq,r,r,r,r,r,r,r,r,9,r,r,B.t,r,r,!0,r,r,r,r,r,r,r,r),r,r)
-else{if(!s.d)m=l&&!n
-else m=!0
-if(m)return A.r("Ongoing",r,r,r,A.Z(r,r,B.dp,r,r,r,r,r,r,r,r,9,r,r,B.t,r,r,!0,r,r,r,r,r,r,r,r),r,r)
-else{m=s.e
-if(m&&n)return p.UW(s.f,o)
-else if(m&&!n)return A.r("Ended",r,r,r,A.Z(r,r,B.aI,r,r,r,r,r,r,r,r,9,r,r,B.t,r,r,!0,r,r,r,r,r,r,r,r),r,r)
-else return A.r(s.r,r,r,r,A.Z(r,r,s.w.ax.b,r,r,r,r,r,r,r,r,9,r,r,B.t,r,r,!0,r,r,r,r,r,r,r,r),r,r)}}else if(s.e&&n)return p.UW(s.f,o)
+$0(){var s=this,r=null,q="Cancelled",p="TitilliumWeb",o=s.a,n=s.b,m=o.YC(n),l=n.d,k=A.bn(new A.c4(Date.now(),0,!1))===A.bn(l)&&A.hn(new A.c4(Date.now(),0,!1))===A.hn(l)&&A.hm(new A.c4(Date.now(),0,!1))===A.hm(l)
+if(A.bn(l)===2026)if(s.c)return A.r(q,r,r,r,A.Z(r,r,B.cq,r,r,r,r,r,p,r,r,9,r,r,B.t,r,r,!0,r,r,r,r,r,r,r,r),r,r)
+else{if(!s.d)l=k&&!m
+else l=!0
+if(l)return A.r("Ongoing",r,r,r,A.Z(r,r,B.dp,r,r,r,r,r,p,r,r,9,r,r,B.t,r,r,!0,r,r,r,r,r,r,r,r),r,r)
+else{l=s.e
+if(l&&m)return o.UW(s.f,n)
+else if(l&&!m)return A.r("Ended",r,r,r,A.Z(r,r,B.aI,r,r,r,r,r,p,r,r,9,r,r,B.t,r,r,!0,r,r,r,r,r,r,r,r),r,r)
+else return A.r(s.r,r,r,r,A.Z(r,r,s.w.ax.b,r,r,r,r,r,p,r,r,9,r,r,B.t,r,r,!0,r,r,r,r,r,r,r,r),r,r)}}else if(s.e&&m)return o.UW(s.f,n)
 else if(s.c)return A.r(q,r,r,r,A.Z(r,r,B.cq,r,r,r,r,r,r,r,r,9,r,r,B.t,r,r,!0,r,r,r,r,r,r,r,r),r,r)
-else{if(!s.d)p=l&&!n
-else p=!0
-if(p)return A.r("Ongoing",r,r,r,A.Z(r,r,B.dp,r,r,r,r,r,r,r,r,9,r,r,B.t,r,r,!0,r,r,r,r,r,r,r,r),r,r)
+else{if(!s.d)o=k&&!m
+else o=!0
+if(o)return A.r("Ongoing",r,r,r,A.Z(r,r,B.dp,r,r,r,r,r,r,r,r,9,r,r,B.t,r,r,!0,r,r,r,r,r,r,r,r),r,r)
 else return A.r(s.r,r,r,r,A.Z(r,r,s.w.ax.b,r,r,r,r,r,r,r,r,9,r,r,B.t,r,r,!0,r,r,r,r,r,r,r,r),r,r)}},
 $S:379}
 A.aLd.prototype={
