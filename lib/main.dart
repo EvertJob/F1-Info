@@ -8059,15 +8059,15 @@ class _CircuitsViewState extends State<CircuitsView> {
                     final isToday = DateTime.now().year == race.date.year && DateTime.now().month == race.date.month && DateTime.now().day == race.date.day;
                     if (race.date.year == 2026) {
                       if (isCancelled) {
-                        return Text('Cancelled', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.red));
+                        return Text('Cancelled', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.red, fontFamily: 'TitilliumWeb'));
                       } else if (isOngoing || (isToday && !hasResults)) {
-                        return Text('Ongoing', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.orange));
+                        return Text('Ongoing', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.orange, fontFamily: 'TitilliumWeb'));
                       } else if (isFinished && hasResults) {
                         return _buildCircuitPodiumPreview(context, race);
                       } else if (isFinished && !hasResults) {
-                        return Text('Ended', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.green));
+                        return Text('Ended', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.green, fontFamily: 'TitilliumWeb'));
                       } else {
-                        return Text(tStr, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: theme.colorScheme.primary));
+                        return Text(tStr, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: theme.colorScheme.primary, fontFamily: 'TitilliumWeb'));
                       }
                     } else {
                       if (isFinished && hasResults) {
