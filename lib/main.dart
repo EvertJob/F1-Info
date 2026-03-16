@@ -123,18 +123,38 @@ abstract final class AppTheme {
     required F1ThemeTokens tokens,
   }) {
     final scheme = base.colorScheme;
-    // Force TitilliumWeb als enige font overal
-    final textTheme = base.textTheme.apply(fontFamily: 'TitilliumWeb');
+    // Bulletproof: Explicit TextTheme mapping for all weights
+    const fontFamily = 'TitilliumWeb';
+    const regular = FontWeight.w400;
+    const bold = FontWeight.w700;
+    final textTheme = const TextTheme(
+      displayLarge: TextStyle(fontFamily: fontFamily, fontWeight: regular),
+      displayMedium: TextStyle(fontFamily: fontFamily, fontWeight: regular),
+      displaySmall: TextStyle(fontFamily: fontFamily, fontWeight: regular),
+      headlineLarge: TextStyle(fontFamily: fontFamily, fontWeight: regular),
+      headlineMedium: TextStyle(fontFamily: fontFamily, fontWeight: regular),
+      headlineSmall: TextStyle(fontFamily: fontFamily, fontWeight: regular),
+      titleLarge: TextStyle(fontFamily: fontFamily, fontWeight: regular),
+      titleMedium: TextStyle(fontFamily: fontFamily, fontWeight: regular),
+      titleSmall: TextStyle(fontFamily: fontFamily, fontWeight: regular),
+      bodyLarge: TextStyle(fontFamily: fontFamily, fontWeight: regular),
+      bodyMedium: TextStyle(fontFamily: fontFamily, fontWeight: regular),
+      bodySmall: TextStyle(fontFamily: fontFamily, fontWeight: regular),
+      labelLarge: TextStyle(fontFamily: fontFamily, fontWeight: regular),
+      labelMedium: TextStyle(fontFamily: fontFamily, fontWeight: regular),
+      labelSmall: TextStyle(fontFamily: fontFamily, fontWeight: regular),
+    );
 
     return base.copyWith(
-      primaryColor: _primary,
+      fontFamily: fontFamily,
       textTheme: textTheme,
+      primaryTextTheme: textTheme,
       splashFactory: InkSparkle.splashFactory,
       dividerColor: Colors.transparent,
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         color: tokens.panelStrong,
         surfaceTintColor: Colors.transparent,
-        shadowColor: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+        shadowColor: Colors.black.withOpacity(isDark ? 0.35 : 0.08),
         elevation: isDark ? 0 : 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(22),
@@ -149,7 +169,12 @@ abstract final class AppTheme {
         shadowColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: textTheme.titleLarge?.copyWith(fontSize: 18),
+        titleTextStyle: const TextStyle(
+          fontFamily: fontFamily,
+          fontWeight: bold,
+          fontSize: 18,
+          color: Colors.black,
+        ),
         iconTheme: IconThemeData(color: scheme.onSurface),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
@@ -158,14 +183,14 @@ abstract final class AppTheme {
         selectedItemColor: scheme.primary,
         unselectedItemColor: scheme.onSurfaceVariant,
         selectedLabelStyle: const TextStyle(
-          fontWeight: FontWeight.w800,
+          fontFamily: fontFamily,
+          fontWeight: bold,
           letterSpacing: 0.8,
-          fontFamily: 'TitilliumWeb',
         ),
         unselectedLabelStyle: const TextStyle(
-          fontWeight: FontWeight.w600,
+          fontFamily: fontFamily,
+          fontWeight: regular,
           letterSpacing: 0.6,
-          fontFamily: 'TitilliumWeb',
         ),
         elevation: 0,
       ),
@@ -176,15 +201,23 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(18),
           side: BorderSide(color: tokens.outline.withValues(alpha: 0.8)),
         ),
-        textStyle: textTheme.bodyMedium,
+        textStyle: const TextStyle(fontFamily: fontFamily, fontWeight: regular),
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: isDark
             ? const Color(0xFF202733)
             : const Color(0xFF1C2330),
-        contentTextStyle: textTheme.bodyMedium?.copyWith(color: Colors.white),
+        contentTextStyle: const TextStyle(
+          fontFamily: fontFamily,
+          fontWeight: regular,
+          color: Colors.white,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         behavior: SnackBarBehavior.floating,
+      ),
+      dialogTheme: const DialogTheme(
+        titleTextStyle: TextStyle(fontFamily: fontFamily, fontWeight: bold, fontSize: 20),
+        contentTextStyle: TextStyle(fontFamily: fontFamily, fontWeight: regular, fontSize: 16),
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: scheme.primary,
@@ -195,6 +228,8 @@ abstract final class AppTheme {
         textColor: scheme.onSurface,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        style: ListTileStyle.list,
+        dense: false,
       ),
       expansionTileTheme: ExpansionTileThemeData(
         backgroundColor: Colors.transparent,
