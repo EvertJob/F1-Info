@@ -1,0 +1,728 @@
+{
+  "standings": [
+    {
+      "driver": "George Russell",
+      "points": 51
+    },
+    {
+      "driver": "Kimi Antonelli",
+      "points": 47
+    },
+    {
+      "driver": "Charles Leclerc",
+      "points": 34
+    },
+    {
+      "driver": "Lewis Hamilton",
+      "points": 33
+    },
+    {
+      "driver": "Oliver Bearman",
+      "points": 17
+    },
+    {
+      "driver": "Lando Norris",
+      "points": 15
+    },
+    {
+      "driver": "Pierre Gasly",
+      "points": 9
+    },
+    {
+      "driver": "Max Verstappen",
+      "points": 8
+    },
+    {
+      "driver": "Liam Lawson",
+      "points": 8
+    },
+    {
+      "driver": "Arvid Lindblad",
+      "points": 4
+    },
+    {
+      "driver": "Isack Hadjar",
+      "points": 4
+    },
+    {
+      "driver": "Oscar Piastri",
+      "points": 3
+    },
+    {
+      "driver": "Gabriel Bortoleto",
+      "points": 2
+    },
+    {
+      "driver": "Carlos Sainz",
+      "points": 2
+    },
+    {
+      "driver": "Franco Colapinto",
+      "points": 1
+    },
+    {
+      "driver": "Esteban Ocon",
+      "points": 0
+    },
+    {
+      "driver": "Alexander Albon",
+      "points": 0
+    },
+    {
+      "driver": "Sergio Pérez",
+      "points": 0
+    },
+    {
+      "driver": "Lance Stroll",
+      "points": 0
+    },
+    {
+      "driver": "Fernando Alonso",
+      "points": 0
+    },
+    {
+      "driver": "Valtteri Bottas",
+      "points": 0
+    },
+    {
+      "driver": "Nico Hülkenberg",
+      "points": 0
+    },
+    {
+      "driver": "Sergio Perez",
+      "points": 0
+    },
+    {
+      "driver": "Nico Hulkenberg",
+      "points": 0
+    }
+  ],
+  "rounds": [
+    {
+      "round": "1",
+      "drivers": {
+        "George Russell": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 25,
+            "points_received": 25,
+            "position_start": null,
+            "position_finish": 1,
+            "position_changed": null
+          }
+        },
+        "Kimi Antonelli": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 18,
+            "points_received": 18,
+            "position_start": null,
+            "position_finish": 2,
+            "position_changed": null
+          }
+        },
+        "Charles Leclerc": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 15,
+            "points_received": 15,
+            "position_start": null,
+            "position_finish": 3,
+            "position_changed": null
+          }
+        },
+        "Lewis Hamilton": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 12,
+            "points_received": 12,
+            "position_start": null,
+            "position_finish": 4,
+            "position_changed": null
+          }
+        },
+        "Lando Norris": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 10,
+            "points_received": 10,
+            "position_start": null,
+            "position_finish": 5,
+            "position_changed": null
+          }
+        },
+        "Max Verstappen": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 8,
+            "points_received": 8,
+            "position_start": null,
+            "position_finish": 6,
+            "position_changed": null
+          }
+        },
+        "Oliver Bearman": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 6,
+            "points_received": 6,
+            "position_start": null,
+            "position_finish": 7,
+            "position_changed": null
+          }
+        },
+        "Arvid Lindblad": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 4,
+            "points_received": 4,
+            "position_start": null,
+            "position_finish": 8,
+            "position_changed": null
+          }
+        },
+        "Gabriel Bortoleto": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 2,
+            "points_received": 2,
+            "position_start": null,
+            "position_finish": 9,
+            "position_changed": null
+          }
+        },
+        "Pierre Gasly": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 1,
+            "points_received": 1,
+            "position_start": null,
+            "position_finish": 10,
+            "position_changed": null
+          }
+        },
+        "Esteban Ocon": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 11,
+            "position_changed": null
+          }
+        },
+        "Alexander Albon": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 12,
+            "position_changed": null
+          }
+        },
+        "Liam Lawson": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 13,
+            "position_changed": null
+          }
+        },
+        "Franco Colapinto": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 14,
+            "position_changed": null
+          }
+        },
+        "Carlos Sainz": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 15,
+            "position_changed": null
+          }
+        },
+        "Sergio Pérez": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 16,
+            "position_changed": null
+          }
+        },
+        "Lance Stroll": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 17,
+            "position_changed": null
+          }
+        },
+        "Fernando Alonso": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 18,
+            "position_changed": null
+          }
+        },
+        "Valtteri Bottas": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 19,
+            "position_changed": null
+          }
+        },
+        "Isack Hadjar": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 20,
+            "position_changed": null
+          }
+        },
+        "Oscar Piastri": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 21,
+            "position_changed": null
+          }
+        },
+        "Nico Hülkenberg": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 22,
+            "position_changed": null
+          }
+        }
+      }
+    },
+    {
+      "round": "2",
+      "drivers": {
+        "George Russell": {
+          "Sprint": {
+            "points_start": 25,
+            "points_finish": 33,
+            "points_received": 8,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 33,
+            "points_finish": 51,
+            "points_received": 18,
+            "position_start": 1,
+            "position_finish": 2,
+            "position_changed": "-1"
+          }
+        },
+        "Charles Leclerc": {
+          "Sprint": {
+            "points_start": 15,
+            "points_finish": 22,
+            "points_received": 7,
+            "position_start": 3,
+            "position_finish": 2,
+            "position_changed": "+1"
+          },
+          "Race": {
+            "points_start": 22,
+            "points_finish": 34,
+            "points_received": 12,
+            "position_start": 2,
+            "position_finish": 4,
+            "position_changed": "-2"
+          }
+        },
+        "Lewis Hamilton": {
+          "Sprint": {
+            "points_start": 12,
+            "points_finish": 18,
+            "points_received": 6,
+            "position_start": 4,
+            "position_finish": 3,
+            "position_changed": "+1"
+          },
+          "Race": {
+            "points_start": 18,
+            "points_finish": 33,
+            "points_received": 15,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Lando Norris": {
+          "Sprint": {
+            "points_start": 10,
+            "points_finish": 15,
+            "points_received": 5,
+            "position_start": 5,
+            "position_finish": 4,
+            "position_changed": "+1"
+          },
+          "Race": {
+            "points_start": 15,
+            "points_finish": 15,
+            "points_received": 0,
+            "position_start": 4,
+            "position_finish": null,
+            "position_changed": null
+          }
+        },
+        "Kimi Antonelli": {
+          "Sprint": {
+            "points_start": 18,
+            "points_finish": 22,
+            "points_received": 4,
+            "position_start": 2,
+            "position_finish": 5,
+            "position_changed": "-3"
+          },
+          "Race": {
+            "points_start": 22,
+            "points_finish": 47,
+            "points_received": 25,
+            "position_start": 5,
+            "position_finish": 1,
+            "position_changed": "+4"
+          }
+        },
+        "Oscar Piastri": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 3,
+            "points_received": 3,
+            "position_start": 21,
+            "position_finish": 6,
+            "position_changed": "+15"
+          },
+          "Race": {
+            "points_start": 3,
+            "points_finish": 3,
+            "points_received": 0,
+            "position_start": 6,
+            "position_finish": null,
+            "position_changed": null
+          }
+        },
+        "Liam Lawson": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 2,
+            "points_received": 2,
+            "position_start": 13,
+            "position_finish": 7,
+            "position_changed": "+6"
+          },
+          "Race": {
+            "points_start": 2,
+            "points_finish": 8,
+            "points_received": 6,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          }
+        },
+        "Oliver Bearman": {
+          "Sprint": {
+            "points_start": 6,
+            "points_finish": 7,
+            "points_received": 1,
+            "position_start": 7,
+            "position_finish": 8,
+            "position_changed": "-1"
+          },
+          "Race": {
+            "points_start": 7,
+            "points_finish": 17,
+            "points_received": 10,
+            "position_start": 8,
+            "position_finish": 5,
+            "position_changed": "+3"
+          }
+        },
+        "Max Verstappen": {
+          "Sprint": {
+            "points_start": 8,
+            "points_finish": 8,
+            "points_received": 0,
+            "position_start": 6,
+            "position_finish": 9,
+            "position_changed": "-3"
+          },
+          "Race": {
+            "points_start": 8,
+            "points_finish": 8,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": null,
+            "position_changed": null
+          }
+        },
+        "Esteban Ocon": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 11,
+            "position_finish": 10,
+            "position_changed": "+1"
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 14,
+            "position_changed": "-4"
+          }
+        },
+        "Pierre Gasly": {
+          "Sprint": {
+            "points_start": 1,
+            "points_finish": 1,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 11,
+            "position_changed": "-1"
+          },
+          "Race": {
+            "points_start": 1,
+            "points_finish": 9,
+            "points_received": 8,
+            "position_start": 11,
+            "position_finish": 6,
+            "position_changed": "+5"
+          }
+        },
+        "Carlos Sainz": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 15,
+            "position_finish": 12,
+            "position_changed": "+3"
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 2,
+            "points_received": 2,
+            "position_start": 12,
+            "position_finish": 9,
+            "position_changed": "+3"
+          }
+        },
+        "Gabriel Bortoleto": {
+          "Sprint": {
+            "points_start": 2,
+            "points_finish": 2,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 13,
+            "position_changed": "-4"
+          },
+          "Race": {
+            "points_start": 2,
+            "points_finish": 2,
+            "points_received": 0,
+            "position_start": 13,
+            "position_finish": null,
+            "position_changed": null
+          }
+        },
+        "Franco Colapinto": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 14,
+            "position_finish": 14,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 1,
+            "points_received": 1,
+            "position_start": 14,
+            "position_finish": 10,
+            "position_changed": "+4"
+          }
+        },
+        "Isack Hadjar": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 20,
+            "position_finish": 15,
+            "position_changed": "+5"
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 4,
+            "points_received": 4,
+            "position_start": 15,
+            "position_finish": 8,
+            "position_changed": "+7"
+          }
+        },
+        "Alexander Albon": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 12,
+            "position_finish": 16,
+            "position_changed": "-4"
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 16,
+            "position_finish": null,
+            "position_changed": null
+          }
+        },
+        "Fernando Alonso": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 18,
+            "position_finish": 17,
+            "position_changed": "+1"
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 17,
+            "position_finish": null,
+            "position_changed": null
+          }
+        },
+        "Lance Stroll": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 17,
+            "position_finish": 18,
+            "position_changed": "-1"
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 18,
+            "position_finish": null,
+            "position_changed": null
+          }
+        },
+        "Sergio Perez": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 19,
+            "position_changed": null
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 19,
+            "position_finish": 15,
+            "position_changed": "+4"
+          }
+        },
+        "Nico Hulkenberg": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": null,
+            "position_changed": null
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 11,
+            "position_changed": null
+          }
+        },
+        "Valtteri Bottas": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 19,
+            "position_finish": null,
+            "position_changed": null
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 13,
+            "position_changed": null
+          }
+        },
+        "Arvid Lindblad": {
+          "Sprint": {
+            "points_start": 4,
+            "points_finish": 4,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": null,
+            "position_changed": null
+          },
+          "Race": {
+            "points_start": 4,
+            "points_finish": 4,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 12,
+            "position_changed": null
+          }
+        }
+      }
+    }
+  ]
+}
