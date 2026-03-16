@@ -123,73 +123,8 @@ abstract final class AppTheme {
     required F1ThemeTokens tokens,
   }) {
     final scheme = base.colorScheme;
-    // Force TitilliumWeb als basis, maar gebruik TitilliumWeb-Bold voor bold
-    final textTheme = base.textTheme.copyWith(
-      displayLarge: base.textTheme.displayLarge?.copyWith(
-        fontFamily: 'TitilliumWeb',
-        fontWeight: FontWeight.normal,
-      ),
-      displayMedium: base.textTheme.displayMedium?.copyWith(
-        fontFamily: 'TitilliumWeb',
-        fontWeight: FontWeight.normal,
-      ),
-      displaySmall: base.textTheme.displaySmall?.copyWith(
-        fontFamily: 'TitilliumWeb',
-        fontWeight: FontWeight.normal,
-      ),
-      headlineLarge: base.textTheme.headlineLarge?.copyWith(
-        fontFamily: 'TitilliumWeb',
-        fontWeight: FontWeight.normal,
-      ),
-      headlineMedium: base.textTheme.headlineMedium?.copyWith(
-        fontFamily: 'TitilliumWeb',
-        fontWeight: FontWeight.normal,
-      ),
-      headlineSmall: base.textTheme.headlineSmall?.copyWith(
-        fontFamily: 'TitilliumWeb',
-        fontWeight: FontWeight.normal,
-      ),
-      titleLarge: base.textTheme.titleLarge?.copyWith(
-        fontFamily: 'TitilliumWeb',
-        fontWeight: FontWeight.normal,
-      ),
-      titleMedium: base.textTheme.titleMedium?.copyWith(
-        fontFamily: 'TitilliumWeb',
-        fontWeight: FontWeight.normal,
-      ),
-      titleSmall: base.textTheme.titleSmall?.copyWith(
-        fontFamily: 'TitilliumWeb',
-        fontWeight: FontWeight.normal,
-      ),
-      bodyLarge: base.textTheme.bodyLarge?.copyWith(
-        fontFamily: 'TitilliumWeb',
-        fontWeight: FontWeight.normal,
-      ),
-      bodyMedium: base.textTheme.bodyMedium?.copyWith(
-        fontFamily: 'TitilliumWeb',
-        fontWeight: FontWeight.normal,
-      ),
-      bodySmall: base.textTheme.bodySmall?.copyWith(
-        fontFamily: 'TitilliumWeb',
-        fontWeight: FontWeight.normal,
-      ),
-      labelLarge: base.textTheme.labelLarge?.copyWith(
-        fontFamily: 'TitilliumWeb',
-        fontWeight: FontWeight.normal,
-      ),
-      labelMedium: base.textTheme.labelMedium?.copyWith(
-        fontFamily: 'TitilliumWeb',
-        fontWeight: FontWeight.normal,
-      ),
-      labelSmall: base.textTheme.labelSmall?.copyWith(
-        fontFamily: 'TitilliumWeb',
-        fontWeight: FontWeight.normal,
-      ),
-    ).apply(
-      fontFamily: 'TitilliumWeb',
-      bodyColor: base.textTheme.bodyMedium?.color,
-      displayColor: base.textTheme.displayMedium?.color,
-    );
+    // Force TitilliumWeb als enige font overal
+    final textTheme = base.textTheme.apply(fontFamily: 'TitilliumWeb');
 
     return base.copyWith(
       primaryColor: _primary,
@@ -751,6 +686,7 @@ Widget _buildSessionWidgetSkeleton(BuildContext context, String title) {
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Color(0xFF2196F3),
+            fontFamily: 'TitilliumWeb',
           ),
         ),
         const SizedBox(height: 10),
@@ -1366,6 +1302,7 @@ class _WeatherMetricTile extends StatelessWidget {
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                     color: theme.colorScheme.onSurfaceVariant,
+                    fontFamily: 'TitilliumWeb',
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -1375,6 +1312,7 @@ class _WeatherMetricTile extends StatelessWidget {
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
                     color: theme.colorScheme.onSurface,
+                    fontFamily: 'TitilliumWeb',
                   ),
                 ),
               ],
@@ -1803,6 +1741,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                         fontWeight: FontWeight.w800,
                         fontSize: 15,
                         color: theme.colorScheme.onSurface,
+                        fontFamily: 'TitilliumWeb',
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -1813,6 +1752,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                       style: TextStyle(
                         fontSize: 11,
                         color: theme.colorScheme.onSurfaceVariant,
+                        fontFamily: 'TitilliumWeb',
                       ),
                     ),
                   ],
@@ -1841,6 +1781,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                         fontWeight: FontWeight.w800,
                         fontSize: 11,
                         color: trackFlagState.color,
+                        fontFamily: 'TitilliumWeb',
                       ),
                     ),
                   ),
@@ -1865,8 +1806,9 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                         fontWeight: FontWeight.w800,
                         fontSize: 11,
                         color: rain > 0
-                            ? const Color(0xFF1565C0)
-                            : const Color(0xFF2E7D32),
+                          ? const Color(0xFF1565C0)
+                          : const Color(0xFF2E7D32),
+                        fontFamily: 'TitilliumWeb',
                       ),
                     ),
                   ),
