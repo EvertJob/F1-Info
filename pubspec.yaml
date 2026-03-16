@@ -115,3 +115,5 @@ flutter:
     - family: TitilliumWeb
       fonts:
         - asset: assets/fonts/TitilliumWeb-Regular.ttf
+        - asset: assets/fonts/TitilliumWeb-Bold.ttf
+          weight: 700

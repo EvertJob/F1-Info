@@ -123,32 +123,72 @@ abstract final class AppTheme {
     required F1ThemeTokens tokens,
   }) {
     final scheme = base.colorScheme;
+    // Force TitilliumWeb als basis, maar gebruik TitilliumWeb-Bold voor bold
     final textTheme = base.textTheme.copyWith(
-      displayLarge: base.textTheme.displayLarge?.copyWith(fontFamily: 'TitilliumWeb'),
-      displayMedium: base.textTheme.displayMedium?.copyWith(fontFamily: 'TitilliumWeb'),
-      displaySmall: base.textTheme.displaySmall?.copyWith(fontFamily: 'TitilliumWeb'),
-      headlineLarge: base.textTheme.headlineLarge?.copyWith(fontFamily: 'TitilliumWeb'),
-      headlineMedium: base.textTheme.headlineMedium?.copyWith(fontFamily: 'TitilliumWeb'),
-      headlineSmall: base.textTheme.headlineSmall?.copyWith(fontFamily: 'TitilliumWeb'),
-      titleLarge: base.textTheme.titleLarge?.copyWith(fontFamily: 'TitilliumWeb'),
-      titleMedium: base.textTheme.titleMedium?.copyWith(fontFamily: 'TitilliumWeb'),
-      titleSmall: base.textTheme.titleSmall?.copyWith(fontFamily: 'TitilliumWeb'),
-      bodyLarge: base.textTheme.bodyLarge?.copyWith(
-        color: scheme.onSurface,
+      displayLarge: base.textTheme.displayLarge?.copyWith(
         fontFamily: 'TitilliumWeb',
+        fontWeight: FontWeight.normal,
       ),
-      bodyMedium: base.textTheme.bodyMedium?.copyWith(fontFamily: 'TitilliumWeb'),
-      bodySmall: base.textTheme.bodySmall?.copyWith(
-        color: scheme.onSurfaceVariant,
+      displayMedium: base.textTheme.displayMedium?.copyWith(
         fontFamily: 'TitilliumWeb',
+        fontWeight: FontWeight.normal,
+      ),
+      displaySmall: base.textTheme.displaySmall?.copyWith(
+        fontFamily: 'TitilliumWeb',
+        fontWeight: FontWeight.normal,
+      ),
+      headlineLarge: base.textTheme.headlineLarge?.copyWith(
+        fontFamily: 'TitilliumWeb',
+        fontWeight: FontWeight.normal,
+      ),
+      headlineMedium: base.textTheme.headlineMedium?.copyWith(
+        fontFamily: 'TitilliumWeb',
+        fontWeight: FontWeight.normal,
+      ),
+      headlineSmall: base.textTheme.headlineSmall?.copyWith(
+        fontFamily: 'TitilliumWeb',
+        fontWeight: FontWeight.normal,
+      ),
+      titleLarge: base.textTheme.titleLarge?.copyWith(
+        fontFamily: 'TitilliumWeb',
+        fontWeight: FontWeight.normal,
+      ),
+      titleMedium: base.textTheme.titleMedium?.copyWith(
+        fontFamily: 'TitilliumWeb',
+        fontWeight: FontWeight.normal,
+      ),
+      titleSmall: base.textTheme.titleSmall?.copyWith(
+        fontFamily: 'TitilliumWeb',
+        fontWeight: FontWeight.normal,
+      ),
+      bodyLarge: base.textTheme.bodyLarge?.copyWith(
+        fontFamily: 'TitilliumWeb',
+        fontWeight: FontWeight.normal,
+      ),
+      bodyMedium: base.textTheme.bodyMedium?.copyWith(
+        fontFamily: 'TitilliumWeb',
+        fontWeight: FontWeight.normal,
+      ),
+      bodySmall: base.textTheme.bodySmall?.copyWith(
+        fontFamily: 'TitilliumWeb',
+        fontWeight: FontWeight.normal,
       ),
       labelLarge: base.textTheme.labelLarge?.copyWith(
-        fontWeight: FontWeight.w700,
-        letterSpacing: 0.5,
         fontFamily: 'TitilliumWeb',
+        fontWeight: FontWeight.normal,
       ),
-      labelMedium: base.textTheme.labelMedium?.copyWith(fontFamily: 'TitilliumWeb'),
-      labelSmall: base.textTheme.labelSmall?.copyWith(fontFamily: 'TitilliumWeb'),
+      labelMedium: base.textTheme.labelMedium?.copyWith(
+        fontFamily: 'TitilliumWeb',
+        fontWeight: FontWeight.normal,
+      ),
+      labelSmall: base.textTheme.labelSmall?.copyWith(
+        fontFamily: 'TitilliumWeb',
+        fontWeight: FontWeight.normal,
+      ),
+    ).apply(
+      fontFamily: 'TitilliumWeb',
+      bodyColor: base.textTheme.bodyMedium?.color,
+      displayColor: base.textTheme.displayMedium?.color,
     );
 
     return base.copyWith(
@@ -185,10 +225,12 @@ abstract final class AppTheme {
         selectedLabelStyle: const TextStyle(
           fontWeight: FontWeight.w800,
           letterSpacing: 0.8,
+          fontFamily: 'TitilliumWeb',
         ),
         unselectedLabelStyle: const TextStyle(
           fontWeight: FontWeight.w600,
           letterSpacing: 0.6,
+          fontFamily: 'TitilliumWeb',
         ),
         elevation: 0,
       ),
