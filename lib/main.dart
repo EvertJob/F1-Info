@@ -146,12 +146,11 @@ abstract final class AppTheme {
     );
 
     return base.copyWith(
-      fontFamily: fontFamily,
       textTheme: textTheme,
       primaryTextTheme: textTheme,
       splashFactory: InkSparkle.splashFactory,
       dividerColor: Colors.transparent,
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: tokens.panelStrong,
         surfaceTintColor: Colors.transparent,
         shadowColor: Colors.black.withOpacity(isDark ? 0.35 : 0.08),
@@ -215,7 +214,7 @@ abstract final class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         behavior: SnackBarBehavior.floating,
       ),
-      dialogTheme: const DialogTheme(
+      dialogTheme: const DialogThemeData(
         titleTextStyle: TextStyle(fontFamily: fontFamily, fontWeight: bold, fontSize: 20),
         contentTextStyle: TextStyle(fontFamily: fontFamily, fontWeight: regular, fontSize: 16),
       ),
