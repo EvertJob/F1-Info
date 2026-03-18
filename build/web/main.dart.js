@@ -64139,9 +64139,9 @@ Fg(a){return this.ax_(a)},
 ax_(a3){var s=0,r=A.C(t.b5),q,p=2,o=[],n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2
 var $async$Fg=A.D(function(a4,a5){if(a4===1){o.push(a5)
 s=p}for(;;)switch(s){case 0:a0="weather_"+A.bv(a3.d)+"_round_"+A.j4(a3)+".json"
-a1=[a0,"data/"+a0,"data/results/"+a0]
+a1=[a0,"data/"+a0,"data/results/"+a0,"assets/data/results/"+a0]
 f=t.f,e=t.P,d=t.j,c=0
-case 3:if(!(c<3)){s=5
+case 3:if(!(c<4)){s=5
 break}n=a1[c]
 p=7
 m=A.Tu().aj(n)
@@ -64188,9 +64188,9 @@ Fe(a){return this.awY(a)},
 awY(a1){var s=0,r=A.C(t.b5),q,p=2,o=[],n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0
 var $async$Fe=A.D(function(a2,a3){if(a2===1){o.push(a3)
 s=p}for(;;)switch(s){case 0:b="race_control_"+A.bv(a1.d)+"_round_"+A.j4(a1)+".json"
-a=[b,"data/"+b,"data/results/"+b]
+a=[b,"data/"+b,"data/results/"+b,"assets/data/results/"+b]
 h=t.f,g=t.P,f=t.j,e=0
-case 3:if(!(e<3)){s=5
+case 3:if(!(e<4)){s=5
 break}n=a[e]
 p=7
 m=A.Tu().aj(n)
@@ -67242,9 +67242,9 @@ Fh(){var s=0,r=A.C(t.AV),q,p=2,o=[],n=this,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3
 var $async$Fh=A.D(function(b2,b3){if(b2===1){o.push(b3)
 s=p}for(;;)switch(s){case 0:a8=n.a.c
 a9="weather_"+A.bv(a8.d)+"_round_"+A.j4(a8)+".json"
-b0=[a9,"data/"+a9,"data/results/"+a9]
+b0=[a9,"data/"+a9,"data/results/"+a9,"assets/data/results/"+a9]
 a8=t.j,a0=t.f,a1=t.P,a2=t.N,a3=t.b5,a4=0
-case 3:if(!(a4<3)){s=5
+case 3:if(!(a4<4)){s=5
 break}m=b0[a4]
 p=7
 l=A.Tu().aj(m)
