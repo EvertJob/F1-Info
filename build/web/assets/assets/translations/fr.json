@@ -371,6 +371,27 @@
   "ai_type_command": "Tapez une commande...",
   "no_race_results_available": "Aucun résultat de course disponible pour le moment.",
   "placeholder_page": "Nouvelle page",
-  "placeholder_page_empty": "Cette page est encore vide."
+  "placeholder_page_empty": "Cette page est encore vide.",
+  "loading": "Chargement",
+  "season_2026": "Saison 2026",
+  "ai_strategist_title": "Stratège IA",
+  "ai_strategist_tap_to_chat": "Appuyez pour poser des questions...",
+  "ai_sentiment_label": "Ambiance équipe",
+  "ai_sentiment_mercedes_positive": "Ambiance équipe : Le moral monte chez Mercedes après la pénalité Hamilton.",
+  "ai_sentiment_generic_positive": "Ambiance équipe : Énergie positive dans tout le paddock.",
+  "ai_sentiment_generic_neutral": "Ambiance équipe : Signaux mitigés des radios équipe.",
+  "ai_rain_chance_label": "Risque de pluie",
+  "ai_weather_effect": "À {pct}% de pluie : chances de podium pour {driver} en hausse de {pct2}% grâce à un bon rythme sous la pluie.",
+  "ai_weather_effect_generic": "À {pct}% de pluie : conditions humides favorables aux spécialistes.",
+  "ai_coach_title": "Coach's Corner",
+  "ai_coach_tip_turn13": "Attention au virage 13, où Leclerc a perdu la course l'année dernière à cause d'une surverse.",
+  "ai_coach_tip_sector2": "Concentrez-vous sur la gestion des pneus en secteur 2 ce week-end.",
+  "ai_coach_tip_generic": "Stratégie et choix de pneus seront décisifs ici.",
+  "ai_teammate_battle": "Duel équipiers",
+  "ai_qualifying_duel": "Duel qualifications",
+  "ai_avg_gap": "Écart moy.",
+  "ai_teammate_insight": "{driver} est traditionnellement plus fort sur ce circuit en qualification, tandis que {teammate} excelle en préservation des pneus.",
+  "ai_strategy_history": "Stratégie gagnante historique : 1 arrêt (Medium vers Hard) est l'option la plus rapide ici dans 80% des cas.",
+  "ai_coach_tip_suzuka": "Le virage 13 à Suzuka est crucial pour la vitesse de sortie."
   }
 }

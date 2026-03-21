@@ -371,6 +371,27 @@
   "ai_type_command": "Befehl eingeben...",
   "no_race_results_available": "Noch kein Rennergebnis verfügbar.",
   "placeholder_page": "Neue Seite",
-  "placeholder_page_empty": "Diese Seite ist noch leer."
+  "placeholder_page_empty": "Diese Seite ist noch leer.",
+  "loading": "Laden",
+  "season_2026": "2026 Saison",
+  "ai_strategist_title": "AI Strategist",
+  "ai_strategist_tap_to_chat": "Tippen für Fragen...",
+  "ai_sentiment_label": "Team-Stimmung",
+  "ai_sentiment_mercedes_positive": "Team-Stimmung: Stimmung bei Mercedes steigt nach Hamilton-Gridstrafe.",
+  "ai_sentiment_generic_positive": "Team-Stimmung: Positive Energie im gesamten Paddock.",
+  "ai_sentiment_generic_neutral": "Team-Stimmung: Gemischte Signale von Team-Funks.",
+  "ai_rain_chance_label": "Regenwahrscheinlichkeit",
+  "ai_weather_effect": "Bei {pct}% Regen: Podium-Chance für {driver} steigt um {pct2}% durch starke Regen-Pace.",
+  "ai_weather_effect_generic": "Bei {pct}% Regen: Nasse Bedingungen begünstigen starke Regen-Fahrer.",
+  "ai_coach_title": "Coach's Corner",
+  "ai_coach_tip_turn13": "Achtung Kurve 13, dort verlor Leclerc letztes Jahr den Sieg durch Übersteuern.",
+  "ai_coach_tip_sector2": "Fokus auf Sektor-2-Reifenmanagement dieses Wochenende.",
+  "ai_coach_tip_generic": "Strategie- und Reifenauswahl werden hier entscheidend sein.",
+  "ai_teammate_battle": "Teamgenossen-Duell",
+  "ai_qualifying_duel": "Qualifying-Duell",
+  "ai_avg_gap": "Ø Differenz",
+  "ai_teammate_insight": "{driver} ist auf dieser Strecke traditionell stärker in der Qualifikation, während {teammate} in Reifenschonung glänzt.",
+  "ai_strategy_history": "Historisch siegreiche Strategie: 1-Stopp (Medium auf Hard) ist hier in 80% der Fälle die schnellste Option.",
+  "ai_coach_tip_suzuka": "Kurve 13 in Suzuka ist entscheidend für die Exit-Geschwindigkeit."
   }
 }
