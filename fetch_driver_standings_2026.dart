@@ -39,8 +39,8 @@ Future<void> main() async {
   }
 
   // Save to file in a simple format for the driver chart
-  final file = File('data/results/drivers_standings_2026.json');
+  final file = File('data/results/drivers/drivers_standings_2026.json');
   await file.create(recursive: true);
   await file.writeAsString(JsonEncoder.withIndent('  ').convert(allEvents));
-  print('Saved drivers standings to data/results/drivers_standings_2026.json');
+  print('Saved drivers standings to data/results/drivers/drivers_standings_2026.json');
 }

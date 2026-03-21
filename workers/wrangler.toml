@@ -1,0 +1,8 @@
+name = "f1-live-timing-proxy"
+# Explicit relative path (run: cd workers && npx wrangler deploy)
+main = "./src/index.js"
+compatibility_date = "2024-12-01"
+
+[vars]
+# Allowed origins for CORS (comma-separated)
+ALLOWED_ORIGINS = "https://f1hub.app,https://www.f1hub.app,http://localhost:5000,http://localhost:3000,http://127.0.0.1:5000"

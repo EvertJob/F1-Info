@@ -15,7 +15,7 @@ void main(List<String> args) async {
     exit(1);
   }
 
-  final outputFile = File('data/results/drivers_standings_2026.json');
+  final outputFile = File('data/results/drivers/drivers_standings_2026.json');
   bool doRebuild = args.contains('--rebuild');
   List<String> rounds = args.where((a) => a != '--rebuild').toList();
 

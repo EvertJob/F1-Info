@@ -19,16 +19,21 @@ if ($versionLine) {
     Write-Host "Versie verhoogd naar $newVersion"
 }
 
-# 2. Builden
-flutter build web
+# 2. Builden (base-href voor GitHub Pages project site: /F1-Info/)
+flutter build web --base-href "/F1-Info/"
 
-# 3. Pushen naar gh-pages
-# Forceer toevoegen van build/web ondanks .gitignore
+# 2b. CNAME voor custom domain (f1hub.app) - moet in root van gh-pages staan
+if (Test-Path CNAME) {
+  Copy-Item CNAME build/web/CNAME
+}
 
+# 3. Pushen naar gh-pages (build/web inhoud naar root voor GitHub Pages)
 git add -f build/web
 $commitMsg = "Auto build: versie verhoogd naar $newVersion"
 git commit -m $commitMsg
 
-git push origin gh-pages
+# Subtree push: build/web inhoud komt in root van gh-pages branch
+$subtreeRef = (git subtree split --prefix build/web).ToString().Trim()
+git push origin "${subtreeRef}:gh-pages" --force
 
 Write-Host "Build en deploy voltooid."

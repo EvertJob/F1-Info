@@ -816,6 +816,10 @@ class Team {
   final List<String> previousNames;
   final List<String> drivers;
   final String carImageUrl;
+  final List<String> factsEn;
+  final List<String> factsNl;
+  final List<String> factsFr;
+  final List<String> factsDe;
   Team({
     required this.name,
     required this.flag,
@@ -849,6 +853,10 @@ class Team {
     required this.previousNames,
     required this.drivers,
     required this.carImageUrl,
+    this.factsEn = const [],
+    this.factsNl = const [],
+    this.factsFr = const [],
+    this.factsDe = const [],
   });
   factory Team.copy(Team t, int points) => Team(
     name: t.name,
@@ -883,6 +891,10 @@ class Team {
     previousNames: t.previousNames,
     drivers: t.drivers,
     carImageUrl: t.carImageUrl,
+    factsEn: t.factsEn,
+    factsNl: t.factsNl,
+    factsFr: t.factsFr,
+    factsDe: t.factsDe,
   );
 }
 
@@ -8169,6 +8181,34 @@ final List<Team> fallbackTeams = [
     ],
     carImageUrl:
         'https://media.formula1.com/image/upload/c_lfill,w_600/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/v1740000000/common/f1/2026/mclaren/2026mclarencarright.webp',
+    factsEn: [
+      'Founded in 1963 by Bruce McLaren, a New Zealand racing driver who was just 22 years old.',
+      'McLaren has won 183 races, making them the second most successful team in F1 history.',
+      'The iconic Papaya Orange livery was Bruce McLaren\'s personal choice and returned in 2018.',
+      'McLaren also builds road cars — the McLaren F1 held the fastest production car record for 20 years.',
+      'Ayrton Senna won all three of his World Championships with McLaren (1988, 1990, 1991).',
+    ],
+    factsNl: [
+      'Opgericht in 1963 door Bruce McLaren, een Nieuw-Zeelandse coureur van slechts 22 jaar.',
+      'McLaren heeft 183 races gewonnen, het op één na meest succesvolle team in de F1-geschiedenis.',
+      'De iconische Papaya Oranje kleurstelling was de persoonlijke keuze van Bruce McLaren en keerde terug in 2018.',
+      'McLaren bouwt ook straatauto\'s — de McLaren F1 had 20 jaar lang het record snelste productieauto.',
+      'Ayrton Senna won al zijn drie wereldtitels met McLaren (1988, 1990, 1991).',
+    ],
+    factsFr: [
+      'Fondée en 1963 par Bruce McLaren, un pilote néo-zélandais de seulement 22 ans.',
+      'McLaren a remporté 183 courses, ce qui en fait la deuxième équipe la plus titrée de l\'histoire de la F1.',
+      'La livrée orange papaye emblématique était le choix personnel de Bruce McLaren et est revenue en 2018.',
+      'McLaren construit aussi des voitures de route — la McLaren F1 a détenu le record de la voiture la plus rapide pendant 20 ans.',
+      'Ayrton Senna a remporté ses trois titres mondiaux avec McLaren (1988, 1990, 1991).',
+    ],
+    factsDe: [
+      'Gegründet 1963 von Bruce McLaren, einem neuseeländischen Rennfahrer, der erst 22 Jahre alt war.',
+      'McLaren hat 183 Rennen gewonnen und ist damit das zweiterfolgreichste Team der F1-Geschichte.',
+      'Die ikonische Papaya-Orange-Lackierung war Bruce McLarens persönliche Wahl und kehrte 2018 zurück.',
+      'McLaren baut auch Straßenfahrzeuge — der McLaren F1 hielt 20 Jahre den Rekord als schnellstes Serienauto.',
+      'Ayrton Senna gewann alle seine drei Weltmeisterschaften mit McLaren (1988, 1990, 1991).',
+    ],
   ),
   Team(
     name: 'Mercedes',
@@ -8227,6 +8267,34 @@ final List<Team> fallbackTeams = [
     ],
     carImageUrl:
         'https://media.formula1.com/image/upload/c_lfill,w_600/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/v1740000000/common/f1/2026/mercedes/2026mercedescarright.webp',
+    factsEn: [
+      'Mercedes is the most successful team in the turbo-hybrid era, winning 8 consecutive Constructors\' Championships (2014–2021).',
+      'The team\'s Brackley factory was originally a secret WWII military facility.',
+      'Lewis Hamilton scored 82 of his record 104 wins with Mercedes.',
+      'Mercedes returned to F1 as a works team in 2010 after buying Brawn GP for just £1.',
+      'The W11 (2020) is considered one of the most dominant F1 cars ever built, winning 13 of 17 races.',
+    ],
+    factsNl: [
+      'Mercedes is het succesvolste team in het turbo-hybride tijdperk, met 8 opeenvolgende constructeurstitels (2014–2021).',
+      'De fabriek in Brackley was oorspronkelijk een geheime militaire faciliteit uit WO2.',
+      'Lewis Hamilton behaalde 82 van zijn record 104 overwinningen met Mercedes.',
+      'Mercedes keerde in 2010 terug als fabrieksteam na de overname van Brawn GP voor slechts £1.',
+      'De W11 (2020) wordt beschouwd als een van de meest dominante F1-auto\'s ooit, met 13 zeges in 17 races.',
+    ],
+    factsFr: [
+      'Mercedes est l\'équipe la plus titrée de l\'ère turbo-hybride, avec 8 titres constructeurs consécutifs (2014–2021).',
+      'L\'usine de Brackley était à l\'origine une installation militaire secrète de la Seconde Guerre mondiale.',
+      'Lewis Hamilton a remporté 82 de ses 104 victoires record avec Mercedes.',
+      'Mercedes est revenu en F1 en tant qu\'équipe d\'usine en 2010 après avoir racheté Brawn GP pour seulement 1 £.',
+      'La W11 (2020) est considérée comme l\'une des F1 les plus dominantes jamais construites, gagnant 13 des 17 courses.',
+    ],
+    factsDe: [
+      'Mercedes ist das erfolgreichste Team der Turbo-Hybrid-Ära mit 8 aufeinanderfolgenden Konstrukteurstiteln (2014–2021).',
+      'Die Fabrik in Brackley war ursprünglich eine geheime Militäreinrichtung aus dem Zweiten Weltkrieg.',
+      'Lewis Hamilton holte 82 seiner Rekord-104-Siege mit Mercedes.',
+      'Mercedes kehrte 2010 als Werksteam in die F1 zurück, nachdem es Brawn GP für nur 1 £ übernommen hatte.',
+      'Der W11 (2020) gilt als einer der dominantesten F1-Wagen aller Zeiten — 13 Siege in 17 Rennen.',
+    ],
   ),
   Team(
     name: 'Red Bull Racing',
@@ -8282,6 +8350,34 @@ final List<Team> fallbackTeams = [
     ],
     carImageUrl:
         'https://media.formula1.com/image/upload/c_lfill,w_600/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/v1740000000/common/f1/2026/redbullracing/2026redbullracingcarright.webp',
+    factsEn: [
+      'Red Bull originally bought the Jaguar Racing team in 2004 for a symbolic \$1.',
+      'The team\'s Milton Keynes factory houses one of the most advanced wind tunnels in motorsport.',
+      'Max Verstappen became the youngest race winner in F1 history with Red Bull in 2016, aged 18.',
+      'Red Bull won 21 of 22 races in 2023, the most dominant season in F1 history.',
+      'Adrian Newey designed Red Bull\'s championship-winning cars before departing in 2024.',
+    ],
+    factsNl: [
+      'Red Bull kocht oorspronkelijk het Jaguar Racing-team in 2004 voor een symbolische \$1.',
+      'De fabriek in Milton Keynes heeft een van de meest geavanceerde windtunnels in de motorsport.',
+      'Max Verstappen werd in 2016 de jongste racewinnaar in de F1-geschiedenis met Red Bull, op 18-jarige leeftijd.',
+      'Red Bull won 21 van 22 races in 2023, het meest dominante seizoen in de F1-geschiedenis.',
+      'Adrian Newey ontwierp Red Bull\'s kampioensauto\'s voordat hij in 2024 vertrok.',
+    ],
+    factsFr: [
+      'Red Bull a racheté l\'équipe Jaguar Racing en 2004 pour un symbolique 1 \$.',
+      'L\'usine de Milton Keynes abrite l\'une des souffleries les plus avancées du sport automobile.',
+      'Max Verstappen est devenu le plus jeune vainqueur de l\'histoire de la F1 avec Red Bull en 2016, à 18 ans.',
+      'Red Bull a remporté 21 des 22 courses en 2023, la saison la plus dominante de l\'histoire.',
+      'Adrian Newey a conçu les voitures championnes de Red Bull avant de partir en 2024.',
+    ],
+    factsDe: [
+      'Red Bull kaufte 2004 das Jaguar-Racing-Team für symbolische 1 \$.',
+      'Die Fabrik in Milton Keynes beherbergt einen der modernsten Windkanäle im Motorsport.',
+      'Max Verstappen wurde 2016 mit 18 Jahren der jüngste Rennsieger der F1-Geschichte bei Red Bull.',
+      'Red Bull gewann 2023 21 von 22 Rennen — die dominanteste Saison der F1-Geschichte.',
+      'Adrian Newey entwarf Red Bulls Meisterautos, bevor er 2024 das Team verließ.',
+    ],
   ),
   Team(
     name: 'Ferrari',
@@ -8359,6 +8455,34 @@ final List<Team> fallbackTeams = [
     ],
     carImageUrl:
         'https://media.formula1.com/image/upload/c_lfill,w_600/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/v1740000000/common/f1/2026/ferrari/2026ferraricarright.webp',
+    factsEn: [
+      'Ferrari is the only team to have competed in every F1 season since the championship began in 1950.',
+      'The Prancing Horse logo was originally on the plane of WWI Italian fighter ace Francesco Baracca.',
+      'Ferrari has won more races (244+) and more Constructors\' Championships (16) than any other team.',
+      'Enzo Ferrari originally had no interest in road cars — he built them only to fund his racing team.',
+      'The Maranello factory\'s famous test track, Fiorano, is just 300 meters from the main building.',
+    ],
+    factsNl: [
+      'Ferrari is het enige team dat in elk F1-seizoen heeft gereden sinds het kampioenschap begon in 1950.',
+      'Het Steigerend Paard-logo stond oorspronkelijk op het vliegtuig van WO1-gevechtspiloot Francesco Baracca.',
+      'Ferrari heeft meer races (244+) en meer constructeurstitels (16) gewonnen dan elk ander team.',
+      'Enzo Ferrari had oorspronkelijk geen interesse in straatauto\'s — hij bouwde ze alleen om zijn raceteam te financieren.',
+      'Het beroemde testcircuit Fiorano in Maranello ligt slechts 300 meter van het hoofdgebouw.',
+    ],
+    factsFr: [
+      'Ferrari est la seule équipe à avoir participé à chaque saison de F1 depuis le début du championnat en 1950.',
+      'Le logo du cheval cabré figurait à l\'origine sur l\'avion de l\'as italien Francesco Baracca durant la Première Guerre mondiale.',
+      'Ferrari a remporté plus de courses (244+) et plus de titres constructeurs (16) que toute autre équipe.',
+      'Enzo Ferrari n\'avait aucun intérêt pour les voitures de route — il les construisait uniquement pour financer son écurie.',
+      'Le célèbre circuit d\'essai de Fiorano à Maranello est à seulement 300 mètres du bâtiment principal.',
+    ],
+    factsDe: [
+      'Ferrari ist das einzige Team, das seit Beginn der Weltmeisterschaft 1950 an jeder F1-Saison teilgenommen hat.',
+      'Das Springende-Pferd-Logo befand sich ursprünglich auf dem Flugzeug des italienischen Kampfpiloten Francesco Baracca im Ersten Weltkrieg.',
+      'Ferrari hat mehr Rennen (244+) und mehr Konstrukteurstitel (16) gewonnen als jedes andere Team.',
+      'Enzo Ferrari hatte kein Interesse an Straßenfahrzeugen — er baute sie nur, um sein Rennteam zu finanzieren.',
+      'Die berühmte Teststrecke Fiorano in Maranello ist nur 300 Meter vom Hauptgebäude entfernt.',
+    ],
   ),
   Team(
     name: 'Williams',
@@ -8423,6 +8547,34 @@ final List<Team> fallbackTeams = [
     ],
     carImageUrl:
         'https://media.formula1.com/image/upload/c_lfill,w_600/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/v1740000000/common/f1/2026/williams/2026williamscarright.webp',
+    factsEn: [
+      'Williams is the third most successful team in F1 history with 9 Constructors\' Championships.',
+      'Sir Frank Williams ran the team from a wheelchair for over 30 years after a car accident in 1986.',
+      'Williams pioneered the use of active suspension in F1, revolutionizing car design in the early 1990s.',
+      'Nigel Mansell\'s FW14B (1992) is widely considered one of the most technologically advanced F1 cars ever.',
+      'The team was sold to Dorilton Capital in 2020, ending 43 years of family ownership.',
+    ],
+    factsNl: [
+      'Williams is het op twee na succesvolste team in de F1-geschiedenis met 9 constructeurstitels.',
+      'Sir Frank Williams leidde het team meer dan 30 jaar vanuit een rolstoel na een auto-ongeluk in 1986.',
+      'Williams was een pionier in het gebruik van actieve ophanging in de F1, wat autodesign revolutioneerde in de jaren \'90.',
+      'De FW14B van Nigel Mansell (1992) wordt gezien als een van de meest geavanceerde F1-auto\'s ooit.',
+      'Het team werd in 2020 verkocht aan Dorilton Capital, waarmee 43 jaar familiebezit eindigde.',
+    ],
+    factsFr: [
+      'Williams est la troisième équipe la plus titrée de l\'histoire de la F1 avec 9 titres constructeurs.',
+      'Sir Frank Williams a dirigé l\'équipe depuis un fauteuil roulant pendant plus de 30 ans après un accident de voiture en 1986.',
+      'Williams a été pionnier dans l\'utilisation de la suspension active en F1, révolutionnant la conception des voitures au début des années 1990.',
+      'La FW14B de Nigel Mansell (1992) est considérée comme l\'une des F1 les plus avancées technologiquement.',
+      'L\'équipe a été vendue à Dorilton Capital en 2020, mettant fin à 43 ans de propriété familiale.',
+    ],
+    factsDe: [
+      'Williams ist das dritterfolgreichste Team der F1-Geschichte mit 9 Konstrukteurstiteln.',
+      'Sir Frank Williams leitete das Team über 30 Jahre aus dem Rollstuhl, nach einem Autounfall 1986.',
+      'Williams war Pionier der aktiven Federung in der F1 und revolutionierte das Autodesign in den frühen 1990ern.',
+      'Nigel Mansells FW14B (1992) gilt als eines der technologisch fortschrittlichsten F1-Autos aller Zeiten.',
+      'Das Team wurde 2020 an Dorilton Capital verkauft und beendete 43 Jahre Familienbesitz.',
+    ],
   ),
   Team(
     name: 'Racing Bulls',
@@ -8479,6 +8631,34 @@ final List<Team> fallbackTeams = [
     ],
     carImageUrl:
         'https://media.formula1.com/image/upload/c_lfill,w_600/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/v1740000000/common/f1/2026/racingbulls/2026racingbullscarright.webp',
+    factsEn: [
+      'Racing Bulls was originally known as Scuderia AlphaTauri, and before that Toro Rosso (Italian for "Red Bull").',
+      'Sebastian Vettel won his first F1 race with Toro Rosso at the 2008 Italian GP at age 21.',
+      'The team is based in Faenza, Italy, making it the only non-British based team on the grid besides Ferrari and Sauber/Audi.',
+      'Racing Bulls serves as Red Bull\'s junior team, developing future talent for the main Red Bull Racing squad.',
+      'The team was rebranded from AlphaTauri to Racing Bulls in 2024 after the fashion brand sponsorship ended.',
+    ],
+    factsNl: [
+      'Racing Bulls heette oorspronkelijk Scuderia AlphaTauri, en daarvoor Toro Rosso (Italiaans voor "Rode Stier").',
+      'Sebastian Vettel won zijn eerste F1-race met Toro Rosso op de GP van Italië in 2008, op 21-jarige leeftijd.',
+      'Het team is gevestigd in Faenza, Italië, het enige niet-Britse team naast Ferrari en Sauber/Audi.',
+      'Racing Bulls dient als Red Bull\'s juniorenteam en ontwikkelt toekomstig talent voor het hoofdteam.',
+      'Het team werd in 2024 omgedoopt van AlphaTauri naar Racing Bulls nadat de modesponsoring eindigde.',
+    ],
+    factsFr: [
+      'Racing Bulls s\'appelait à l\'origine Scuderia AlphaTauri, et avant cela Toro Rosso (italien pour « Red Bull »).',
+      'Sebastian Vettel a remporté sa première victoire en F1 avec Toro Rosso au GP d\'Italie 2008, à 21 ans.',
+      'L\'équipe est basée à Faenza en Italie, la seule équipe non britannique avec Ferrari et Sauber/Audi.',
+      'Racing Bulls sert d\'équipe junior de Red Bull, développant les futurs talents pour l\'écurie principale.',
+      'L\'équipe a été rebaptisée d\'AlphaTauri à Racing Bulls en 2024 après la fin du parrainage mode.',
+    ],
+    factsDe: [
+      'Racing Bulls hieß ursprünglich Scuderia AlphaTauri und davor Toro Rosso (italienisch für „Roter Stier").',
+      'Sebastian Vettel gewann sein erstes F1-Rennen 2008 mit Toro Rosso beim GP von Italien im Alter von 21 Jahren.',
+      'Das Team hat seinen Sitz in Faenza, Italien — das einzige nicht-britische Team neben Ferrari und Sauber/Audi.',
+      'Racing Bulls dient als Red Bulls Juniorteam und entwickelt zukünftige Talente für das Hauptteam.',
+      'Das Team wurde 2024 von AlphaTauri in Racing Bulls umbenannt, nachdem die Modemarken-Partnerschaft endete.',
+    ],
   ),
   Team(
     name: 'Aston Martin',
@@ -8534,6 +8714,34 @@ final List<Team> fallbackTeams = [
     ],
     carImageUrl:
         'https://media.formula1.com/image/upload/c_lfill,w_600/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/v1740000000/common/f1/2026/astonmartin/2026astonmartincarright.webp',
+    factsEn: [
+      'Aston Martin returned to F1 as a constructor in 2021 after a 61-year absence from the sport.',
+      'The team\'s Silverstone factory is one of the most modern in F1, built with a £200 million investment.',
+      'Lawrence Stroll, a Canadian billionaire fashion investor, bought the team (then Racing Point) in 2018.',
+      'Fernando Alonso chose Aston Martin for his final F1 chapter, joining in 2023 at age 41.',
+      'The original Aston Martin team competed in the 1959 and 1960 F1 World Championships.',
+    ],
+    factsNl: [
+      'Aston Martin keerde in 2021 terug als constructeur in de F1 na 61 jaar afwezigheid.',
+      'De fabriek in Silverstone is een van de modernste in de F1, gebouwd met een investering van £200 miljoen.',
+      'Lawrence Stroll, een Canadese miljardair, kocht het team (toen Racing Point) in 2018.',
+      'Fernando Alonso koos Aston Martin voor zijn laatste F1-hoofdstuk en kwam in 2023 op 41-jarige leeftijd.',
+      'Het oorspronkelijke Aston Martin-team nam deel aan de F1 WK\'s van 1959 en 1960.',
+    ],
+    factsFr: [
+      'Aston Martin est revenu en F1 en tant que constructeur en 2021 après 61 ans d\'absence.',
+      'L\'usine de Silverstone est l\'une des plus modernes en F1, construite avec un investissement de 200 millions de livres.',
+      'Lawrence Stroll, milliardaire canadien de la mode, a racheté l\'équipe (alors Racing Point) en 2018.',
+      'Fernando Alonso a choisi Aston Martin pour son dernier chapitre en F1, rejoignant l\'équipe en 2023 à 41 ans.',
+      'L\'équipe Aston Martin originale a participé aux championnats du monde F1 de 1959 et 1960.',
+    ],
+    factsDe: [
+      'Aston Martin kehrte 2021 als Konstrukteur in die F1 zurück, nach 61 Jahren Abwesenheit.',
+      'Die Fabrik in Silverstone gehört zu den modernsten der F1, gebaut mit einer Investition von 200 Mio. £.',
+      'Lawrence Stroll, ein kanadischer Milliardär, kaufte das Team (damals Racing Point) 2018.',
+      'Fernando Alonso wählte Aston Martin für sein letztes F1-Kapitel und kam 2023 mit 41 Jahren.',
+      'Das ursprüngliche Aston-Martin-Team nahm 1959 und 1960 an der F1-Weltmeisterschaft teil.',
+    ],
   ),
   Team(
     name: 'Haas F1 Team',
@@ -8584,6 +8792,34 @@ final List<Team> fallbackTeams = [
     ],
     carImageUrl:
         'https://media.formula1.com/image/upload/c_lfill,w_600/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/v1740000000/common/f1/2026/haasf1team/2026haasf1teamcarright.webp',
+    factsEn: [
+      'Haas is the newest American team in F1, entering the sport in 2016 founded by Gene Haas.',
+      'Gene Haas also owns Haas Automation, the largest CNC machine tool builder in North America.',
+      'Haas has a unique partnership with Ferrari, using Ferrari engines, gearboxes, and other components.',
+      'The team operates from two bases: Kannapolis, USA (design) and Banbury, UK (race operations).',
+      'Kevin Magnussen scored Haas\'s best-ever result with P4 at the 2018 Australian GP on his debut race for the team.',
+    ],
+    factsNl: [
+      'Haas is het nieuwste Amerikaanse team in de F1, opgericht in 2016 door Gene Haas.',
+      'Gene Haas is ook eigenaar van Haas Automation, de grootste CNC-machinefabrikant in Noord-Amerika.',
+      'Haas heeft een uniek partnerschap met Ferrari en gebruikt Ferrari-motoren, versnellingsbakken en andere onderdelen.',
+      'Het team werkt vanuit twee locaties: Kannapolis, VS (ontwerp) en Banbury, VK (race-operaties).',
+      'Kevin Magnussen behaalde Haas\' beste resultaat ooit met P4 op de GP van Australië 2018 bij zijn debuut voor het team.',
+    ],
+    factsFr: [
+      'Haas est la plus récente équipe américaine en F1, fondée en 2016 par Gene Haas.',
+      'Gene Haas possède également Haas Automation, le plus grand fabricant de machines CNC en Amérique du Nord.',
+      'Haas a un partenariat unique avec Ferrari, utilisant moteurs, boîtes de vitesses et autres composants Ferrari.',
+      'L\'équipe opère depuis deux bases : Kannapolis, USA (conception) et Banbury, UK (opérations de course).',
+      'Kevin Magnussen a obtenu le meilleur résultat de Haas avec une P4 au GP d\'Australie 2018 lors de son premier GP pour l\'équipe.',
+    ],
+    factsDe: [
+      'Haas ist das neueste amerikanische Team in der F1, 2016 von Gene Haas gegründet.',
+      'Gene Haas besitzt auch Haas Automation, den größten CNC-Werkzeugmaschinenhersteller Nordamerikas.',
+      'Haas hat eine einzigartige Partnerschaft mit Ferrari und nutzt Ferrari-Motoren, Getriebe und andere Komponenten.',
+      'Das Team arbeitet von zwei Standorten: Kannapolis, USA (Design) und Banbury, UK (Rennbetrieb).',
+      'Kevin Magnussen erzielte Haas\' bestes Ergebnis mit P4 beim GP von Australien 2018 bei seinem Teamdebüt.',
+    ],
   ),
   Team(
     name: 'Audi',
@@ -8641,6 +8877,34 @@ final List<Team> fallbackTeams = [
     ],
     carImageUrl:
         'https://media.formula1.com/image/upload/c_lfill,w_600/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/v1740000000/common/f1/2026/audi/2026audicarright.webp',
+    factsEn: [
+      'Audi enters F1 in 2026 after taking over the Sauber team, marking a historic return for the Volkswagen Group.',
+      'The Hinwil, Switzerland factory has been home to the Sauber team since 1993.',
+      'Audi has a legendary motorsport pedigree with 13 Le Mans 24h wins and pioneering diesel/hybrid race technology.',
+      'The team previously competed as BMW Sauber from 2006 to 2009, winning one race.',
+      'Mattia Binotto, former Ferrari team principal, was appointed to lead the Audi F1 project.',
+    ],
+    factsNl: [
+      'Audi stapt in 2026 in de F1 na de overname van het Sauber-team, een historische terugkeer voor de Volkswagen Groep.',
+      'De fabriek in Hinwil, Zwitserland, is sinds 1993 de thuisbasis van het Sauber-team.',
+      'Audi heeft een legendarische motorsportgeschiedenis met 13 Le Mans-zeges en baanbrekende diesel/hybride racetechnologie.',
+      'Het team reed eerder als BMW Sauber van 2006 tot 2009 en won één race.',
+      'Mattia Binotto, voormalig teambaas van Ferrari, werd aangesteld om het Audi F1-project te leiden.',
+    ],
+    factsFr: [
+      'Audi entre en F1 en 2026 après avoir repris l\'équipe Sauber, marquant un retour historique pour le groupe Volkswagen.',
+      'L\'usine de Hinwil en Suisse abrite l\'équipe Sauber depuis 1993.',
+      'Audi possède un palmarès légendaire avec 13 victoires aux 24h du Mans et une technologie pionnière diesel/hybride.',
+      'L\'équipe a participé sous le nom de BMW Sauber de 2006 à 2009, remportant une course.',
+      'Mattia Binotto, ancien directeur de Ferrari, a été nommé pour diriger le projet F1 d\'Audi.',
+    ],
+    factsDe: [
+      'Audi steigt 2026 in die F1 ein, nachdem es das Sauber-Team übernommen hat — eine historische Rückkehr für den VW-Konzern.',
+      'Die Fabrik in Hinwil, Schweiz, ist seit 1993 die Heimat des Sauber-Teams.',
+      'Audi hat eine legendäre Motorsport-Geschichte mit 13 Le-Mans-Siegen und Pionierarbeit bei Diesel-/Hybridtechnik.',
+      'Das Team fuhr als BMW Sauber von 2006 bis 2009 und gewann ein Rennen.',
+      'Mattia Binotto, ehemaliger Ferrari-Teamchef, wurde mit der Leitung des Audi-F1-Projekts betraut.',
+    ],
   ),
   Team(
     name: 'Alpine',
@@ -8701,6 +8965,34 @@ final List<Team> fallbackTeams = [
     ],
     carImageUrl:
         'https://media.formula1.com/image/upload/c_lfill,w_600/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/v1740000000/common/f1/2026/alpine/2026alpinecarright.webp',
+    factsEn: [
+      'Alpine is the rebranded Renault F1 team, named after the iconic French sports car brand owned by Renault.',
+      'Renault won back-to-back Championships with Fernando Alonso in 2005 and 2006.',
+      'The Enstone factory in Oxfordshire, UK has been an F1 base since 1992 (originally Benetton).',
+      'Michael Schumacher won his first two World Championships at this very factory when it was Benetton (1994, 1995).',
+      'Alpine produces road cars from its Dieppe factory in Normandy, including the popular A110 sports car.',
+    ],
+    factsNl: [
+      'Alpine is het omgedoopte Renault F1-team, vernoemd naar het iconische Franse sportautomerk van Renault.',
+      'Renault won twee opeenvolgende titels met Fernando Alonso in 2005 en 2006.',
+      'De fabriek in Enstone, Oxfordshire, is sinds 1992 een F1-basis (oorspronkelijk Benetton).',
+      'Michael Schumacher won zijn eerste twee wereldtitels in dezelfde fabriek toen het Benetton was (1994, 1995).',
+      'Alpine produceert straatauto\'s in de fabriek in Dieppe, Normandië, waaronder de populaire A110.',
+    ],
+    factsFr: [
+      'Alpine est l\'équipe Renault F1 rebaptisée, du nom de la marque française de voitures de sport appartenant à Renault.',
+      'Renault a remporté deux titres consécutifs avec Fernando Alonso en 2005 et 2006.',
+      'L\'usine d\'Enstone dans l\'Oxfordshire est une base F1 depuis 1992 (à l\'origine Benetton).',
+      'Michael Schumacher a remporté ses deux premiers titres dans cette même usine quand elle appartenait à Benetton (1994, 1995).',
+      'Alpine produit des voitures de route depuis son usine de Dieppe en Normandie, dont la populaire A110.',
+    ],
+    factsDe: [
+      'Alpine ist das umbenannte Renault-F1-Team, benannt nach der legendären französischen Sportwagenmarke von Renault.',
+      'Renault gewann mit Fernando Alonso 2005 und 2006 zwei aufeinanderfolgende Meisterschaften.',
+      'Die Fabrik in Enstone, Oxfordshire, ist seit 1992 eine F1-Basis (ursprünglich Benetton).',
+      'Michael Schumacher gewann seine ersten beiden WM-Titel in genau dieser Fabrik als Benetton (1994, 1995).',
+      'Alpine baut Straßenfahrzeuge in seiner Fabrik in Dieppe, Normandie, darunter den beliebten A110.',
+    ],
   ),
   Team(
     name: 'Cadillac',
@@ -8740,6 +9032,34 @@ final List<Team> fallbackTeams = [
     ],
     carImageUrl:
         'https://media.formula1.com/image/upload/c_lfill,w_600/q_auto/d_common:f1:2026:fallback:car:2026fallbackcarright.webp/v1740000000/common/f1/2026/cadillac/2026cadillaccarright.webp?v=2',
+    factsEn: [
+      'Cadillac becomes the first new team to enter F1 since Haas in 2016, joining the grid in 2026 as the 11th team.',
+      'The entry is backed by General Motors, making it the first GM-affiliated team in F1 since 1974.',
+      'Cadillac plans to develop its own power unit for F1, targeting 2028 for a full works engine.',
+      'The team is led by Michael Andretti\'s organization, which spent years lobbying for an F1 entry.',
+      'Cadillac\'s arrival brings the grid to 22 cars for the first time since 2016.',
+    ],
+    factsNl: [
+      'Cadillac wordt het eerste nieuwe team in de F1 sinds Haas in 2016, en voegt zich in 2026 als 11e team bij de grid.',
+      'De entree wordt gesteund door General Motors, het eerste GM-team in de F1 sinds 1974.',
+      'Cadillac is van plan een eigen krachtbron te ontwikkelen voor de F1, met 2028 als doel voor een volledig eigen motor.',
+      'Het team wordt geleid door de organisatie van Michael Andretti, die jarenlang lobbyde voor F1-deelname.',
+      'De komst van Cadillac brengt de grid naar 22 auto\'s, voor het eerst sinds 2016.',
+    ],
+    factsFr: [
+      'Cadillac devient la première nouvelle équipe à rejoindre la F1 depuis Haas en 2016, intégrant la grille en 2026 comme 11e équipe.',
+      'L\'entrée est soutenue par General Motors, la première équipe affiliée à GM en F1 depuis 1974.',
+      'Cadillac prévoit de développer son propre groupe motopropulseur, visant 2028 pour un moteur complet.',
+      'L\'équipe est dirigée par l\'organisation de Michael Andretti, qui a fait pression pendant des années pour entrer en F1.',
+      'L\'arrivée de Cadillac porte la grille à 22 voitures pour la première fois depuis 2016.',
+    ],
+    factsDe: [
+      'Cadillac wird 2026 das erste neue Team in der F1 seit Haas 2016 und tritt als 11. Team an.',
+      'Der Einstieg wird von General Motors unterstützt — das erste GM-Team in der F1 seit 1974.',
+      'Cadillac plant, ab 2028 eine eigene Antriebseinheit für die F1 zu entwickeln.',
+      'Das Team wird von Michael Andrettis Organisation geleitet, die jahrelang für einen F1-Einstieg warb.',
+      'Cadillacs Ankunft bringt das Feld auf 22 Autos — zum ersten Mal seit 2016.',
+    ],
   ),
 ];
 

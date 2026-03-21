@@ -4,10 +4,9 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 const _jolpicaBaseUrl = 'https://api.jolpi.ca/ergast/f1';
-const _defaultOutputDirectory = 'data/results';
+const _defaultOutputDirectory = 'data/results/drivers';
 const _defaultStartYear = 2025;
 const _defaultEndYear = 2017;
-const _defaultFileName = 'driver_comparison_stats_2017_2025.json';
 
 Future<void> main(List<String> arguments) async {
   try {
@@ -25,12 +24,22 @@ Future<void> main(List<String> arguments) async {
         endYear: config.endYear,
       );
 
-      final outputFile = await _writeJsonFile(
-        outputDirectory: config.outputDirectory,
-        fileName: config.fileName,
-        jsonData: export,
-      );
-      stdout.writeln('Saved ${outputFile.path}');
+      final years = export['years'] as Map<String, dynamic>? ?? {};
+      final dir = Directory(config.outputDirectory);
+      if (!await dir.exists()) await dir.create(recursive: true);
+
+      for (final entry in years.entries) {
+        final year = int.tryParse(entry.key);
+        if (year == null) continue;
+        final yearData = entry.value as Map<String, dynamic>;
+        final perYear = <String, dynamic>{
+          'year': year,
+          ...yearData,
+        };
+        final file = File('${dir.path}${Platform.pathSeparator}driver_comparison_stats_$year.json');
+        await file.writeAsString('${const JsonEncoder.withIndent('  ').convert(perYear)}\n');
+        stdout.writeln('Saved ${file.path}');
+      }
     } finally {
       fetcher.close();
     }
@@ -57,22 +66,6 @@ Future<void> main(List<String> arguments) async {
   }
 }
 
-Future<File> _writeJsonFile({
-  required String outputDirectory,
-  required String fileName,
-  required Object jsonData,
-}) async {
-  final directory = Directory(outputDirectory);
-  if (!await directory.exists()) {
-    await directory.create(recursive: true);
-  }
-
-  final file = File('${directory.path}${Platform.pathSeparator}$fileName');
-  const encoder = JsonEncoder.withIndent('  ');
-  await file.writeAsString('${encoder.convert(jsonData)}\n');
-  return file;
-}
-
 void _printUsage() {
   stdout.writeln('Driver comparison seasonal data fetcher');
   stdout.writeln('');
@@ -87,10 +80,7 @@ void _printUsage() {
     '  --end-year <year>      Lowest season year to include. Defaults to $_defaultEndYear.',
   );
   stdout.writeln(
-    '  --output-dir <path>    Directory for the JSON file. Defaults to $_defaultOutputDirectory.',
-  );
-  stdout.writeln(
-    '  --file-name <name>     Output file name. Defaults to $_defaultFileName.',
+    '  --output-dir <path>    Directory for per-year JSON files. Defaults to $_defaultOutputDirectory.',
   );
   stdout.writeln('  --help                 Show this help message.');
   stdout.writeln('');
@@ -105,21 +95,18 @@ class DriverComparisonCliConfig {
     required this.startYear,
     required this.endYear,
     required this.outputDirectory,
-    required this.fileName,
     required this.showHelp,
   });
 
   final int startYear;
   final int endYear;
   final String outputDirectory;
-  final String fileName;
   final bool showHelp;
 
   factory DriverComparisonCliConfig.parse(List<String> arguments) {
     var startYear = _defaultStartYear;
     var endYear = _defaultEndYear;
     var outputDirectory = _defaultOutputDirectory;
-    var fileName = _defaultFileName;
     var showHelp = false;
 
     for (var index = 0; index < arguments.length; index++) {
@@ -172,20 +159,6 @@ class DriverComparisonCliConfig {
         continue;
       }
 
-      if (argument.startsWith('--file-name=')) {
-        fileName = argument.split('=').last.trim();
-        continue;
-      }
-      if (argument == '--file-name') {
-        if (index + 1 >= arguments.length) {
-          throw const DriverComparisonCliUsageException(
-            'Missing value for --file-name.',
-          );
-        }
-        fileName = arguments[++index].trim();
-        continue;
-      }
-
       throw DriverComparisonCliUsageException('Unknown argument: $argument');
     }
 
@@ -193,7 +166,6 @@ class DriverComparisonCliConfig {
       startYear: startYear,
       endYear: endYear,
       outputDirectory: outputDirectory,
-      fileName: fileName,
       showHelp: showHelp,
     );
   }

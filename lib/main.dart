@@ -2,20 +2,34 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import 'package:go_router/go_router.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'live_timing_page.dart';
+import 'login_page.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
+import 'theme/f1_team_schemes.dart';
+import 'theme/f1_theme_tokens.dart';
+import 'theme/theme_controller.dart';
+import 'widgets/f1_module.dart';
+import 'theme/theme_service.dart';
+import 'profile_favorites_service.dart';
+import 'utils/driver_name_utils.dart';
 import 'data/repositories/race_repository.dart';
 import 'data/local/hive/hive_boxes.dart';
 import 'data/local/hive/hive_bootstrap.dart';
 import 'browser_bridge.dart' as browser_bridge;
+import 'open_meteo_api.dart';
 
 part 'f1_data.dart';
 
@@ -37,92 +51,40 @@ String _normalizeDriverLookupName(String value) {
   return normalized.replaceAll(RegExp(r'[^a-z0-9]+'), ' ').trim();
 }
 
-@immutable
-class F1ThemeTokens extends ThemeExtension<F1ThemeTokens> {
-  final Color panel;
-  final Color panelStrong;
-  final Color outline;
-  final Color accentSoft;
-  final Color heroStart;
-  final Color heroEnd;
-
-  const F1ThemeTokens({
-    required this.panel,
-    required this.panelStrong,
-    required this.outline,
-    required this.accentSoft,
-    required this.heroStart,
-    required this.heroEnd,
-  });
-
-  @override
-  F1ThemeTokens copyWith({
-    Color? panel,
-    Color? panelStrong,
-    Color? outline,
-    Color? accentSoft,
-    Color? heroStart,
-    Color? heroEnd,
-  }) {
-    return F1ThemeTokens(
-      panel: panel ?? this.panel,
-      panelStrong: panelStrong ?? this.panelStrong,
-      outline: outline ?? this.outline,
-      accentSoft: accentSoft ?? this.accentSoft,
-      heroStart: heroStart ?? this.heroStart,
-      heroEnd: heroEnd ?? this.heroEnd,
-    );
-  }
-
-  @override
-  F1ThemeTokens lerp(ThemeExtension<F1ThemeTokens>? other, double t) {
-    if (other is! F1ThemeTokens) return this;
-    return F1ThemeTokens(
-      panel: Color.lerp(panel, other.panel, t)!,
-      panelStrong: Color.lerp(panelStrong, other.panelStrong, t)!,
-      outline: Color.lerp(outline, other.outline, t)!,
-      accentSoft: Color.lerp(accentSoft, other.accentSoft, t)!,
-      heroStart: Color.lerp(heroStart, other.heroStart, t)!,
-      heroEnd: Color.lerp(heroEnd, other.heroEnd, t)!,
-    );
-  }
-}
-
 abstract final class AppTheme {
-  static const Color _primary = Color(0xFFE10600);
+  static FlexSchemeData get _defaultScheme =>
+      F1TeamSchemes.schemeAt(F1TeamSchemes.defaultIndex);
 
-  static ThemeData get lightTheme => _buildTheme(
-        base: ThemeData.light(),
-        isDark: false,
-        tokens: const F1ThemeTokens(
-          panel: Color(0xFFF8FAFD),
-          panelStrong: Color(0xFFFFFFFF),
-          outline: Color(0xFFDCE3ED),
-          accentSoft: Color(0x1A2EA6FF),
-          heroStart: Color(0xFFFFFFFF),
-          heroEnd: Color(0xFFEAF5FF),
-        ),
-      );
+  static ThemeData get lightTheme {
+    final colors = _defaultScheme.light;
+    final scheme = ColorScheme.fromSeed(
+      seedColor: colors.primary,
+      brightness: Brightness.light,
+      primary: colors.primary,
+      secondary: colors.secondary,
+      tertiary: colors.tertiary,
+    );
+    return _buildTheme(base: ThemeData.light().copyWith(colorScheme: scheme), isDark: false);
+  }
 
-  static ThemeData get darkTheme => _buildTheme(
-        base: ThemeData.dark(),
-        isDark: true,
-        tokens: const F1ThemeTokens(
-          panel: Color(0xFF1C2330),
-          panelStrong: Color(0xFF202733),
-          outline: Color(0xFF323B4A),
-          accentSoft: Color(0x332EA6FF),
-          heroStart: Color(0xFF202733),
-          heroEnd: Color(0xFF161A22),
-        ),
-      );
+  static ThemeData get darkTheme {
+    final colors = _defaultScheme.dark;
+    final scheme = ColorScheme.fromSeed(
+      seedColor: colors.primary,
+      brightness: Brightness.dark,
+      primary: colors.primary,
+      secondary: colors.secondary,
+      tertiary: colors.tertiary,
+    );
+    return _buildTheme(base: ThemeData.dark().copyWith(colorScheme: scheme), isDark: true);
+  }
 
   static ThemeData _buildTheme({
     required ThemeData base,
     required bool isDark,
-    required F1ThemeTokens tokens,
   }) {
     final scheme = base.colorScheme;
+    final tokens = F1ThemeTokens.fromColorScheme(scheme);
     // Bulletproof: Explicit TextTheme mapping for all weights
     const fontFamily = 'TitilliumWeb';
     const regular = FontWeight.w400;
@@ -153,7 +115,7 @@ abstract final class AppTheme {
       cardTheme: CardThemeData(
         color: tokens.panelStrong,
         surfaceTintColor: Colors.transparent,
-        shadowColor: Colors.black.withOpacity(isDark ? 0.35 : 0.08),
+        shadowColor: scheme.shadow.withValues(alpha: isDark ? 0.35 : 0.08),
         elevation: isDark ? 0 : 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(22),
@@ -168,11 +130,11 @@ abstract final class AppTheme {
         shadowColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: const TextStyle(
+        titleTextStyle: TextStyle(
           fontFamily: fontFamily,
           fontWeight: bold,
           fontSize: 18,
-          color: Colors.black,
+          color: scheme.onSurface,
         ),
         iconTheme: IconThemeData(color: scheme.onSurface),
       ),
@@ -203,13 +165,11 @@ abstract final class AppTheme {
         textStyle: const TextStyle(fontFamily: fontFamily, fontWeight: regular),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: isDark
-            ? const Color(0xFF202733)
-            : const Color(0xFF1C2330),
-        contentTextStyle: const TextStyle(
+        backgroundColor: scheme.surfaceContainerHighest,
+        contentTextStyle: TextStyle(
           fontFamily: fontFamily,
           fontWeight: regular,
-          color: Colors.white,
+          color: scheme.onSurface,
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         behavior: SnackBarBehavior.floating,
@@ -273,14 +233,11 @@ abstract final class AppTheme {
   }
 }
 
-const F1ThemeTokens _fallbackThemeTokens = F1ThemeTokens(
-  panel: Color(0xFFF8FAFD),
-  panelStrong: Color(0xFFFFFFFF),
-  outline: Color(0xFFDCE3ED),
-  accentSoft: Color(0x1A2EA6FF),
-  heroStart: Color(0xFFFFFFFF),
-  heroEnd: Color(0xFFEAF5FF),
-);
+F1ThemeTokens get _fallbackThemeTokens {
+  final flexColors = F1TeamSchemes.schemeAt(F1TeamSchemes.defaultIndex).light;
+  final scheme = ColorScheme.fromSeed(seedColor: flexColors.primary, brightness: Brightness.light);
+  return F1ThemeTokens.fromColorScheme(scheme);
+}
 
 F1ThemeTokens _themeTokens(BuildContext context) =>
     Theme.of(context).extension<F1ThemeTokens>() ?? _fallbackThemeTokens;
@@ -290,8 +247,69 @@ LinearGradient _heroPanelGradient(BuildContext context) {
   return LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [tokens.heroStart, tokens.heroEnd],
+    colors: [
+      tokens.heroStart.withValues(alpha: 0.4), // 60% transparant links
+      tokens.heroEnd,
+    ],
   );
+}
+
+/// Ambient glow: white base with subtle team-primary bloom (5–8% opacity)
+/// in top-left and bottom-right for cards to "float".
+Widget _buildAmbientBackground(BuildContext context) {
+  final scheme = Theme.of(context).colorScheme;
+  final primary = scheme.primary.withValues(alpha: 0.06);
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          primary,
+          Colors.white,
+          Colors.white,
+          primary,
+        ],
+        stops: const [0.0, 0.35, 0.65, 1.0],
+      ),
+    ),
+  );
+}
+
+/// Paints subtle radial blooms at top-left and bottom-right for ambient glow.
+class _AmbientGlowPainter extends CustomPainter {
+  _AmbientGlowPainter({required this.topLeftGlow, required this.bottomRightGlow});
+  final Color topLeftGlow;
+  final Color bottomRightGlow;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final topLeft = RadialGradient(
+      center: Alignment.topLeft,
+      radius: 1.2,
+      colors: [topLeftGlow, Colors.transparent],
+    );
+    final bottomRight = RadialGradient(
+      center: Alignment.bottomRight,
+      radius: 1.2,
+      colors: [bottomRightGlow, Colors.transparent],
+    );
+    canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height), Paint());
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      Paint()..shader = topLeft.createShader(Rect.fromLTWH(0, 0, size.width, size.height)),
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      Paint()..shader = bottomRight.createShader(Rect.fromLTWH(0, 0, size.width, size.height)),
+    );
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _AmbientGlowPainter old) =>
+      topLeftGlow != old.topLeftGlow || bottomRightGlow != old.bottomRightGlow;
 }
 
 String _driverFlagHeroTag(Driver driver, {String source = 'default'}) =>
@@ -330,21 +348,862 @@ Widget _buildGlyphIcon(String glyph, {double size = 18}) {
   );
 }
 
-Widget _buildSummerBreakFlag({required double size}) {
+Widget _buildSummerBreakFlag(
+  BuildContext context, {
+  required double size,
+}) {
+  final scheme = Theme.of(context).colorScheme;
+  final tokens = _themeTokens(context);
   return SizedBox(
     width: size,
     height: size,
-    child: CustomPaint(painter: const _SummerBreakFlagPainter()),
+    child: CustomPaint(
+      painter: _SummerBreakFlagPainter(
+        poleColor: scheme.outline,
+        lightSquareColor: scheme.surfaceContainerLowest,
+        darkSquareColor: scheme.surfaceContainer,
+        sunRaysColor: scheme.primary,
+        sunLeftColor: scheme.primary,
+        sunRightColor: scheme.primaryContainer,
+        glassesColor: scheme.outline,
+        borderColor: tokens.outline,
+      ),
+    ),
   );
 }
 
+/// Animated weather icon: sunny=360° rotation, clouds=horizontal drift, rain=vertical slide.
+class _AnimatedWeatherIcon extends StatefulWidget {
+  const _AnimatedWeatherIcon({
+    required this.isRain,
+    required this.isCloudy,
+    required this.color,
+    this.size = 20,
+  });
+
+  final bool isRain;
+  final bool isCloudy;
+  final Color color;
+  final double size;
+
+  @override
+  State<_AnimatedWeatherIcon> createState() => _AnimatedWeatherIconState();
+}
+
+class _AnimatedWeatherIconState extends State<_AnimatedWeatherIcon>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 12),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.isRain) {
+      return _RainAnimation(color: widget.color, size: widget.size);
+    }
+    if (widget.isCloudy) {
+      return _CloudyAnimation(
+        color: widget.color,
+        size: widget.size,
+        controller: _controller,
+      );
+    }
+    return _SunnyAnimation(
+      color: widget.color,
+      size: widget.size,
+      controller: _controller,
+    );
+  }
+}
+
+class _CloudyAnimation extends StatelessWidget {
+  const _CloudyAnimation({
+    required this.color,
+    required this.size,
+    required this.controller,
+  });
+
+  final Color color;
+  final double size;
+  final AnimationController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) => Transform.translate(
+        offset: Offset(4 * (controller.value * 2 % 1) - 2, 0),
+        child: Icon(Icons.cloud, color: color, size: size),
+      ),
+    );
+  }
+}
+
+class _SunnyAnimation extends StatelessWidget {
+  const _SunnyAnimation({
+    required this.color,
+    required this.size,
+    required this.controller,
+  });
+
+  final Color color;
+  final double size;
+  final AnimationController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, child) => Transform.rotate(
+        angle: controller.value * 2 * 3.14159,
+        child: Icon(Icons.wb_sunny, color: color, size: size),
+      ),
+    );
+  }
+}
+
+class _RainAnimation extends StatefulWidget {
+  const _RainAnimation({required this.color, required this.size});
+
+  final Color color;
+  final double size;
+
+  @override
+  State<_RainAnimation> createState() => _RainAnimationState();
+}
+
+class _RainAnimationState extends State<_RainAnimation>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) => Opacity(
+        opacity: 0.3 + 0.7 * (1 - (_controller.value * 2 % 1).abs()),
+        child: Transform.translate(
+          offset: Offset(0, 4 * (_controller.value * 2 % 1)),
+          child: Icon(Icons.umbrella, color: widget.color, size: widget.size),
+        ),
+      ),
+    );
+  }
+}
+
+/// Settings gear icon with ScaleTransition and Team Primary color shift on hover/tap.
+class _AnimatedSettingsIcon extends StatefulWidget {
+  const _AnimatedSettingsIcon();
+
+  @override
+  State<_AnimatedSettingsIcon> createState() => _AnimatedSettingsIconState();
+}
+
+class _AnimatedSettingsIconState extends State<_AnimatedSettingsIcon>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
+    );
+    _scale = Tween<double>(begin: 1.0, end: 1.15).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return MouseRegion(
+      onEnter: (_) => _controller.forward(),
+      onExit: (_) => _controller.reverse(),
+      child: GestureDetector(
+        onTapDown: (_) => _controller.forward(),
+        onTapUp: (_) => _controller.reverse(),
+        onTapCancel: () => _controller.reverse(),
+        child: ScaleTransition(
+          scale: _scale,
+          alignment: Alignment.center,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, _) {
+              final onSurface = Theme.of(context).colorScheme.onSurface;
+              final color = Color.lerp(onSurface, primary, _controller.value) ?? onSurface;
+              return DefaultTextStyle(
+                style: TextStyle(fontSize: 20, color: color),
+                child: _buildGlyphIcon('⚙', size: 20),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Wraps a child with a subtle lift (scale 1.02) effect on tap/hover.
+class _LiftOnTap extends StatefulWidget {
+  const _LiftOnTap({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_LiftOnTap> createState() => _LiftOnTapState();
+}
+
+class _LiftOnTapState extends State<_LiftOnTap>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
+    );
+    _scale = Tween<double>(begin: 1.0, end: 1.02).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => _controller.forward(),
+      onExit: (_) => _controller.reverse(),
+      child: GestureDetector(
+        onTapDown: (_) => _controller.forward(),
+        onTapUp: (_) => _controller.reverse(),
+        onTapCancel: () => _controller.reverse(),
+        child: AnimatedBuilder(
+          animation: _scale,
+          builder: (context, child) => Transform(
+            transform: Matrix4.identity()..scale(_scale.value),
+            alignment: Alignment.center,
+            child: child,
+          ),
+          child: widget.child,
+        ),
+      ),
+    );
+  }
+}
+
+/// Pulsing AI/Brain icon in Team Primary Color for the AI Strategist card.
+class _PulsingAIIcon extends StatefulWidget {
+  const _PulsingAIIcon({required this.color, this.size = 28});
+
+  final Color color;
+  final double size;
+
+  @override
+  State<_PulsingAIIcon> createState() => _PulsingAIIconState();
+}
+
+class _PulsingAIIconState extends State<_PulsingAIIcon>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+    _scale = Tween<double>(begin: 0.92, end: 1.08).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _scale,
+      builder: (context, _) => Transform.scale(
+        scale: _scale.value,
+        child: Icon(
+          Icons.psychology_rounded,
+          color: widget.color,
+          size: widget.size,
+        ),
+      ),
+    );
+  }
+}
+
+/// AI Strategist card: Teammate Battle, Coach's Corner, Sentiment Tracker.
+/// Historical/seasonal focus. Tappable to open the full AI chat overlay.
+class _AIStrategistCard extends StatefulWidget {
+  const _AIStrategistCard({
+    required this.race,
+    required this.onTap,
+  });
+
+  final Race race;
+  final VoidCallback onTap;
+
+  @override
+  State<_AIStrategistCard> createState() => _AIStrategistCardState();
+}
+
+class _AIStrategistCardState extends State<_AIStrategistCard>
+    with TickerProviderStateMixin {
+  late AnimationController _pulseController;
+  late Animation<double> _pulseScale;
+  late Animation<double> _pulseOpacity;
+  late AnimationController _coachPulseController;
+  late Animation<double> _coachPulseOpacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3000),
+    )..repeat();
+    _pulseScale = Tween<double>(begin: 1.0, end: 2.2).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeOut),
+    );
+    _pulseOpacity = Tween<double>(begin: 0.2, end: 0.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeOut),
+    );
+    _coachPulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    )..repeat(reverse: true);
+    _coachPulseOpacity = Tween<double>(begin: 0.6, end: 1.0).animate(
+      CurvedAnimation(parent: _coachPulseController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    _coachPulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
+    final favorites = context.watch<ProfileFavoritesNotifier>().value;
+    final favoriteDriver = favorites.favoriteDriver ?? 'Alonso';
+    final favoriteTeam = favorites.favoriteTeam ?? 'Aston Martin';
+
+    final scheme = theme.colorScheme;
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: F1Module(
+        fillWidth: true,
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+        borderRadius: 20,
+        backgroundColor: scheme.surface,
+        showFadingBorder: true,
+        boxShadow: [
+          BoxShadow(
+            color: scheme.shadow.withValues(alpha: 0.10),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                _PulsingAIIcon(color: primary, size: 28),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    't.ai_strategist_title'.tr(),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.8,
+                      color: scheme.onSurface,
+                    ),
+                  ),
+                ),
+                Icon(Icons.open_in_new, size: 18, color: primary.withValues(alpha: 0.7)),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildTeammateBattleSection(context, theme, favoriteDriver),
+            const SizedBox(height: 16),
+            _buildCoachCornerSection(theme, primary),
+            const SizedBox(height: 16),
+            Text(
+              't.ai_sentiment_label'.tr(),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.2,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 6),
+            RepaintBoundary(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  const sentimentValue = 0.72;
+                  final indicatorLeft = (constraints.maxWidth * sentimentValue) - 4;
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        height: 6,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(3),
+                          gradient: LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: [
+                              theme.colorScheme.error,
+                              theme.colorScheme.tertiary,
+                              theme.colorScheme.primary,
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: indicatorLeft - 6,
+                        top: -9,
+                        child: AnimatedBuilder(
+                          animation: _pulseController,
+                          builder: (context, _) {
+                            return Container(
+                              width: 20 + (_pulseScale.value * 12),
+                              height: 20 + (_pulseScale.value * 12),
+                              margin: EdgeInsets.all((10 - (_pulseScale.value * 6)).clamp(0.0, 10.0)),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: primary.withValues(alpha: _pulseOpacity.value * 0.2),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: primary.withValues(alpha: _pulseOpacity.value),
+                                    blurRadius: 8 + (_pulseScale.value * 4),
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      Positioned(
+                        left: indicatorLeft,
+                        top: -3,
+                        child: Container(
+                          width: 8,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: primary,
+                            borderRadius: BorderRadius.circular(4),
+                            boxShadow: [
+                              BoxShadow(
+                                color: theme.colorScheme.shadow.withValues(alpha: 0.25),
+                                blurRadius: 2,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              _sentimentSummary(favoriteTeam),
+              style: TextStyle(
+                fontSize: 12,
+                height: 1.35,
+                color: scheme.onSurface,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTeammateBattleSection(
+    BuildContext context,
+    ThemeData theme,
+    String favoriteDriver,
+  ) {
+    final primary = theme.colorScheme.primary;
+    final secondary = theme.colorScheme.secondary;
+    final fav = _findDriver2026ByName(favoriteDriver);
+    if (fav == null) return const SizedBox.shrink();
+    final teammate = _getTeammate2026(fav);
+    if (teammate == null) return const SizedBox.shrink();
+
+    final (favWins, teWins, gapSec) = _teammateQualifyingStats(fav, teammate);
+    final gapStr = gapSec < 0
+        ? '${gapSec.toStringAsFixed(3)}s'
+        : '+${gapSec.toStringAsFixed(3)}s';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.emoji_events_outlined, size: 16, color: primary),
+            const SizedBox(width: 6),
+            Text(
+              't.ai_teammate_battle'.tr(),
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.2,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => context.push(_driverPath(fav)),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Ink(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: secondary.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: secondary.withValues(alpha: 0.35)),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(fav.flag, style: const TextStyle(fontSize: 18)),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            fav.name.split(' ').last,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '$favWins - $teWins',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: secondary,
+                    ),
+                  ),
+                  Text(
+                    't.ai_qualifying_duel'.tr(),
+                    style: TextStyle(
+                      fontSize: 9,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: secondary.withValues(alpha: 0.15),
+                      border: Border.all(color: secondary.withValues(alpha: 0.5)),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'VS',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          color: secondary,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => context.push(_driverPath(teammate)),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Ink(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: secondary.withValues(alpha: 0.10),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: secondary.withValues(alpha: 0.35)),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(teammate.flag, style: const TextStyle(fontSize: 18)),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            teammate.name.split(' ').last,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            Icon(Icons.swap_horiz, size: 14, color: secondary),
+            const SizedBox(width: 4),
+            Text(
+              't.ai_avg_gap'.tr(),
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              gapStr,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: secondary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          't.ai_teammate_insight'.tr(namedArgs: {
+            'driver': fav.name.split(' ').last,
+            'teammate': teammate.name.split(' ').last,
+          }),
+          style: TextStyle(
+            fontSize: 11,
+            height: 1.35,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCoachCornerSection(ThemeData theme, Color primary) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.lightbulb_outline, size: 16, color: primary),
+            const SizedBox(width: 6),
+            Text(
+              't.ai_coach_title'.tr(),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.2,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        AnimatedBuilder(
+          animation: _coachPulseController,
+          builder: (context, _) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Opacity(
+                  opacity: _coachPulseOpacity.value,
+                  child: Icon(Icons.psychology, size: 14, color: primary),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    _coachTipForCircuit(widget.race.name, ''),
+                    style: TextStyle(
+                      fontSize: 12,
+                      height: 1.35,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 6),
+        AnimatedBuilder(
+          animation: _coachPulseController,
+          builder: (context, _) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Opacity(
+                  opacity: _coachPulseOpacity.value,
+                  child: Icon(Icons.psychology, size: 14, color: primary),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    't.ai_strategy_history'.tr(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      height: 1.35,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  String _sentimentSummary(String team) {
+    if (team.toLowerCase().contains('mercedes')) {
+      return 't.ai_sentiment_mercedes_positive'.tr();
+    }
+    return 't.ai_sentiment_generic_positive'.tr();
+  }
+
+  String _coachTipForCircuit(String raceName, String driver) {
+    if (raceName.contains('Australian')) {
+      return 't.ai_coach_tip_australia'.tr();
+    }
+    if (raceName.contains('Monaco')) {
+      return 't.ai_coach_tip_monaco'.tr();
+    }
+    if (raceName.contains('Spa') || raceName.contains('Belgian')) {
+      return 't.ai_coach_tip_leclerc_turn13'.tr();
+    }
+    if (raceName.contains('Suzuka') || raceName.contains('Japanese')) {
+      return 't.ai_coach_tip_suzuka'.tr();
+    }
+    if (raceName.contains('Hungar') || raceName.contains('Hungary')) {
+      return 't.ai_coach_tip_hungary'.tr();
+    }
+    return 't.ai_coach_tip_generic'.tr();
+  }
+}
+
 class _SummerBreakFlagPainter extends CustomPainter {
-  const _SummerBreakFlagPainter();
+  const _SummerBreakFlagPainter({
+    required this.poleColor,
+    required this.lightSquareColor,
+    required this.darkSquareColor,
+    required this.sunRaysColor,
+    required this.sunLeftColor,
+    required this.sunRightColor,
+    required this.glassesColor,
+    required this.borderColor,
+  });
+
+  final Color poleColor;
+  final Color lightSquareColor;
+  final Color darkSquareColor;
+  final Color sunRaysColor;
+  final Color sunLeftColor;
+  final Color sunRightColor;
+  final Color glassesColor;
+  final Color borderColor;
 
   @override
   void paint(Canvas canvas, Size size) {
     final polePaint = Paint()
-      ..color = const Color(0xFF6D4C41)
+      ..color = poleColor
       ..style = PaintingStyle.fill;
     final poleRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(
@@ -389,8 +1248,8 @@ class _SummerBreakFlagPainter extends CustomPainter {
     canvas.save();
     canvas.clipPath(flagPath);
 
-    final lightPaint = Paint()..color = const Color(0xFFF1F1F1);
-    final darkPaint = Paint()..color = const Color(0xFF262626);
+    final lightPaint = Paint()..color = lightSquareColor;
+    final darkPaint = Paint()..color = darkSquareColor;
     final columns = 6;
     final rows = 6;
     final cellWidth = size.width / columns;
@@ -410,7 +1269,7 @@ class _SummerBreakFlagPainter extends CustomPainter {
     final sunCenter = Offset(size.width * 0.53, size.height * 0.5);
     final sunRadius = size.width * 0.19;
     final rayPaint = Paint()
-      ..color = const Color(0xFFF3C74D)
+      ..color = sunRaysColor
       ..strokeCap = StrokeCap.round
       ..strokeWidth = size.width * 0.028;
     for (var index = 0; index < 8; index++) {
@@ -426,8 +1285,8 @@ class _SummerBreakFlagPainter extends CustomPainter {
       canvas.drawLine(start, end, rayPaint);
     }
 
-    final sunLeftPaint = Paint()..color = const Color(0xFFF4CD58);
-    final sunRightPaint = Paint()..color = const Color(0xFFE0AD38);
+    final sunLeftPaint = Paint()..color = sunLeftColor;
+    final sunRightPaint = Paint()..color = sunRightColor;
     canvas.save();
     canvas.clipRect(Rect.fromLTWH(0, 0, sunCenter.dx, size.height));
     canvas.drawCircle(sunCenter, sunRadius, sunLeftPaint);
@@ -439,7 +1298,7 @@ class _SummerBreakFlagPainter extends CustomPainter {
     canvas.drawCircle(sunCenter, sunRadius, sunRightPaint);
     canvas.restore();
 
-    final glassesPaint = Paint()..color = const Color(0xFF263B45);
+    final glassesPaint = Paint()..color = glassesColor;
     final lensWidth = sunRadius * 0.78;
     final lensHeight = sunRadius * 0.5;
     final bridgeWidth = sunRadius * 0.18;
@@ -477,7 +1336,7 @@ class _SummerBreakFlagPainter extends CustomPainter {
     canvas.restore();
 
     final borderPaint = Paint()
-      ..color = const Color(0xFFEAEAEA)
+      ..color = borderColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = size.width * 0.03;
     canvas.drawPath(flagPath, borderPaint);
@@ -553,34 +1412,22 @@ class _SkeletonBoxState extends State<SkeletonBox>
 Widget _buildStandingsSkeleton(BuildContext context, {required bool isDriver}) {
   final theme = Theme.of(context);
   final isDark = theme.brightness == Brightness.dark;
-  final sampleDrivers =
-      driversData[DateTime.now().year] ??
-      driversData.values.firstWhere(
-        (drivers) => drivers.isNotEmpty,
-        orElse: () => <Driver>[],
-      );
 
   return ListView.builder(
     physics: const AlwaysScrollableScrollPhysics(),
     padding: const EdgeInsets.symmetric(vertical: 10),
     itemCount: 8,
     itemBuilder: (context, index) {
-      final accentColor = isDriver
-          ? _getTeamColor(
-              sampleDrivers.isEmpty
-                  ? 'drivers'
-                  : sampleDrivers[index % sampleDrivers.length].team,
-            )
-          : _getTeamColor(fallbackTeams[index % fallbackTeams.length].name);
-
-      return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF16161E) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border(left: BorderSide(color: accentColor, width: 6)),
+      final tokens = Theme.of(context).extension<F1ThemeTokens>();
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        child: F1Module(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          backgroundColor: tokens?.panelStrong ?? Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: 12,
+          borderWidth: 2,
           boxShadow: isDark
-              ? []
+              ? null
               : [
                   const BoxShadow(
                     color: Colors.black12,
@@ -588,9 +1435,6 @@ Widget _buildStandingsSkeleton(BuildContext context, {required bool isDriver}) {
                     offset: Offset(0, 2),
                   ),
                 ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
               const SkeletonBox(
@@ -717,9 +1561,9 @@ Widget _buildSessionWidgetSkeleton(BuildContext context, String title) {
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Color(0xFF2196F3),
+            color: Theme.of(context).colorScheme.primary,
             fontFamily: 'TitilliumWeb',
           ),
         ),
@@ -834,12 +1678,22 @@ String _normalizeSessionName(String? raw) {
   }
 }
 
+/// colorKey: 'success'|'warning'|'error' — resolved from F1ThemeTokens at build time.
 @immutable
 class _TrackFlagState {
   final String labelKey;
-  final Color color;
+  final String colorKey;
 
-  const _TrackFlagState({required this.labelKey, required this.color});
+  const _TrackFlagState({required this.labelKey, required this.colorKey});
+}
+
+Color _trackFlagColor(_TrackFlagState state, F1ThemeTokens tokens) {
+  switch (state.colorKey) {
+    case 'success': return tokens.statusSuccess;
+    case 'warning': return tokens.statusWarning;
+    case 'error': return tokens.statusError;
+    default: return tokens.outline;
+  }
 }
 
 @immutable
@@ -863,22 +1717,22 @@ class _WeekendWeatherData {
 
 const _trackClearState = _TrackFlagState(
   labelKey: 'track_flag_green',
-  color: Color(0xFF2E7D32),
+  colorKey: 'success',
 );
 
 const _trackYellowState = _TrackFlagState(
   labelKey: 'track_flag_yellow',
-  color: Color(0xFFF9A825),
+  colorKey: 'warning',
 );
 
 const _trackDoubleYellowState = _TrackFlagState(
   labelKey: 'track_flag_double_yellow',
-  color: Color(0xFFF57F17),
+  colorKey: 'warning',
 );
 
 const _trackRedState = _TrackFlagState(
   labelKey: 'track_flag_red',
-  color: Color(0xFFC62828),
+  colorKey: 'error',
 );
 
 String? _trackFlagScopeKey(Map<String, dynamic> message) {
@@ -1496,6 +2350,8 @@ class CircuitWeatherPlaybackCard extends StatefulWidget {
   final List<Map<String, dynamic>> lapTimeline;
   final List<Map<String, dynamic>> raceControlMessages;
   final String sessionName;
+  /// When false, omits the outer card container so parent F1Module provides styling.
+  final bool embedInCard;
 
   const CircuitWeatherPlaybackCard({
     required this.race,
@@ -1503,6 +2359,7 @@ class CircuitWeatherPlaybackCard extends StatefulWidget {
     this.lapTimeline = const <Map<String, dynamic>>[],
     this.raceControlMessages = const <Map<String, dynamic>>[],
     this.sessionName = 'Race',
+    this.embedInCard = true,
     super.key,
   });
 
@@ -1699,11 +2556,18 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
+
     final theme = Theme.of(context);
     final tokens = _themeTokens(context);
 
     if (_resolvedSamples.isEmpty) {
+      final content = Text(
+        't.track_playback_no_weather'.tr(),
+        style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+      );
+      if (!widget.embedInCard) {
+        return content;
+      }
       return Container(
         width: double.infinity,
         margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -1713,10 +2577,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: tokens.outline.withValues(alpha: 0.7)),
         ),
-        child: Text(
-          loc.translate('track_playback_no_weather'),
-          style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-        ),
+        child: content,
       );
     }
 
@@ -1738,29 +2599,21 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
       widget.sessionName,
     );
     final trackFlagState = trackFlagContext.state;
+    final trackFlagColor = _trackFlagColor(trackFlagState, tokens);
     final currentLap = _resolveCurrentSessionLap(
       timestamp,
       widget.lapTimeline,
       widget.raceControlMessages,
       widget.sessionName,
     );
-    final translatedTrackFlagLabel = loc.translate(trackFlagState.labelKey);
+    final translatedTrackFlagLabel = 't.${trackFlagState.labelKey}'.tr();
     final trackStatusLabel =
         trackFlagState.labelKey == _trackClearState.labelKey &&
             currentLap != null
-        ? loc.format('lap_label', {'lap': '$currentLap'})
+        ? 't.lap_label'.tr(namedArgs: {'lap': '$currentLap'})
         : translatedTrackFlagLabel;
 
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: tokens.panelStrong,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: tokens.outline.withValues(alpha: 0.8)),
-      ),
-      child: Column(
+    final columnContent = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -1770,7 +2623,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      loc.translate('track_playback_title'),
+                      't.track_playback_title'.tr(),
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 15,
@@ -1781,8 +2634,8 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                     const SizedBox(height: 4),
                     Text(
                       timestamp == null
-                          ? loc.translate('track_playback_unknown_sample')
-                          : '${_formatWeatherTimestampLabel(timestamp)} • ${loc.translate(isInterpolated ? 'track_playback_interpolated_minute' : 'track_playback_recorded_sample')}',
+                          ? 't.track_playback_unknown_sample'.tr()
+                          : '${_formatWeatherTimestampLabel(timestamp)} • ${(isInterpolated ? 't.track_playback_interpolated_minute' : 't.track_playback_recorded_sample').tr()}',
                       style: TextStyle(
                         fontSize: 11,
                         color: theme.colorScheme.onSurfaceVariant,
@@ -1803,10 +2656,10 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: trackFlagState.color.withValues(alpha: 0.14),
+                      color: trackFlagColor.withValues(alpha: 0.14),
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
-                        color: trackFlagState.color.withValues(alpha: 0.34),
+                        color: trackFlagColor.withValues(alpha: 0.34),
                       ),
                     ),
                     child: Text(
@@ -1814,7 +2667,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 11,
-                        color: trackFlagState.color,
+                        color: trackFlagColor,
                         fontFamily: 'TitilliumWeb',
                       ),
                     ),
@@ -1826,22 +2679,21 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                     ),
                     decoration: BoxDecoration(
                       color: rain > 0
-                          ? const Color(0xFFDCF0FF)
-                          : const Color(0xFFEAF7EC),
+                          ? theme.colorScheme.primary.withValues(alpha: 0.12)
+                          : tokens.statusSuccess.withValues(alpha: 0.14),
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
-                      loc.translate(
-                        rain > 0
-                            ? 'track_playback_rain_active'
-                            : 'track_playback_dry_track',
-                      ),
+                      (rain > 0
+                              ? 't.track_playback_rain_active'
+                              : 't.track_playback_dry_track')
+                          .tr(),
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 11,
                         color: rain > 0
-                          ? const Color(0xFF1565C0)
-                          : const Color(0xFF2E7D32),
+                          ? theme.colorScheme.primary
+                          : tokens.statusSuccess,
                         fontFamily: 'TitilliumWeb',
                       ),
                     ),
@@ -1857,10 +2709,10 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
-                color: trackFlagState.color.withValues(alpha: 0.12),
+                color: trackFlagColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: trackFlagState.color.withValues(alpha: 0.28),
+                  color: trackFlagColor.withValues(alpha: 0.28),
                 ),
               ),
               child: Text(
@@ -1868,7 +2720,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: trackFlagState.color,
+                  color: trackFlagColor,
                 ),
               ),
             ),
@@ -1883,17 +2735,17 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                 end: Alignment.bottomRight,
                 colors: [
                   Color.alphaBlend(
-                    trackFlagState.color.withValues(alpha: 0.14),
+                    trackFlagColor.withValues(alpha: 0.14),
                     tokens.panel.withValues(alpha: 0.92),
                   ),
                   Color.alphaBlend(
-                    trackFlagState.color.withValues(alpha: 0.08),
+                    trackFlagColor.withValues(alpha: 0.08),
                     tokens.accentSoft.withValues(alpha: 0.45),
                   ),
                 ],
               ),
               border: Border.all(
-                color: trackFlagState.color.withValues(alpha: 0.45),
+                color: trackFlagColor.withValues(alpha: 0.45),
               ),
             ),
             child: ClipRRect(
@@ -1907,7 +2759,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                       widget.race.circuitImage,
                       fit: BoxFit.contain,
                       colorFilter: ColorFilter.mode(
-                        trackFlagState.color,
+                        trackFlagColor,
                         BlendMode.srcIn,
                       ),
                     ),
@@ -1918,8 +2770,8 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                         animation: _controller,
                         builder: (context, _) => CustomPaint(
                           painter: _WeatherTrackOverlayPainter(
-                            primaryColor: const Color(0xFF1E88E5),
-                            rainColor: const Color(0xFF42A5F5),
+                            primaryColor: theme.colorScheme.primary,
+                            rainColor: theme.colorScheme.primaryContainer,
                             phase: _controller.value,
                             windSpeed: windSpeed,
                             windDirectionDegrees: (windDirection ?? 0)
@@ -1949,7 +2801,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            loc.translate('wind'),
+                            't.wind'.tr(),
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
@@ -2055,7 +2907,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
               SizedBox(
                 width: 150,
                 child: _WeatherMetricTile(
-                  label: loc.translate('air_temperature'),
+                  label: 't.air_temperature'.tr(),
                   value: air == null ? '-' : '${air.toStringAsFixed(1)} C',
                   icon: Icons.thermostat,
                 ),
@@ -2063,7 +2915,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
               SizedBox(
                 width: 150,
                 child: _WeatherMetricTile(
-                  label: loc.translate('track_temperature'),
+                  label: 't.track_temperature'.tr(),
                   value: track == null ? '-' : '${track.toStringAsFixed(1)} C',
                   icon: Icons.device_thermostat,
                 ),
@@ -2071,7 +2923,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
               SizedBox(
                 width: 150,
                 child: _WeatherMetricTile(
-                  label: loc.translate('humidity'),
+                  label: 't.humidity'.tr(),
                   value: humidity == null
                       ? '-'
                       : '${humidity.toStringAsFixed(1)}%',
@@ -2081,7 +2933,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
               SizedBox(
                 width: 150,
                 child: _WeatherMetricTile(
-                  label: loc.translate('rainfall'),
+                  label: 't.rainfall'.tr(),
                   value: '${rain.toStringAsFixed(1)} mm',
                   icon: Icons.umbrella,
                 ),
@@ -2089,7 +2941,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
               SizedBox(
                 width: 150,
                 child: _WeatherMetricTile(
-                  label: loc.translate('pressure'),
+                  label: 't.pressure'.tr(),
                   value: pressure == null
                       ? '-'
                       : '${pressure.toStringAsFixed(1)} hPa',
@@ -2099,799 +2951,25 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
             ],
           ),
         ],
+      );
+    if (!widget.embedInCard) {
+      return columnContent;
+    }
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: tokens.panelStrong,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: tokens.outline.withValues(alpha: 0.8)),
       ),
+      child: columnContent,
     );
   }
 }
 
-/// --- INTERNE LOKALISATIE MET EMOJIS -------------------------
-class AppLocalizations {
-  final Locale locale;
-  const AppLocalizations(this.locale);
-  static AppLocalizations of(BuildContext context) =>
-      Localizations.of<AppLocalizations>(context, AppLocalizations) ??
-      const AppLocalizations(Locale('en'));
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
-
-  static final Map<String, String> _nlDictionary = {
-    'appTitle': 'F1 Hub',
-    'settings': 'Instellingen',
-    'toggleTheme': 'Wissel Thema',
-    'changelog': 'Changelog',
-    'placeholder_page': 'Nieuwe pagina',
-    'placeholder_page_empty': 'Deze pagina is nog leeg.',
-    'compare': 'Vergelijken',
-    'select_drivers_to_compare': 'Selecteer 2 coureurs',
-    'select_teams_to_compare': 'Selecteer 2 teams',
-    'compare_overall': 'Overall',
-    'compare_season': 'Per seizoen',
-    'compare_year': 'Seizoen',
-    'compare_season_unavailable':
-        'Seizoensdata voor deze vergelijking is niet beschikbaar.',
-    'points_progression': 'Puntenverloop',
-    'points_after_each_race': 'Stand na elke race',
-    'round_short': 'R',
-    'dnf_percentage': 'Uitval %',
-    'circuits': 'Circuits',
-    'standings': 'Standen',
-    'country': 'Land',
-    'date': 'Datum',
-    'nextRace': 'Volgende Race',
-    'startsIn': 'Start in',
-    'week': 'week',
-    'weeks': 'weken',
-    'day': 'dag',
-    'days': 'dagen',
-    'hours': 'uur',
-    'minutes': 'minuten',
-    'sponsors': 'Sponsors',
-    'drivers': 'Coureurs',
-    'drivers_chart': 'Coureursgrafiek',
-    'championship_progression': 'Kampioenschapsverloop',
-    'chart_no_data': 'Geen grafiekdata beschikbaar voor dit seizoen.',
-    'top_5': 'Top 5',
-    'top_10': 'Top 10',
-    'show_all': 'Alles',
-    'hide_all': 'Geen',
-    'reserve_driver': 'Reservecoureur',
-    'teams': 'Teams',
-    'pts': 'PNT',
-    'using_fallback_data': 'Offline/Fallback data in gebruik.',
-    'points_history': 'Punten per Seizoen',
-    'session_results': 'Sessie Resultaten',
-    'fp1': 'Vrije Training 1',
-    'fp2': 'Vrije Training 2',
-    'fp3': 'Vrije Training 3',
-    'sprint_quali': 'Sprint Kwalificatie',
-    'sprint': 'Sprintrace',
-    'qualifying': 'Kwalificatie',
-    'session_future': 'Sessie begint op',
-    'no_data_yet': 'Data nog niet beschikbaar of API is nog niet geüpdatet',
-    'version': 'Versie',
-    'weather_forecast': 'Weerverwachting',
-    'circuit_info': 'Circuit Info',
-    'temp': 'Temperatuur',
-    'rain_chance': 'Regenkans',
-    'wind_speed': 'Windsnelheid',
-    'humidity': 'Luchtvochtigheid',
-    'length': 'Lengte',
-    'since': 'Op kalender sinds',
-    'until': 'Contract tot',
-    'lap_speed_stats': 'RONDE & SNELHEID',
-    'risks_incidents': 'RISICO\'S & INCIDENTEN',
-    'tyres_strategy': 'BANDEN & STRATEGIE',
-    'characteristics': 'CIRCUIT KENMERKEN',
-    'totalLength': 'Totale Lengte',
-    'laps': 'Rondes',
-    'fastestLap': 'Snelste Ronde',
-    'slowestLap': 'Langzaamste Ronde',
-    'avgLap': 'Gemiddelde Ronde',
-    'topSpeed': 'Topsnelheid',
-    'averageSpeed': 'Gemiddelde Snelheid',
-    'avgGForce': 'Gem. G-Kracht',
-    'max_g_force': 'Max G-Kracht',
-    'risks': 'Risico\'s',
-    'redFlag': 'Kans op Rode Vlag',
-    'vsc': 'Kans op VSC',
-    'accident': 'Kans op Crash',
-    'turn1Accident': 'Kans Crash Bocht 1',
-    'tyres': 'Banden',
-    'tireWear': 'Bandenslijtage',
-    'strategy': 'Strategie',
-    'bestCombination': 'Beste Combinatie',
-    'fastestPit': 'Snelste Pitstop',
-    'driver_facts_title': 'Feiten & Weetjes',
-    'general': 'Algemeen',
-    'current_team': 'Huidig Team',
-    'nationality': 'Nationaliteit',
-    'personal_info': 'Persoonlijke Info',
-    'age': 'Leeftijd',
-    'birth_place': 'Geboorteplaats',
-    'partner': 'Partner',
-    'pets': 'Huisdieren',
-    'children': 'Kinderen',
-    'manager': 'Manager',
-    'previous_teams': 'Teams',
-    'career_stats': 'Carrière Statistieken',
-    'championships': 'Wereldtitels',
-    'wins': 'Overwinningen',
-    'podiums': 'Podiums',
-    'poles': 'Pole Positions',
-    'fastest_laps': 'Snelste Rondes',
-    'total_points': 'Totale Punten',
-    'f1_debut': 'F1 Debuut',
-    'contract_until': 'Contract tot',
-    'driver_history': 'Historie (Laatste 5 jaar)',
-    'experience': 'Ervaring',
-    'retirements': 'Uitvalbeurten',
-    'starts': 'Starts',
-    'laps_led': 'Rondes aan de leiding',
-    'dnf': 'Uitvalbeurten (DNF)',
-    'dsqs': 'Gediskwalificeerd',
-    'dnqs': 'Niet gekwalificeerd',
-    'frontRowStarts': 'Starts 1e Rij',
-    'highestFinish': 'Hoogste Finish',
-    'highestGrid': 'Hoogste Startplek',
-    'hatTricks': 'Hattricks',
-    'cc_wins': 'Constructeurstitels',
-    'dc_wins': 'Coureurstitels',
-    'race_stats': 'Race Statistieken',
-    'total_entries': 'Totale Inschrijvingen',
-    'one_two': '1-2 Finishes',
-    'pitstop_leadership': 'Pitstop & Leiderschap',
-    'overtakes': 'Inhaalacties',
-    'team_principal': 'Teambaas',
-    'technical_director': 'Technisch Directeur',
-    'height': 'Lengte',
-    'engine': 'Motor',
-    'soft_tire': 'Zacht',
-    'medium_tire': 'Medium',
-    'hard_tire': 'Hard',
-    'wear_High': 'Hoog',
-    'wear_Medium': 'Gemiddeld',
-    'wear_Low': 'Laag',
-    'strategy_1 stop': '1 stop',
-    'strategy_2 stops': '2 stops',
-    'strategy_3 stops': '3 stops',
-    'level_1': 'Zeer Makkelijk',
-    'level_2': 'Makkelijk',
-    'level_3': 'Gemiddeld',
-    'level_4': 'Moeilijk',
-    'level_5': 'Zeer Moeilijk',
-    'nat_Dutch': 'Nederlands',
-    'nat_British': 'Brits',
-    'nat_Spanish': 'Spaans',
-    'nat_Monegasque': 'Monegaskisch',
-    'nat_Australian': 'Australisch',
-    'nat_French': 'Frans',
-    'nat_German': 'Duits',
-    'nat_Thai': 'Thais',
-    'nat_Canadian': 'Canadees',
-    'nat_Japanese': 'Japans',
-    'nat_Italian': 'Italiaans',
-    'nat_New Zealander': 'Nieuw-Zeelands',
-    'nat_Brazilian': 'Braziliaans',
-    'nat_Argentine': 'Argentijns',
-    'nat_Mexican': 'Mexicaans',
-    'nat_Finnish': 'Fins',
-    'gp_Bahrain Grand Prix': 'Grand Prix van Bahrein',
-    'gp_Saudi Arabian Grand Prix': 'Grand Prix van Saoedi-Arabië',
-    'gp_Australian Grand Prix': 'Grand Prix van Australië',
-    'gp_Japanese Grand Prix': 'Grand Prix van Japan',
-    'gp_Chinese Grand Prix': 'Grand Prix van China',
-    'gp_Miami Grand Prix': 'Grand Prix van Miami',
-    'gp_Barcelona Grand Prix': 'Grand Prix van Barcelona',
-    'gp_Monaco Grand Prix': 'Grand Prix van Monaco',
-    'gp_Canadian Grand Prix': 'Grand Prix van Canada',
-    'gp_Spanish Grand Prix': 'Grand Prix van Spanje',
-    'gp_Austrian Grand Prix': 'Grand Prix van Oostenrijk',
-    'gp_British Grand Prix': 'Grand Prix van Groot-Brittannië',
-    'gp_Hungarian Grand Prix': 'Grand Prix van Hongarije',
-    'gp_Belgian Grand Prix': 'Grand Prix van België',
-    'gp_Dutch Grand Prix': 'Grand Prix van Nederland',
-    'gp_Italian Grand Prix': 'Grand Prix van Italië',
-    'gp_Azerbaijan Grand Prix': 'Grand Prix van Azerbeidzjan',
-    'gp_Singapore Grand Prix': 'Grand Prix van Singapore',
-    'gp_United States Grand Prix': 'Grand Prix van de VS',
-    'gp_Mexico City Grand Prix': 'Grand Prix van Mexico',
-    'gp_São Paulo Grand Prix': 'Grand Prix van São Paulo',
-    'gp_Las Vegas Grand Prix': 'Grand Prix van Las Vegas',
-    'gp_Qatar Grand Prix': 'Grand Prix van Qatar',
-    'gp_Abu Dhabi Grand Prix': 'Grand Prix van Abu Dhabi',
-    'country_Bahrain': 'Bahrein',
-    'country_Saudi Arabia': 'Saoedi-Arabië',
-    'country_Australia': 'Australië',
-    'country_Japan': 'Japan',
-    'country_China': 'China',
-    'country_USA': 'VS',
-    'country_Italy': 'Italië',
-    'country_Monaco': 'Monaco',
-    'country_Canada': 'Canada',
-    'country_Spain': 'Spanje',
-    'country_Austria': 'Oostenrijk',
-    'country_UK': 'Groot-Brittannië',
-    'country_Hungary': 'Hongarije',
-    'country_Belgium': 'België',
-    'country_Netherlands': 'Nederland',
-    'country_Azerbaijan': 'Azerbeidzjan',
-    'country_Singapore': 'Singapore',
-    'country_Mexico': 'Mexico',
-    'country_Brazil': 'Brazilië',
-    'country_Qatar': 'Qatar',
-    'country_UAE': 'V.A.E.',
-    'clear_cache': 'Cache Legen',
-    'cache_cleared': 'Cache succesvol geleegd!',
-    'engine_supplier': 'Motorleverancier',
-    'name': 'Naam',
-    'engine_name': 'Motornaam',
-    'city': 'Stad',
-    'headquarters': 'Hoofdkantoor',
-    'team_history': 'Team Geschiedenis',
-    'personal_sponsors': 'Persoonlijke Sponsors',
-    'circuit_layout': 'Circuit Lay-out',
-    'distanceToTurn1': 'Afstand tot Bocht 1',
-    'circuitDifficulty': 'Circuit Moeilijkheid',
-    'overtakingDifficulty': 'Inhaal Moeilijkheid',
-    'race': 'Race',
-    'results': 'Resultaten',
-    'driver': 'Coureur',
-    'finish': 'Finish',
-    'time': 'Tijd',
-    'start': 'Start',
-    'points': 'Punten',
-    'penalty': 'Straf',
-    'status': 'Status',
-    'scope': 'Scope',
-    'session': 'Sessie',
-    'circuit': 'Circuit',
-    'rain': 'Regen',
-    'wind': 'Wind',
-    'top_3': 'Top 3',
-    'best_lap': 'Beste ronde',
-    'total_time': 'Totale tijd',
-    'gap': 'Verschil',
-    'result': 'Resultaat',
-    'pos': 'Pos',
-    'tyre': 'Band',
-    'time_gap': 'Tijd / Verschil',
-    'fullscreen_table': 'Tabel op volledig scherm',
-    'weekend_hub': 'Weekend Hub',
-    'weekend_hub_card_subtitle':
-        'Schema, weer, podium en penalties in een scherm',
-    'weekend_hub_loading': 'Weekend Hub laden...',
-    'weekend_hub_load_error':
-        'Weekend Hub kon niet volledig laden. Cachedata wordt getoond.',
-    'weekend_schedule': 'Weekend schema',
-    'session_status_upcoming': 'Aankomend',
-    'session_status_live_recent': 'Live / Recent',
-    'session_status_completed': 'Voltooid',
-    'track_flag_green': 'Groene vlag',
-    'track_flag_yellow': 'Gele vlag',
-    'track_flag_double_yellow': 'Dubbel geel',
-    'track_flag_red': 'Rode vlag',
-    'track_playback_title': 'Track Playback',
-    'track_playback_no_weather': 'Geen weerdata beschikbaar voor deze sessie.',
-    'track_playback_unknown_sample': 'Onbekend sample',
-    'track_playback_interpolated_minute': 'geinterpoleerde minuut',
-    'track_playback_recorded_sample': 'opgenomen sample',
-    'track_playback_rain_active': 'Regen actief',
-    'track_playback_dry_track': 'Droge baan',
-    'air_temperature': 'Luchttemperatuur',
-    'track_temperature': 'Baantemperatuur',
-    'rainfall': 'Neerslag',
-    'pressure': 'Druk',
-    'unknown_time': 'Onbekende tijd',
-    'unknown_sample': 'Onbekend',
-    'unknown': 'Onbekend',
-    'all_scopes': 'Alle scopes',
-    'race_control': 'Race Control',
-    'race_control_detail': 'Race Control detail',
-    'race_control_search_hint':
-        'Zoek op bericht, vlag, categorie, ronde of coureur',
-    'race_control_message_count': '{visible} van {total} berichten',
-    'race_control_empty':
-        'Geen race control-berichten gevonden voor deze filter of zoekopdracht.',
-    'race_control_no_linked_message':
-        'Geen gekoppeld steward-bericht gevonden.',
-    'race_control_related_updates': 'Gerelateerde steward-updates',
-    'race_control_relation_served_penalty': 'Uitgevoerde straf',
-    'race_control_relation_issued_earlier': 'Eerder opgelegd',
-    'race_control_relation_penalty_message': 'Strafbericht',
-    'race_control_relation_served_later': 'Later uitgevoerd',
-    'race_control_relation_noted': 'Genoteerd',
-    'race_control_relation_investigation': 'Onderzoek',
-    'race_control_relation_outcome': 'Uitkomst',
-    'race_control_relation_message': 'Race Control-bericht',
-    'race_control_relation_linked': 'Gekoppeld bericht',
-    'linked_update_one': '1 gekoppelde update',
-    'linked_update_many': '{count} gekoppelde updates',
-    'show_less_messages': 'Minder berichten tonen',
-    'show_all_messages': 'Alle {count} berichten tonen',
-    'lap_label': 'Ronde {lap}',
-    'car_label': 'Auto {number}',
-    'penalties': 'Penalties',
-    'penalties_empty': 'Geen penalties gevonden in de huidige weekendcache.',
-    'session_weather_unavailable': 'Geen weerdata beschikbaar voor {session}.',
-    'session_data_unavailable':
-        '{session}-data wordt geladen of is nog niet beschikbaar.',
-    'close': 'Sluiten',
-    'used_tyre': 'gebruikt',
-    'q1_out': 'Q1 uit',
-    'q2_out': 'Q2 uit',
-    'last_5_points': 'Punten laatste 5',
-    'avg_finish': 'Gem. finish',
-    'avg_finish_l5': 'Gem. finish (L5)',
-    'no_finish_data': 'Geen finishdata',
-    'points_per_start': 'Punten / start',
-    'points_per_entry': 'Punten / entry',
-    'win_rate': 'Winrate %',
-    'pole_rate': 'Pole %',
-    'fastest_lap_rate': 'Snelste ronde %',
-    'summer_break': 'Zomerstop',
-    'summer_break_subtitle': 'Tussen Hongarije en Nederland ligt de zomerstop.',
-    'previous_winners': 'Eerdere winnaars',
-    'last_winner': 'Winnaar vorig jaar',
-    'ai_race_engineer': 'AI Race Engineer',
-    'ai_example_prompt':
-        'Probeer bijvoorbeeld: "Fetch latest results", "Show next weekend", "Show driver standings", "Open driver Charles Leclerc" of "Show latest penalties".',
-    'ai_no_completed_race': 'Er is nog geen verreden race gevonden.',
-    'ai_latest_results_refreshed': 'De laatste uitslag is opnieuw opgehaald.',
-    'ai_latest_results_podium':
-        'Laatste resultaten vernieuwd. Podium: {podium}',
-    'ai_open_latest_results': 'Open laatste resultaten',
-    'ai_next_weekend': 'Volgend weekend: {race} op {date}.',
-    'ai_open_weekend_hub': 'Open weekend hub',
-    'ai_compare_parse_error':
-        'Ik kon de vergelijking niet lezen. Gebruik: naam1 vs naam2',
-    'ai_driver_compare_ready':
-        'Driver comparison klaar voor {left} en {right}.',
-    'ai_open_driver_compare': 'Open driver compare',
-    'ai_team_compare_ready': 'Team comparison klaar voor {left} en {right}.',
-    'ai_open_team_compare': 'Open team compare',
-    'ai_compare_no_match':
-        'Ik kon geen twee geldige drivers of teams vinden voor deze vergelijking.',
-    'ai_form_no_driver': 'Ik kon geen coureur vinden voor de form-analyse.',
-    'ai_form_no_cache': 'Nog geen gecachte recente races voor {driver}.',
-    'ai_form_summary': 'Laatste vorm van {driver}: {summary}',
-    'ai_driver_standings_summary': 'Driver standings {year}: {summary}',
-    'ai_team_standings_summary': 'Constructor standings {year}: {summary}',
-    'ai_open_driver_standings': 'Open driver standings',
-    'ai_open_team_standings': 'Open constructor standings',
-    'ai_driver_profile_ready': 'Driverprofiel klaar voor {driver}.',
-    'ai_open_driver_profile': 'Open driverprofiel',
-    'ai_team_profile_ready': 'Teamprofiel klaar voor {team}.',
-    'ai_open_team_profile': 'Open teamprofiel',
-    'ai_drivers_chart_ready': 'De coureursgrafiek staat klaar voor {year}.',
-    'ai_open_drivers_chart': 'Open coureursgrafiek',
-    'ai_next_weekend_weather':
-        'Weer voor {race}: {temp}C, {rain}% regen, {wind} km/u wind.',
-    'ai_latest_penalties_summary':
-        'Laatste penalties bij {race}: {count}. {details}',
-    'ai_latest_penalties_none': 'Geen penalties gevonden voor {race}.',
-    'ai_latest_race_control_summary':
-        'Race Control bij {race}: {count} berichten. Laatste update: {message}',
-    'ai_latest_race_control_none':
-        'Geen Race Control-berichten gevonden voor {race}.',
-    'ai_supported_commands':
-        'Ondersteunde commando\'s: Fetch latest results, Show next weekend, Compare naam1 vs naam2, Show form [driver], Show driver standings, Show team standings, Open driver [naam], Open team [naam], Show drivers chart, Show latest penalties, Show latest race control.',
-    'ai_crash': 'De assistent liep vast op: {error}',
-    'ai_chip_fetch_latest_results': 'Fetch latest results',
-    'ai_chip_show_next_weekend': 'Show next weekend',
-    'ai_chip_compare_max_lando': 'Compare Max vs Lando',
-    'ai_chip_show_form_piastri': 'Show form Piastri',
-    'ai_chip_show_driver_standings': 'Show driver standings',
-    'ai_chip_show_latest_penalties': 'Show latest penalties',
-    'ai_type_command': 'Typ een opdracht...',
-    'no_race_results_available': 'Nog geen race-uitslag beschikbaar.',
-  };
-
-  static final Map<String, String> _enDictionary = {
-    'appTitle': 'F1 Hub',
-    'settings': 'Settings',
-    'toggleTheme': 'Toggle Theme',
-    'changelog': 'Changelog',
-    'placeholder_page': 'New page',
-    'placeholder_page_empty': 'This page is empty for now.',
-    'compare': 'Compare',
-    'select_drivers_to_compare': 'Select 2 drivers',
-    'select_teams_to_compare': 'Select 2 teams',
-    'compare_overall': 'Overall',
-    'compare_season': 'By season',
-    'compare_year': 'Season',
-    'compare_season_unavailable':
-        'Season data is unavailable for this comparison.',
-    'points_progression': 'Points progression',
-    'points_after_each_race': 'Standings after each race',
-    'round_short': 'R',
-    'dnf_percentage': 'DNF %',
-    'circuits': 'Circuits',
-    'standings': 'Standings',
-    'country': 'Country',
-    'date': 'Date',
-    'nextRace': 'Next Race',
-    'startsIn': 'Starts in',
-    'week': 'week',
-    'weeks': 'weeks',
-    'day': 'day',
-    'days': 'days',
-    'hours': 'hours',
-    'minutes': 'minutes',
-    'sponsors': 'Sponsors',
-    'drivers': 'Drivers',
-    'drivers_chart': 'Drivers chart',
-    'championship_progression': 'Championship progression',
-    'chart_no_data': 'No chart data is available for this season.',
-    'top_5': 'Top 5',
-    'top_10': 'Top 10',
-    'show_all': 'All',
-    'hide_all': 'None',
-    'reserve_driver': 'Reserve Driver',
-    'teams': 'Teams',
-    'pts': 'PTS',
-    'using_fallback_data': 'Using offline/fallback data.',
-    'points_history': 'Points per Season',
-    'session_results': 'Session Results',
-    'fp1': 'Practice 1',
-    'fp2': 'Practice 2',
-    'fp3': 'Practice 3',
-    'sprint_quali': 'Sprint Qualifying',
-    'sprint': 'Sprint',
-    'qualifying': 'Qualifying',
-    'session_future': 'Session begins at',
-    'no_data_yet': 'Data not available yet or API pending update',
-    'version': 'Version',
-    'weather_forecast': 'Weather Forecast',
-    'circuit_info': 'Circuit Info',
-    'temp': 'Temperature',
-    'rain_chance': 'Rain Chance',
-    'wind_speed': 'Wind Speed',
-    'humidity': 'Humidity',
-    'length': 'Length',
-    'since': 'On calendar since',
-    'until': 'Contract until',
-    'lap_speed_stats': 'LAP & SPEED STATS',
-    'risks_incidents': 'RISKS & INCIDENTS',
-    'tyres_strategy': 'TYRES & STRATEGY',
-    'characteristics': 'CIRCUIT CHARACTERISTICS',
-    'totalLength': 'Total Length',
-    'laps': 'Laps',
-    'fastestLap': 'Fastest Lap',
-    'slowestLap': 'Slowest Lap',
-    'avgLap': 'Average Lap',
-    'topSpeed': 'Top Speed',
-    'averageSpeed': 'Average Speed',
-    'avgGForce': 'Avg G-Force',
-    'max_g_force': 'Max G-Force',
-    'risks': 'Risks',
-    'redFlag': 'Red Flag Chance',
-    'vsc': 'VSC Chance',
-    'accident': 'Accident Chance',
-    'turn1Accident': 'Turn 1 Accident Chance',
-    'tyres': 'Tyres',
-    'tireWear': 'Tire Wear',
-    'strategy': 'Strategy',
-    'bestCombination': 'Best Combination',
-    'fastestPit': 'Fastest Pitstop',
-    'driver_facts_title': 'Facts & Trivia',
-    'general': 'General',
-    'current_team': 'Current Team',
-    'nationality': 'Nationality',
-    'personal_info': 'Personal Info',
-    'age': 'Age',
-    'birth_place': 'Birthplace',
-    'partner': 'Partner',
-    'pets': 'Pets',
-    'children': 'Children',
-    'manager': 'Manager',
-    'previous_teams': 'Teams',
-    'career_stats': 'Career Stats',
-    'championships': 'Championships',
-    'wins': 'Wins',
-    'podiums': 'Podiums',
-    'poles': 'Pole Positions',
-    'fastest_laps': 'Fastest Laps',
-    'total_points': 'Total Points',
-    'f1_debut': 'F1 Debut',
-    'contract_until': 'Contract until',
-    'driver_history': 'History (Last 5 Years)',
-    'experience': 'Experience',
-    'retirements': 'Retirements',
-    'starts': 'Starts',
-    'laps_led': 'Laps Led',
-    'dnf': 'Did Not Finish',
-    'dsqs': 'Disqualified',
-    'dnqs': 'Did Not Qualify',
-    'frontRowStarts': 'Front Row Starts',
-    'highestFinish': 'Highest Finish',
-    'highestGrid': 'Highest Grid Position',
-    'hatTricks': 'Hat Tricks',
-    'cc_wins': 'Constructors Titles',
-    'dc_wins': 'Drivers Titles',
-    'race_stats': 'Race Stats',
-    'total_entries': 'Total Entries',
-    'one_two': '1-2 Finishes',
-    'pitstop_leadership': 'Pitstop & Leadership',
-    'overtakes': 'Overtakes',
-    'team_principal': 'Team Principal',
-    'technical_director': 'Technical Director',
-    'height': 'Height',
-    'engine': 'Engine',
-    'soft_tire': 'Soft',
-    'medium_tire': 'Medium',
-    'hard_tire': 'Hard',
-    'wear_High': 'High',
-    'wear_Medium': 'Medium',
-    'wear_Low': 'Low',
-    'strategy_1 stop': '1 stop',
-    'strategy_2 stops': '2 stops',
-    'strategy_3 stops': '3 stops',
-    'level_1': 'Very Easy',
-    'level_2': 'Easy',
-    'level_3': 'Medium',
-    'level_4': 'Hard',
-    'level_5': 'Very Hard',
-    'nat_Dutch': 'Dutch',
-    'nat_British': 'British',
-    'nat_Spanish': 'Spanish',
-    'nat_Monegasque': 'Monegasque',
-    'nat_Australian': 'Australian',
-    'nat_French': 'French',
-    'nat_German': 'German',
-    'nat_Thai': 'Thai',
-    'nat_Canadian': 'Canadian',
-    'nat_Japanese': 'Japanese',
-    'nat_Italian': 'Italian',
-    'nat_New Zealander': 'New Zealander',
-    'nat_Brazilian': 'Brazilian',
-    'nat_Argentine': 'Argentine',
-    'nat_Mexican': 'Mexican',
-    'nat_Finnish': 'Finnish',
-    'gp_Bahrain Grand Prix': 'Bahrain Grand Prix',
-    'gp_Saudi Arabian Grand Prix': 'Saudi Arabian Grand Prix',
-    'gp_Australian Grand Prix': 'Australian Grand Prix',
-    'gp_Japanese Grand Prix': 'Japanese Grand Prix',
-    'gp_Chinese Grand Prix': 'Chinese Grand Prix',
-    'gp_Miami Grand Prix': 'Miami Grand Prix',
-    'gp_Barcelona Grand Prix': 'Barcelona Grand Prix',
-    'gp_Monaco Grand Prix': 'Monaco Grand Prix',
-    'gp_Canadian Grand Prix': 'Canadian Grand Prix',
-    'gp_Spanish Grand Prix': 'Spanish Grand Prix',
-    'gp_Austrian Grand Prix': 'Austrian Grand Prix',
-    'gp_British Grand Prix': 'British Grand Prix',
-    'gp_Hungarian Grand Prix': 'Hungarian Grand Prix',
-    'gp_Belgian Grand Prix': 'Belgian Grand Prix',
-    'gp_Dutch Grand Prix': 'Dutch Grand Prix',
-    'gp_Italian Grand Prix': 'Italian Grand Prix',
-    'gp_Azerbaijan Grand Prix': 'Azerbaijan Grand Prix',
-    'gp_Singapore Grand Prix': 'Singapore Grand Prix',
-    'gp_United States Grand Prix': 'United States Grand Prix',
-    'gp_Mexico City Grand Prix': 'Mexico City Grand Prix',
-    'gp_São Paulo Grand Prix': 'São Paulo Grand Prix',
-    'gp_Las Vegas Grand Prix': 'Las Vegas Grand Prix',
-    'gp_Qatar Grand Prix': 'Qatar Grand Prix',
-    'gp_Abu Dhabi Grand Prix': 'Abu Dhabi Grand Prix',
-    'country_Bahrain': 'Bahrain',
-    'country_Saudi Arabia': 'Saudi Arabia',
-    'country_Australia': 'Australia',
-    'country_Japan': 'Japan',
-    'country_China': 'China',
-    'country_USA': 'USA',
-    'country_Italy': 'Italy',
-    'country_Monaco': 'Monaco',
-    'country_Canada': 'Canada',
-    'country_Spain': 'Spain',
-    'country_Austria': 'Austria',
-    'country_UK': 'UK',
-    'country_Hungary': 'Hungary',
-    'country_Belgium': 'Belgium',
-    'country_Netherlands': 'Netherlands',
-    'country_Azerbaijan': 'Azerbaijan',
-    'country_Singapore': 'Singapore',
-    'country_Mexico': 'Mexico',
-    'country_Brazil': 'Brazil',
-    'country_Qatar': 'Qatar',
-    'country_UAE': 'UAE',
-    'clear_cache': 'Clear Cache',
-    'cache_cleared': 'Cache cleared successfully!',
-    'engine_supplier': 'Engine Supplier',
-    'name': 'Name',
-    'engine_name': 'Engine Name',
-    'city': 'City',
-    'headquarters': 'Headquarters',
-    'team_history': 'Team History',
-    'personal_sponsors': 'Personal Sponsors',
-    'circuit_layout': 'Circuit Layout',
-    'distanceToTurn1': 'Distance to Turn 1',
-    'circuitDifficulty': 'Circuit Difficulty',
-    'overtakingDifficulty': 'Overtaking Difficulty',
-    'race': 'Race',
-    'results': 'Results',
-    'driver': 'Driver',
-    'finish': 'Finish',
-    'time': 'Time',
-    'start': 'Start',
-    'points': 'Points',
-    'penalty': 'Penalty',
-    'status': 'Status',
-    'scope': 'Scope',
-    'session': 'Session',
-    'circuit': 'Circuit',
-    'rain': 'Rain',
-    'wind': 'Wind',
-    'top_3': 'Top 3',
-    'best_lap': 'Best lap',
-    'total_time': 'Total time',
-    'gap': 'Gap',
-    'result': 'Result',
-    'pos': 'Pos',
-    'tyre': 'Tyre',
-    'time_gap': 'Time / Gap',
-    'fullscreen_table': 'Fullscreen table',
-    'weekend_hub': 'Weekend Hub',
-    'weekend_hub_card_subtitle':
-        'Schedule, weather, podium and penalties in one screen',
-    'weekend_hub_loading': 'Loading Weekend Hub...',
-    'weekend_hub_load_error':
-        'Weekend Hub could not be fully loaded. Cached data is being shown.',
-    'weekend_schedule': 'Weekend schedule',
-    'session_status_upcoming': 'Upcoming',
-    'session_status_live_recent': 'Live / Recent',
-    'session_status_completed': 'Completed',
-    'track_flag_green': 'Green flag',
-    'track_flag_yellow': 'Yellow flag',
-    'track_flag_double_yellow': 'Double yellow',
-    'track_flag_red': 'Red flag',
-    'track_playback_title': 'Track Playback',
-    'track_playback_no_weather': 'No weather data available for this session.',
-    'track_playback_unknown_sample': 'Unknown sample',
-    'track_playback_interpolated_minute': 'interpolated minute',
-    'track_playback_recorded_sample': 'recorded sample',
-    'track_playback_rain_active': 'Rain active',
-    'track_playback_dry_track': 'Dry track',
-    'air_temperature': 'Air temperature',
-    'track_temperature': 'Track temperature',
-    'rainfall': 'Rainfall',
-    'pressure': 'Pressure',
-    'unknown_time': 'Unknown time',
-    'unknown_sample': 'Unknown sample',
-    'unknown': 'Unknown',
-    'all_scopes': 'All scopes',
-    'race_control': 'Race Control',
-    'race_control_detail': 'Race Control detail',
-    'race_control_search_hint':
-        'Search by message, flag, category, lap or driver',
-    'race_control_message_count': '{visible} of {total} messages',
-    'race_control_empty':
-        'No race control messages found for this filter or search.',
-    'race_control_no_linked_message': 'No linked steward message found.',
-    'race_control_related_updates': 'Related steward updates',
-    'race_control_relation_served_penalty': 'Served penalty',
-    'race_control_relation_issued_earlier': 'Issued earlier',
-    'race_control_relation_penalty_message': 'Penalty message',
-    'race_control_relation_served_later': 'Served later',
-    'race_control_relation_noted': 'Noted',
-    'race_control_relation_investigation': 'Investigation',
-    'race_control_relation_outcome': 'Outcome',
-    'race_control_relation_message': 'Race Control message',
-    'race_control_relation_linked': 'Linked message',
-    'linked_update_one': '1 linked update',
-    'linked_update_many': '{count} linked updates',
-    'show_less_messages': 'Show fewer messages',
-    'show_all_messages': 'Show all {count} messages',
-    'lap_label': 'Lap {lap}',
-    'car_label': 'Car {number}',
-    'penalties': 'Penalties',
-    'penalties_empty': 'No penalties found in the current weekend cache.',
-    'session_weather_unavailable': 'No weather data available for {session}.',
-    'session_data_unavailable':
-        '{session} data is loading or not available yet.',
-    'close': 'Close',
-    'used_tyre': 'used',
-    'q1_out': 'Q1 out',
-    'q2_out': 'Q2 out',
-    'last_5_points': 'Last 5 points',
-    'avg_finish': 'Avg finish',
-    'avg_finish_l5': 'Avg finish (L5)',
-    'no_finish_data': 'No finish data',
-    'points_per_start': 'Points / start',
-    'points_per_entry': 'Points / entry',
-    'win_rate': 'Win rate %',
-    'pole_rate': 'Pole rate %',
-    'fastest_lap_rate': 'Fastest lap rate %',
-    'summer_break': 'Summer break',
-    'summer_break_subtitle':
-        'The summer break sits between Hungary and the Netherlands.',
-    'previous_winners': 'Previous winners',
-    'last_winner': 'Last year winner',
-    'ai_race_engineer': 'AI Race Engineer',
-    'ai_example_prompt':
-        'Try for example: "Fetch latest results", "Show next weekend", "Show driver standings", "Open driver Charles Leclerc" or "Show latest penalties".',
-    'ai_no_completed_race': 'No completed race has been found yet.',
-    'ai_latest_results_refreshed': 'The latest results were refreshed.',
-    'ai_latest_results_podium': 'Latest results refreshed. Podium: {podium}',
-    'ai_open_latest_results': 'Open latest results',
-    'ai_next_weekend': 'Next weekend: {race} on {date}.',
-    'ai_open_weekend_hub': 'Open weekend hub',
-    'ai_compare_parse_error':
-        'I could not read the comparison. Use: name1 vs name2',
-    'ai_driver_compare_ready':
-        'Driver comparison is ready for {left} and {right}.',
-    'ai_open_driver_compare': 'Open driver compare',
-    'ai_team_compare_ready': 'Team comparison is ready for {left} and {right}.',
-    'ai_open_team_compare': 'Open team compare',
-    'ai_compare_no_match':
-        'I could not find two valid drivers or teams for this comparison.',
-    'ai_form_no_driver': 'I could not find a driver for the form analysis.',
-    'ai_form_no_cache': 'No cached recent races for {driver} yet.',
-    'ai_form_summary': 'Recent form for {driver}: {summary}',
-    'ai_driver_standings_summary': 'Driver standings {year}: {summary}',
-    'ai_team_standings_summary': 'Constructor standings {year}: {summary}',
-    'ai_open_driver_standings': 'Open driver standings',
-    'ai_open_team_standings': 'Open constructor standings',
-    'ai_driver_profile_ready': 'Driver profile ready for {driver}.',
-    'ai_open_driver_profile': 'Open driver profile',
-    'ai_team_profile_ready': 'Team profile ready for {team}.',
-    'ai_open_team_profile': 'Open team profile',
-    'ai_drivers_chart_ready': 'The drivers chart is ready for {year}.',
-    'ai_open_drivers_chart': 'Open drivers chart',
-    'ai_next_weekend_weather':
-        'Weather for {race}: {temp}C, {rain}% rain, {wind} km/h wind.',
-    'ai_latest_penalties_summary':
-        'Latest penalties at {race}: {count}. {details}',
-    'ai_latest_penalties_none': 'No penalties found for {race}.',
-    'ai_latest_race_control_summary':
-        'Race Control at {race}: {count} messages. Latest update: {message}',
-    'ai_latest_race_control_none': 'No Race Control messages found for {race}.',
-    'ai_supported_commands':
-        'Supported commands: Fetch latest results, Show next weekend, Compare name1 vs name2, Show form [driver], Show driver standings, Show team standings, Open driver [name], Open team [name], Show drivers chart, Show latest penalties, Show latest race control.',
-    'ai_crash': 'The assistant ran into: {error}',
-    'ai_chip_fetch_latest_results': 'Fetch latest results',
-    'ai_chip_show_next_weekend': 'Show next weekend',
-    'ai_chip_compare_max_lando': 'Compare Max vs Lando',
-    'ai_chip_show_form_piastri': 'Show form Piastri',
-    'ai_chip_show_driver_standings': 'Show driver standings',
-    'ai_chip_show_latest_penalties': 'Show latest penalties',
-    'ai_type_command': 'Type a command...',
-    'no_race_results_available': 'No race results available yet.',
-  };
-
-  static final Map<String, Map<String, String>> _localizedValues = {
-    'en': _enDictionary,
-    'nl': _nlDictionary,
-    'fr': _enDictionary,
-    'es': _enDictionary,
-    'de': _nlDictionary, // Duits > Nederlands mapping
-  };
-
-  String translate(String key) {
-    return _localizedValues[locale.languageCode]?[key] ??
-        _enDictionary[key] ??
-        key;
-  }
-
-  String format(String key, Map<String, String> values) {
-    var text = translate(key);
-    for (final entry in values.entries) {
-      text = text.replaceAll('{${entry.key}}', entry.value);
-    }
-    return text;
-  }
-}
-
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
-  const _AppLocalizationsDelegate();
-  @override
-  bool isSupported(Locale locale) =>
-      ['en', 'nl', 'fr', 'es', 'de'].contains(locale.languageCode);
-  @override
-  Future<AppLocalizations> load(Locale locale) async =>
-      AppLocalizations(locale);
-  @override
-  bool shouldReload(covariant LocalizationsDelegate<AppLocalizations> old) =>
-      false;
-}
+/// ---
 
 /// ---------------------------------------------------------------------
 
@@ -3003,11 +3081,52 @@ Team? _findTeamBySlug(String slug) {
   return null;
 }
 
+Driver? _findDriver2026ByName(String nameOrLastName) {
+  final lower = nameOrLastName.trim().toLowerCase();
+  for (final d in drivers2026) {
+    if (d.name.toLowerCase() == lower ||
+        d.name.toLowerCase().endsWith(' $lower') ||
+        d.name.split(' ').last.toLowerCase() == lower) {
+      return d;
+    }
+  }
+  return null;
+}
+
+Driver? _getTeammate2026(Driver driver) {
+  for (final d in drivers2026) {
+    if (d.team == driver.team && d.name != driver.name) return d;
+  }
+  return null;
+}
+
+/// Returns (favoriteDriverWins, teammateWins, avgGapSec). Gap negative = favorite faster.
+(int, int, double) _teammateQualifyingStats(Driver fav, Driver teammate) {
+  final key1 = '${fav.name.toLowerCase()}|${teammate.name.toLowerCase()}';
+  final key2 = '${teammate.name.toLowerCase()}|${fav.name.toLowerCase()}';
+  const stats = <String, (int, int, double)>{
+    'lewis hamilton|charles leclerc': (7, 3, -0.084),
+    'charles leclerc|lewis hamilton': (3, 7, 0.084),
+    'max verstappen|isack hadjar': (10, 0, -0.250),
+    'isack hadjar|max verstappen': (0, 10, 0.250),
+    'lando norris|oscar piastri': (6, 4, -0.042),
+    'oscar piastri|lando norris': (4, 6, 0.042),
+    'george russell|kimi antonelli': (5, 5, 0.012),
+    'kimi antonelli|george russell': (5, 5, -0.012),
+    'fernando alonso|lance stroll': (8, 2, -0.156),
+    'lance stroll|fernando alonso': (2, 8, 0.156),
+  };
+  return stats[key1] ?? stats[key2] ?? (5, 5, -0.050);
+}
+
 String _circuitsPath() => '/circuits';
 String _driversPath() => '/drivers';
 String _teamsPath() => '/teams';
 String _changelogPath() => '/changelog';
 String _placeholderPagePath() => '/placeholder';
+String _loginPath() => '/login';
+String _livePath() => '/live';
+String _profilePath() => '/profile';
 String _racePath(Race race) => '${_circuitsPath()}/${_raceSlug(race)}';
 String _weekendHubPath(Race race) => '${_racePath(race)}/weekend';
 String _raceResultsPath(Race race) => '${_racePath(race)}/results';
@@ -3024,19 +3143,54 @@ String _teamComparePath(Team team1, Team team2) =>
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
+  await Supabase.initialize(
+    url: 'https://aeekchoaetlksooyylsv.supabase.co',
+    anonKey: 'sb_publishable_38F48DBpJ7cWwVo-2yZjhA_rE6wE9uz',
+  );
   await HiveBootstrap.initialize();
   await SessionDataManager().init(races);
   // Preload all JSON files in the background (do not await)
   // This ensures all race/session data is loaded without blocking the UI
   // ignore: unawaited_futures
   SessionDataManager().fetchAllData();
-  runApp(const F1HubApp());
+
+  final stored = await ThemeService.instance.load();
+  final themeController = ThemeController(
+    initialSchemeIndex: stored.schemeIndex,
+    initialThemeMode: stored.isDark ? ThemeMode.dark : ThemeMode.light,
+  );
+
+  // Fetch theme from Supabase profile before first frame (if logged in)
+  await themeController.initFromSupabase();
+
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [
+        Locale('en'),
+        Locale('nl'),
+        Locale('de'),
+        Locale('fr'),
+      ],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('en'),
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider<ThemeController>.value(value: themeController),
+          ChangeNotifierProvider<ProfileFavoritesNotifier>(
+            create: (_) => ProfileFavoritesNotifier(),
+          ),
+        ],
+        child: const F1HubApp(),
+      ),
+    ),
+  );
 }
 
 class F1HubApp extends StatefulWidget {
   const F1HubApp({super.key});
 
-  static _F1HubAppState of(BuildContext context) {
+  static State<F1HubApp> of(BuildContext context) {
     final state = context.findAncestorStateOfType<_F1HubAppState>();
     assert(state != null, 'F1HubApp state not found in context');
     return state!;
@@ -3046,15 +3200,166 @@ class F1HubApp extends StatefulWidget {
   State<F1HubApp> createState() => _F1HubAppState();
 }
 
-class _F1HubAppState extends State<F1HubApp> {
-  Locale? _locale;
-  ThemeMode _themeMode = (DateTime.now().hour > 6 && DateTime.now().hour < 20)
-      ? ThemeMode.light
-      : ThemeMode.dark;
+/// Branded 2026-style splash screen: white bg, logo fade-in, loading subtitle,
+/// animated fading perimeter border at bottom (0%→100% width).
+class _SplashScreen extends StatefulWidget {
+  const _SplashScreen({
+    required this.primaryColor,
+    required this.onComplete,
+  });
 
-  Widget _buildSettingsMenu() => AppSettingsMenuButton(
-    onSetLocale: _setLocale,
-    onToggleTheme: _toggleTheme,
+  final Color primaryColor;
+  final VoidCallback onComplete;
+
+  @override
+  State<_SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<_SplashScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _logoController;
+  late AnimationController _borderController;
+  late Animation<double> _logoOpacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _logoController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _borderController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    );
+    _logoOpacity = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _logoController, curve: Curves.easeOut),
+    );
+    _logoController.forward();
+    _borderController.forward().then((_) {
+      widget.onComplete();
+    });
+  }
+
+  @override
+  void dispose() {
+    _logoController.dispose();
+    _borderController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      color: theme.colorScheme.surface,
+      child: SafeArea(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Spacer(),
+                AnimatedBuilder(
+                  animation: _logoOpacity,
+                  builder: (context, child) => Opacity(
+                    opacity: _logoOpacity.value,
+                    child: child,
+                  ),
+                  child: Icon(
+                    Icons.sports_motorsports,
+                    size: 80,
+                    color: widget.primaryColor,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  't.appTitle'.tr(),
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.2,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  't.season_2026'.tr(),
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  't.loading'.tr(),
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                  ),
+                ),
+                const SizedBox(height: 32),
+              ],
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: AnimatedBuilder(
+                animation: _borderController,
+                builder: (context, _) {
+                  final width = MediaQuery.of(context).size.width * _borderController.value;
+                  return Container(
+                    height: 3,
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      width: width,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            widget.primaryColor,
+                            widget.primaryColor.withValues(alpha: 0.5),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _F1HubAppState extends State<F1HubApp> {
+  bool _showSplash = true;
+  bool _splashFadingOut = false;
+  static const _splashDuration = Duration(milliseconds: 2200);
+  static const _splashFadeOut = Duration(milliseconds: 400);
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(_splashDuration, () {
+      if (!mounted) return;
+      setState(() => _splashFadingOut = true);
+      Future.delayed(_splashFadeOut, () {
+        if (mounted) setState(() => _showSplash = false);
+      });
+    });
+  }
+
+  Widget _buildSettingsMenu(BuildContext context) => AppSettingsMenuButton(
+    onToggleTheme: () => context.read<ThemeController>().toggleBrightness(),
+  );
+
+  Widget _buildCircuitsSettingsMenu(BuildContext context) => AppSettingsMenuButton(
+    onToggleTheme: () => context.read<ThemeController>().toggleBrightness(),
+    icon: const _AnimatedSettingsIcon(),
   );
 
   late final GoRouter _router = GoRouter(
@@ -3063,14 +3368,16 @@ class _F1HubAppState extends State<F1HubApp> {
       GoRoute(path: '/', redirect: (_, _) => _circuitsPath()),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
-            MainNavigation(navigationShell: navigationShell),
+            _LoggedInSnackBarTrigger(
+              child: MainNavigation(navigationShell: navigationShell),
+            ),
         branches: [
           StatefulShellBranch(
             routes: [
               GoRoute(
                 path: _circuitsPath(),
                 builder: (context, state) =>
-                    CircuitsView(settingsMenu: _buildSettingsMenu()),
+                    CircuitsView(settingsMenu: _buildCircuitsSettingsMenu(context)),
                 routes: [
                   GoRoute(
                     path: ':raceSlug',
@@ -3088,7 +3395,7 @@ class _F1HubAppState extends State<F1HubApp> {
                       return CircuitDetailScreen(
                         race: race,
                         heroTag: _raceFlagHeroTag(race, source: 'route'),
-                        settingsMenu: _buildSettingsMenu(),
+                        settingsMenu: _buildSettingsMenu(context),
                       );
                     },
                     routes: [
@@ -3167,7 +3474,7 @@ class _F1HubAppState extends State<F1HubApp> {
                 path: _driversPath(),
                 builder: (context, state) => StandingsView(
                   isDriverView: true,
-                  settingsMenu: _buildSettingsMenu(),
+                  settingsMenu: _buildSettingsMenu(context),
                 ),
                 routes: [
                   GoRoute(
@@ -3212,7 +3519,7 @@ class _F1HubAppState extends State<F1HubApp> {
                       return DriverDetailView(
                         driver: driver,
                         heroTag: _driverFlagHeroTag(driver, source: 'route'),
-                        settingsMenu: _buildSettingsMenu(),
+                        settingsMenu: _buildSettingsMenu(context),
                       );
                     },
                   ),
@@ -3226,7 +3533,7 @@ class _F1HubAppState extends State<F1HubApp> {
                 path: _teamsPath(),
                 builder: (context, state) => StandingsView(
                   isDriverView: false,
-                  settingsMenu: _buildSettingsMenu(),
+                  settingsMenu: _buildSettingsMenu(context),
                 ),
                 routes: [
                   GoRoute(
@@ -3268,7 +3575,7 @@ class _F1HubAppState extends State<F1HubApp> {
                       return TeamDetailView(
                         team: team,
                         heroTag: _teamFlagHeroTag(team, source: 'route'),
-                        settingsMenu: _buildSettingsMenu(),
+                        settingsMenu: _buildSettingsMenu(context),
                       );
                     },
                   ),
@@ -3276,7 +3583,24 @@ class _F1HubAppState extends State<F1HubApp> {
               ),
             ],
           ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: _profilePath(),
+                builder: (context, state) =>
+                    ProfileScreen(settingsMenu: _buildSettingsMenu(context)),
+              ),
+            ],
+          ),
         ],
+      ),
+      GoRoute(
+        path: _loginPath(),
+        builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: _livePath(),
+        builder: (context, state) => const LiveTimingPage(),
       ),
       GoRoute(
         path: _changelogPath(),
@@ -3290,76 +3614,50 @@ class _F1HubAppState extends State<F1HubApp> {
   );
 
   @override
-  void initState() {
-    super.initState();
-    _loadSettings();
-  }
-
-  Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      final lang = prefs.getString('language_code');
-      if (lang != null) _locale = Locale(lang);
-      final isDark = prefs.getBool('is_dark');
-      if (isDark != null) {
-        _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
-      }
-    });
-  }
-
-  void _setLocale(Locale newLocale) {
-    setState(() => _locale = newLocale);
-    SharedPreferences.getInstance().then(
-      (p) => p.setString('language_code', newLocale.languageCode),
-    );
-  }
-
-  void _toggleTheme() {
-    setState(() {
-      _themeMode = _themeMode == ThemeMode.dark
-          ? ThemeMode.light
-          : ThemeMode.dark;
-    });
-    SharedPreferences.getInstance().then(
-      (p) => p.setBool('is_dark', _themeMode == ThemeMode.dark),
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final themeController = context.watch<ThemeController>();
+    final primaryColor = Theme.of(context).brightness == Brightness.dark
+        ? themeController.darkTheme.colorScheme.primary
+        : themeController.lightTheme.colorScheme.primary;
     return MaterialApp.router(
       title: 'F1 Hub',
       debugShowCheckedModeBanner: false,
       routerConfig: _router,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
+      theme: themeController.lightTheme,
+      darkTheme: themeController.darkTheme,
       themeAnimationCurve: Curves.easeInOutCubic,
       themeAnimationDuration: const Duration(milliseconds: 320),
-      themeMode: _themeMode,
-      locale: _locale,
-      supportedLocales: const [
-        Locale('en'),
-        Locale('nl'),
-        Locale('fr'),
-        Locale('es'),
-        Locale('de'),
-      ],
-      localeResolutionCallback: (deviceLocale, supportedLocales) {
-        if (deviceLocale != null) {
-          for (var supportedLocale in supportedLocales) {
-            if (supportedLocale.languageCode == deviceLocale.languageCode) {
-              return supportedLocale;
-            }
-          }
-        }
-        return const Locale('en');
+      themeMode: themeController.themeMode,
+      locale: context.locale,
+      supportedLocales: context.supportedLocales,
+      localizationsDelegates: context.localizationDelegates,
+      builder: (context, child) {
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            if (child != null) child,
+            if (_showSplash)
+              Positioned.fill(
+                child: IgnorePointer(
+                  ignoring: _splashFadingOut,
+                  child: AnimatedOpacity(
+                    opacity: _splashFadingOut ? 0 : 1,
+                    duration: _splashFadeOut,
+                    onEnd: () {
+                      if (mounted && _splashFadingOut) {
+                        setState(() => _showSplash = false);
+                      }
+                    },
+                    child: _SplashScreen(
+                      primaryColor: primaryColor,
+                      onComplete: () {},
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
       },
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
     );
   }
 }
@@ -3411,26 +3709,6 @@ String _getFlag(String nat) {
     'Italy': '',
   };
   return flags[nat] ?? '';
-}
-
-Color _getTeamColor(String t) {
-  if (t.toLowerCase().contains('ferrari')) return const Color(0xFFE80020);
-  if (t.toLowerCase().contains('red bull')) return const Color(0xFF0600EF);
-  if (t.toLowerCase().contains('mclaren')) return const Color(0xFFFF8700);
-  if (t.toLowerCase().contains('mercedes')) return const Color(0xFF27F4D2);
-  if (t.toLowerCase().contains('aston')) return const Color(0xFF229971);
-  if (t.toLowerCase().contains('williams')) return const Color(0xFF005AFF);
-  if (t.toLowerCase().contains('alpine')) return const Color(0xFFFF87BC);
-  if (t.toLowerCase().contains('haas')) return const Color(0xFFB6BABD);
-  if (t.toLowerCase().contains('audi') || t.toLowerCase().contains('sauber')) {
-    return const Color(0xFFE2FF00);
-  }
-  if (t.toLowerCase().contains('racing bulls') ||
-      t.toLowerCase().contains('rb')) {
-    return const Color(0xFF6692FF);
-  }
-  if (t.toLowerCase().contains('cadillac')) return const Color(0xFFFFB800);
-  return Colors.blueGrey;
 }
 
 String getTireEmoji(String compound) {
@@ -4236,6 +4514,32 @@ class DriverStandingsChartData {
   });
 }
 
+class TeamStandingsChartSeries {
+  final String teamName;
+  final List<SeasonRacePointsEntry> pointsByRace;
+  final Color color;
+
+  const TeamStandingsChartSeries({
+    required this.teamName,
+    required this.pointsByRace,
+    required this.color,
+  });
+}
+
+class TeamStandingsChartData {
+  final int year;
+  final List<String> circuitLabels;
+  final List<TeamStandingsChartSeries> series;
+  final double maxPoints;
+
+  const TeamStandingsChartData({
+    required this.year,
+    required this.circuitLabels,
+    required this.series,
+    required this.maxPoints,
+  });
+}
+
 final Map<String, Future<SeasonalDriverComparisonStats?>>
 _seasonalDriverComparisonStatsCache =
     <String, Future<SeasonalDriverComparisonStats?>>{};
@@ -4243,6 +4547,8 @@ Future<Map<int, Map<String, SeasonalDriverComparisonStats>>>?
 _seasonalDriverComparisonAssetCache;
 final Map<int, Future<DriverStandingsChartData?>>
 _driverStandingsChartDataCache = <int, Future<DriverStandingsChartData?>>{};
+final Map<int, Future<TeamStandingsChartData?>>
+_teamStandingsChartDataCache = <int, Future<TeamStandingsChartData?>>{};
 
 Future<Map<int, Map<String, SeasonalDriverComparisonStats>>>
 _loadSeasonalDriverComparisonAssetCache() {
@@ -4267,52 +4573,168 @@ Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromAsset(
   int year,
 ) async {
   try {
-    if (year == 2026) {
-      final raw = await rootBundle.loadString('data/results/drivers_standings_2026.json');
-      final List<dynamic> data = jsonDecode(raw);
-      // Map: driver_number -> driverName
-      final Map<int, String> driverNumberToName = {};
-      // Try to get driver names from driversData[2026] if available
-      if (driversData.containsKey(2026)) {
-        for (final driver in driversData[2026]!) {
-          driverNumberToName[driver.number] = driver.name;
+    final driversStandingsPath = year == 2026
+        ? 'data/results/drivers/drivers_standings_2026.json'
+        : 'data/results/drivers/drivers_standings_$year.json';
+    try {
+      final raw = await rootBundle.loadString(driversStandingsPath);
+      final decoded = jsonDecode(raw);
+      if (decoded is Map<String, dynamic>) {
+        final roundsRaw = decoded['rounds'];
+        if (roundsRaw is List) {
+          double pointsReceivedForSession(dynamic sessionData) {
+            if (sessionData is! Map) return 0.0;
+            final received = sessionData['points_received'];
+            if (received is num) return received.toDouble();
+            final start = sessionData['points_start'];
+            final finish = sessionData['points_finish'];
+            if (start is num && finish is num) {
+              return finish.toDouble() - start.toDouble();
+            }
+            return 0.0;
+          }
+          final allDrivers = <String>{};
+          final pointsDeltaByRound = <int, Map<String, double>>{};
+          final labels = <String>[];
+          for (final entry in roundsRaw) {
+            if (entry is! Map) continue;
+            final roundStr = entry['round']?.toString();
+            final round = int.tryParse(roundStr ?? '');
+            if (round == null) continue;
+            final drivers = entry['drivers'];
+            if (drivers is! Map) continue;
+            final raceName = _raceNameForRound(year, round);
+            labels.add(_abbreviateRaceLabel(raceName));
+            final deltas = <String, double>{};
+            for (final driverEntry in drivers.entries) {
+              final driverName = driverEntry.key.toString();
+              final driverData = driverEntry.value;
+              if (driverData is! Map) continue;
+              allDrivers.add(driverName);
+              double roundPoints = 0.0;
+              for (final sessionKey in ['Sprint', 'Race']) {
+                final session = driverData[sessionKey];
+                if (session is Map) {
+                  roundPoints += pointsReceivedForSession(session);
+                }
+              }
+              if (roundPoints != 0.0) deltas[driverName] = roundPoints;
+            }
+            pointsDeltaByRound[round] = deltas;
+          }
+          if (allDrivers.isEmpty || pointsDeltaByRound.isEmpty) {
+            return null;
+          }
+          final standings = decoded['standings'];
+          if (standings is List) {
+            for (final entry in standings) {
+              if (entry is Map && entry['driver'] != null) {
+                allDrivers.add(entry['driver'].toString());
+              }
+            }
+          }
+          final cumulativeByDriver = <String, List<SeasonRacePointsEntry>>{
+            for (final d in allDrivers) d: [],
+          };
+          final totals = <String, double>{for (final d in allDrivers) d: 0.0};
+          final allRounds = pointsDeltaByRound.keys.toList()..sort();
+          final sortedRounds = allRounds.where((round) {
+            final deltas = pointsDeltaByRound[round] ?? const {};
+            return deltas.values.any((v) => v > 0);
+          }).toList();
+          for (final round in sortedRounds) {
+            final deltas = pointsDeltaByRound[round] ?? const {};
+            final raceName = _raceNameForRound(year, round);
+            for (final driver in allDrivers) {
+              totals[driver] = (totals[driver] ?? 0.0) + (deltas[driver] ?? 0.0);
+              cumulativeByDriver[driver]!.add(SeasonRacePointsEntry(
+                round: round,
+                raceName: raceName,
+                points: totals[driver]!,
+              ));
+            }
+          }
+          final sortedDrivers = cumulativeByDriver.keys.toList()
+            ..sort((a, b) {
+              final aLast = cumulativeByDriver[a]!.isNotEmpty
+                  ? cumulativeByDriver[a]!.last.points
+                  : 0.0;
+              final bLast = cumulativeByDriver[b]!.isNotEmpty
+                  ? cumulativeByDriver[b]!.last.points
+                  : 0.0;
+              return bLast.compareTo(aLast);
+            });
+          final series = <DriverStandingsChartSeries>[];
+          double maxPoints = 0.0;
+          for (var i = 0; i < sortedDrivers.length; i++) {
+            final driverName = sortedDrivers[i];
+            final pointsByRace = cumulativeByDriver[driverName]!;
+            if (pointsByRace.isNotEmpty) {
+              maxPoints = math.max(maxPoints, pointsByRace.last.points);
+            }
+            series.add(DriverStandingsChartSeries(
+              driverName: driverName,
+              pointsByRace: pointsByRace,
+              color: _chartColorForDriver(driverName, year, i),
+            ));
+          }
+          if (series.isEmpty) return null;
+          return DriverStandingsChartData(
+            year: year,
+            circuitLabels: labels,
+            series: series,
+            maxPoints: maxPoints <= 0 ? 1 : maxPoints,
+          );
         }
       }
-      // Group by session_key (race)
-      final Map<int, List<Map<String, dynamic>>> bySession = {};
-      for (final entry in data) {
-        final map = entry as Map<String, dynamic>;
-        final sessionKey = map['session_key'] as int?;
-        if (sessionKey != null) {
-          bySession.putIfAbsent(sessionKey, () => []).add(map);
+      if (year == 2026 && decoded is List) {
+        final List<dynamic> data = decoded;
+        final Map<int, String> driverNumberToName = {};
+        if (driversData.containsKey(2026)) {
+          for (final driver in driversData[2026]!) {
+            driverNumberToName[driver.number] = driver.name;
+          }
         }
-      }
-      // Sort sessions by session_key (assume chronological)
-      final sessionKeys = bySession.keys.toList()..sort();
-      // Build driver points progression
-      final Map<String, List<SeasonRacePointsEntry>> driverPointsByRace = {};
-      final Map<String, double> driverTotalPoints = {};
-      int round = 1;
-      for (final sessionKey in sessionKeys) {
-        final raceEntries = bySession[sessionKey]!;
-        for (final entry in raceEntries) {
-          final driverNumber = entry['driver_number'];
-          if (driverNumber == null) continue;
-          final driverName = driverNumberToName[driverNumber] ?? 'Driver $driverNumber';
-          final points = (entry['points_current'] as num?)?.toDouble() ?? 0.0;
-          final raceName = 'Race $round';
-          driverPointsByRace.putIfAbsent(driverName, () => []);
-          driverPointsByRace[driverName]!.add(SeasonRacePointsEntry(
-            round: round,
-            raceName: raceName,
-            points: points,
-          ));
-          driverTotalPoints[driverName] = points;
+        final Map<int, List<Map<String, dynamic>>> bySession = {};
+        for (final entry in data) {
+          final map = entry as Map<String, dynamic>;
+          final sessionKey = map['session_key'] as int? ?? map['meeting_key'] as int?;
+          if (sessionKey != null) {
+            final sessionStandings = map['standings'] as List? ?? [map];
+            for (final s in sessionStandings) {
+              if (s is Map<String, dynamic>) {
+                bySession.putIfAbsent(sessionKey, () => []).add(s);
+              }
+            }
+            if (sessionStandings.isEmpty) {
+              bySession.putIfAbsent(sessionKey, () => []).add(map);
+            }
+          }
         }
-        round++;
-      }
-      // Build chart series
-      final List<DriverStandingsChartSeries> series = [];
+        final sessionKeys = bySession.keys.toList()..sort();
+        final Map<String, List<SeasonRacePointsEntry>> driverPointsByRace = {};
+        final Map<String, double> driverTotalPoints = {};
+        int round = 1;
+        for (final sessionKey in sessionKeys) {
+          final raceEntries = bySession[sessionKey]!;
+          for (final entry in raceEntries) {
+            final driverNumber = entry['driver_number'];
+            if (driverNumber == null) continue;
+            final driverName = driverNumberToName[driverNumber] ?? 'Driver $driverNumber';
+            final points = (entry['points_current'] as num?)?.toDouble() ?? 0.0;
+            final raceName = 'Race $round';
+            driverPointsByRace.putIfAbsent(driverName, () => []);
+            driverPointsByRace[driverName]!.add(SeasonRacePointsEntry(
+              round: round,
+              raceName: raceName,
+              points: points,
+            ));
+            driverTotalPoints[driverName] = points;
+          }
+          round++;
+        }
+        // Build chart series
+        final List<DriverStandingsChartSeries> series = [];
       double maxPoints = 0.0;
       int index = 0;
       for (final entry in driverPointsByRace.entries) {
@@ -4327,33 +4749,30 @@ Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromAsset(
         ));
         index++;
       }
-      if (series.isEmpty) {
-        return null;
+        if (series.isEmpty) {
+          return null;
+        }
+        series.sort((left, right) =>
+          (right.pointsByRace.isEmpty ? 0.0 : right.pointsByRace.last.points)
+              .compareTo(left.pointsByRace.isEmpty ? 0.0 : left.pointsByRace.last.points));
+        final labels = [for (var i = 1; i < round; i++) 'R$i'];
+        return DriverStandingsChartData(
+          year: year,
+          circuitLabels: labels,
+          series: series,
+          maxPoints: maxPoints <= 0 ? 1 : maxPoints,
+        );
       }
-      series.sort((left, right) =>
-        (right.pointsByRace.isEmpty ? 0.0 : right.pointsByRace.last.points)
-          .compareTo(left.pointsByRace.isEmpty ? 0.0 : left.pointsByRace.last.points));
-      final labels = [for (var i = 1; i < round; i++) 'R$i'];
-      return DriverStandingsChartData(
-        year: year,
-        circuitLabels: labels,
-        series: series,
-        maxPoints: maxPoints <= 0 ? 1 : maxPoints,
-      );
-    } else {
+    } catch (_) {
+      // drivers_standings not found or parse failed; for 2017-2025 try driver_comparison
+    }
+    if (year >= 2017 && year <= 2025) {
       final raw = await rootBundle.loadString(
-        'data/results/driver_comparison_stats_2017_2025.json',
+        'data/results/drivers/driver_comparison_stats_$year.json',
       );
       final decoded = jsonDecode(raw) as Map<String, dynamic>;
-      final years =
-          decoded['years'] as Map<String, dynamic>? ?? const <String, dynamic>{};
-      final yearData = years['$year'] as Map<String, dynamic>?;
-      if (yearData == null) {
-        return null;
-      }
-
       final drivers =
-          yearData['drivers'] as Map<String, dynamic>? ??
+          decoded['drivers'] as Map<String, dynamic>? ??
           const <String, dynamic>{};
       final series = <DriverStandingsChartSeries>[];
       var maxPoints = 0.0;
@@ -4399,11 +4818,144 @@ Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromAsset(
         maxPoints: maxPoints <= 0 ? 1 : maxPoints,
       );
     }
+    return null;
   } catch (_) {
     return null;
   }
 }
 
+Future<TeamStandingsChartData?> _fetchTeamStandingsChartData(int year) {
+  return _teamStandingsChartDataCache.putIfAbsent(
+    year,
+    () => _loadTeamStandingsChartDataFromAsset(year),
+  );
+}
+
+Future<TeamStandingsChartData?> _loadTeamStandingsChartDataFromAsset(
+  int year,
+) async {
+  try {
+    final teamsStandingsPath =
+        'data/results/teams/teams_standings_$year.json';
+    final raw = await rootBundle.loadString(teamsStandingsPath);
+    final decoded = jsonDecode(raw);
+    if (decoded is! Map<String, dynamic>) return null;
+    final roundsRaw = decoded['rounds'];
+    if (roundsRaw is! List) return null;
+
+    double pointsReceivedForSession(dynamic sessionData) {
+      if (sessionData is! Map) return 0.0;
+      final received = sessionData['points_received'];
+      if (received is num) return received.toDouble();
+      final start = sessionData['points_start'];
+      final finish = sessionData['points_finish'];
+      if (start is num && finish is num) {
+        return finish.toDouble() - start.toDouble();
+      }
+      return 0.0;
+    }
+
+    final allTeams = <String>{};
+    final pointsDeltaByRound = <int, Map<String, double>>{};
+    final labels = <String>[];
+
+    for (final entry in roundsRaw) {
+      if (entry is! Map) continue;
+      final roundStr = entry['round']?.toString();
+      final round = int.tryParse(roundStr ?? '');
+      if (round == null) continue;
+      final teams = entry['teams'];
+      if (teams is! Map) continue;
+      final raceName = _raceNameForRound(year, round);
+      labels.add(_abbreviateRaceLabel(raceName));
+      final deltas = <String, double>{};
+      for (final teamEntry in teams.entries) {
+        final teamName = teamEntry.key.toString();
+        final teamData = teamEntry.value;
+        if (teamData is! Map) continue;
+        allTeams.add(teamName);
+        double roundPoints = 0.0;
+        for (final sessionKey in ['Sprint', 'Race']) {
+          final session = teamData[sessionKey];
+          if (session is Map) {
+            roundPoints += pointsReceivedForSession(session);
+          }
+        }
+        if (roundPoints != 0.0) deltas[teamName] = roundPoints;
+      }
+      pointsDeltaByRound[round] = deltas;
+    }
+
+    if (allTeams.isEmpty || pointsDeltaByRound.isEmpty) return null;
+
+    final standings = decoded['standings'];
+    if (standings is List) {
+      for (final entry in standings) {
+        if (entry is Map && entry['team'] != null) {
+          allTeams.add(entry['team'].toString());
+        }
+      }
+    }
+
+    final cumulativeByTeam = <String, List<SeasonRacePointsEntry>>{
+      for (final t in allTeams) t: [],
+    };
+    final totals = <String, double>{for (final t in allTeams) t: 0.0};
+    final allRounds = pointsDeltaByRound.keys.toList()..sort();
+    final sortedRounds = allRounds.where((round) {
+      final deltas = pointsDeltaByRound[round] ?? const {};
+      return deltas.values.any((v) => v > 0);
+    }).toList();
+
+    for (final round in sortedRounds) {
+      final deltas = pointsDeltaByRound[round] ?? const {};
+      final raceName = _raceNameForRound(year, round);
+      for (final team in allTeams) {
+        totals[team] = (totals[team] ?? 0.0) + (deltas[team] ?? 0.0);
+        cumulativeByTeam[team]!.add(SeasonRacePointsEntry(
+          round: round,
+          raceName: raceName,
+          points: totals[team]!,
+        ));
+      }
+    }
+
+    final sortedTeams = cumulativeByTeam.keys.toList()
+      ..sort((a, b) {
+        final aLast = cumulativeByTeam[a]!.isNotEmpty
+            ? cumulativeByTeam[a]!.last.points
+            : 0.0;
+        final bLast = cumulativeByTeam[b]!.isNotEmpty
+            ? cumulativeByTeam[b]!.last.points
+            : 0.0;
+        return bLast.compareTo(aLast);
+      });
+
+    final series = <TeamStandingsChartSeries>[];
+    double maxPoints = 0.0;
+    for (var i = 0; i < sortedTeams.length; i++) {
+      final teamName = sortedTeams[i];
+      final pointsByRace = cumulativeByTeam[teamName]!;
+      if (pointsByRace.isNotEmpty) {
+        maxPoints = math.max(maxPoints, pointsByRace.last.points);
+      }
+      series.add(TeamStandingsChartSeries(
+        teamName: teamName,
+        pointsByRace: pointsByRace,
+        color: F1TeamSchemes.getTeamColor(teamName),
+      ));
+    }
+    if (series.isEmpty) return null;
+    return TeamStandingsChartData(
+      year: year,
+      circuitLabels: labels,
+      series: series,
+      maxPoints: maxPoints <= 0 ? 1 : maxPoints,
+    );
+  } catch (_) {
+    return null;
+  }
+}
 
 // All API calls removed. Only local data is used.
 
@@ -4422,6 +4974,13 @@ List<String> _buildCircuitLabels(List<DriverStandingsChartSeries> series) {
   return rounds
       .map((round) => labelsByRound[round] ?? round.toString())
       .toList();
+}
+
+String _raceNameForRound(int year, int round) {
+  if (year == 2026 && round >= 1 && round <= races.length) {
+    return races[round - 1].name;
+  }
+  return 'Round $round';
 }
 
 String _abbreviateRaceLabel(String raceName) {
@@ -4446,30 +5005,21 @@ Color _chartColorForDriver(String driverName, int year, int index) {
   if (driver == null) {
     return fallback;
   }
-  final teamColor = _getTeamColor(driver.team);
+  final teamColor = F1TeamSchemes.getTeamColor(driver.team);
   return Color.lerp(teamColor, fallback, 0.35) ?? teamColor;
 }
 
 Future<Map<int, Map<String, SeasonalDriverComparisonStats>>>
 _readSeasonalDriverComparisonAssetCache() async {
-  try {
-    final raw = await rootBundle.loadString(
-      'data/results/driver_comparison_stats_2017_2025.json',
-    );
-    final decoded = jsonDecode(raw) as Map<String, dynamic>;
-    final years =
-        decoded['years'] as Map<String, dynamic>? ?? const <String, dynamic>{};
-    final resolved = <int, Map<String, SeasonalDriverComparisonStats>>{};
-
-    for (final yearEntry in years.entries) {
-      final year = int.tryParse(yearEntry.key);
-      if (year == null || yearEntry.value is! Map<String, dynamic>) {
-        continue;
-      }
-
-      final yearData = yearEntry.value as Map<String, dynamic>;
+  final resolved = <int, Map<String, SeasonalDriverComparisonStats>>{};
+  for (var year = 2017; year <= 2025; year++) {
+    try {
+      final raw = await rootBundle.loadString(
+        'data/results/drivers/driver_comparison_stats_$year.json',
+      );
+      final decoded = jsonDecode(raw) as Map<String, dynamic>;
       final drivers =
-          yearData['drivers'] as Map<String, dynamic>? ??
+          decoded['drivers'] as Map<String, dynamic>? ??
           const <String, dynamic>{};
       final driverStats = <String, SeasonalDriverComparisonStats>{};
       for (final entry in drivers.entries) {
@@ -4480,11 +5030,11 @@ _readSeasonalDriverComparisonAssetCache() async {
         );
       }
       resolved[year] = driverStats;
+    } catch (_) {
+      // Skip year if file missing or invalid
     }
-    return resolved;
-  } catch (_) {
-    return {};
   }
+  return resolved;
 }
 
 bool _apiDriverEntryMatches(dynamic driverData, String driverName) {
@@ -5458,6 +6008,7 @@ class SessionDataManager extends ChangeNotifier {
       fileName,
       'data/$fileName',
       'data/results/$fileName',
+      'assets/data/results/$fileName',
     ];
 
     for (final candidatePath in candidatePaths) {
@@ -5838,6 +6389,7 @@ class SessionDataManager extends ChangeNotifier {
       fileName,
       'data/$fileName',
       'data/results/$fileName',
+      'assets/data/results/$fileName',
     ];
 
     for (final candidatePath in candidatePaths) {
@@ -5881,6 +6433,7 @@ class SessionDataManager extends ChangeNotifier {
       fileName,
       'data/$fileName',
       'data/results/$fileName',
+      'assets/data/results/$fileName',
     ];
 
     for (final candidatePath in candidatePaths) {
@@ -5937,6 +6490,7 @@ class SessionDataManager extends ChangeNotifier {
       fileName,
       'data/$fileName',
       'data/results/$fileName',
+      'assets/data/results/$fileName',
     ];
 
     for (final candidatePath in candidatePaths) {
@@ -6785,79 +7339,17 @@ class SessionDataManager extends ChangeNotifier {
 }
 
 class AppSettingsMenuButton extends StatelessWidget {
-  final ValueChanged<Locale> onSetLocale;
   final VoidCallback onToggleTheme;
+  final Widget? icon;
 
   const AppSettingsMenuButton({
-    required this.onSetLocale,
     required this.onToggleTheme,
+    this.icon,
     super.key,
   });
 
-  Future<void> _clearCache(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    final languageCode = prefs.getString('language_code');
-    final isDark = prefs.getBool('is_dark');
-
-    await prefs.clear();
-    if (languageCode != null) {
-      await prefs.setString('language_code', languageCode);
-    }
-    if (isDark != null) {
-      await prefs.setBool('is_dark', isDark);
-    }
-
-    await SessionDataManager().clearStoredSessionCache();
-    await Hive.box(HiveBoxes.raceResults).clear();
-    SessionDataManager().isInitialized = false;
-    await SessionDataManager().init(races);
-
-    if (!context.mounted) {
-      return;
-    }
-
-    final loc = AppLocalizations.of(context);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(loc.translate('cache_cleared'))));
-  }
-
-  Future<void> _showLanguageDialog(BuildContext context) async {
-    final Locale? selectedLocale = await showDialog<Locale>(
-      context: context,
-      builder: (dialogContext) {
-        return SimpleDialog(
-          title: const Text('Language'),
-          children: [
-            SimpleDialogOption(
-              onPressed: () => Navigator.pop(dialogContext, const Locale('en')),
-              child: const Text('English'),
-            ),
-            SimpleDialogOption(
-              onPressed: () => Navigator.pop(dialogContext, const Locale('nl')),
-              child: const Text('Nederlands'),
-            ),
-            SimpleDialogOption(
-              onPressed: () => Navigator.pop(dialogContext, const Locale('fr')),
-              child: const Text('Français'),
-            ),
-            SimpleDialogOption(
-              onPressed: () => Navigator.pop(dialogContext, const Locale('es')),
-              child: const Text('Español'),
-            ),
-            SimpleDialogOption(
-              onPressed: () => Navigator.pop(dialogContext, const Locale('de')),
-              child: const Text('Deutsch'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (selectedLocale != null) {
-      onSetLocale(selectedLocale);
-    }
-  }
+  static Stream<AuthState> get _authStateStream =>
+      Supabase.instance.client.auth.onAuthStateChange;
 
   Future<void> _handleSettingsSelection(
     BuildContext context,
@@ -6865,7 +7357,7 @@ class AppSettingsMenuButton extends StatelessWidget {
   ) async {
     switch (value) {
       case 'theme':
-        onToggleTheme();
+        await _showThemeBottomSheet(context);
         break;
       case 'language':
         await _showLanguageDialog(context);
@@ -6879,35 +7371,305 @@ class AppSettingsMenuButton extends StatelessWidget {
       case 'clear_cache':
         await _clearCache(context);
         break;
+      case 'login':
+        context.push(_loginPath());
+        break;
+      case 'profile':
+        context.go(_profilePath());
+        break;
+      case 'logout':
+        await Supabase.instance.client.auth.signOut();
+        if (context.mounted) {
+          context.go(_circuitsPath());
+        }
+        break;
     }
+  }
+
+  Future<void> _clearCache(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final languageCode = prefs.getString('language_code');
+    final themeSchemeIndex = prefs.getInt('theme_scheme_index');
+    final themeIsDark = prefs.getBool('theme_is_dark');
+
+    await prefs.clear();
+    if (languageCode != null) {
+      await prefs.setString('language_code', languageCode);
+    }
+    if (themeSchemeIndex != null) {
+      await prefs.setInt('theme_scheme_index', themeSchemeIndex);
+    }
+    if (themeIsDark != null) {
+      await prefs.setBool('theme_is_dark', themeIsDark);
+    }
+
+    await SessionDataManager().clearStoredSessionCache();
+    await Hive.box(HiveBoxes.raceResults).clear();
+    SessionDataManager().isInitialized = false;
+    await SessionDataManager().init(races);
+
+    if (!context.mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('t.cache_cleared'.tr())));
+  }
+
+  Future<void> _showLanguageDialog(BuildContext context) async {
+    final supportedLocales = context.supportedLocales;
+    final entries = <Locale, String>{};
+    for (final locale in supportedLocales) {
+      try {
+        final json = await rootBundle.loadString(
+          'assets/translations/${locale.languageCode}.json',
+        );
+        final map = jsonDecode(json) as Map<String, dynamic>;
+        entries[locale] =
+            map['language_selector'] as String? ?? locale.languageCode;
+      } catch (_) {
+        entries[locale] = locale.languageCode;
+      }
+    }
+    if (!context.mounted) return;
+    final Locale? selectedLocale = await showDialog<Locale>(
+      context: context,
+      builder: (dialogContext) {
+        return SimpleDialog(
+          title: Text('t.language'.tr()),
+          children: entries.entries
+              .map(
+                (e) => SimpleDialogOption(
+                  onPressed: () => Navigator.pop(dialogContext, e.key),
+                  child: Text(e.value),
+                ),
+              )
+              .toList(),
+        );
+      },
+    );
+    if (selectedLocale != null && context.mounted) {
+      context.setLocale(selectedLocale);
+    }
+  }
+
+  Widget _buildThemeCard(
+    BuildContext context, {
+    required ColorScheme scheme,
+    required FlexSchemeData teamScheme,
+    required int index,
+    required bool isSelected,
+    required Future<void> Function() onTap,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final heroStart =
+        isDark ? teamScheme.dark.primary : teamScheme.light.primary;
+    final heroEnd = isDark
+        ? teamScheme.dark.primaryContainer
+        : teamScheme.light.primaryContainer;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () async => onTap(),
+        borderRadius: BorderRadius.circular(6),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [heroStart, heroEnd],
+            ),
+            border: isSelected
+                ? Border.all(color: scheme.primary, width: 3)
+                : null,
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: scheme.primary.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    )
+                  ]
+                : null,
+          ),
+          padding: const EdgeInsets.all(6),
+          child: Center(
+            child: Text(
+              teamScheme.name,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).colorScheme.surface,
+                shadows: const [
+                  Shadow(
+                    color: Colors.black45,
+                    blurRadius: 2,
+                    offset: Offset(0, 1),
+                  ),
+                  Shadow(
+                    color: Colors.black38,
+                    blurRadius: 6,
+                    offset: Offset(0, 1),
+                  ),
+                ],
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showThemeBottomSheet(BuildContext context) async {
+    final controller = context.read<ThemeController>();
+    if (!context.mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: false,
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  't.toggleTheme'.tr(),
+                  style: Theme.of(ctx).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SegmentedButton<ThemeMode>(
+                        segments: [
+                          ButtonSegment(value: ThemeMode.light, label: Text('Light')),
+                          ButtonSegment(value: ThemeMode.dark, label: Text('Dark')),
+                          ButtonSegment(value: ThemeMode.system, label: Text('System')),
+                        ],
+                        selected: {controller.themeMode},
+                        onSelectionChanged: (modes) {
+                          controller.setThemeMode(modes.first);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Team theme',
+                  style: Theme.of(ctx).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                LayoutBuilder(
+                  builder: (ctx, constraints) {
+                    const crossAxisCount = 4;
+                    const spacing = 6.0;
+                    final itemWidth =
+                        (constraints.maxWidth - (crossAxisCount - 1) * spacing) /
+                            crossAxisCount;
+                    final scheme = Theme.of(ctx).colorScheme;
+                    return Wrap(
+                      spacing: spacing,
+                      runSpacing: spacing,
+                      children: [
+                        for (var i = 0; i < F1TeamSchemes.count; i++) ...[
+                          SizedBox(
+                            width: itemWidth,
+                            height: itemWidth / 2.2,
+                            child: _buildThemeCard(
+                              ctx,
+                              scheme: scheme,
+                              teamScheme: F1TeamSchemes.schemes[i],
+                              index: i,
+                              isSelected: controller.schemeIndex == i,
+                              onTap: () async {
+                                controller.setBrandTheme(F1TeamSchemes.brandFromIndex(i));
+                                if (ctx.mounted) Navigator.pop(ctx);
+                              },
+                            ),
+                          ),
+                        ],
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
+    return StreamBuilder<AuthState>(
+      stream: _authStateStream,
+      builder: (context, snapshot) {
+        final session = snapshot.hasData
+            ? snapshot.data!.session
+            : Supabase.instance.client.auth.currentSession;
+        final isLoggedIn = session != null;
 
-    return PopupMenuButton<String>(
-      icon: _buildGlyphIcon('⚙', size: 20),
-      tooltip: loc.translate('settings'),
-      onSelected: (value) => _handleSettingsSelection(context, value),
-      itemBuilder: (context) => [
-        PopupMenuItem<String>(
-          value: 'theme',
-          child: Row(
-            children: [
-              _buildGlyphIcon('◐', size: 18),
-              const SizedBox(width: 12),
-              Text(loc.translate('toggleTheme')),
-            ],
+        final items = <PopupMenuItem<String>>[
+          if (!isLoggedIn)
+            PopupMenuItem<String>(
+              value: 'login',
+              child: Row(
+                children: [
+                  _buildGlyphIcon('🔐', size: 18),
+                  const SizedBox(width: 12),
+                  Text('t.login'.tr()),
+                ],
+              ),
+            ),
+          if (isLoggedIn) ...[
+            PopupMenuItem<String>(
+              value: 'profile',
+              child: Row(
+                children: [
+                  _buildGlyphIcon('👤', size: 18),
+                  const SizedBox(width: 12),
+                  Text('t.profile'.tr()),
+                ],
+              ),
+            ),
+            PopupMenuItem<String>(
+              value: 'logout',
+              child: Row(
+                children: [
+                  _buildGlyphIcon('🚪', size: 18),
+                  const SizedBox(width: 12),
+                  Text('t.logout'.tr()),
+                ],
+              ),
+            ),
+          ],
+          PopupMenuItem<String>(
+            value: 'theme',
+            child: Row(
+              children: [
+                _buildGlyphIcon('◐', size: 18),
+                const SizedBox(width: 12),
+                Text('t.toggleTheme'.tr()),
+              ],
+            ),
           ),
-        ),
         PopupMenuItem<String>(
           value: 'language',
           child: Row(
             children: [
               _buildGlyphIcon('🌐', size: 18),
               const SizedBox(width: 12),
-              const Text('Language'),
+              Text('t.language'.tr()),
             ],
           ),
         ),
@@ -6917,7 +7679,7 @@ class AppSettingsMenuButton extends StatelessWidget {
             children: [
               _buildGlyphIcon('▣', size: 18),
               const SizedBox(width: 12),
-              Text(loc.translate('placeholder_page')),
+              Text('t.placeholder_page'.tr()),
             ],
           ),
         ),
@@ -6927,7 +7689,7 @@ class AppSettingsMenuButton extends StatelessWidget {
             children: [
               _buildGlyphIcon('↻', size: 18),
               const SizedBox(width: 12),
-              Text(loc.translate('changelog')),
+              Text('t.changelog'.tr()),
             ],
           ),
         ),
@@ -6938,20 +7700,247 @@ class AppSettingsMenuButton extends StatelessWidget {
               _buildGlyphIcon('🗑', size: 18),
               const SizedBox(width: 12),
               Text(
-                loc.translate('clear_cache'),
-                style: const TextStyle(color: Colors.redAccent),
+                't.clear_cache'.tr(),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             ],
           ),
         ),
+        ];
+        return PopupMenuButton<String>(
+          icon: icon ?? _buildGlyphIcon('⚙', size: 20),
+          tooltip: 't.settings'.tr(),
+          onSelected: (value) => _handleSettingsSelection(context, value),
+          itemBuilder: (context) => items,
+        );
+      },
+    );
+  }
+}
+
+/// Shows "Je bent ingelogd" SnackBar (3 sec) when returning from login.
+class _LoggedInSnackBarTrigger extends StatefulWidget {
+  final Widget child;
+
+  const _LoggedInSnackBarTrigger({required this.child});
+
+  @override
+  State<_LoggedInSnackBarTrigger> createState() => _LoggedInSnackBarTriggerState();
+}
+
+class _LoggedInSnackBarTriggerState extends State<_LoggedInSnackBarTrigger> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (LoggedInNotifier.shouldShowAndClear()) {
+        final controller = ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('t.logged_in'.tr()),
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted) controller.close();
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+/// Custom nav rail: neutral inactive icons, primary + 3px stripe for active,
+/// hover tint from F1ThemeTokens.hoverHighlight. No bright bubble.
+class _F1NavRail extends StatefulWidget {
+  final int selectedIndex;
+  final bool extended;
+  final ValueChanged<int> onDestinationSelected;
+  final List<NavigationRailDestination> destinations;
+
+  const _F1NavRail({
+    required this.selectedIndex,
+    required this.extended,
+    required this.onDestinationSelected,
+    required this.destinations,
+  });
+
+  @override
+  State<_F1NavRail> createState() => _F1NavRailState();
+}
+
+class _F1NavRailState extends State<_F1NavRail> {
+  int? _hoveredIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).extension<F1ThemeTokens>();
+    final primary = scheme.primary;
+    final inactiveColor = scheme.onSurfaceVariant;
+    final hoverBg = tokens?.hoverHighlight ?? primary.withValues(alpha: 0.10);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.speed_rounded, size: 20, color: inactiveColor),
+              if (widget.extended) ...[
+                const SizedBox(width: 10),
+                Text(
+                  't.appTitle'.tr().toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1,
+                    color: inactiveColor,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        for (int i = 0; i < widget.destinations.length; i++)
+          _F1NavTile(
+            destination: widget.destinations[i],
+            isSelected: widget.selectedIndex == i,
+            isHovered: _hoveredIndex == i,
+            inactiveColor: inactiveColor,
+            primaryColor: primary,
+            hoverBackground: hoverBg,
+            extended: widget.extended,
+            onTap: () => widget.onDestinationSelected(i),
+            onHover: (hover) => setState(() => _hoveredIndex = hover ? i : null),
+          ),
       ],
+    );
+  }
+}
+
+class _F1NavTile extends StatelessWidget {
+  final NavigationRailDestination destination;
+  final bool isSelected;
+  final bool isHovered;
+  final Color inactiveColor;
+  final Color primaryColor;
+  final Color hoverBackground;
+  final bool extended;
+  final VoidCallback onTap;
+  final ValueChanged<bool> onHover;
+
+  const _F1NavTile({
+    required this.destination,
+    required this.isSelected,
+    required this.isHovered,
+    required this.inactiveColor,
+    required this.primaryColor,
+    required this.hoverBackground,
+    required this.extended,
+    required this.onTap,
+    required this.onHover,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final iconColor = isSelected ? primaryColor : inactiveColor;
+    final showFadingBorder = isSelected;
+
+    return MouseRegion(
+      onEnter: (_) => onHover(true),
+      onExit: (_) => onHover(false),
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: showFadingBorder
+            ? Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: F1Module(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  backgroundColor: isHovered ? hoverBackground : Colors.transparent,
+                  borderRadius: 12,
+                  child: Row(
+                    mainAxisSize: extended ? MainAxisSize.max : MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: Center(
+                          child: DefaultTextStyle(
+                            style: TextStyle(color: iconColor, fontSize: 18),
+                            child: isSelected ? destination.selectedIcon : destination.icon,
+                          ),
+                        ),
+                      ),
+                      if (extended)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 12),
+                          child: DefaultTextStyle(
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.8,
+                              color: iconColor,
+                            ),
+                            child: destination.label,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              )
+            : Container(
+                height: 48,
+                margin: const EdgeInsets.symmetric(vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isHovered ? hoverBackground : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: extended ? MainAxisSize.max : MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: Center(
+                        child: DefaultTextStyle(
+                          style: TextStyle(color: iconColor, fontSize: 18),
+                          child: isSelected ? destination.selectedIcon : destination.icon,
+                        ),
+                      ),
+                    ),
+                    if (extended)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 12),
+                        child: DefaultTextStyle(
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.8,
+                            color: iconColor,
+                          ),
+                          child: destination.label,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+      ),
     );
   }
 }
 
 class MainNavigation extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
-  static const double _desktopShellBreakpoint = 1100;
+  /// Width >= 600: sidebar (rail). Width < 600: bottom bar.
+  static const double _desktopShellBreakpoint = 600;
   static const double _desktopContentMaxWidth = 1400;
 
   const MainNavigation({required this.navigationShell, super.key});
@@ -6967,158 +7956,205 @@ class MainNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
+
     final destinations = <NavigationRailDestination>[
       NavigationRailDestination(
         icon: _buildGlyphIcon('🏁', size: 20),
         selectedIcon: _buildGlyphIcon('🏁', size: 20),
-        label: Text(loc.translate('circuits').toUpperCase()),
+        label: Text('t.circuits'.tr().toUpperCase()),
       ),
       NavigationRailDestination(
         icon: _buildGlyphIcon('👤', size: 20),
         selectedIcon: _buildGlyphIcon('👤', size: 20),
-        label: Text(loc.translate('drivers').toUpperCase()),
+        label: Text('t.drivers'.tr().toUpperCase()),
       ),
       NavigationRailDestination(
         icon: _buildGlyphIcon('👥', size: 20),
         selectedIcon: _buildGlyphIcon('👥', size: 20),
-        label: Text(loc.translate('teams').toUpperCase()),
+        label: Text('t.teams'.tr().toUpperCase()),
+      ),
+      NavigationRailDestination(
+        icon: _buildGlyphIcon('⚙', size: 20),
+        selectedIcon: _buildGlyphIcon('⚙', size: 20),
+        label: Text('t.profile'.tr().toUpperCase()),
       ),
     ];
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final isDesktop = constraints.maxWidth >= _desktopShellBreakpoint;
+        final scheme = Theme.of(context).colorScheme;
+        final ambientGlow = scheme.primary.withValues(alpha: 0.06);
 
         return Scaffold(
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => _openAiAssistant(context),
-            icon: _buildGlyphIcon('🤖', size: 18),
-            label: const Text('AI'),
-          ),
-          bottomNavigationBar: isDesktop
-              ? null
-              : BottomNavigationBar(
-                  currentIndex: navigationShell.currentIndex,
-                  type: BottomNavigationBarType.fixed,
-                  onTap: (i) {
-                    navigationShell.goBranch(i, initialLocation: true);
-                  },
-                  items: <BottomNavigationBarItem>[
-                    BottomNavigationBarItem(
-                      icon: _buildGlyphIcon('🏁', size: 20),
-                      label: loc.translate('circuits').toUpperCase(),
-                    ),
-                    BottomNavigationBarItem(
-                      icon: _buildGlyphIcon('👤', size: 20),
-                      label: loc.translate('drivers').toUpperCase(),
-                    ),
-                    BottomNavigationBarItem(
-                      icon: _buildGlyphIcon('👥', size: 20),
-                      label: loc.translate('teams').toUpperCase(),
-                    ),
-                  ],
+          body: Stack(
+            fit: StackFit.expand,
+            children: [
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: scheme.surfaceContainerLow,
                 ),
-          body: isDesktop
-              ? SafeArea(
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 0, 16),
-                        child: Container(
-                          margin: const EdgeInsets.fromLTRB(4, 16, 0, 16),
-                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).extension<F1ThemeTokens>()?.panelStrong,
-                            borderRadius: BorderRadius.circular(22),
-                            border: Border.all(
-                            color: Theme.of(context).extension<F1ThemeTokens>()?.outline.withValues(alpha: 0.7) ?? Colors.grey.withValues(alpha: 0.7),
-                              width: 1.2,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                              color: Colors.black.withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.18 : 0.08),
-                                blurRadius: 12,
-                                offset: const Offset(0, 2),
+                child: CustomPaint(
+                  painter: _AmbientGlowPainter(
+                    topLeftGlow: ambientGlow,
+                    bottomRightGlow: ambientGlow,
+                  ),
+                ),
+              ),
+              isDesktop
+                  ? SafeArea(
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 16, 0, 16),
+                            child: Container(
+                              margin: const EdgeInsets.fromLTRB(4, 16, 0, 16),
+                              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).extension<F1ThemeTokens>()?.panelStrong,
+                                borderRadius: BorderRadius.circular(22),
+                                border: Border.all(
+                                color: Theme.of(context).extension<F1ThemeTokens>()?.outline.withValues(alpha: 0.7) ?? Colors.grey.withValues(alpha: 0.7),
+                                  width: 1.2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                  color: Colors.black.withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.18 : 0.08),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Expanded(
-                                child: NavigationRail(
-                                  backgroundColor: Colors.transparent,
-                                  extended: constraints.maxWidth >= 1320,
-                                  minExtendedWidth: 188,
-                                  selectedIndex: navigationShell.currentIndex,
-                                  groupAlignment: -0.8,
-                                  labelType: NavigationRailLabelType.none,
-                                  leading: Padding(
-                                    padding: const EdgeInsets.only(bottom: 12),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                          width: 44,
-                                          height: 44,
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary
-                                            .withValues(alpha: 0.12),
-                                            borderRadius: BorderRadius.circular(14),
-                                          ),
-                                          child: Icon(
-                                            Icons.speed_rounded,
-                                            color: Theme.of(context).colorScheme.primary,
-                                          ),
-                                        ),
-                                        if (constraints.maxWidth >= 1320) ...[
-                                          const SizedBox(height: 10),
-                                          Text(
-                                            loc.translate('appTitle').toUpperCase(),
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w800,
-                                              letterSpacing: 1.2,
-                                              color: Theme.of(context).colorScheme.onSurface,
-                                            ),
-                                          ),
-                                        ],
-                                      ],
+                              child: Column(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Expanded(
+                                    child: _F1NavRail(
+                                      selectedIndex: navigationShell.currentIndex,
+                                      extended: constraints.maxWidth >= 1320,
+                                      onDestinationSelected: (i) =>
+                                          navigationShell.goBranch(i, initialLocation: true),
+                                      destinations: destinations,
                                     ),
                                   ),
-                                  onDestinationSelected: (index) {
-                                    navigationShell.goBranch(index, initialLocation: true);
-                                  },
-                                  destinations: destinations,
+                                  const SizedBox(height: 12),
+                                  AppSettingsMenuButton(
+                                    onToggleTheme: () => context.read<ThemeController>().toggleBrightness(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 32),
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                bottomLeft: Radius.circular(20),
+                              ),
+                              child: Center(
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: _desktopContentMaxWidth,
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 20),
+                                    child: navigationShell,
+                                  ),
                                 ),
                               ),
-                              const SizedBox(height: 12),
-                              AppSettingsMenuButton(
-                                onSetLocale: F1HubApp.of(context)._setLocale,
-                                onToggleTheme: F1HubApp.of(context)._toggleTheme,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      // Removed VerticalDivider to eliminate the line right from the menu
-                      Expanded(
-                        child: Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(
-                              maxWidth: _desktopContentMaxWidth,
                             ),
-                            child: navigationShell,
                           ),
-                        ),
+                        ],
+                      ),
+                    )
+                  : navigationShell,
+            ],
+          ),
+          floatingActionButton: navigationShell.currentIndex == 0
+              ? null
+              : FloatingActionButton.extended(
+                  onPressed: () => _openAiAssistant(context),
+                  icon: _buildGlyphIcon('🤖', size: 18),
+                  label: const Text('AI'),
+                ),
+          bottomNavigationBar: isDesktop
+              ? null
+              : Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 8,
+                        offset: const Offset(0, -2),
                       ),
                     ],
                   ),
-                )
-              : navigationShell,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          height: 3,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: [
+                                Theme.of(context).colorScheme.primary,
+                                Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Theme(
+                          data: Theme.of(context).copyWith(
+                            bottomNavigationBarTheme: BottomNavigationBarThemeData(
+                              backgroundColor: Theme.of(context).colorScheme.surface,
+                              selectedItemColor: Theme.of(context).colorScheme.primary,
+                              unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          child: BottomNavigationBar(
+                            currentIndex: navigationShell.currentIndex,
+                            type: BottomNavigationBarType.fixed,
+                            elevation: 0,
+                            onTap: (i) {
+                              navigationShell.goBranch(i, initialLocation: true);
+                            },
+                            items: <BottomNavigationBarItem>[
+                              BottomNavigationBarItem(
+                                icon: _buildGlyphIcon('🏁', size: 20),
+                                label: 't.circuits'.tr().toUpperCase(),
+                              ),
+                              BottomNavigationBarItem(
+                                icon: _buildGlyphIcon('👤', size: 20),
+                                label: 't.drivers'.tr().toUpperCase(),
+                              ),
+                              BottomNavigationBarItem(
+                                icon: _buildGlyphIcon('👥', size: 20),
+                                label: 't.teams'.tr().toUpperCase(),
+                              ),
+                              BottomNavigationBarItem(
+                                icon: _buildGlyphIcon('⚙', size: 20),
+                                label: 't.profile'.tr().toUpperCase(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
         );
       },
     );
@@ -7146,7 +8182,7 @@ class CircuitsView extends StatefulWidget {
 }
 
 class _CircuitsViewState extends State<CircuitsView> {
-    bool _hasResultsForRace(Race race) {
+  bool _hasResultsForRace(Race race) {
       final cacheKey = SessionDataManager().raceResultsKeyFor(race);
       final cachedResults = SessionDataManager().raceResultsCache[cacheKey];
       return cachedResults != null && cachedResults.isNotEmpty;
@@ -7255,13 +8291,27 @@ class _CircuitsViewState extends State<CircuitsView> {
 
   Future<void> _fetchLiveWeather() async {
     try {
-      await Future.delayed(const Duration(milliseconds: 700));
-      // API call removed. Use local data or set default values.
-      setState(() {
-        liveTemp = '-';
-        liveRain = 0;
-      });
-    } catch (_) {}
+      final race = _nextRace();
+      final w = await fetchWeatherForRace(race.lat, race.lon);
+      if (mounted && w != null) {
+        setState(() {
+          liveTemp = w.temperature.round().toString();
+          liveRain = w.precipitationProbability;
+        });
+      } else if (mounted) {
+        setState(() {
+          liveTemp = '-';
+          liveRain = 0;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          liveTemp = '-';
+          liveRain = 0;
+        });
+      }
+    }
   }
 
   Future<void> _refreshCircuits() async {
@@ -7285,27 +8335,27 @@ class _CircuitsViewState extends State<CircuitsView> {
   }
 
   String _timeUntil(DateTime date, BuildContext context) {
-    final loc = AppLocalizations.of(context);
+
     final diff = date.difference(DateTime.now());
     if (diff.isNegative) return '';
     if (diff.inDays >= 7) {
       final weeks = (diff.inDays / 7).floor();
       final remainingDays = diff.inDays % 7;
       String w =
-          '$weeks ${weeks == 1 ? loc.translate('week') : loc.translate('weeks')}';
+          '$weeks ${weeks == 1 ? 't.week'.tr() : 't.weeks'.tr()}';
       if (remainingDays > 0) {
         w +=
-            ', $remainingDays ${remainingDays == 1 ? loc.translate('day') : loc.translate('days')}';
+            ', $remainingDays ${remainingDays == 1 ? 't.day'.tr() : 't.days'.tr()}';
       }
       return w;
     } else if (diff.inDays >= 1) {
       final days = diff.inDays;
       final hours = diff.inHours % 24;
-      return '$days ${days == 1 ? loc.translate('day') : loc.translate('days')}${hours > 0 ? ', $hours ${loc.translate('hours')}' : ''}';
+      return '$days ${days == 1 ? 't.day'.tr() : 't.days'.tr()}${hours > 0 ? ', $hours ${'t.hours'.tr()}' : ''}';
     } else if (diff.inHours >= 1) {
-      return '${diff.inHours} ${loc.translate('hours')}, ${diff.inMinutes % 60} ${loc.translate('minutes')}';
+      return '${diff.inHours} ${'t.hours'.tr()}, ${diff.inMinutes % 60} ${'t.minutes'.tr()}';
     } else {
-      return '${diff.inMinutes} ${loc.translate('minutes')}';
+      return '${diff.inMinutes} ${'t.minutes'.tr()}';
     }
   }
 
@@ -7352,35 +8402,54 @@ class _CircuitsViewState extends State<CircuitsView> {
     if (race.previousWinners.isEmpty) {
       return const <String>[];
     }
-    return race.previousWinners.take(count).toList(growable: false);
+    return race.previousWinners.take(count).map((s) {
+      final match = RegExp(r'^\d{4}:\s*').firstMatch(s);
+      return match != null ? s.substring(match.end).trim() : s;
+    }).toList(growable: false);
   }
 
   Widget _buildPreviousWinnersBlock(
     BuildContext context,
     Race race, {
     bool compact = false,
+    String? favoriteDriver,
+    bool onLightBackground = false,
   }) {
     final theme = Theme.of(context);
-    final loc = AppLocalizations.of(context);
+    final labelColor = onLightBackground ? Colors.white70 : theme.colorScheme.onSurfaceVariant;
+    final textColor = onLightBackground ? Colors.white : theme.colorScheme.onSurface;
+    final accentColor = onLightBackground ? Colors.white : theme.colorScheme.secondary;
+
     final winners = _recentPreviousWinners(race, count: compact ? 2 : 3);
     if (winners.isEmpty) {
       return const SizedBox.shrink();
     }
 
     final lastWinner = winners.first;
+    bool isFavoriteWinner(String name) =>
+        favoriteDriver != null &&
+        favoriteDriver.isNotEmpty &&
+        normalizeForComparison(name) == normalizeForComparison(favoriteDriver);
+
+    TextStyle winnerTextStyle(String winner, {bool compactStyle = false}) {
+      final isFavorite = isFavoriteWinner(winner);
+      return TextStyle(
+        fontSize: compactStyle ? 12 : 11,
+        fontWeight: isFavorite ? FontWeight.bold : (compactStyle ? FontWeight.w700 : FontWeight.w600),
+        color: isFavorite ? accentColor : textColor,
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          compact
-              ? loc.translate('last_winner')
-              : loc.translate('previous_winners'),
+          compact ? 't.last_winner'.tr() : 't.previous_winners'.tr(),
           style: TextStyle(
             fontSize: 10,
             letterSpacing: 1.1,
             fontWeight: FontWeight.w800,
-            color: theme.colorScheme.onSurfaceVariant,
+            color: labelColor,
           ),
         ),
         const SizedBox(height: 8),
@@ -7389,11 +8458,7 @@ class _CircuitsViewState extends State<CircuitsView> {
             lastWinner,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: theme.colorScheme.onSurface,
-            ),
+            style: winnerTextStyle(lastWinner, compactStyle: true),
           )
         else
           Wrap(
@@ -7407,21 +8472,19 @@ class _CircuitsViewState extends State<CircuitsView> {
                       vertical: 7,
                     ),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                      color: onLightBackground
+                          ? Colors.white.withValues(alpha: 0.2)
+                          : theme.colorScheme.primary.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
-                        color: theme.colorScheme.primary.withValues(
-                          alpha: 0.14,
-                        ),
+                        color: onLightBackground
+                            ? Colors.white.withValues(alpha: 0.4)
+                            : theme.colorScheme.primary.withValues(alpha: 0.14),
                       ),
                     ),
                     child: Text(
                       winner,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onSurface,
-                      ),
+                      style: winnerTextStyle(winner),
                     ),
                   ),
                 )
@@ -7442,27 +8505,78 @@ class _CircuitsViewState extends State<CircuitsView> {
     return entries;
   }
 
+  /// Index of the separator between Hungary card and Summer Break card.
+  int get _summerBreakSeparatorIndex {
+    final hungaryIndex = races.indexWhere(
+      (r) => r.name == 'Hungarian Grand Prix',
+    );
+    return hungaryIndex;
+  }
+
+  /// Builds the separator between calendar entry[index] and entry[index+1].
+  /// Returns SizedBox(height: 16) normally; SizedBox(height: 48) with Summer Break
+  /// label when index is the gap between Hungary and the Netherlands.
+  Widget _buildCalendarSeparator(BuildContext context, int index) {
+    const gap = 16.0;
+    const summerBreakGap = 48.0;
+
+    if (index == _summerBreakSeparatorIndex) {
+      final theme = Theme.of(context);
+      return SizedBox(
+        height: summerBreakGap,
+        child: Center(
+          child: Text(
+            't.summer_break'.tr(),
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              letterSpacing: 1.0,
+            ),
+          ),
+        ),
+      );
+    }
+    return const SizedBox(height: gap);
+  }
+
+  /// Returns calendar entries interleaved with separators. Each pair of cards
+  /// is separated by 16px (or 48px with Summer Break label between Hungary/Netherlands).
+  List<Widget> _buildCalendarListWithSeparators(BuildContext context) {
+    final entries = _buildCalendarEntries(context);
+    if (entries.isEmpty) return [];
+
+    final result = <Widget>[];
+    for (var i = 0; i < entries.length; i++) {
+      result.add(entries[i]);
+      if (i < entries.length - 1) {
+        result.add(_buildCalendarSeparator(context, i));
+      }
+    }
+    return result;
+  }
+
   Widget _buildDesktopOverviewSidebar(BuildContext context, Race upcoming) {
-    final loc = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final tokens = _themeTokens(context);
     final latestRace = _latestCompletedRace();
 
     return Column(
       children: [
         Card(
-          child: Container(
-            width: double.infinity,
+          color: theme.colorScheme.surface,
+          elevation: 1,
+          shadowColor: theme.colorScheme.shadow,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          clipBehavior: Clip.antiAlias,
+          child: F1Module(
+            fillWidth: true,
             padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              color: tokens.panelStrong,
-            ),
+            borderRadius: 20,
+            backgroundColor: theme.colorScheme.surface,
+            showFadingBorder: true,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  loc.translate('nextRace').toUpperCase(),
+                  't.nextRace'.tr().toUpperCase(),
                   style: TextStyle(
                     fontSize: 10,
                     letterSpacing: 1.4,
@@ -7499,15 +8613,16 @@ class _CircuitsViewState extends State<CircuitsView> {
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        liveRain > 30 ? Icons.umbrella : Icons.wb_sunny,
+                      _AnimatedWeatherIcon(
+                        isRain: liveRain > 30,
+                        isCloudy: liveRain <= 30 && liveRain > 10,
+                        color: liveRain > 30 ? theme.colorScheme.primary : theme.colorScheme.tertiary,
                         size: 18,
-                        color: liveRain > 30 ? Colors.blue : Colors.amber,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          '$liveRain% ${loc.translate('rain').toLowerCase()}',
+                          '$liveRain% ${'t.rain'.tr().toLowerCase()}',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             color: theme.colorScheme.onSurface,
@@ -7524,13 +8639,17 @@ class _CircuitsViewState extends State<CircuitsView> {
         const SizedBox(height: 12),
         if (latestRace != null)
           Card(
-            child: Container(
-              width: double.infinity,
+            color: theme.colorScheme.surface,
+            elevation: 1,
+            shadowColor: theme.colorScheme.shadow,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            clipBehavior: Clip.antiAlias,
+            child: F1Module(
+              fillWidth: true,
               padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                color: tokens.panel,
-              ),
+              borderRadius: 20,
+              backgroundColor: theme.colorScheme.surface,
+              showFadingBorder: true,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -7545,7 +8664,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    loc.translate('gp_${latestRace.name}'),
+                    't.gp_${latestRace.name}'.tr(),
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       color: theme.colorScheme.onSurface,
@@ -7565,96 +8684,107 @@ class _CircuitsViewState extends State<CircuitsView> {
     );
   }
 
-  Widget _buildDesktopCalendarGrid(BuildContext context) {
-    final loc = AppLocalizations.of(context);
+  Widget _buildDesktopCalendarHeader(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = _themeTokens(context);
+    const headerHeight = 48.0;
 
-    return Card(
-      margin: EdgeInsets.zero,
-      clipBehavior: Clip.antiAlias,
-      child: Container(
-        decoration: BoxDecoration(
-          color: tokens.panel,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: tokens.outline.withValues(alpha: 0.5)),
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withValues(
-                  alpha: 0.82,
-                ),
-                border: Border(
-                  bottom: BorderSide(
-                    color: tokens.outline.withValues(alpha: 0.45),
+    return Container(
+      height: headerHeight,
+      margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 18),
+      decoration: BoxDecoration(
+        color: tokens.panelStrong,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: tokens.outline.withValues(alpha: 0.7)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 5,
+            child: Row(
+              children: [
+                const SizedBox(width: 48),
+                Text(
+                  't.race'.tr().toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.1,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-              ),
-              child: Row(
-                children: [
-                  _buildDesktopCalendarHeaderCell(
-                    context,
-                    label: loc.translate('race'),
-                    flex: 5,
-                  ),
-                  _buildDesktopCalendarHeaderCell(
-                    context,
-                    label: loc.translate('country'),
-                    flex: 3,
-                  ),
-                  _buildDesktopCalendarHeaderCell(
-                    context,
-                    label: loc.translate('date'),
-                    flex: 2,
-                  ),
-                  _buildDesktopCalendarHeaderCell(
-                    context,
-                    label: loc.translate('last_winner'),
-                    flex: 3,
-                  ),
-                  _buildDesktopCalendarHeaderCell(
-                    context,
-                    label: loc.translate('status'),
-                    flex: 3,
-                    alignEnd: true,
-                  ),
-                ],
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              't.country'.tr().toUpperCase(),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.1,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            ..._buildCalendarEntries(context),
-          ],
-        ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              't.date'.tr().toUpperCase(),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.1,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              't.last_winner'.tr().toUpperCase(),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.1,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                't.status'.tr().toUpperCase(),
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.1,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildDesktopCalendarHeaderCell(
-    BuildContext context, {
-    required String label,
-    required int flex,
-    bool alignEnd = false,
-  }) {
-    final theme = Theme.of(context);
-
-    return Expanded(
-      flex: flex,
-      child: Align(
-        alignment: alignEnd ? Alignment.centerRight : Alignment.centerLeft,
-        child: Text(
-          label.toUpperCase(),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 10,
-            letterSpacing: 1.2,
-            fontWeight: FontWeight.w800,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ),
+  Widget _buildDesktopCalendarGrid(BuildContext context) {
+    final entries = _buildCalendarEntries(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildDesktopCalendarHeader(context),
+        const SizedBox(height: 8),
+        for (var i = 0; i < entries.length; i++) ...[
+          if (i > 0) const SizedBox(height: 12),
+          entries[i],
+        ],
+      ],
     );
   }
 
@@ -7665,8 +8795,9 @@ class _CircuitsViewState extends State<CircuitsView> {
     bool isOngoing,
     String timeLabel,
   ) {
-    final loc = AppLocalizations.of(context);
+
     final theme = Theme.of(context);
+    final tokens = _themeTokens(context);
     final isCancelled = race.name == 'Bahrain Grand Prix' || race.name == 'Saudi Arabian Grand Prix';
     // statusChip variable removed (no longer used)
 
@@ -7693,7 +8824,7 @@ class _CircuitsViewState extends State<CircuitsView> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              chip('Ended', Colors.green.withOpacity(0.10), Colors.green.withOpacity(0.24), Colors.green),
+              chip('Ended', tokens.statusSuccess.withValues(alpha: 0.10), tokens.statusSuccess.withValues(alpha: 0.24), tokens.statusSuccess),
               const SizedBox(width: 8),
               OutlinedButton(
                 onPressed: () => context.push(_weekendHubPath(race)),
@@ -7701,11 +8832,11 @@ class _CircuitsViewState extends State<CircuitsView> {
                   visualDensity: VisualDensity.compact,
                   minimumSize: const Size(0, 32),
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  side: BorderSide(color: Colors.green.withOpacity(0.24)),
+                  side: BorderSide(color: tokens.statusSuccess.withValues(alpha: 0.24)),
                 ),
                 child: Text(
-                  loc.translate('results'),
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.green),
+                  't.results'.tr(),
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: tokens.statusSuccess),
                 ),
               ),
             ],
@@ -7727,154 +8858,83 @@ class _CircuitsViewState extends State<CircuitsView> {
         ],
       );
     } else if (!isCancelled && (isOngoing || (isToday && !hasResults))) {
-      return chip('Ongoing', Colors.orange.withOpacity(0.10), Colors.orange.withOpacity(0.24), Colors.orange);
+      return chip('Ongoing', tokens.statusWarning.withValues(alpha: 0.10), tokens.statusWarning.withValues(alpha: 0.24), tokens.statusWarning);
     } else if (!isCancelled && !isFinished) {
-      return chip('${loc.translate('startsIn')} $timeLabel', theme.colorScheme.primary.withOpacity(0.10), theme.colorScheme.primary.withOpacity(0.18), theme.colorScheme.primary);
+      return chip('${'t.startsIn'.tr()} $timeLabel', theme.colorScheme.primary.withValues(alpha: 0.10), theme.colorScheme.primary.withValues(alpha: 0.18), theme.colorScheme.primary);
     } else if (isCancelled) {
-      return chip('Cancelled', Colors.red.withOpacity(0.08), Colors.red.withOpacity(0.24), Colors.red);
+      return chip('Cancelled', tokens.statusError.withValues(alpha: 0.08), tokens.statusError.withValues(alpha: 0.24), tokens.statusError);
     } else if (isFinished && !hasResults) {
-      return chip('Ended', Colors.green.withOpacity(0.10), Colors.green.withOpacity(0.24), Colors.green);
+      return chip('Ended', tokens.statusSuccess.withValues(alpha: 0.10), tokens.statusSuccess.withValues(alpha: 0.24), tokens.statusSuccess);
     } else {
-      return chip('Unknown', Colors.grey.withOpacity(0.10), Colors.grey.withOpacity(0.24), Colors.grey);
+      return chip('Unknown', theme.colorScheme.outline.withValues(alpha: 0.10), theme.colorScheme.outline.withValues(alpha: 0.24), theme.colorScheme.outline);
     }
   }
 
-  Widget _buildFeaturedRaceCard(
+  /// Mobile "Next Race" card: same surface treatment as desktop (no solid primary block).
+  Widget _buildUnifiedNextRaceBlock(
     BuildContext context,
     Race upcoming,
     String timeStrNext,
   ) {
-    final loc = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final tokens = _themeTokens(context);
+    final scheme = theme.colorScheme;
     final isCancelled = upcoming.name == 'Bahrain Grand Prix' || upcoming.name == 'Saudi Arabian Grand Prix';
+    final isRainy = liveRain > 30;
+    final isCloudy = !isRainy && liveRain > 10;
 
     return GestureDetector(
       onTap: () => context.push(_racePath(upcoming)),
-      child: Card(
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: _heroPanelGradient(context),
-            border: Border.all(color: tokens.outline.withValues(alpha: 0.65)),
-          ),
+      child: SafeArea(
+        top: true,
+        bottom: false,
+        left: false,
+        right: false,
+        child: F1Module(
+          fillWidth: true,
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          borderRadius: 20,
+          backgroundColor: scheme.surface,
+          showFadingBorder: true,
+          boxShadow: [
+            BoxShadow(
+              color: scheme.shadow.withValues(alpha: 0.10),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ],
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Status chip at the top right
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: isCancelled
-                        ? Colors.red.withValues(alpha: 0.08)
-                        : theme.colorScheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: isCancelled
-                          ? Colors.red.withValues(alpha: 0.24)
-                          : theme.colorScheme.primary.withValues(alpha: 0.18),
-                      ),
-                    ),
-                    child: Text(
-                      isCancelled ? 'Cancelled' : loc.translate('session_status_upcoming'),
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        color: isCancelled ? Colors.red : theme.colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    loc.translate('nextRace').toUpperCase(),
-                    style: TextStyle(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        '$liveTemp°C ',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
-                      Icon(
-                        liveRain > 30 ? Icons.umbrella : Icons.wb_sunny,
-                        color: liveRain > 30 ? Colors.blue : Colors.amber,
-                        size: 20,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildFlagHero(
-                    tag: _raceFlagHeroTag(upcoming, source: 'featured'),
-                    flag: _getFlag(
-                      loc.translate('country_${upcoming.country}'),
-                    ),
-                    fontSize: 32,
-                  ),
-                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      loc.translate('gp_${upcoming.name}'),
+                      't.appTitle'.tr().toUpperCase(),
                       style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.2,
+                        color: scheme.onSurface,
                       ),
                     ),
                   ),
+                  if (!_isDesktopShellLayout(context))
+                    DefaultTextStyle(
+                      style: TextStyle(color: scheme.onSurface, fontSize: 20),
+                      child: widget.settingsMenu,
+                    ),
                 ],
               ),
-              Text(
-                upcoming.name,
-                style: TextStyle(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontSize: 14,
-                ),
+              const SizedBox(height: 16),
+              _buildNextRaceContent(
+                context,
+                upcoming,
+                timeStrNext,
+                isCancelled: isCancelled,
+                isRainy: isRainy,
+                isCloudy: isCloudy,
+                onBlueBackground: false,
               ),
-              const SizedBox(height: 14),
-              _buildPreviousWinnersBlock(context, upcoming),
-              Divider(
-                height: 30,
-                color: tokens.outline.withValues(alpha: 0.75),
-              ),
-              // Only show 'Starts in' if not Bahrain or Saudi Arabian GP
-              if (upcoming.name == 'Bahrain Grand Prix' || upcoming.name == 'Saudi Arabian Grand Prix')
-                const SizedBox.shrink()
-              else if (timeStrNext.isEmpty)
-                _buildCircuitPodiumPreview(
-                  context,
-                  upcoming,
-                  alignment: CrossAxisAlignment.start,
-                )
-              else
-                Text(
-                  '${loc.translate('startsIn')} $timeStrNext',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.secondary,
-                  ),
-                ),
             ],
           ),
         ),
@@ -7882,8 +8942,172 @@ class _CircuitsViewState extends State<CircuitsView> {
     );
   }
 
+  Widget _buildNextRaceContent(
+    BuildContext context,
+    Race upcoming,
+    String timeStrNext, {
+    required bool isCancelled,
+    required bool isRainy,
+    required bool isCloudy,
+    bool onBlueBackground = false,
+  }) {
+    final theme = Theme.of(context);
+    final tokens = _themeTokens(context);
+    final primary = theme.colorScheme.primary;
+    final textColor = onBlueBackground ? Colors.white : theme.colorScheme.onSurface;
+    final variantColor = onBlueBackground ? Colors.white70 : theme.colorScheme.onSurfaceVariant;
+
+    final chipColor = onBlueBackground
+        ? (isCancelled ? tokens.statusError : Colors.white.withValues(alpha: 0.25))
+        : (isCancelled ? tokens.statusError.withValues(alpha: 0.08) : primary.withValues(alpha: 0.1));
+    final chipBorder = onBlueBackground
+        ? (isCancelled ? tokens.statusError : Colors.white.withValues(alpha: 0.5))
+        : (isCancelled ? tokens.statusError.withValues(alpha: 0.24) : primary.withValues(alpha: 0.18));
+    final chipText = isCancelled ? tokens.statusError : (onBlueBackground ? Colors.white : primary);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: chipColor,
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: chipBorder),
+              ),
+              child: Text(
+                isCancelled ? 'Cancelled' : 't.session_status_upcoming'.tr(),
+                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: chipText),
+              ),
+            ),
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              't.nextRace'.tr().toUpperCase(),
+              style: TextStyle(
+                color: onBlueBackground ? Colors.white70 : primary,
+                fontWeight: FontWeight.bold,
+                fontSize: 10,
+                letterSpacing: 1.5,
+              ),
+            ),
+            Row(
+              children: [
+                Text(
+                  '$liveTemp°C ',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: textColor),
+                ),
+                _AnimatedWeatherIcon(
+                  isRain: isRainy,
+                  isCloudy: isCloudy,
+                  color: onBlueBackground ? Colors.white : (isRainy ? primary : theme.colorScheme.tertiary),
+                  size: 20,
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildFlagHero(
+              tag: _raceFlagHeroTag(upcoming, source: 'featured'),
+              flag: _getFlag('t.country_${upcoming.country}'.tr()),
+              fontSize: 32,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                't.gp_${upcoming.name}'.tr(),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textColor),
+              ),
+            ),
+          ],
+        ),
+        Text(
+          upcoming.name,
+          style: TextStyle(color: variantColor, fontSize: 14),
+        ),
+        const SizedBox(height: 14),
+        _buildPreviousWinnersBlock(
+          context,
+          upcoming,
+          favoriteDriver: context.watch<ProfileFavoritesNotifier>().value.favoriteDriver,
+          onLightBackground: onBlueBackground,
+        ),
+        Divider(
+          height: 30,
+          color: onBlueBackground ? Colors.white24 : tokens.outline.withValues(alpha: 0.75),
+        ),
+        if (upcoming.name == 'Bahrain Grand Prix' || upcoming.name == 'Saudi Arabian Grand Prix')
+          const SizedBox.shrink()
+        else if (timeStrNext.isEmpty)
+          _buildCircuitPodiumPreview(
+            context,
+            upcoming,
+            alignment: CrossAxisAlignment.start,
+            onLightBackground: onBlueBackground,
+          )
+        else
+          Text(
+            '${'t.startsIn'.tr()} $timeStrNext',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: onBlueBackground ? Colors.white : primary,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildFeaturedRaceCard(
+    BuildContext context,
+    Race upcoming,
+    String timeStrNext,
+  ) {
+    final isCancelled = upcoming.name == 'Bahrain Grand Prix' || upcoming.name == 'Saudi Arabian Grand Prix';
+    final isRainy = liveRain > 30;
+    final isCloudy = !isRainy && liveRain > 10;
+
+    final scheme = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: () => context.push(_racePath(upcoming)),
+      child: F1Module(
+        fillWidth: true,
+        padding: const EdgeInsets.all(20),
+        borderRadius: 20,
+        backgroundColor: scheme.surface,
+        showFadingBorder: true,
+        boxShadow: [
+          BoxShadow(
+            color: scheme.shadow.withValues(alpha: 0.10),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        child: _buildNextRaceContent(
+          context,
+          upcoming,
+          timeStrNext,
+          isCancelled: isCancelled,
+          isRainy: isRainy,
+          isCloudy: isCloudy,
+          onBlueBackground: false,
+        ),
+      ),
+    );
+  }
+
   Widget _buildCalendarRaceCard(BuildContext context, Race race) {
-    final loc = AppLocalizations.of(context);
+
     final theme = Theme.of(context);
     final tokens = _themeTokens(context);
     final now = DateTime.now();
@@ -7900,30 +9124,16 @@ class _CircuitsViewState extends State<CircuitsView> {
 
     if (showDesktopExtras) {
       final lastWinner = _recentPreviousWinners(race, count: 1);
-
       return Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () => context.push(_racePath(race)),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                left: isFinished
-                    ? BorderSide(
-                        color: theme.colorScheme.secondary.withValues(
-                          alpha: 0.72,
-                        ),
-                        width: 3,
-                      )
-                    : BorderSide.none,
-                bottom: BorderSide(
-                  color: tokens.outline.withValues(alpha: 0.38),
-                ),
-              ),
-              boxShadow: null,
-            ),
+          borderRadius: BorderRadius.circular(20),
+          child: F1Module(
+            fillWidth: true,
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+            borderRadius: 20,
+            backgroundColor: theme.colorScheme.surface,
             child: Row(
               children: [
                 Expanded(
@@ -7935,13 +9145,13 @@ class _CircuitsViewState extends State<CircuitsView> {
                         flag: race.flag,
                         fontSize: 28,
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 20),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              loc.translate('gp_${race.name}'),
+                              't.gp_${race.name}'.tr(),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -7969,7 +9179,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                 Expanded(
                   flex: 3,
                   child: Text(
-                    loc.translate('country_${race.country}'),
+                    't.country_${race.country}'.tr(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -8022,104 +9232,210 @@ class _CircuitsViewState extends State<CircuitsView> {
       );
     }
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => context.push(_racePath(race)),
-        child: Stack(
-          children: [
-            Positioned.fill(child: _buildCompletedRaceBackground(context)),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  _buildFlagHero(
-                    tag: _raceFlagHeroTag(race, source: 'calendar'),
-                    flag: race.flag,
-                    fontSize: 32,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          loc.translate('gp_${race.name}'),
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: theme.colorScheme.onSurface,
+    final favoritesMobile = context.watch<ProfileFavoritesNotifier>().value;
+    final isFavoriteCircuitMobile = favoritesMobile.favoriteCircuit != null &&
+        race.name == favoritesMobile.favoriteCircuit;
+
+    Widget _buildMobileStatusWidget() {
+      final hasResults = _hasResultsForRace(race);
+      final isToday = DateTime.now().year == race.date.year &&
+          DateTime.now().month == race.date.month &&
+          DateTime.now().day == race.date.day;
+      if (race.date.year == 2026) {
+        if (isCancelled) {
+          return Text('Cancelled',
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: tokens.statusError,
+                  fontFamily: 'TitilliumWeb'));
+        } else if (isOngoing || (isToday && !hasResults)) {
+          return Text('Ongoing',
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: tokens.statusWarning,
+                  fontFamily: 'TitilliumWeb'));
+        } else if (isFinished && hasResults) {
+          return _buildCircuitPodiumPreview(context, race);
+        } else if (isFinished && !hasResults) {
+          return Text('Ended',
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: tokens.statusSuccess,
+                  fontFamily: 'TitilliumWeb'));
+        } else {
+          return Text(tStr,
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                  fontFamily: 'TitilliumWeb'));
+        }
+      } else {
+        if (isFinished && hasResults) {
+          return _buildCircuitPodiumPreview(context, race);
+        } else if (isCancelled) {
+          return Text('Cancelled',
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: tokens.statusError));
+        } else if (isOngoing || (isToday && !hasResults)) {
+          return Text('Ongoing',
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: tokens.statusWarning));
+        } else {
+          return Text(tStr,
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary));
+        }
+      }
+    }
+
+    final statusWidget = () {
+      final hasResults = _hasResultsForRace(race);
+      final isToday = DateTime.now().year == race.date.year &&
+          DateTime.now().month == race.date.month &&
+          DateTime.now().day == race.date.day;
+      if (race.date.year == 2026) {
+        if (isCancelled) {
+          return Text('Cancelled',
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: tokens.statusError,
+                  fontFamily: 'TitilliumWeb'));
+        } else if (isOngoing || (isToday && !hasResults)) {
+          return Text('Ongoing',
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: tokens.statusWarning,
+                  fontFamily: 'TitilliumWeb'));
+        } else if (isFinished && hasResults) {
+          return _buildCircuitPodiumPreview(context, race);
+        } else if (isFinished && !hasResults) {
+          return Text('Ended',
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: tokens.statusSuccess,
+                  fontFamily: 'TitilliumWeb'));
+        } else {
+          return Text(tStr,
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                  fontFamily: 'TitilliumWeb'));
+        }
+      } else {
+        if (isFinished && hasResults) {
+          return _buildCircuitPodiumPreview(context, race);
+        } else if (isCancelled) {
+          return Text('Cancelled',
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: tokens.statusError));
+        } else if (isOngoing || (isToday && !hasResults)) {
+          return Text('Ongoing',
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: tokens.statusWarning));
+        } else {
+          return Text(tStr,
+              style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary));
+        }
+      }
+    }();
+
+    final card = Padding(
+      padding: isFavoriteCircuitMobile
+          ? EdgeInsets.zero
+          : const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => context.push(_racePath(race)),
+          borderRadius: BorderRadius.circular(20),
+          child: F1Module(
+            fillWidth: true,
+            padding: const EdgeInsets.all(12),
+            borderRadius: 20,
+            backgroundColor: theme.colorScheme.surface,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildFlagHero(
+                      tag: _raceFlagHeroTag(race, source: 'calendar'),
+                      flag: race.flag,
+                      fontSize: 32,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            't.gp_${race.name}'.tr(),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: theme.colorScheme.onSurface,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          '${race.date.day}-${race.date.month}-${race.date.year}',
-                          style: TextStyle(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            fontSize: 11,
-                          ),
-                        ),
-                        if (showDesktopExtras) ...[
-                          const SizedBox(height: 8),
-                          _buildPreviousWinnersBlock(
-                            context,
-                            race,
-                            compact: true,
+                          const SizedBox(height: 6),
+                          Text(
+                            '${race.date.day}-${race.date.month}-${race.date.year}',
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontSize: 11,
+                            ),
                           ),
                         ],
-                      ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  (() {
-                    final hasResults = _hasResultsForRace(race);
-                    final isToday = DateTime.now().year == race.date.year && DateTime.now().month == race.date.month && DateTime.now().day == race.date.day;
-                    if (race.date.year == 2026) {
-                      if (isCancelled) {
-                        return Text('Cancelled', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.red, fontFamily: 'TitilliumWeb'));
-                      } else if (isOngoing || (isToday && !hasResults)) {
-                        return Text('Ongoing', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.orange, fontFamily: 'TitilliumWeb'));
-                      } else if (isFinished && hasResults) {
-                        return _buildCircuitPodiumPreview(context, race);
-                      } else if (isFinished && !hasResults) {
-                        return Text('Ended', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.green, fontFamily: 'TitilliumWeb'));
-                      } else {
-                        return Text(tStr, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: theme.colorScheme.primary, fontFamily: 'TitilliumWeb'));
-                      }
-                    } else {
-                      if (isFinished && hasResults) {
-                        return _buildCircuitPodiumPreview(context, race);
-                      } else if (isCancelled) {
-                        return Text('Cancelled', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.red));
-                      } else if (isOngoing || (isToday && !hasResults)) {
-                        return Text('Ongoing', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.orange));
-                      } else {
-                        return Text(tStr, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: theme.colorScheme.primary));
-                      }
-                    }
-                  })(),
-                ],
-              ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: statusWidget,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
+    return card;
   }
 
   Widget _buildCompletedRaceBackground(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
       ),
     );
   }
 
   Widget _buildSummerBreakCard(BuildContext context) {
-    final loc = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final tokens = _themeTokens(context);
     final showDesktopLayout =
         MediaQuery.of(context).size.width >= _desktopCircuitsBreakpoint;
     final breakRaces = _summerBreakRaces();
@@ -8131,53 +9447,32 @@ class _CircuitsViewState extends State<CircuitsView> {
     final breakLabel = breakDays == null
         ? ''
         : breakDays % 7 == 0
-        ? '${breakDays ~/ 7} ${breakDays ~/ 7 == 1 ? loc.translate('week') : loc.translate('weeks')}'
-        : '$breakDays ${breakDays == 1 ? loc.translate('day') : loc.translate('days')}';
+        ? '${breakDays ~/ 7} ${breakDays ~/ 7 == 1 ? 't.week'.tr() : 't.weeks'.tr()}'
+        : '$breakDays ${breakDays == 1 ? 't.day'.tr() : 't.days'.tr()}';
     final dateLabel = startRace != null && endRace != null
         ? '${_calendarDateLabel(startRace.date)} - ${_calendarDateLabel(endRace.date)}'
-        : loc.translate('summer_break_subtitle');
+        : 't.summer_break_subtitle'.tr();
 
     if (showDesktopLayout) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [
-              theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.94),
-              theme.colorScheme.secondaryContainer.withValues(alpha: 0.46),
-            ],
-          ),
-          border: Border(
-            left: BorderSide(
-              color: theme.colorScheme.secondary.withValues(alpha: 0.72),
-              width: 3,
-            ),
-            bottom: BorderSide(color: tokens.outline.withValues(alpha: 0.38)),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: theme.colorScheme.secondary.withValues(alpha: 0.05),
-              blurRadius: 14,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
+      return F1Module(
+        fillWidth: true,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        borderRadius: 20,
+        backgroundColor: theme.colorScheme.surface,
         child: Row(
           children: [
             Expanded(
               flex: 5,
               child: Row(
                 children: [
-                  _buildSummerBreakFlag(size: 42),
+                  _buildSummerBreakFlag(context, size: 42),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          loc.translate('summer_break'),
+                          't.summer_break'.tr(),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -8188,7 +9483,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          loc.translate('summer_break_subtitle'),
+                          't.summer_break_subtitle'.tr(),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -8248,7 +9543,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                         ),
                       ),
                       child: Text(
-                        loc.translate('summer_break'),
+                        't.summer_break'.tr(),
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
@@ -8285,14 +9580,14 @@ class _CircuitsViewState extends State<CircuitsView> {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            _buildSummerBreakFlag(size: 54),
+            _buildSummerBreakFlag(context, size: 54),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    loc.translate('summer_break'),
+                    't.summer_break'.tr(),
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -8309,7 +9604,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    loc.translate('summer_break_subtitle'),
+                    't.summer_break_subtitle'.tr(),
                     style: TextStyle(
                       fontSize: 10,
                       color: theme.colorScheme.onSurfaceVariant,
@@ -8359,9 +9654,13 @@ class _CircuitsViewState extends State<CircuitsView> {
     BuildContext context,
     Race race, {
     CrossAxisAlignment alignment = CrossAxisAlignment.end,
+    bool onLightBackground = false,
   }) {
     final theme = Theme.of(context);
     final podiumRows = _circuitPodiumRows(race);
+    final textColor = onLightBackground ? Colors.white : theme.colorScheme.onSurface;
+    final variantColor = onLightBackground ? Colors.white70 : theme.colorScheme.onSurfaceVariant;
+
     if (podiumRows.isEmpty) {
       return Text(
         _getPodiumString(race),
@@ -8371,13 +9670,14 @@ class _CircuitsViewState extends State<CircuitsView> {
         style: TextStyle(
           fontSize: 9,
           fontWeight: FontWeight.bold,
-          color: theme.colorScheme.onSurfaceVariant,
+          color: variantColor,
         ),
       );
     }
 
-    // Show all podium drivers on a single line with medals
+    // Show all podium drivers with team colors, indicator strips, and medal drop-shadows
     final medals = ['🥇', '🥈', '🥉'];
+    final raceYear = race.date.year;
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: alignment == CrossAxisAlignment.end
@@ -8385,90 +9685,214 @@ class _CircuitsViewState extends State<CircuitsView> {
           : MainAxisAlignment.start,
       children: List.generate(
         podiumRows.length,
-        (i) => Padding(
-          padding: EdgeInsets.only(right: i < podiumRows.length - 1 ? 12 : 0),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                medals[i],
-                style: const TextStyle(fontSize: 13, height: 1),
-              ),
-              const SizedBox(width: 3),
-              Text(
-                podiumRows[i].driver.split(' ').last,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: theme.colorScheme.onSurfaceVariant,
+        (i) {
+          final driverName = podiumRows[i].driver;
+          final teamColor = _teamColorForPodiumDriver(driverName, raceYear);
+          return Padding(
+            padding: EdgeInsets.only(right: i < podiumRows.length - 1 ? 12 : 0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  medals[i],
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withValues(alpha: 0.25),
+                        blurRadius: 1.5,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
+                const SizedBox(width: 3),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(2),
+                    color: onLightBackground
+                        ? Colors.white.withValues(alpha: 0.2)
+                        : teamColor.withValues(alpha: 0.9),
+                    boxShadow: [
+                      BoxShadow(
+                        color: teamColor.withValues(alpha: 0.35),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 2,
+                        height: 14,
+                        decoration: BoxDecoration(
+                          color: teamColor,
+                          borderRadius: BorderRadius.circular(1),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        driverName.split(' ').last,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: textColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
+  Color _teamColorForPodiumDriver(String driverName, int year) {
+    final driver = _driverForSeason(driverName, year);
+    if (driver != null) {
+      return F1TeamSchemes.getTeamColor(driver.team);
+    }
+    return Theme.of(context).colorScheme.primary;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
+
     final upcoming = _nextRace();
     final timeStrNext = _timeUntil(upcoming.date, context);
 
+    final scheme = Theme.of(context).colorScheme;
+    final ambientGlow = scheme.primary.withValues(alpha: 0.08);
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(loc.translate('appTitle').toUpperCase()),
-        actions: _desktopAwareSettingsActions(context, widget.settingsMenu),
-      ),
-      body: RefreshIndicator(
-        onRefresh: _refreshCircuits,
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          children: [
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final isDesktop =
-                    constraints.maxWidth >= _desktopCircuitsBreakpoint;
-
-                if (!isDesktop) {
-                  return _buildFeaturedRaceCard(context, upcoming, timeStrNext);
-                }
-
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 5,
-                      child: _buildFeaturedRaceCard(
-                        context,
-                        upcoming,
-                        timeStrNext,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    SizedBox(
-                      width: 320,
-                      child: _buildDesktopOverviewSidebar(context, upcoming),
-                    ),
-                  ],
-                );
-              },
+      extendBodyBehindAppBar: false,
+      backgroundColor: Colors.transparent,
+      appBar: _isDesktopShellLayout(context)
+          ? AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              foregroundColor: scheme.onSurface,
+              title: Text(
+                't.appTitle'.tr().toUpperCase(),
+                style: TextStyle(
+                  color: scheme.onSurface,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              actions: const <Widget>[],
+            )
+          : null,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          DecoratedBox(
+            decoration: BoxDecoration(color: scheme.surfaceContainerLow),
+            child: CustomPaint(
+              painter: _AmbientGlowPainter(
+                topLeftGlow: ambientGlow,
+                bottomRightGlow: ambientGlow,
+              ),
             ),
-            _sectionHeader("2026 Calendar", "📅"),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final isDesktop =
-                    constraints.maxWidth >= _desktopCircuitsBreakpoint;
-                if (!isDesktop) {
-                  return Column(children: _buildCalendarEntries(context));
-                }
-                return _buildDesktopCalendarGrid(context);
-              },
+          ),
+          RefreshIndicator(
+            onRefresh: _refreshCircuits,
+            child: SafeArea(
+              top: false,
+              child: ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  _isDesktopShellLayout(context) ? 16 : 0,
+                  16,
+                  16,
+                ),
+                separatorBuilder: (context, index) => const SizedBox(height: 16),
+                itemCount: 3,
+                itemBuilder: (context, index) {
+                  switch (index) {
+                    case 0:
+                      return LayoutBuilder(
+                        builder: (context, constraints) {
+                          final isDesktop =
+                              constraints.maxWidth >= _desktopCircuitsBreakpoint;
+                          if (!isDesktop) {
+                            return _buildUnifiedNextRaceBlock(
+                              context,
+                              upcoming,
+                              timeStrNext,
+                            );
+                          }
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 5,
+                                child: _buildFeaturedRaceCard(
+                                  context,
+                                  upcoming,
+                                  timeStrNext,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              SizedBox(
+                                width: 320,
+                                child: _buildDesktopOverviewSidebar(context, upcoming),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    case 1:
+                      return _AIStrategistCard(
+                        race: upcoming,
+                        onTap: () async {
+                          await showModalBottomSheet<void>(
+                            context: context,
+                            isScrollControlled: true,
+                            showDragHandle: true,
+                            builder: (_) => const AIAssistantSheet(),
+                          );
+                        },
+                      );
+                    case 2:
+                    default:
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _sectionHeader("2026 Calendar", "📅"),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final isDesktop =
+                                  constraints.maxWidth >= _desktopCircuitsBreakpoint;
+                              if (!isDesktop) {
+                                final entries = _buildCalendarEntries(context);
+                                return ListView.separated(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: entries.length,
+                                  itemBuilder: (_, i) => _LiftOnTap(child: entries[i]),
+                                  separatorBuilder: (_, i) =>
+                                      _buildCalendarSeparator(context, i),
+                                );
+                              }
+                              return _buildDesktopCalendarGrid(context);
+                            },
+                          ),
+                        ],
+                      );
+                  }
+                },
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -8513,7 +9937,7 @@ class _StandingsViewState extends State<StandingsView> {
     if (_selectedYear == 2026 && widget.isDriverView) {
       setState(() => _isLoading = true);
       try {
-        final raw = await DefaultAssetBundle.of(context).loadString('data/results/drivers_standings_2026.json');
+        final raw = await DefaultAssetBundle.of(context).loadString('data/results/drivers/drivers_standings_2026.json');
         final jsonData = json.decode(raw);
         final standings = jsonData['standings'] as List<dynamic>;
         final localDrivers = driversData[2026] ?? [];
@@ -8584,6 +10008,79 @@ class _StandingsViewState extends State<StandingsView> {
         if (mounted) {
           setState(() {
             _cachedDrivers = List.from(driversData[2026] ?? []);
+            _cachedTeams = List.from(fallbackTeams);
+            _usingFallback = true;
+            _isLoading = false;
+          });
+        }
+      }
+      return;
+    }
+
+    if (_selectedYear == 2026 && !widget.isDriverView) {
+      setState(() => _isLoading = true);
+      try {
+        final raw = await DefaultAssetBundle.of(context)
+            .loadString('data/results/teams/teams_standings_2026.json');
+        final jsonData = json.decode(raw);
+        final standings = jsonData['standings'] as List<dynamic>;
+        List<Team> mergedTeams = [];
+        for (final entry in standings) {
+          final name = entry['team'] as String;
+          final points = (entry['points'] as num).toInt();
+          final local = fallbackTeams.firstWhere(
+            (t) => t.name == name,
+            orElse: () => fallbackTeams.firstWhere(
+              (t) => t.name.toLowerCase() == name.toLowerCase(),
+              orElse: () => Team(
+                name: name,
+                flag: '',
+                points: points,
+                engine: '',
+                fastestPitstopTime: '',
+                fastestPitstopYear: 0,
+                fastestPitstopCircuit: '',
+                ccWins: 0,
+                dcWins: 0,
+                podiums: 0,
+                oneTwo: 0,
+                hattricks: 0,
+                doublePodiums: 0,
+                totalPoints: 0.0,
+                frontRow: 0,
+                poles: 0,
+                fastestLaps: 0,
+                racesLed: 0,
+                principalName: '',
+                principalAge: 0,
+                principalFlag: '',
+                totalEntries: 0,
+                technicalDirectorName: '',
+                technicalDirectorAge: 0,
+                engineSupplier: EngineSupplier(name: '', engineName: '', city: ''),
+                sponsors: const [],
+                ccYears: const [],
+                dcList: const [],
+                headquarters: '',
+                previousNames: const [],
+                drivers: const [],
+                carImageUrl: '',
+              ),
+            ),
+          );
+          mergedTeams.add(Team.copy(local, points));
+        }
+        mergedTeams.sort((a, b) => b.points.compareTo(a.points));
+        if (mounted) {
+          setState(() {
+            _cachedTeams = mergedTeams;
+            _usingFallback = false;
+            _isLoading = false;
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
             _cachedTeams = List.from(fallbackTeams);
             _usingFallback = true;
             _isLoading = false;
@@ -8768,12 +10265,12 @@ class _StandingsViewState extends State<StandingsView> {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: isSelected
-            ? _getTeamColor(teamName).withValues(alpha: 0.16)
-            : (isDark ? const Color(0xFF16161E) : Colors.white),
+            ? F1TeamSchemes.getTeamColor(teamName).withValues(alpha: 0.16)
+            : (isDark ? theme.colorScheme.surface : theme.colorScheme.surface),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isSelected
-              ? _getTeamColor(teamName).withValues(alpha: 0.6)
+              ? F1TeamSchemes.getTeamColor(teamName).withValues(alpha: 0.6)
               : (isDark ? Colors.white10 : Colors.black12),
         ),
         boxShadow: isDark
@@ -8789,9 +10286,11 @@ class _StandingsViewState extends State<StandingsView> {
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
         onTap: () => _handleStandingsTap(item, widget.isDriverView),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          child: Row(
+        child: F1Hoverable(
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+            child: Row(
             children: [
               SizedBox(
                 width: 52,
@@ -8843,7 +10342,7 @@ class _StandingsViewState extends State<StandingsView> {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
-                        color: _getTeamColor(teamName),
+                        color: F1TeamSchemes.getTeamColor(teamName),
                       ),
                     ),
                     const SizedBox(height: 3),
@@ -8864,10 +10363,10 @@ class _StandingsViewState extends State<StandingsView> {
                 child: Text(
                   _formatPoints(points),
                   textAlign: TextAlign.right,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 18,
-                    color: Color(0xFF2196F3),
+                    color: theme.colorScheme.primary,
                   ),
                 ),
               ),
@@ -8880,7 +10379,7 @@ class _StandingsViewState extends State<StandingsView> {
                             : Icons.radio_button_unchecked,
                         size: 18,
                         color: isSelected
-                            ? _getTeamColor(teamName)
+                            ? F1TeamSchemes.getTeamColor(teamName)
                             : theme.colorScheme.onSurfaceVariant,
                       )
                     : Icon(
@@ -8892,6 +10391,7 @@ class _StandingsViewState extends State<StandingsView> {
             ],
           ),
         ),
+        ),
       ),
     );
   }
@@ -8902,8 +10402,9 @@ class _StandingsViewState extends State<StandingsView> {
     required int index,
     required bool isDriver,
   }) {
-    final loc = AppLocalizations.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final name = isDriver ? (item as Driver).name : (item as Team).name;
     final points = isDriver ? (item as Driver).points : (item as Team).points;
     final flag = isDriver ? (item as Driver).flag : (item as Team).flag;
@@ -8914,27 +10415,17 @@ class _StandingsViewState extends State<StandingsView> {
     final bool isSelected =
         _isCompareMode && _selectedForComparison.contains(item);
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? _getTeamColor(teamName).withValues(alpha: 0.3)
-            : (isDark ? const Color(0xFF16161E) : Colors.white),
-        borderRadius: BorderRadius.circular(12),
-        border: Border(
-          left: BorderSide(color: _getTeamColor(teamName), width: 6),
-        ),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-      ),
-      child: ListTile(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: F1Module(
+        fillWidth: true,
+        padding: EdgeInsets.zero,
+        borderRadius: 20,
+        backgroundColor: isSelected
+            ? F1TeamSchemes.getTeamColor(teamName).withValues(alpha: 0.16)
+            : Colors.white,
+        showFadingBorder: true,
+        child: ListTile(
         onTap: () => _handleStandingsTap(item, widget.isDriverView),
         leading: Text(
           '${index + 1}',
@@ -8984,14 +10475,15 @@ class _StandingsViewState extends State<StandingsView> {
           ],
         ),
         trailing: Text(
-          '${_formatPoints(points)} ${loc.translate('pts')}',
-          style: const TextStyle(
+          '${_formatPoints(points)} ${'t.pts'.tr()}',
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 12,
-            color: Color(0xFF2196F3),
+            color: theme.colorScheme.primary,
           ),
         ),
       ),
+    ),
     );
   }
 
@@ -9040,14 +10532,14 @@ class _StandingsViewState extends State<StandingsView> {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
+
     final isDriverView = widget.isDriverView;
 
     return Scaffold(
       appBar: AppBar(
         title: _isCompareMode
             ? Text(
-                '${isDriverView ? loc.translate('select_drivers_to_compare') : loc.translate('select_teams_to_compare')} (${_selectedForComparison.length}/2)',
+                '${isDriverView ? 't.select_drivers_to_compare'.tr() : 't.select_teams_to_compare'.tr()} (${_selectedForComparison.length}/2)',
               )
             : DropdownButton<int>(
                 value: _selectedYear,
@@ -9080,8 +10572,19 @@ class _StandingsViewState extends State<StandingsView> {
           if (isDriverView)
             IconButton(
               icon: const Icon(Icons.show_chart),
-              tooltip: loc.translate('drivers_chart'),
+              tooltip: 't.drivers_chart'.tr(),
               onPressed: () => _openDriverStandingsChartSheet(
+                context,
+                initialYear: _selectedYear,
+                availableYears: _years,
+                onYearChanged: _handleChartYearChanged,
+              ),
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.show_chart),
+              tooltip: 't.teams_chart'.tr(),
+              onPressed: () => _openTeamStandingsChartSheet(
                 context,
                 initialYear: _selectedYear,
                 availableYears: _years,
@@ -9090,7 +10593,7 @@ class _StandingsViewState extends State<StandingsView> {
             ),
           IconButton(
             icon: Icon(_isCompareMode ? Icons.cancel : Icons.compare_arrows),
-            tooltip: loc.translate('compare'),
+            tooltip: 't.compare'.tr(),
             onPressed: () => setState(() {
               _isCompareMode = !_isCompareMode;
               _selectedForComparison.clear();
@@ -9118,7 +10621,7 @@ class _StandingsViewState extends State<StandingsView> {
                       horizontal: 16,
                     ),
                     child: Text(
-                      loc.translate('using_fallback_data'),
+                      't.using_fallback_data'.tr(),
                       style: const TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
@@ -9261,6 +10764,36 @@ void _openDriverStandingsChartSheet(
     builder: (context) => FractionallySizedBox(
       heightFactor: 0.9,
       child: DriverStandingsChartSheet(
+        initialYear: initialYear,
+        availableYears: availableYears,
+        onYearChanged: onYearChanged,
+      ),
+    ),
+  );
+}
+
+void _openTeamStandingsChartSheet(
+  BuildContext context, {
+  required int initialYear,
+  required List<int> availableYears,
+  ValueChanged<int>? onYearChanged,
+}) {
+  final screenWidth = MediaQuery.of(context).size.width;
+  final maxSheetWidth = screenWidth >= 1400
+      ? 1320.0
+      : screenWidth >= 1100
+      ? 1120.0
+      : screenWidth;
+
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    backgroundColor: Theme.of(context).colorScheme.surface,
+    constraints: BoxConstraints(maxWidth: maxSheetWidth),
+    builder: (context) => FractionallySizedBox(
+      heightFactor: 0.9,
+      child: TeamStandingsChartSheet(
         initialYear: initialYear,
         availableYears: availableYears,
         onYearChanged: onYearChanged,
@@ -9496,7 +11029,7 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
+
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -9513,14 +11046,14 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        loc.translate('drivers_chart'),
+                        't.drivers_chart'.tr(),
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        loc.translate('championship_progression'),
+                        't.championship_progression'.tr(),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -9567,7 +11100,7 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                       data.series.isEmpty) {
                     return Center(
                       child: Text(
-                        loc.translate('chart_no_data'),
+                        't.chart_no_data'.tr(),
                         style: TextStyle(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -9615,21 +11148,21 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                                 runSpacing: 6,
                                 children: [
                                   ActionChip(
-                                    label: Text(loc.translate('top_5')),
+                                    label: Text('t.top_5'.tr()),
                                     onPressed: () => _selectTopDrivers(data, 5),
                                   ),
                                   ActionChip(
-                                    label: Text(loc.translate('top_10')),
+                                    label: Text('t.top_10'.tr()),
                                     onPressed: () =>
                                         _selectTopDrivers(data, 10),
                                   ),
                                   ActionChip(
-                                    label: Text(loc.translate('show_all')),
+                                    label: Text('t.show_all'.tr()),
                                     onPressed: () =>
                                         _setAllDriversVisible(data),
                                   ),
                                   ActionChip(
-                                    label: Text(loc.translate('hide_all')),
+                                    label: Text('t.hide_all'.tr()),
                                     onPressed: _clearAllDrivers,
                                   ),
                                 ],
@@ -9925,7 +11458,7 @@ class _DriverStandingsChartPainter extends CustomPainter {
     }
 
     final gridPaint = Paint()
-      ..color = isDark ? Colors.white10 : Colors.black12
+      ..color = theme.colorScheme.outline.withValues(alpha: isDark ? 0.2 : 0.15)
       ..strokeWidth = 1;
     final axisLabelStyle = TextStyle(
       color: theme.colorScheme.onSurfaceVariant,
@@ -9958,7 +11491,7 @@ class _DriverStandingsChartPainter extends CustomPainter {
               : value.toStringAsFixed(1),
           style: axisLabelStyle,
         ),
-        textDirection: TextDirection.ltr,
+        textDirection: ui.TextDirection.ltr,
       )..layout();
       painter.paint(canvas, Offset(leftInset, y - painter.height - 2));
     }
@@ -10042,6 +11575,779 @@ class _DriverStandingsChartPainter extends CustomPainter {
   }
 }
 
+class TeamStandingsChartSheet extends StatefulWidget {
+  final int initialYear;
+  final List<int> availableYears;
+  final ValueChanged<int>? onYearChanged;
+
+  const TeamStandingsChartSheet({
+    required this.initialYear,
+    required this.availableYears,
+    this.onYearChanged,
+    super.key,
+  });
+
+  @override
+  State<TeamStandingsChartSheet> createState() =>
+      _TeamStandingsChartSheetState();
+}
+
+class _TeamStandingsChartSheetState extends State<TeamStandingsChartSheet> {
+  late int _selectedYear;
+  final Map<int, Set<String>> _selectedTeamNamesByYear = <int, Set<String>>{};
+  int? _hoveredRound;
+  Offset? _hoverPosition;
+
+  Set<String> _buildDefaultChartSelection(TeamStandingsChartData data) {
+    return data.series.take(8).map((series) => series.teamName).toSet();
+  }
+
+  void _selectTopTeams(TeamStandingsChartData data, int count) {
+    setState(() {
+      _selectedTeamNamesByYear[_selectedYear] = data.series
+          .take(count)
+          .map((series) => series.teamName)
+          .toSet();
+    });
+  }
+
+  void _setAllTeamsVisible(TeamStandingsChartData data) {
+    setState(() {
+      _selectedTeamNamesByYear[_selectedYear] = data.series
+          .map((series) => series.teamName)
+          .toSet();
+    });
+  }
+
+  void _clearAllTeams() {
+    setState(() {
+      _selectedTeamNamesByYear[_selectedYear] = <String>{};
+    });
+  }
+
+  List<int> _sortedChartRoundsForSeries(
+    List<TeamStandingsChartSeries> series,
+  ) {
+    final rounds = <int>{
+      for (final teamSeries in series)
+        ...teamSeries.pointsByRace.map((entry) => entry.round),
+    }.toList()..sort();
+    return rounds;
+  }
+
+  String _roundShortLabel(TeamStandingsChartData data, int round) {
+    for (final series in data.series) {
+      for (final entry in series.pointsByRace) {
+        if (entry.round == round) {
+          return _abbreviateRaceLabel(entry.raceName);
+        }
+      }
+    }
+    return round.toString();
+  }
+
+  String _roundFullLabel(TeamStandingsChartData data, int round) {
+    for (final series in data.series) {
+      for (final entry in series.pointsByRace) {
+        if (entry.round == round) {
+          return entry.raceName;
+        }
+      }
+    }
+    return 'Round $round';
+  }
+
+  double? _pointsForRound(TeamStandingsChartSeries series, int round) {
+    for (final entry in series.pointsByRace) {
+      if (entry.round == round) {
+        return entry.points;
+      }
+    }
+    return null;
+  }
+
+  String _formatChartPoints(double value) {
+    return value == value.roundToDouble()
+        ? value.toInt().toString()
+        : value.toStringAsFixed(1);
+  }
+
+  List<MapEntry<TeamStandingsChartSeries, double>> _rankedValuesForRound(
+    List<TeamStandingsChartSeries> visibleSeries,
+    int round,
+  ) {
+    final values =
+        visibleSeries
+            .map((series) => MapEntry(series, _pointsForRound(series, round)))
+            .where((entry) => entry.value != null)
+            .map((entry) => MapEntry(entry.key, entry.value!))
+            .toList()
+          ..sort((left, right) => right.value.compareTo(left.value));
+    return values;
+  }
+
+  int? _resolveHoveredRound(List<int> rounds, double localX, double width) {
+    if (rounds.isEmpty || width <= 0) {
+      return null;
+    }
+    if (rounds.length == 1) {
+      return rounds.first;
+    }
+
+    final clampedX = localX.clamp(0.0, width);
+    final stepWidth = width / (rounds.length - 1);
+    final index = (clampedX / stepWidth).round().clamp(0, rounds.length - 1);
+    return rounds[index];
+  }
+
+  Widget _buildHoverTooltip(
+    BuildContext context, {
+    required TeamStandingsChartData data,
+    required List<TeamStandingsChartSeries> visibleSeries,
+    required int round,
+  }) {
+    final theme = Theme.of(context);
+    final values = _rankedValuesForRound(visibleSeries, round);
+
+    return Container(
+      width: 220,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.96),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.35),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.18),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            _roundFullLabel(data, round),
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...values
+              .take(6)
+              .toList()
+              .asMap()
+              .entries
+              .map(
+                (rankedEntry) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    children: [
+                      Text(
+                        '#${rankedEntry.key + 1}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: rankedEntry.value.key.color,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          rankedEntry.value.key.teamName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${_formatChartPoints(rankedEntry.value.value)} pts',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedYear = widget.initialYear;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        't.teams_chart'.tr(),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        't.championship_progression'.tr(),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                DropdownButton<int>(
+                  value: _selectedYear,
+                  onChanged: (value) {
+                    if (value == null) {
+                      return;
+                    }
+                    setState(() {
+                      _selectedYear = value;
+                      _hoveredRound = null;
+                      _hoverPosition = null;
+                    });
+                    widget.onYearChanged?.call(value);
+                  },
+                  items: widget.availableYears
+                      .map(
+                        (year) => DropdownMenuItem<int>(
+                          value: year,
+                          child: Text(year.toString()),
+                        ),
+                      )
+                      .toList(growable: false),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: FutureBuilder<TeamStandingsChartData?>(
+                future: _fetchTeamStandingsChartData(_selectedYear),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final data = snapshot.data;
+                  if (snapshot.hasError ||
+                      data == null ||
+                      data.series.isEmpty) {
+                    return Center(
+                      child: Text(
+                        't.chart_no_data'.tr(),
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    );
+                  }
+
+                  final selectedNames = _selectedTeamNamesByYear.putIfAbsent(
+                    _selectedYear,
+                    () => _buildDefaultChartSelection(data),
+                  );
+                  final visibleSeries = data.series
+                      .where(
+                        (series) => selectedNames.contains(series.teamName),
+                      )
+                      .toList(growable: false);
+                  final rounds = _sortedChartRoundsForSeries(visibleSeries);
+
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.03)
+                          : Colors.black.withValues(alpha: 0.02),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isDark ? Colors.white10 : Colors.black12,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 148,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              right: BorderSide(
+                                color: isDark ? Colors.white10 : Colors.black12,
+                              ),
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: [
+                                  ActionChip(
+                                    label: Text('t.top_5'.tr()),
+                                    onPressed: () => _selectTopTeams(data, 5),
+                                  ),
+                                  ActionChip(
+                                    label: Text('t.top_10'.tr()),
+                                    onPressed: () =>
+                                        _selectTopTeams(data, 10),
+                                  ),
+                                  ActionChip(
+                                    label: Text('t.show_all'.tr()),
+                                    onPressed: () =>
+                                        _setAllTeamsVisible(data),
+                                  ),
+                                  ActionChip(
+                                    label: Text('t.hide_all'.tr()),
+                                    onPressed: _clearAllTeams,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Expanded(
+                                child: ListView.separated(
+                                  itemCount: data.series.length,
+                                  separatorBuilder: (_, _) =>
+                                      const SizedBox(height: 8),
+                                  itemBuilder: (context, index) {
+                                    final series = data.series[index];
+                                    final isSelected = selectedNames.contains(
+                                      series.teamName,
+                                    );
+                                    return Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(12),
+                                        onTap: () {
+                                          setState(() {
+                                            final selection =
+                                                _selectedTeamNamesByYear
+                                                    .putIfAbsent(
+                                                      _selectedYear,
+                                                      () =>
+                                                          _buildDefaultChartSelection(
+                                                            data,
+                                                          ),
+                                                    );
+                                            if (selection.contains(
+                                              series.teamName,
+                                            )) {
+                                              selection.remove(
+                                                series.teamName,
+                                              );
+                                            } else {
+                                              selection.add(series.teamName);
+                                            }
+                                          });
+                                        },
+                                        child: AnimatedOpacity(
+                                          duration: const Duration(
+                                            milliseconds: 180,
+                                          ),
+                                          opacity: isSelected ? 1 : 0.38,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 9,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: isSelected
+                                                  ? series.color.withValues(
+                                                      alpha: 0.12,
+                                                    )
+                                                  : Colors.transparent,
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              border: Border.all(
+                                                color: isSelected
+                                                    ? series.color.withValues(
+                                                        alpha: 0.45,
+                                                      )
+                                                    : (isDark
+                                                          ? Colors.white10
+                                                          : Colors.black12),
+                                              ),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                Container(
+                                                  width: 12,
+                                                  height: 12,
+                                                  decoration: BoxDecoration(
+                                                    color: series.color,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 10),
+                                                Expanded(
+                                                  child: Text(
+                                                    series.teamName,
+                                                    maxLines: 2,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: theme
+                                                          .colorScheme
+                                                          .onSurface,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Icon(
+                                                  isSelected
+                                                      ? Icons.visibility
+                                                      : Icons.visibility_off,
+                                                  size: 16,
+                                                  color: isSelected
+                                                      ? series.color
+                                                      : theme
+                                                            .colorScheme
+                                                            .onSurfaceVariant,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final chartWidth = math.max(
+                                0.0,
+                                constraints.maxWidth - 24,
+                              );
+                              final labelWidth = rounds.isEmpty
+                                  ? 24.0
+                                  : (chartWidth / rounds.length)
+                                        .clamp(18.0, 42.0)
+                                        .toDouble();
+
+                              return Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  8,
+                                  16,
+                                  16,
+                                  16,
+                                ),
+                                child: SizedBox(
+                                  width: chartWidth,
+                                  child: MouseRegion(
+                                    onExit: (_) => setState(() {
+                                      _hoveredRound = null;
+                                      _hoverPosition = null;
+                                    }),
+                                    onHover: (event) {
+                                      final box = context.findRenderObject();
+                                      if (box is! RenderBox) {
+                                        return;
+                                      }
+                                      final local = box.globalToLocal(
+                                        event.position,
+                                      );
+                                      setState(() {
+                                        _hoverPosition = local;
+                                        _hoveredRound = _resolveHoveredRound(
+                                          rounds,
+                                          local.dx,
+                                          chartWidth,
+                                        );
+                                      });
+                                    },
+                                    child: GestureDetector(
+                                      behavior: HitTestBehavior.opaque,
+                                      onTapDown: (details) {
+                                        setState(() {
+                                          _hoverPosition =
+                                              details.localPosition;
+                                          _hoveredRound = _resolveHoveredRound(
+                                            rounds,
+                                            details.localPosition.dx,
+                                            chartWidth,
+                                          );
+                                        });
+                                      },
+                                      child: Stack(
+                                        children: [
+                                          Column(
+                                            children: [
+                                              Expanded(
+                                                child: CustomPaint(
+                                                  painter:
+                                                      _TeamStandingsChartPainter(
+                                                        data: data,
+                                                        series: visibleSeries,
+                                                        rounds: rounds,
+                                                        theme: theme,
+                                                        isDark: isDark,
+                                                        hoveredRound:
+                                                            _hoveredRound,
+                                                      ),
+                                                  child:
+                                                      const SizedBox.expand(),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 6),
+                                              Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: rounds
+                                                    .map(
+                                                      (round) => SizedBox(
+                                                        width: labelWidth,
+                                                        child: Transform.rotate(
+                                                          angle: -0.8,
+                                                          alignment: Alignment
+                                                              .topCenter,
+                                                          child: Text(
+                                                            _roundShortLabel(
+                                                              data,
+                                                              round,
+                                                            ),
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                            style: TextStyle(
+                                                              fontSize: 9,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w700,
+                                                              color: theme
+                                                                  .colorScheme
+                                                                  .onSurfaceVariant,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    )
+                                                    .toList(growable: false),
+                                              ),
+                                            ],
+                                          ),
+                                          if (_hoveredRound != null &&
+                                              _hoverPosition != null)
+                                            Positioned(
+                                              left: (_hoverPosition!.dx + 12)
+                                                  .clamp(
+                                                    8.0,
+                                                    chartWidth - 228.0,
+                                                  ),
+                                              top: 8,
+                                              child: _buildHoverTooltip(
+                                                context,
+                                                data: data,
+                                                visibleSeries: visibleSeries,
+                                                round: _hoveredRound!,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TeamStandingsChartPainter extends CustomPainter {
+  final TeamStandingsChartData data;
+  final List<TeamStandingsChartSeries> series;
+  final List<int> rounds;
+  final ThemeData theme;
+  final bool isDark;
+  final int? hoveredRound;
+
+  const _TeamStandingsChartPainter({
+    required this.data,
+    required this.series,
+    required this.rounds,
+    required this.theme,
+    required this.isDark,
+    this.hoveredRound,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (rounds.isEmpty || series.isEmpty) {
+      return;
+    }
+
+    final gridPaint = Paint()
+      ..color = theme.colorScheme.outline.withValues(alpha: isDark ? 0.2 : 0.15)
+      ..strokeWidth = 1;
+    final axisLabelStyle = TextStyle(
+      color: theme.colorScheme.onSurfaceVariant,
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+    );
+    const leftInset = 12.0;
+    const topInset = 20.0;
+    const bottomInset = 16.0;
+    final chartWidth = size.width - leftInset * 2;
+    final chartHeight = size.height - topInset - bottomInset;
+    final steps = math.max(1, rounds.length - 1);
+    final maxPoints = math.max(1.0, data.maxPoints);
+    final roundIndexMap = <int, int>{
+      for (var index = 0; index < rounds.length; index++) rounds[index]: index,
+    };
+
+    for (var index = 0; index <= 4; index++) {
+      final y = topInset + (chartHeight / 4) * index;
+      canvas.drawLine(
+        Offset(leftInset, y),
+        Offset(size.width - leftInset, y),
+        gridPaint,
+      );
+      final value = ((maxPoints / 4) * (4 - index));
+      final painter = TextPainter(
+        text: TextSpan(
+          text: value == value.roundToDouble()
+              ? value.toInt().toString()
+              : value.toStringAsFixed(1),
+          style: axisLabelStyle,
+        ),
+        textDirection: ui.TextDirection.ltr,
+      )..layout();
+      painter.paint(canvas, Offset(leftInset, y - painter.height - 2));
+    }
+
+    for (var roundIndex = 0; roundIndex < rounds.length; roundIndex++) {
+      final x = leftInset + (chartWidth / steps) * roundIndex;
+      canvas.drawLine(
+        Offset(x, topInset),
+        Offset(x, topInset + chartHeight),
+        gridPaint,
+      );
+    }
+
+    if (hoveredRound != null) {
+      final hoverIndex = roundIndexMap[hoveredRound!];
+      if (hoverIndex != null) {
+        final hoverX = leftInset + (chartWidth / steps) * hoverIndex;
+        final hoverPaint = Paint()
+          ..color = theme.colorScheme.primary.withValues(alpha: 0.5)
+          ..strokeWidth = 1.4;
+        canvas.drawLine(
+          Offset(hoverX, topInset),
+          Offset(hoverX, topInset + chartHeight),
+          hoverPaint,
+        );
+      }
+    }
+
+    for (final teamSeries in series) {
+      final sortedEntries = [...teamSeries.pointsByRace]
+        ..sort((left, right) => left.round.compareTo(right.round));
+      if (sortedEntries.isEmpty) {
+        continue;
+      }
+
+      final path = Path();
+      for (var index = 0; index < sortedEntries.length; index++) {
+        final entry = sortedEntries[index];
+        final roundIndex = roundIndexMap[entry.round];
+        if (roundIndex == null) {
+          continue;
+        }
+        final x = leftInset + (chartWidth / steps) * roundIndex;
+        final y =
+            topInset + chartHeight - ((entry.points / maxPoints) * chartHeight);
+        if (index == 0) {
+          path.moveTo(x, y);
+        } else {
+          path.lineTo(x, y);
+        }
+      }
+
+      final paint = Paint()
+        ..color = teamSeries.color
+        ..strokeWidth = 2.0
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round;
+      canvas.drawPath(path, paint);
+
+      final dotPaint = Paint()..color = teamSeries.color;
+      for (final entry in sortedEntries) {
+        final roundIndex = roundIndexMap[entry.round];
+        if (roundIndex == null) {
+          continue;
+        }
+        final x = leftInset + (chartWidth / steps) * roundIndex;
+        final y =
+            topInset + chartHeight - ((entry.points / maxPoints) * chartHeight);
+        canvas.drawCircle(Offset(x, y), 2.1, dotPaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _TeamStandingsChartPainter oldDelegate) {
+    return oldDelegate.data != data ||
+        oldDelegate.series != series ||
+        oldDelegate.theme != theme ||
+        oldDelegate.isDark != isDark ||
+        oldDelegate.hoveredRound != hoveredRound;
+  }
+}
+
 class DriverComparisonView extends StatefulWidget {
   final Driver driver1;
   final Driver driver2;
@@ -10089,7 +12395,7 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final leftDriver = _leftDriver;
     final rightDriver = _rightDriver;
@@ -10113,37 +12419,37 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
           const SizedBox(height: 20),
           if (_showOverall) ...[
             ComparisonRow(
-              label: loc.translate('championships'),
+              label: 't.championships'.tr(),
               value1: leftDriver.championships,
               value2: rightDriver.championships,
               isDark: isDark,
             ),
             ComparisonRow(
-              label: loc.translate('wins'),
+              label: 't.wins'.tr(),
               value1: leftDriver.wins,
               value2: rightDriver.wins,
               isDark: isDark,
             ),
             ComparisonRow(
-              label: loc.translate('podiums'),
+              label: 't.podiums'.tr(),
               value1: leftDriver.podiums,
               value2: rightDriver.podiums,
               isDark: isDark,
             ),
             ComparisonRow(
-              label: loc.translate('poles'),
+              label: 't.poles'.tr(),
               value1: leftDriver.poles,
               value2: rightDriver.poles,
               isDark: isDark,
             ),
             ComparisonRow(
-              label: loc.translate('fastest_laps'),
+              label: 't.fastest_laps'.tr(),
               value1: leftDriver.fastestLaps,
               value2: rightDriver.fastestLaps,
               isDark: isDark,
             ),
             ComparisonRow(
-              label: loc.translate('total_points'),
+              label: 't.total_points'.tr(),
               value1: leftDriver.totalPoints,
               value2: rightDriver.totalPoints,
               isDark: isDark,
@@ -10151,58 +12457,58 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
           ],
           if (_showOverall) ...[
             ComparisonRow(
-              label: loc.translate('starts'),
+              label: 't.starts'.tr(),
               value1: leftDriver.starts,
               value2: rightDriver.starts,
               isDark: isDark,
             ),
             ComparisonRow(
-              label: loc.translate('dnf'),
+              label: 't.dnf'.tr(),
               value1: leftDriver.dnfs,
               value2: rightDriver.dnfs,
               isDark: isDark,
               lowerIsBetter: true,
             ),
             ComparisonRow(
-              label: loc.translate('laps_led'),
+              label: 't.laps_led'.tr(),
               value1: leftDriver.lapsLed,
               value2: rightDriver.lapsLed,
               isDark: isDark,
             ),
             ComparisonRow(
-              label: loc.translate('highestFinish'),
+              label: 't.highestFinish'.tr(),
               value1: leftDriver.highestFinish,
               value2: rightDriver.highestFinish,
               isDark: isDark,
               lowerIsBetter: true,
             ),
             ComparisonRow(
-              label: loc.translate('highestGrid'),
+              label: 't.highestGrid'.tr(),
               value1: leftDriver.highestGrid,
               value2: rightDriver.highestGrid,
               isDark: isDark,
               lowerIsBetter: true,
             ),
             ComparisonRow(
-              label: loc.translate('points_per_start'),
+              label: 't.points_per_start'.tr(),
               value1: (leftDriver.totalPoints / starts1).toStringAsFixed(2),
               value2: (rightDriver.totalPoints / starts2).toStringAsFixed(2),
               isDark: isDark,
             ),
             ComparisonRow(
-              label: loc.translate('win_rate'),
+              label: 't.win_rate'.tr(),
               value1: ((leftDriver.wins / starts1) * 100).toStringAsFixed(1),
               value2: ((rightDriver.wins / starts2) * 100).toStringAsFixed(1),
               isDark: isDark,
             ),
             ComparisonRow(
-              label: loc.translate('last_5_points'),
+              label: 't.last_5_points'.tr(),
               value1: _formatFormPoints(recentForm1),
               value2: _formatFormPoints(recentForm2),
               isDark: isDark,
             ),
             ComparisonRow(
-              label: loc.translate('avg_finish_l5'),
+              label: 't.avg_finish_l5'.tr(),
               value1: _formatDriverAverageFinish(recentForm1),
               value2: _formatDriverAverageFinish(recentForm2),
               isDark: isDark,
@@ -10224,7 +12530,7 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
     required int year,
     required bool isDark,
   }) {
-    final loc = AppLocalizations.of(context);
+
 
     return <Widget>[
       FutureBuilder<List<SeasonalDriverComparisonStats?>>(
@@ -10249,7 +12555,7 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Text(
-                loc.translate('compare_season_unavailable'),
+                't.compare_season_unavailable'.tr(),
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -10263,7 +12569,7 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
           return Column(
             children: [
               ComparisonRow(
-                label: loc.translate('points'),
+                label: 't.points'.tr(),
                 value1: leftStats.points.toStringAsFixed(
                   leftStats.points == leftStats.points.roundToDouble() ? 0 : 1,
                 ),
@@ -10275,46 +12581,46 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
                 isDark: isDark,
               ),
               ComparisonRow(
-                label: loc.translate('poles'),
+                label: 't.poles'.tr(),
                 value1: leftStats.poles,
                 value2: rightStats.poles,
                 isDark: isDark,
               ),
               ComparisonRow(
-                label: loc.translate('fastest_laps'),
+                label: 't.fastest_laps'.tr(),
                 value1: leftStats.fastestLaps,
                 value2: rightStats.fastestLaps,
                 isDark: isDark,
               ),
               ComparisonRow(
-                label: loc.translate('dnf_percentage'),
+                label: 't.dnf_percentage'.tr(),
                 value1: leftStats.dnfPercentage.toStringAsFixed(1),
                 value2: rightStats.dnfPercentage.toStringAsFixed(1),
                 isDark: isDark,
                 lowerIsBetter: true,
               ),
               ComparisonRow(
-                label: loc.translate('podiums'),
+                label: 't.podiums'.tr(),
                 value1: leftStats.podiums,
                 value2: rightStats.podiums,
                 isDark: isDark,
               ),
               ComparisonRow(
-                label: loc.translate('highestFinish'),
+                label: 't.highestFinish'.tr(),
                 value1: leftStats.highestFinish,
                 value2: rightStats.highestFinish,
                 isDark: isDark,
                 lowerIsBetter: true,
               ),
               ComparisonRow(
-                label: loc.translate('highestGrid'),
+                label: 't.highestGrid'.tr(),
                 value1: leftStats.highestGrid,
                 value2: rightStats.highestGrid,
                 isDark: isDark,
                 lowerIsBetter: true,
               ),
               ComparisonRow(
-                label: loc.translate('win_rate'),
+                label: 't.win_rate'.tr(),
                 value1: leftStats.winRate.toStringAsFixed(1),
                 value2: rightStats.winRate.toStringAsFixed(1),
                 isDark: isDark,
@@ -10347,7 +12653,7 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
       return const SizedBox.shrink();
     }
 
-    final loc = AppLocalizations.of(context);
+
     final theme = Theme.of(context);
     final leftByRound = {
       for (final entry in leftStats.pointsByRace) entry.round: entry,
@@ -10375,10 +12681,10 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
             ),
             childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             title: Text(
-              loc.translate('points_progression'),
+              't.points_progression'.tr(),
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
-            subtitle: Text(loc.translate('points_after_each_race')),
+            subtitle: Text('t.points_after_each_race'.tr()),
             children: rounds
                 .map((round) {
                   final leftEntry = leftByRound[round];
@@ -10415,7 +12721,7 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
                           child: Column(
                             children: [
                               Text(
-                                '${loc.translate('round_short')} $round',
+                                '${'t.round_short'.tr()} $round',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 11,
@@ -10497,7 +12803,7 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
   }
 
   Widget _buildCompareScopeControls(BuildContext context) {
-    final loc = AppLocalizations.of(context);
+
     final theme = Theme.of(context);
     final seasonsAvailable = _availableYears.isNotEmpty;
 
@@ -10509,12 +12815,12 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
           runSpacing: 8,
           children: [
             ChoiceChip(
-              label: Text(loc.translate('compare_overall')),
+              label: Text('t.compare_overall'.tr()),
               selected: _showOverall,
               onSelected: (_) => setState(() => _showOverall = true),
             ),
             ChoiceChip(
-              label: Text(loc.translate('compare_season')),
+              label: Text('t.compare_season'.tr()),
               selected: !_showOverall,
               onSelected: seasonsAvailable
                   ? (_) => setState(() => _showOverall = false)
@@ -10527,7 +12833,7 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
           Row(
             children: [
               Text(
-                '${loc.translate('compare_year')}:',
+                '${'t.compare_year'.tr()}:',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   color: theme.colorScheme.onSurface,
@@ -10591,7 +12897,7 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
         Text(
           '#${driver.number}',
           style: TextStyle(
-            color: _getTeamColor(driver.team),
+            color: F1TeamSchemes.getTeamColor(driver.team),
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -10619,7 +12925,7 @@ class TeamComparisonView extends StatefulWidget {
 class _TeamComparisonViewState extends State<TeamComparisonView> {
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final leftTeam = widget.team1;
     final rightTeam = widget.team2;
@@ -10636,74 +12942,74 @@ class _TeamComparisonViewState extends State<TeamComparisonView> {
           _buildHeader(context, leftTeam, rightTeam),
           const SizedBox(height: 20),
           ComparisonRow(
-            label: loc.translate('cc_wins'),
+            label: 't.cc_wins'.tr(),
             value1: widget.team1.ccWins,
             value2: widget.team2.ccWins,
             isDark: isDark,
           ),
           ComparisonRow(
-            label: loc.translate('dc_wins'),
+            label: 't.dc_wins'.tr(),
             value1: widget.team1.dcWins,
             value2: widget.team2.dcWins,
             isDark: isDark,
           ),
           ComparisonRow(
-            label: loc.translate('wins'),
+            label: 't.wins'.tr(),
             value1: widget.team1.podiums,
             value2: widget.team2.podiums,
             isDark: isDark,
           ),
           ComparisonRow(
-            label: loc.translate('one_two'),
+            label: 't.one_two'.tr(),
             value1: widget.team1.oneTwo,
             value2: widget.team2.oneTwo,
             isDark: isDark,
           ),
           ComparisonRow(
-            label: loc.translate('poles'),
+            label: 't.poles'.tr(),
             value1: widget.team1.poles,
             value2: widget.team2.poles,
             isDark: isDark,
           ),
           ComparisonRow(
-            label: loc.translate('fastest_laps'),
+            label: 't.fastest_laps'.tr(),
             value1: widget.team1.fastestLaps,
             value2: widget.team2.fastestLaps,
             isDark: isDark,
           ),
           ComparisonRow(
-            label: loc.translate('total_points'),
+            label: 't.total_points'.tr(),
             value1: widget.team1.totalPoints,
             value2: widget.team2.totalPoints,
             isDark: isDark,
           ),
           ComparisonRow(
-            label: loc.translate('total_entries'),
+            label: 't.total_entries'.tr(),
             value1: widget.team1.totalEntries,
             value2: widget.team2.totalEntries,
             isDark: isDark,
           ),
           ComparisonRow(
-            label: loc.translate('fastestPit'),
+            label: 't.fastestPit'.tr(),
             value1: widget.team1.fastestPitstopTime,
             value2: widget.team2.fastestPitstopTime,
             isDark: isDark,
             lowerIsBetter: true,
           ),
           ComparisonRow(
-            label: loc.translate('points_per_entry'),
+            label: 't.points_per_entry'.tr(),
             value1: (leftTeam.totalPoints / entries1).toStringAsFixed(2),
             value2: (rightTeam.totalPoints / entries2).toStringAsFixed(2),
             isDark: isDark,
           ),
           ComparisonRow(
-            label: loc.translate('pole_rate'),
+            label: 't.pole_rate'.tr(),
             value1: ((leftTeam.poles / entries1) * 100).toStringAsFixed(1),
             value2: ((rightTeam.poles / entries2) * 100).toStringAsFixed(1),
             isDark: isDark,
           ),
           ComparisonRow(
-            label: loc.translate('fastest_lap_rate'),
+            label: 't.fastest_lap_rate'.tr(),
             value1: ((leftTeam.fastestLaps / entries1) * 100).toStringAsFixed(
               1,
             ),
@@ -10746,7 +13052,7 @@ class _TeamComparisonViewState extends State<TeamComparisonView> {
         ),
         Text(
           team.principalName,
-          style: TextStyle(color: _getTeamColor(team.name), fontSize: 12),
+          style: TextStyle(color: F1TeamSchemes.getTeamColor(team.name), fontSize: 12),
           textAlign: TextAlign.center,
         ),
       ],
@@ -10804,8 +13110,30 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
 
   Future<void> _fetchWeather() async {
     try {
-      await Future.delayed(const Duration(milliseconds: 700));
-      // API call removed. Use local data or set default values.
+      final weath = await fetchWeatherForRace(
+        widget.race.lat,
+        widget.race.lon,
+      );
+      if (mounted) {
+        if (weath != null) {
+          setState(() {
+            t = weath.temperature.round().toString();
+            r = weath.precipitationProbability;
+            w = weath.windspeed.round().toString();
+            h = weath.humidity.round().toString();
+            _isWeatherLoading = false;
+          });
+        } else {
+          setState(() {
+            t = '-';
+            w = '-';
+            h = '-';
+            r = 0;
+            _isWeatherLoading = false;
+          });
+        }
+      }
+    } catch (_) {
       if (mounted) {
         setState(() {
           t = '-';
@@ -10815,14 +13143,10 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
           _isWeatherLoading = false;
         });
       }
-    } catch (_) {
-      if (mounted) {
-        setState(() => _isWeatherLoading = false);
-      }
     }
   }
 
-  Widget _buildCircuitHero(BuildContext context, AppLocalizations loc) {
+  Widget _buildCircuitHero(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = _themeTokens(context);
 
@@ -10843,7 +13167,7 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            loc.translate('gp_${widget.race.name}').toUpperCase(),
+            't.gp_${widget.race.name}'.tr().toUpperCase(),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: theme.colorScheme.onSurface,
@@ -10876,12 +13200,12 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
               _buildHeroChip(
                 context,
                 Icons.format_list_numbered,
-                '${widget.race.laps} ${loc.translate('laps').toLowerCase()}',
+                '${widget.race.laps} ${'t.laps'.tr().toLowerCase()}',
               ),
               _buildHeroChip(
                 context,
                 Icons.workspace_premium,
-                loc.translate(widget.race.circuitDifficulty),
+                't.${widget.race.circuitDifficulty}'.tr(),
               ),
             ],
           ),
@@ -10919,7 +13243,7 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
     );
   }
 
-  Widget _buildCircuitLayoutCard(BuildContext context, AppLocalizations loc) {
+  Widget _buildCircuitLayoutCard(BuildContext context) {
     final tokens = _themeTokens(context);
 
     return Container(
@@ -10933,11 +13257,11 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            loc.translate('circuit_layout'),
-            style: const TextStyle(
+            't.circuit_layout'.tr(),
+            style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
-              color: Color(0xFF2196F3),
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
           const SizedBox(height: 12),
@@ -10971,7 +13295,7 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
     );
   }
 
-  Widget _buildCircuitTopArea(BuildContext context, AppLocalizations loc) {
+  Widget _buildCircuitTopArea(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 980;
@@ -10982,9 +13306,9 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(flex: 11, child: _buildCircuitHero(context, loc)),
+                Expanded(flex: 11, child: _buildCircuitHero(context)),
                 const SizedBox(width: 16),
-                Expanded(flex: 9, child: _buildCircuitLayoutCard(context, loc)),
+                Expanded(flex: 9, child: _buildCircuitLayoutCard(context)),
               ],
             ),
           );
@@ -10992,9 +13316,9 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
 
         return Column(
           children: [
-            _buildCircuitHero(context, loc),
+            _buildCircuitHero(context),
             const SizedBox(height: 20),
-            SizedBox(height: 340, child: _buildCircuitLayoutCard(context, loc)),
+            SizedBox(height: 340, child: _buildCircuitLayoutCard(context)),
           ],
         );
       },
@@ -11034,17 +13358,17 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
+
     String translatedStrategy = widget.race.bestCombination
-        .replaceAll('Soft', loc.translate('soft_tire'))
-        .replaceAll('Medium', loc.translate('medium_tire'))
-        .replaceAll('Hard', loc.translate('hard_tire'));
+        .replaceAll('Soft', 't.soft_tire'.tr())
+        .replaceAll('Medium', 't.medium_tire'.tr())
+        .replaceAll('Hard', 't.hard_tire'.tr());
     final isDutch =
-        loc.locale.languageCode == 'nl' || loc.locale.languageCode == 'de';
+        context.locale.languageCode == 'nl' || context.locale.languageCode == 'de';
     final List<String> characteristics = isDutch
         ? widget.race.characteristicsNl
         : widget.race.characteristicsEn;
-    String title = loc.translate('gp_${widget.race.name}').toUpperCase();
+    String title = 't.gp_${widget.race.name}'.tr().toUpperCase();
     if (_showFlagInTitle) {
       title = '${widget.race.flag} $title';
     }
@@ -11053,21 +13377,21 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
       ExpansionTile(
         initiallyExpanded: true,
         title: Text(
-          loc.translate('weather_forecast'),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          't.weather_forecast'.tr(),
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           if (_isWeatherLoading)
             _buildWeatherSkeletonRows(context)
           else ...[
-            _statTile(loc.translate('temp'), '$t°C', Icons.thermostat),
-            _statTile(loc.translate('rain_chance'), '$r%', Icons.umbrella),
-            _statTile(loc.translate('wind_speed'), '$w km/h', Icons.air),
-            _statTile(loc.translate('humidity'), '$h%', Icons.water_drop),
+            _statTile('t.temp'.tr(), '$t°C', Icons.thermostat),
+            _statTile('t.rain_chance'.tr(), '$r%', Icons.umbrella),
+            _statTile('t.wind_speed'.tr(), '$w km/h', Icons.air),
+            _statTile('t.humidity'.tr(), '$h%', Icons.water_drop),
             const SizedBox(height: 8),
           ],
         ],
@@ -11075,43 +13399,43 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
       ExpansionTile(
         initiallyExpanded: true,
         title: Text(
-          loc.translate('circuit_info'),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          't.circuit_info'.tr(),
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           _statTile(
-            loc.translate('length'),
+            't.length'.tr(),
             '${widget.race.length} m',
             Icons.straighten,
           ),
           _statTile(
-            loc.translate('distanceToTurn1'),
+            't.distanceToTurn1'.tr(),
             widget.race.distanceToTurn1,
             Icons.turn_right,
           ),
           _statTile(
-            loc.translate('laps'),
+            't.laps'.tr(),
             widget.race.laps.toString(),
             Icons.format_list_numbered,
           ),
           _statTile(
-            loc.translate('since'),
+            't.since'.tr(),
             widget.race.firstGrandPrix.toString(),
             Icons.history,
           ),
           _statTile(
-            loc.translate('until'),
+            't.until'.tr(),
             widget.race.contractUntil,
             Icons.event,
           ),
           _statTile(
-            loc.translate('circuitDifficulty'),
+            't.circuitDifficulty'.tr(),
             Text(
-              loc.translate(widget.race.circuitDifficulty),
+              't.${widget.race.circuitDifficulty}'.tr(),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
@@ -11121,9 +13445,9 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
             Icons.speed,
           ),
           _statTile(
-            loc.translate('overtakingDifficulty'),
+            't.overtakingDifficulty'.tr(),
             Text(
-              loc.translate(widget.race.overtakingDifficulty),
+              't.${widget.race.overtakingDifficulty}'.tr(),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
@@ -11148,16 +13472,16 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
       ExpansionTile(
         initiallyExpanded: true,
         title: Text(
-          '⚡ ${loc.translate('lap_speed_stats')}',
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          '⚡ ${'t.lap_speed_stats'.tr()}',
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           _statTile(
-            loc.translate('fastestLap'),
+            't.fastestLap'.tr(),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
@@ -11182,7 +13506,7 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
             Icons.timer,
           ),
           _statTile(
-            loc.translate('slowestLap'),
+            't.slowestLap'.tr(),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
@@ -11207,27 +13531,27 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
             Icons.timer_off,
           ),
           _statTile(
-            loc.translate('avgLap'),
+            't.avgLap'.tr(),
             widget.race.averageLap,
             Icons.av_timer,
           ),
           _statTile(
-            loc.translate('topSpeed'),
+            't.topSpeed'.tr(),
             widget.race.topSpeed,
             Icons.speed,
           ),
           _statTile(
-            loc.translate('averageSpeed'),
+            't.averageSpeed'.tr(),
             widget.race.averageSpeed,
             Icons.directions_car,
           ),
           _statTile(
-            loc.translate('max_g_force'),
+            't.max_g_force'.tr(),
             widget.race.maxGForce,
             Icons.compress,
           ),
           _statTile(
-            loc.translate('avgForce'),
+            't.avgForce'.tr(),
             widget.race.avgGForce,
             Icons.compress,
           ),
@@ -11236,31 +13560,31 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
       ),
       ExpansionTile(
         title: Text(
-          loc.translate('risks_incidents'),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          't.risks_incidents'.tr(),
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           _statTile(
-            loc.translate('redFlag'),
+            't.redFlag'.tr(),
             '${widget.race.redFlagChance}%',
             Icons.flag,
           ),
           _statTile(
-            loc.translate('vsc'),
+            't.vsc'.tr(),
             '${widget.race.vscChance}%',
             Icons.warning_amber,
           ),
           _statTile(
-            loc.translate('accident'),
+            't.accident'.tr(),
             '${widget.race.accidentChance}%',
             Icons.car_crash,
           ),
           _statTile(
-            loc.translate('turn1Accident'),
+            't.turn1Accident'.tr(),
             '${widget.race.turn1AccidentChance}%',
             Icons.turn_right,
           ),
@@ -11269,31 +13593,31 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
       ),
       ExpansionTile(
         title: Text(
-          '🛞 ${loc.translate('tyres_strategy')}',
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          '🛞 ${'t.tyres_strategy'.tr()}',
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           _statTile(
-            loc.translate('tireWear'),
-            loc.translate('wear_${widget.race.tireWear}'),
+            't.tireWear'.tr(),
+            't.wear_${widget.race.tireWear}'.tr(),
             Icons.layers,
           ),
           _statTile(
-            loc.translate('strategy'),
-            loc.translate('strategy_${widget.race.tireStrategy}'),
+            't.strategy'.tr(),
+            't.strategy_${widget.race.tireStrategy}'.tr(),
             Icons.settings_suggest,
           ),
           _statTile(
-            loc.translate('bestCombination'),
+            't.bestCombination'.tr(),
             translatedStrategy,
             Icons.donut_large,
           ),
           _statTile(
-            loc.translate('fastestPit'),
+            't.fastestPit'.tr(),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
@@ -11322,12 +13646,12 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
       ),
       ExpansionTile(
         title: Text(
-          '📍 ${loc.translate('characteristics')}',
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          '📍 ${'t.characteristics'.tr()}',
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           Container(
@@ -11344,11 +13668,11 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             '📌 ',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF2196F3),
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
                           Expanded(
@@ -11387,17 +13711,17 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
           padding: const EdgeInsets.all(20),
           children: [
             const SizedBox(height: 20),
-            _buildCircuitTopArea(context, loc),
+            _buildCircuitTopArea(context),
             const SizedBox(height: 16),
             Card(
               color: Theme.of(context).colorScheme.secondaryContainer,
               child: ListTile(
                 leading: const Icon(Icons.view_timeline),
                 title: Text(
-                  loc.translate('weekend_hub'),
+                  't.weekend_hub'.tr(),
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                subtitle: Text(loc.translate('weekend_hub_card_subtitle')),
+                subtitle: Text('t.weekend_hub_card_subtitle'.tr()),
                 trailing: const Icon(Icons.arrow_forward),
                 onTap: () => context.push(_weekendHubPath(widget.race)),
               ),
@@ -11411,6 +13735,23 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
   }
 }
 
+/// Wraps a child with the unified F1 module style: surfaceContainerLow,
+/// 20px radius, fading perimeter border (primary → transparent at 50% width).
+/// Replaces the legacy 2px vertical stripe. Used by Weekend Hub, Race Control, Penalties.
+Widget _weekendHubCard(
+  BuildContext context, {
+  required Widget child,
+  EdgeInsetsGeometry? padding,
+  bool fillWidth = false,
+}) {
+  return F1Module(
+    fillWidth: fillWidth,
+    padding: padding ?? const EdgeInsets.all(18),
+    borderRadius: 20,
+    child: child,
+  );
+}
+
 class WeekendHubScreen extends StatefulWidget {
   final Race race;
 
@@ -11421,22 +13762,22 @@ class WeekendHubScreen extends StatefulWidget {
 }
 
 String _sessionDisplayTitle(BuildContext context, String sessionName) {
-  final loc = AppLocalizations.of(context);
+
   switch (sessionName) {
     case 'Practice 1':
-      return loc.translate('fp1');
+      return 't.fp1'.tr();
     case 'Practice 2':
-      return loc.translate('fp2');
+      return 't.fp2'.tr();
     case 'Practice 3':
-      return loc.translate('fp3');
+      return 't.fp3'.tr();
     case 'Sprint Qualifying':
-      return loc.translate('sprint_quali');
+      return 't.sprint_quali'.tr();
     case 'Sprint':
-      return loc.translate('sprint');
+      return 't.sprint'.tr();
     case 'Qualifying':
-      return loc.translate('qualifying');
+      return 't.qualifying'.tr();
     case 'Race':
-      return '🏁 ${loc.translate('race')}';
+      return '🏁 ${'t.race'.tr()}';
     default:
       return sessionName;
   }
@@ -11473,6 +13814,10 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
   final TextEditingController _raceControlSearchController =
       TextEditingController();
   String _selectedRaceControlScope = _allRaceControlScopes;
+  static const String _rcFilterAll = 'all';
+  static const String _rcFilterAlerts = 'alerts';
+  static const String _rcFilterStewards = 'stewards';
+  String _selectedRaceControlQuickFilter = _rcFilterAll;
   String _selectedWeekendSession = 'Race';
   String _raceControlSearchQuery = '';
   bool _showAllRaceControlMessages = false;
@@ -11500,7 +13845,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
   }
 
   Future<void> _loadWeekendData() async {
-    final loc = AppLocalizations.of(context);
+
     if (mounted) {
       setState(() {
         _loading = true;
@@ -11539,7 +13884,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
         }
       } catch (_) {}
     } catch (_) {
-      _loadError = loc.translate('weekend_hub_load_error');
+      _loadError = 't.weekend_hub_load_error'.tr();
     }
 
     if (mounted) {
@@ -11809,6 +14154,22 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     return filtered;
   }
 
+  List<Map<String, dynamic>> _applyRaceControlQuickFilter(
+    List<Map<String, dynamic>> messages,
+  ) {
+    if (_selectedRaceControlQuickFilter == _rcFilterAll) return messages;
+    return messages.where((m) {
+      final msg = m['message']?.toString();
+      if (_selectedRaceControlQuickFilter == _rcFilterAlerts) {
+        return _matchesRaceControlAlertsFilter(msg);
+      }
+      if (_selectedRaceControlQuickFilter == _rcFilterStewards) {
+        return _matchesRaceControlStewardsFilter(msg);
+      }
+      return true;
+    }).toList(growable: false);
+  }
+
   List<String> _availableWeekendSessions(
     List<Map<String, dynamic>> raceControlMessages,
   ) {
@@ -11840,6 +14201,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       fileName,
       'data/$fileName',
       'data/results/$fileName',
+      'assets/data/results/$fileName',
     ];
 
     for (final candidatePath in candidatePaths) {
@@ -11927,87 +14289,12 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     );
   }
 
-  Widget _buildWeekendSessionSelector(
-    BuildContext context,
-    List<String> availableSessions,
-  ) {
-    if (_loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    // Find the latest session with results (prefer the last in the list)
-    String latestWithResults = availableSessions.reversed.firstWhere(
-      (session) => _hasSessionResults(session),
-      orElse: () => availableSessions.contains('Race') ? 'Race' : availableSessions.first,
-    );
-    // Zorg dat _selectedWeekendSession altijd geldig is
-    final dropdownValue = availableSessions.contains(_selectedWeekendSession)
-        ? _selectedWeekendSession
-        : latestWithResults;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: _themeTokens(context).panelStrong.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: _themeTokens(context).outline.withValues(alpha: 0.65),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            AppLocalizations.of(context).translate('session'),
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
-            key: ValueKey(dropdownValue),
-          initialValue: dropdownValue,
-            isExpanded: true,
-            decoration: const InputDecoration(
-              isDense: true,
-              prefixIcon: Icon(Icons.schedule, size: 18),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 10,
-              ),
-            ),
-            items: availableSessions
-                .map(
-                  (session) => DropdownMenuItem<String>(
-                    value: session,
-                    child: Text(_sessionDisplayTitle(context, session)),
-                  ),
-                )
-                .toList(growable: false),
-            onChanged: (value) {
-              if (value == null) {
-                return;
-              }
-              setState(() {
-                _selectedWeekendSession = value;
-                _showAllRaceControlMessages = false;
-              });
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
   String _formatRaceControlTimestamp(
     BuildContext context,
     String? timestampUtc,
   ) {
     if (timestampUtc == null || timestampUtc.trim().isEmpty) {
-      return AppLocalizations.of(context).translate('unknown_time');
+      return 't.unknown_time'.tr();
     }
 
     final date = DateTime.tryParse(timestampUtc)?.toLocal();
@@ -12023,69 +14310,193 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     return '$day-$month $hour:$minute:$second';
   }
 
+  /// Race Control message style: Green (resolved), Red (alert), Orange (active).
+  /// Uses FIA semantic colors (green/orange/red), not team primary.
   ({Color background, Color border, Color text})? _raceControlMessageStyle(
     String? rawMessage,
+    F1ThemeTokens tokens,
   ) {
     final message = rawMessage?.trim().toUpperCase() ?? '';
-    if (message.isEmpty) {
-      return null;
+    if (message.isEmpty) return null;
+
+    // FIA semantic colors: Green (clear/resolved), Orange (caution), Red (alert)
+    final success = const Color(0xFF2E7D32); // Material Green 800
+    final error = tokens.statusError;
+    final warning = const Color(0xFFE65100); // Material Orange 900
+    ({Color background, Color border, Color text}) style({required Color c}) => (
+      background: c,
+      border: c,
+      text: c,
+    );
+
+    // ─── GREEN (Success/Resolved) – most specific first ─────────────────────
+    // Resolution phrases (check before generic "ENDING" to avoid false matches)
+    if (_matchesAny(message, [
+      'PENALTY SERVED',
+      'PENALTY NOTED', // penalty acknowledged / no further action
+      'NO FURTHER ACTION',
+      'NO FURTHER INVESTIGATION REQUIRED',
+      'NO FURTHER INVESTIGATION', // e.g. "NOTED - NO FURTHER INVESTIGATION"
+      'REVIEWED NO FURTHER INVESTIGATION',
+      'VSC ENDING',
+      'VSC ENDED',
+      'SAFETY CAR IN THIS LAP',
+      'SAFETY CAR IN LAP',
+      'SAFETY CAR RETURNING',
+      'TRACK CLEAR',
+      'CLEAR IN TRACK',
+      'ALL CLEAR',
+      'RACE RESUMED',
+      'SESSION RESUMED',
+      'START PROCEDURE RESUMED',
+      'OVERTAKE RESTORED',
+      'LAPPED CARS MAY NOW OVERTAKE',
+      'LAPPED CARS TO OVERTAKE',
+      'FORMATION LAP RESUMED',
+      'WARNING', // steward warning issued (resolution)
+      'REPRIMAND',
+      'BLACK AND WHITE FLAG',
+      'FINE', // steward fine (resolution)
+      // 2026
+      'OVERTAKE MODE ENABLED',
+      'OVERTAKE AVAILABLE',
+      'ACTIVE AERO ENABLED',
+    ])) {
+      return style(c: success);
+    }
+    // Generic "ending" / "cleared" (after specific phrases)
+    if (message.contains('ENDING') || message.contains('ENDED') ||
+        message.contains('WITHDRAWN') || message.contains('CLEARED')) {
+      return style(c: success);
     }
 
-    if (message.contains('PENALTY SERVED')) {
-      return (
-        background: const Color(0x1A2E7D32),
-        border: const Color(0x662E7D32),
-        text: const Color(0xFF2E7D32),
-      );
+    // ─── RED (Alert/Critical) – highest priority first ──────────────────────
+    if (_matchesAny(message, [
+      'ABORTED',
+      'DELAYED',
+      'EMERGENCY E-STOP',
+      'BATTERY ISOLATION REQUIRED',
+      'RED FLAG',
+      'RACE SUSPENDED',
+      'RACE STOPPED',
+      'SESSION SUSPENDED',
+      'SESSION STOPPED',
+      'DISQUALIFIED',
+      'EXCLUDED',
+      'BLACK FLAG',
+      'BLACK AND ORANGE',
+    ])) {
+      return style(c: error);
+    }
+    // Penalty imposition (not "PENALTY SERVED" – already handled above)
+    if (message.contains('PENALTY') &&
+        !message.contains('PENALTY SERVED') &&
+        !message.contains('PENALTY NOTED')) {
+      return style(c: error);
     }
 
-    // Groen voor SC IN THIS LAP en ENDING en NO FURTHER ACTION
-    if (message.contains('NO FURTHER ACTION') || 
-        message.contains('ENDING') ||
-        message.contains('SAFETY CAR IN THIS LAP')) {
-      return (
-        background: const Color(0x1A2E7D32),
-        border: const Color(0x662E7D32),
-        text: const Color(0xFF2E7D32),
-      );
+    // ─── ORANGE (Warning/Active) – situations requiring caution ────────────
+    if (_matchesAny(message, [
+      'DEBRIS ON TRACK',
+      'DEBRIS',
+      'OIL ON TRACK',
+      'FLUID ON TRACK',
+      'MARSHALS ON TRACK',
+      'DOUBLE YELLOW',
+      'SINGLE YELLOW',
+      'YELLOW FLAG',
+      'VSC DEPLOYED',
+      'VSC DEPLOYMENT',
+      'SAFETY CAR DEPLOYED',
+      'SAFETY CAR DEPLOYMENT',
+      'SC DEPLOYED',
+      'UNDER INVESTIGATION',
+      'WILL BE INVESTIGATED',
+      'SUMMONED',
+      'SUMMONED TO STEWARDS',
+      'NOTED',
+      'DEPLOYED',
+      'FORMATION LAP',
+      'START PROCEDURE',
+      // 2026
+      'ACTIVE AERO RESTRICTED',
+      'ENERGY RECOVERY LIMIT',
+      'POWER UNIT CLIPPING',
+    ])) {
+      return style(c: warning);
     }
 
-    if (message.contains('NO FURTHER INVESTIGATION REQUIRED') ||
-        message.contains('REVIEWED NO FURTHER INVESTIGATION')) {
-      return (
-        background: const Color(0x1A2E7D32),
-        border: const Color(0x662E7D32),
-        text: const Color(0xFF2E7D32),
-      );
+    // ─── NEUTRAL – informational (DRS, chequered, etc.) – no highlight ────
+    // Return null so message uses default panelStrong styling
+    return null;
+  }
+
+  bool _matchesAny(String message, List<String> phrases) {
+    for (final phrase in phrases) {
+      if (message.contains(phrase)) return true;
+    }
+    return false;
+  }
+
+  /// 'warning' | 'error' = Alerts. Uses same logic as _raceControlMessageStyle.
+  String? _raceControlMessageCategory(String? rawMessage) {
+    final message = rawMessage?.trim().toUpperCase() ?? '';
+    if (message.isEmpty) return null;
+
+    if (_matchesAny(message, [
+      'PENALTY SERVED', 'PENALTY NOTED', 'NO FURTHER ACTION',
+      'NO FURTHER INVESTIGATION REQUIRED', 'NO FURTHER INVESTIGATION',
+      'REVIEWED NO FURTHER INVESTIGATION', 'VSC ENDING', 'VSC ENDED',
+      'SAFETY CAR IN THIS LAP', 'SAFETY CAR IN LAP', 'SAFETY CAR RETURNING',
+      'TRACK CLEAR', 'CLEAR IN TRACK', 'ALL CLEAR', 'RACE RESUMED',
+      'SESSION RESUMED', 'START PROCEDURE RESUMED', 'OVERTAKE RESTORED',
+      'LAPPED CARS MAY NOW OVERTAKE', 'LAPPED CARS TO OVERTAKE',
+      'FORMATION LAP RESUMED', 'WARNING', 'REPRIMAND', 'BLACK AND WHITE FLAG',
+      'FINE', 'OVERTAKE MODE ENABLED', 'OVERTAKE AVAILABLE', 'ACTIVE AERO ENABLED',
+    ])) {
+      return 'success';
+    }
+    if (message.contains('ENDING') || message.contains('ENDED') ||
+        message.contains('WITHDRAWN') || message.contains('CLEARED')) {
+      return 'success';
     }
 
-    if (message.contains('PENALTY')) {
-      return (
-        background: const Color(0x1AC62828),
-        border: const Color(0x66C62828),
-        text: const Color(0xFFC62828),
-      );
+    if (_matchesAny(message, [
+      'ABORTED', 'DELAYED', 'EMERGENCY E-STOP', 'BATTERY ISOLATION REQUIRED',
+      'RED FLAG', 'RACE SUSPENDED', 'RACE STOPPED', 'SESSION SUSPENDED',
+      'SESSION STOPPED', 'DISQUALIFIED', 'EXCLUDED', 'BLACK FLAG', 'BLACK AND ORANGE',
+    ])) {
+      return 'error';
+    }
+    if (message.contains('PENALTY') && !message.contains('PENALTY SERVED') &&
+        !message.contains('PENALTY NOTED')) {
+      return 'error';
     }
 
-    if (message.contains(' NOTED') || message.endsWith('NOTED') || message.contains('DEPLOYED')) {
-      return (
-        background: const Color(0x1AF57C00),
-        border: const Color(0x66F57C00),
-        text: const Color(0xFFF57C00),
-      );
-    }
-
-    if (message.contains('UNDER INVESTIGATION') ||
-        message.contains('WILL BE INVESTIGATED') ||
-        message.contains('SUMMONED')) {
-      return (
-        background: const Color(0x1AF57C00),
-        border: const Color(0x66F57C00),
-        text: const Color(0xFFF57C00),
-      );
+    if (_matchesAny(message, [
+      'DEBRIS ON TRACK', 'DEBRIS', 'OIL ON TRACK', 'FLUID ON TRACK',
+      'MARSHALS ON TRACK', 'DOUBLE YELLOW', 'SINGLE YELLOW', 'YELLOW FLAG',
+      'VSC DEPLOYED', 'VSC DEPLOYMENT', 'SAFETY CAR DEPLOYED', 'SAFETY CAR DEPLOYMENT',
+      'SC DEPLOYED', 'UNDER INVESTIGATION', 'WILL BE INVESTIGATED', 'SUMMONED',
+      'SUMMONED TO STEWARDS', 'NOTED', 'DEPLOYED', 'FORMATION LAP', 'START PROCEDURE',
+      'ACTIVE AERO RESTRICTED', 'ENERGY RECOVERY LIMIT', 'POWER UNIT CLIPPING',
+    ])) {
+      return 'warning';
     }
 
     return null;
+  }
+
+  bool _matchesRaceControlAlertsFilter(String? rawMessage) {
+    final cat = _raceControlMessageCategory(rawMessage);
+    return cat == 'warning' || cat == 'error';
+  }
+
+  bool _matchesRaceControlStewardsFilter(String? rawMessage) {
+    final message = rawMessage?.trim().toUpperCase() ?? '';
+    return _matchesAny(message, [
+      'INVESTIGATION', 'PENALTY', 'NOTED', 'SUMMONED', 'REPRIMAND',
+    ]);
   }
 
   bool _isRaceControlPenaltyServedMessage(String? rawMessage) {
@@ -12281,43 +14692,38 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     String? rawMessage,
     bool isSource,
   ) {
-    final loc = AppLocalizations.of(context);
+
     if (_isRaceControlPenaltyServedMessage(rawMessage)) {
-      return loc.translate(
-        isSource
-            ? 'race_control_relation_served_penalty'
-            : 'race_control_relation_issued_earlier',
-      );
+      return (isSource
+              ? 't.race_control_relation_served_penalty'
+              : 't.race_control_relation_issued_earlier')
+          .tr();
     }
     if (_isRaceControlPenaltyMessage(rawMessage)) {
-      return loc.translate(
-        isSource
-            ? 'race_control_relation_penalty_message'
-            : 'race_control_relation_served_later',
-      );
+      return (isSource
+              ? 't.race_control_relation_penalty_message'
+              : 't.race_control_relation_served_later')
+          .tr();
     }
     if (_isRaceControlNotedMessage(rawMessage)) {
-      return loc.translate('race_control_relation_noted');
+      return 't.race_control_relation_noted'.tr();
     }
     if (_isRaceControlInvestigationMessage(rawMessage)) {
-      return loc.translate(
-        isSource
-            ? 'race_control_relation_investigation'
-            : 'race_control_relation_outcome',
-      );
+      return (isSource
+              ? 't.race_control_relation_investigation'
+              : 't.race_control_relation_outcome')
+          .tr();
     }
     if (_isRaceControlResolutionMessage(rawMessage)) {
-      return loc.translate(
-        isSource
-            ? 'race_control_relation_outcome'
-            : 'race_control_relation_investigation',
-      );
+      return (isSource
+              ? 't.race_control_relation_outcome'
+              : 't.race_control_relation_investigation')
+          .tr();
     }
-    return loc.translate(
-      isSource
-          ? 'race_control_relation_message'
-          : 'race_control_relation_linked',
-    );
+    return (isSource
+            ? 't.race_control_relation_message'
+            : 't.race_control_relation_linked')
+        .tr();
   }
 
   List<Map<String, dynamic>> _relatedRaceControlMessages(
@@ -12455,10 +14861,10 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     String title,
     Map<String, dynamic> message,
   ) {
-    final loc = AppLocalizations.of(context);
+
     final theme = Theme.of(context);
     final tokens = _themeTokens(context);
-    final style = _raceControlMessageStyle(message['message']?.toString());
+    final style = _raceControlMessageStyle(message['message']?.toString(), tokens);
 
     return Container(
       width: double.infinity,
@@ -12500,13 +14906,13 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                 _buildRaceControlTag(
                   context,
                   Icons.looks_one,
-                  loc.format('lap_label', {'lap': '${message['lap']}'}),
+                  't.lap_label'.tr(namedArgs: {'lap': '${message['lap']}'}),
                 ),
               if (message['driverNumber'] != null)
                 _buildRaceControlTag(
                   context,
                   Icons.directions_car,
-                  loc.format('car_label', {
+                  't.car_label'.tr(namedArgs: {
                     'number': '${message['driverNumber']}',
                   }),
                 ),
@@ -12517,6 +14923,8 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                   message['flag']!.toString(),
                   accentColor: _raceControlFlagColor(
                     message['flag']?.toString(),
+                    tokens,
+                    theme.colorScheme,
                   ),
                 ),
             ],
@@ -12545,7 +14953,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     String selectedSession,
     Map<String, dynamic> message,
   ) async {
-    final loc = AppLocalizations.of(context);
+
     final relatedMessages = _relatedRaceControlMessages(
       allMessages,
       selectedSession,
@@ -12563,7 +14971,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       true,
     );
     final relatedTitle = sourceIsInvestigation || sourceIsResolution
-        ? loc.translate('race_control_related_updates')
+        ? 't.race_control_related_updates'.tr()
         : _raceControlRelationTitle(
             context,
             message['message']?.toString(),
@@ -12574,7 +14982,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: Text(loc.translate('race_control_detail')),
+          title: Text('t.race_control_detail'.tr()),
           content: SizedBox(
             width: 520,
             child: SingleChildScrollView(
@@ -12614,7 +15022,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                     ),
                   ] else ...[
                     Text(
-                      loc.translate('race_control_no_linked_message'),
+                      't.race_control_no_linked_message'.tr(),
                       style: TextStyle(
                         fontSize: 12,
                         color: Theme.of(
@@ -12630,7 +15038,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text(loc.translate('close')),
+              child: Text('t.close'.tr()),
             ),
           ],
         );
@@ -12638,22 +15046,16 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     );
   }
 
-  Color? _raceControlFlagColor(String? flag) {
+  Color? _raceControlFlagColor(String? flag, F1ThemeTokens tokens, ColorScheme scheme) {
     final normalized = flag?.trim().toUpperCase() ?? '';
     switch (normalized) {
-      case 'BLUE':
-        return const Color(0xFF1E88E5);
-      case 'RED':
-        return const Color(0xFFC62828);
+      case 'BLUE': return scheme.primary;
+      case 'RED': return tokens.statusError;
       case 'DOUBLE YELLOW':
-        return const Color(0xFFF57F17);
-      case 'YELLOW':
-        return const Color(0xFFF9A825);
+      case 'YELLOW': return tokens.statusWarning;
       case 'GREEN':
-      case 'CLEAR':
-        return const Color(0xFF2E7D32);
-      default:
-        return null;
+      case 'CLEAR': return tokens.statusSuccess;
+      default: return null;
     }
   }
 
@@ -12662,28 +15064,146 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     List<String> availableScopes,
     String selectedScope,
   ) {
-    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    bool isSelected(String scope) => scope == selectedScope;
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: availableScopes
-          .map(
-            (scope) => ChoiceChip(
-              label: Text(
-                scope == _allRaceControlScopes
-                    ? loc.translate('all_scopes')
-                    : scope,
+      children: availableScopes.map((scope) {
+        final selected = isSelected(scope);
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              setState(() {
+                _selectedRaceControlScope = scope;
+                _showAllRaceControlMessages = false;
+              });
+            },
+            borderRadius: BorderRadius.circular(999),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: selected
+                    ? theme.colorScheme.primary.withValues(alpha: 0.12)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(999),
+                border: selected
+                    ? Border.all(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.35),
+                        width: 0.5,
+                      )
+                    : null,
               ),
-              selected: scope == selectedScope,
-              onSelected: (_) {
-                setState(() {
-                  _selectedRaceControlScope = scope;
-                  _showAllRaceControlMessages = false;
-                });
-              },
+              child: Text(
+                scope == _allRaceControlScopes ? 't.all_scopes'.tr() : scope,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: selected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
             ),
-          )
-          .toList(growable: false),
+          ),
+        );
+      }).toList(growable: false),
+    );
+  }
+
+  Widget _buildRaceControlFilterBar(BuildContext context) {
+    bool isSelected(String filter) => filter == _selectedRaceControlQuickFilter;
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildRaceControlFilterChip(
+            context,
+            label: 't.race_control_filter_all'.tr(),
+            filter: _rcFilterAll,
+            selected: isSelected(_rcFilterAll),
+          ),
+          const SizedBox(width: 8),
+          _buildRaceControlFilterChip(
+            context,
+            label: 't.race_control_filter_alerts'.tr(),
+            filter: _rcFilterAlerts,
+            selected: isSelected(_rcFilterAlerts),
+          ),
+          const SizedBox(width: 8),
+          _buildRaceControlFilterChip(
+            context,
+            label: 't.race_control_filter_stewards'.tr(),
+            filter: _rcFilterStewards,
+            selected: isSelected(_rcFilterStewards),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRaceControlFilterChip(
+    BuildContext context, {
+    required String label,
+    required String filter,
+    required bool selected,
+  }) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final bg = selected
+        ? scheme.primary
+        : scheme.surfaceContainerLow;
+    final textColor = selected
+        ? F1ThemeTokens.textOnBackground(scheme.primary)
+        : scheme.onSurfaceVariant;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _selectedRaceControlQuickFilter = filter;
+            _showAllRaceControlMessages = false;
+          });
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: textColor,
+                ),
+              ),
+              if (selected)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: CustomPaint(
+                      painter: FadingBorderPainter(
+                        color: F1ThemeTokens.textOnBackground(scheme.primary)
+                            .withValues(alpha: 0.4),
+                        borderRadius: 20,
+                        borderWidth: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -12692,29 +15212,29 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     List<Map<String, dynamic>> messages,
     String selectedSession,
   ) {
-    final loc = AppLocalizations.of(context);
+
     final theme = Theme.of(context);
-    final tokens = _themeTokens(context);
     final availableScopes = _raceControlScopes(messages, selectedSession);
     final selectedScope = availableScopes.contains(_selectedRaceControlScope)
         ? _selectedRaceControlScope
         : _allRaceControlScopes;
-    final filteredMessages = _filterRaceControlMessages(
+    var filteredMessages = _filterRaceControlMessages(
       messages,
       selectedSession,
       selectedScope,
     );
+    filteredMessages = _applyRaceControlQuickFilter(filteredMessages);
     final visibleMessages = _showAllRaceControlMessages
         ? filteredMessages
         : filteredMessages.take(_defaultRaceControlVisibleCount).toList();
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSectionCardTitle(context, loc.translate('race_control')),
+    return _weekendHubCard(
+      context,
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionCardTitle(context, 't.race_control'.tr()),
             const SizedBox(height: 12),
             TextField(
               controller: _raceControlSearchController,
@@ -12726,12 +15246,12 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
               },
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.search),
-                hintText: loc.translate('race_control_search_hint'),
+                hintText: 't.race_control_search_hint'.tr(),
               ),
             ),
             const SizedBox(height: 12),
             Text(
-              loc.translate('scope'),
+              't.scope'.tr(),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
@@ -12745,8 +15265,10 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
               selectedScope,
             ),
             const SizedBox(height: 12),
+            _buildRaceControlFilterBar(context),
+            const SizedBox(height: 12),
             Text(
-              loc.format('race_control_message_count', {
+              't.race_control_message_count'.tr(namedArgs: {
                 'visible': '${visibleMessages.length}',
                 'total': '${filteredMessages.length}',
               }),
@@ -12759,15 +15281,17 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
             const SizedBox(height: 12),
             if (filteredMessages.isEmpty)
               Text(
-                loc.translate('race_control_empty'),
+                't.race_control_empty'.tr(),
                 style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
               )
             else
               Column(
                 children: visibleMessages
                     .map((message) {
+                      final tokens = _themeTokens(context);
                       final messageStyle = _raceControlMessageStyle(
                         message['message']?.toString(),
+                        tokens,
                       );
                       final relatedMessages = _relatedRaceControlMessages(
                         messages,
@@ -12777,7 +15301,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                       return Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(20),
                           onTap: () => _showRaceControlMessageDetails(
                             context,
                             messages,
@@ -12787,107 +15311,45 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                           child: Container(
                             width: double.infinity,
                             margin: const EdgeInsets.only(bottom: 10),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color:
-                                  messageStyle?.background ??
-                                  tokens.panelStrong,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color:
-                                    messageStyle?.border ??
-                                    tokens.outline.withValues(alpha: 0.6),
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Stack(
+                              clipBehavior: Clip.none,
                               children: [
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: [
-                                    _buildRaceControlTag(
-                                      context,
-                                      Icons.schedule,
-                                      _normalizeSessionName(message['sessionName']) == ''
-                                          ? loc.translate('unknown')
-                                          : _normalizeSessionName(message['sessionName']),
-                                    ),
-                                    if ((message['scope']?.toString() ?? '')
-                                        .trim()
-                                        .isNotEmpty)
-                                      _buildRaceControlTag(
-                                        context,
-                                        Icons.center_focus_strong,
-                                        message['scope']!.toString(),
-                                      ),
-                                    if ((message['flag']?.toString() ?? '')
-                                        .trim()
-                                        .isNotEmpty)
-                                      _buildRaceControlTag(
-                                        context,
-                                        Icons.flag,
-                                        message['flag']!.toString(),
-                                        accentColor: _raceControlFlagColor(
-                                          message['flag']?.toString(),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: messageStyle?.background ??
+                                        tokens.panelStrong,
+                                    borderRadius:
+                                        BorderRadius.circular(20),
+                                    border: messageStyle == null
+                                        ? Border.all(
+                                            color: tokens.outline
+                                                .withValues(alpha: 0.6),
+                                          )
+                                        : null,
+                                  ),
+                                  child: _buildRaceControlMessageContent(
+                                    context,
+                                    message,
+                                    theme,
+                                    tokens,
+                                    messageStyle,
+                                    relatedMessages,
+                                  ),
+                                ),
+                                if (messageStyle != null)
+                                  Positioned.fill(
+                                    child: IgnorePointer(
+                                      child: CustomPaint(
+                                        painter: FadingBorderPainter(
+                                          color: theme.colorScheme.primary,
+                                          borderRadius: 20,
+                                          borderWidth: 2,
                                         ),
                                       ),
-                                    if (message['lap'] != null)
-                                      _buildRaceControlTag(
-                                        context,
-                                        Icons.looks_one,
-                                        loc.format('lap_label', {
-                                          'lap': '${message['lap']}',
-                                        }),
-                                      ),
-                                    if (message['driverNumber'] != null)
-                                      _buildRaceControlTag(
-                                        context,
-                                        Icons.directions_car,
-                                        loc.format('car_label', {
-                                          'number':
-                                              '${message['driverNumber']}',
-                                        }),
-                                      ),
-                                    if (relatedMessages.isNotEmpty)
-                                      _buildRaceControlTag(
-                                        context,
-                                        Icons.link,
-                                        relatedMessages.length == 1
-                                            ? loc.translate('linked_update_one')
-                                            : loc.format('linked_update_many', {
-                                                'count':
-                                                    '${relatedMessages.length}',
-                                              }),
-                                      ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  message['message']?.toString() ?? '-',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color:
-                                        messageStyle?.text ??
-                                        theme.colorScheme.onSurface,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  _formatRaceControlTimestamp(
-                                    context,
-                                    message['timestampUtc']?.toString(),
-                                  ),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color:
-                                        messageStyle?.text.withValues(
-                                          alpha: 0.88,
-                                        ) ??
-                                        theme.colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
                               ],
                             ),
                           ),
@@ -12914,17 +15376,115 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                   ),
                   label: Text(
                     _showAllRaceControlMessages
-                        ? loc.translate('show_less_messages')
-                        : loc.format('show_all_messages', {
-                            'count': '${filteredMessages.length}',
-                          }),
+                        ? 't.show_less_messages'.tr()
+                        : 't.show_all_messages'.tr(namedArgs: {'count': '${filteredMessages.length}'}),
                   ),
                 ),
               ),
             ],
           ],
         ),
-      ),
+      );
+  }
+
+  Widget _buildRaceControlMessageContent(
+    BuildContext context,
+    Map<String, dynamic> message,
+    ThemeData theme,
+    F1ThemeTokens tokens,
+    ({Color background, Color border, Color text})? messageStyle,
+    List<Map<String, dynamic>> relatedMessages,
+  ) {
+    final bg = messageStyle?.background ?? tokens.panelStrong;
+    final textColor = messageStyle != null
+        ? F1ThemeTokens.textOnBackground(bg)
+        : null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _buildRaceControlTag(
+              context,
+              Icons.schedule,
+              _normalizeSessionName(message['sessionName']) == ''
+                  ? 't.unknown'.tr()
+                  : _normalizeSessionName(message['sessionName']),
+              forceTextColor: textColor,
+            ),
+            if ((message['scope']?.toString() ?? '').trim().isNotEmpty)
+              _buildRaceControlTag(
+                context,
+                Icons.center_focus_strong,
+                message['scope']!.toString(),
+                forceTextColor: textColor,
+              ),
+            if ((message['flag']?.toString() ?? '').trim().isNotEmpty)
+              _buildRaceControlTag(
+                context,
+                Icons.flag,
+                message['flag']!.toString(),
+                accentColor: textColor == null
+                    ? _raceControlFlagColor(
+                        message['flag']?.toString(),
+                        tokens,
+                        theme.colorScheme,
+                      )
+                    : null,
+                forceTextColor: textColor,
+              ),
+            if (message['lap'] != null)
+              _buildRaceControlTag(
+                context,
+                Icons.looks_one,
+                't.lap_label'.tr(namedArgs: {'lap': '${message['lap']}'}),
+                forceTextColor: textColor,
+              ),
+            if (message['driverNumber'] != null)
+              _buildRaceControlTag(
+                context,
+                Icons.directions_car,
+                't.car_label'.tr(namedArgs: {
+                  'number': '${message['driverNumber']}',
+                }),
+                forceTextColor: textColor,
+              ),
+            if (relatedMessages.isNotEmpty)
+              _buildRaceControlTag(
+                context,
+                Icons.link,
+                relatedMessages.length == 1
+                    ? 't.linked_update_one'.tr()
+                    : 't.linked_update_many'.tr(namedArgs: {
+                        'count': '${relatedMessages.length}',
+                      }),
+                forceTextColor: textColor,
+              ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Text(
+          message['message']?.toString() ?? '-',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: textColor ?? theme.colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          _formatRaceControlTimestamp(
+            context,
+            message['timestampUtc']?.toString(),
+          ),
+          style: TextStyle(
+            fontSize: 12,
+            color: textColor ?? theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 
@@ -12933,21 +15493,28 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     IconData icon,
     String label, {
     Color? accentColor,
+    Color? forceTextColor,
   }) {
     final theme = Theme.of(context);
-    final effectiveColor = accentColor ?? theme.colorScheme.onSurfaceVariant;
+    final tokens = _themeTokens(context);
+    final effectiveColor = forceTextColor ??
+        (accentColor ?? theme.colorScheme.onSurfaceVariant);
+    final tagBg = forceTextColor != null
+        ? effectiveColor.withValues(alpha: 0.2)
+        : (accentColor == null
+            ? tokens.panel
+            : accentColor.withValues(alpha: 0.14));
+    final tagBorder = forceTextColor != null
+        ? effectiveColor.withValues(alpha: 0.4)
+        : (accentColor == null
+            ? tokens.outline.withValues(alpha: 0.55)
+            : accentColor.withValues(alpha: 0.34));
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: accentColor == null
-            ? _themeTokens(context).panel
-            : effectiveColor.withValues(alpha: 0.14),
+        color: tagBg,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: accentColor == null
-              ? _themeTokens(context).outline.withValues(alpha: 0.55)
-              : effectiveColor.withValues(alpha: 0.34),
-        ),
+        border: Border.all(color: tagBorder),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -13025,10 +15592,10 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                 onRefresh: _loadWeekendData,
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   children: [
                     _buildWeekendHubHeader(context, availableSessions),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
                     _buildWeekendHubLowerRow(
                       context,
                       selectedSession,
@@ -13060,6 +15627,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
           sessionWeather,
           sessionLapTimeline,
           raceControlMessages,
+          includeSectionTitle: false,
         );
         final raceControl = _buildRaceControlSection(
           context,
@@ -13073,9 +15641,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(flex: 10, child: race),
-              const SizedBox(width: 16),
+              const SizedBox(width: 24),
               Expanded(flex: 13, child: raceControl),
-              const SizedBox(width: 16),
+              const SizedBox(width: 24),
               Expanded(flex: 9, child: penaltiesCard),
             ],
           );
@@ -13089,11 +15657,11 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(flex: 10, child: race),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 24),
                   Expanded(flex: 13, child: raceControl),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               penaltiesCard,
             ],
           );
@@ -13103,9 +15671,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             race,
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             raceControl,
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             penaltiesCard,
           ],
         );
@@ -13114,37 +15682,24 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
   }
 
   Widget _buildWeekendScheduleCard(BuildContext context) {
-    final loc = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final tokens = _themeTokens(context);
     final schedule = _sessionSchedule();
 
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: tokens.panelStrong.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: tokens.outline.withValues(alpha: 0.7)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 14,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+    return _weekendHubCard(
+      context,
+      padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            loc.translate('weekend_schedule'),
-            style: TextStyle(
-              fontSize: 14,
+            't.weekend_schedule'.tr(),
+            style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w800,
               color: theme.colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           ...schedule.map((entry) {
             final status = _sessionStatus(entry.value);
             final canOpenResults = status == 'session_status_completed';
@@ -13157,43 +15712,32 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
             return Container(
               margin: const EdgeInsets.only(bottom: 8),
               decoration: BoxDecoration(
-                color: tokens.panel.withValues(alpha: 0.88),
-                borderRadius: BorderRadius.circular(14),
+                color: theme.colorScheme.surfaceContainerLow.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: tokens.outline.withValues(alpha: 0.42),
+                  color: tokens.outline.withValues(alpha: 0.2),
+                  width: 0.5,
                 ),
               ),
               child: InkWell(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(12),
                 onTap: canOpenResults
                     ? () => _openSingleSessionResults(entry.key)
                     : null,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 9,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   child: Row(
                     children: [
-                      Container(
-                        width: 28,
-                        height: 28,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: 0.14),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Icon(
-                          entry.key == 'Race'
-                              ? Icons.flag
-                              : entry.key.contains('Qualifying')
-                              ? Icons.timer
-                              : Icons.schedule,
-                          size: 15,
-                          color: statusColor,
-                        ),
+                      Icon(
+                        entry.key == 'Race'
+                            ? Icons.flag
+                            : entry.key.contains('Qualifying')
+                            ? Icons.timer
+                            : Icons.schedule,
+                        size: 18,
+                        color: statusColor.withValues(alpha: 0.9),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -13204,8 +15748,8 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
                                 color: theme.colorScheme.onSurface,
                               ),
                             ),
@@ -13222,18 +15766,25 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        canOpenResults
-                            ? loc.translate('results')
-                            : loc.translate(status),
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: statusColor,
+                      if (canOpenResults)
+                        TextButton(
+                          onPressed: () => _openSingleSessionResults(entry.key),
+                          style: TextButton.styleFrom(
+                            foregroundColor: theme.colorScheme.primary.withValues(alpha: 0.8),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: Text('t.results'.tr(), style: const TextStyle(fontSize: 11)),
+                        )
+                      else
+                        Text(
+                          't.$status'.tr(),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -13250,46 +15801,70 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     String selectedSession,
     List<Map<String, dynamic>> sessionWeather,
     List<Map<String, dynamic>> sessionLapTimeline,
-    List<Map<String, dynamic>> raceControlMessages,
-  ) {
+    List<Map<String, dynamic>> raceControlMessages, {
+    bool includeSectionTitle = true,
+  }) {
     final theme = Theme.of(context);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    if (sessionWeather.isNotEmpty) {
+      final trackPlayback = _weekendHubCard(
+        context,
+        padding: const EdgeInsets.all(18),
+        fillWidth: true,
+        child: CircuitWeatherPlaybackCard(
+          race: widget.race,
+          sessionName: selectedSession,
+          weatherSamples: sessionWeather,
+          lapTimeline: sessionLapTimeline,
+          raceControlMessages: raceControlMessages,
+          embedInCard: false,
+        ),
+      );
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (includeSectionTitle) ...[
             _buildSectionCardTitle(
               context,
               _sessionDisplayTitle(context, selectedSession),
             ),
-            const SizedBox(height: 12),
-            if (sessionWeather.isNotEmpty) ...[
-              CircuitWeatherPlaybackCard(
-                race: widget.race,
-                sessionName: selectedSession,
-                weatherSamples: sessionWeather,
-                lapTimeline: sessionLapTimeline,
-                raceControlMessages: raceControlMessages,
-              ),
-              const SizedBox(height: 12),
-            ] else ...[
-              Text(
-                'Geen weerdata beschikbaar voor ${_sessionDisplayTitle(context, selectedSession)}.',
-                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-              ),
-              const SizedBox(height: 12),
-            ],
-            if (_loadError != null) ...[
-              Text(
-                _loadError!,
-                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-              ),
-              const SizedBox(height: 12),
-            ],
+            const SizedBox(height: 14),
           ],
-        ),
+          trackPlayback,
+          if (_loadError != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              _loadError!,
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+            ),
+          ],
+        ],
+      );
+    }
+
+    return _weekendHubCard(
+      context,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionCardTitle(
+            context,
+            _sessionDisplayTitle(context, selectedSession),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'Geen weerdata beschikbaar voor ${_sessionDisplayTitle(context, selectedSession)}.',
+            style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+          ),
+          if (_loadError != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              _loadError!,
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -13321,51 +15896,62 @@ Widget _buildPenaltiesCard(
     return bTime.compareTo(aTime); // nieuwste bovenaan
   });
 
-  return Card(
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSectionCardTitle(context, 'Penalties'),
-          const SizedBox(height: 12),
-          if (penaltyEntries.isEmpty)
-            const Text('Geen penalties gevonden in de huidige weekend cache.')
-          else
-            Column(
-              children: penaltyEntries
-                  .map(
-                    (entry) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(
-                            Icons.warning_amber_rounded,
-                            color: Color(0xFFF57C00),
-                            size: 18,
+  final theme = Theme.of(context);
+  final tokens = _themeTokens(context);
+
+  return _weekendHubCard(
+    context,
+    padding: const EdgeInsets.all(18),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionCardTitle(context, 'Penalties'),
+        const SizedBox(height: 12),
+        if (penaltyEntries.isEmpty)
+          Text(
+            'Geen penalties gevonden in de huidige weekend cache.',
+            style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+          )
+        else
+          Column(
+            children: penaltyEntries
+                .map(
+                  (entry) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.warning_amber_rounded,
+                          color: tokens.statusWarning,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${entry['driver']}: ${entry['penalty']}',
+                                style: TextStyle(color: theme.colorScheme.onSurface),
+                              ),
+                              if (entry['reason'] != null && (entry['reason'] as String).trim().isNotEmpty)
+                                Text(
+                                  'Reden: ${entry['reason']}',
+                                  style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant),
+                                ),
+                            ],
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('${entry['driver']}: ${entry['penalty']}'),
-                                if (entry['reason'] != null && (entry['reason'] as String).trim().isNotEmpty)
-                                  Text('Reden: ${entry['reason']}', style: const TextStyle(fontSize: 13, color: Color(0xFF888888))),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  )
-                  .toList(),
+                  ),
+                )
+                .toList(),
             ),
         ],
       ),
-    ),
-  );
+    );
 }
 
 // Zoek timestamp van penalty detail via raceControlMessages
@@ -13412,15 +15998,8 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 860;
         final isThreeColumn = constraints.maxWidth >= 1180;
-        final summary = _buildWeekendHubSummaryCard(context);
-        final sessionSelector = _buildWeekendSessionSelector(
-          context,
-          availableSessions,
-        );
-        final summaryColumn = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [summary, const SizedBox(height: 12), sessionSelector],
-        );
+        final summary = _buildWeekendHubSummaryCard(context, availableSessions);
+        final summaryColumn = summary;
         final selectedSession =
             availableSessions.contains(_selectedWeekendSession)
             ? _selectedWeekendSession
@@ -13431,15 +16010,17 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
         final schedule = _buildWeekendScheduleCard(context);
 
         if (isThreeColumn) {
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: summaryColumn),
-              const SizedBox(width: 12),
-              Expanded(child: podium),
-              const SizedBox(width: 12),
-              Expanded(child: schedule),
-            ],
+          return IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: summaryColumn),
+                const SizedBox(width: 24),
+                Expanded(child: podium),
+                const SizedBox(width: 24),
+                Expanded(child: schedule),
+              ],
+            ),
           );
         }
 
@@ -13447,15 +16028,17 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: summaryColumn),
-                  const SizedBox(width: 12),
-                  Expanded(child: podium),
-                ],
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: summaryColumn),
+                    const SizedBox(width: 24),
+                    Expanded(child: podium),
+                  ],
+                ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 24),
               schedule,
             ],
           );
@@ -13465,11 +16048,9 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             summary,
-            const SizedBox(height: 12),
-            sessionSelector,
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             podium,
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             schedule,
           ],
         );
@@ -13477,31 +16058,41 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
     );
   }
 
-  Widget _buildWeekendHubSummaryCard(BuildContext context) {
-    final loc = AppLocalizations.of(context);
-    final tokens = _themeTokens(context);
+  Widget _buildWeekendHubSummaryCard(
+    BuildContext context,
+    List<String> availableSessions,
+  ) {
+    final theme = Theme.of(context);
+    final latestWithResults = availableSessions.reversed.firstWhere(
+      (session) => _hasSessionResults(session),
+      orElse: () => availableSessions.contains('Race') ? 'Race' : availableSessions.first,
+    );
+    final dropdownValue = availableSessions.contains(_selectedWeekendSession)
+        ? _selectedWeekendSession
+        : latestWithResults;
 
-    return Container(
-      width: double.infinity,
+    return _weekendHubCard(
+      context,
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: _heroPanelGradient(context),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: tokens.outline.withValues(alpha: 0.7)),
-      ),
+      fillWidth: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionCardTitle(context, loc.translate('circuit')),
+          Text(
+            't.circuit'.tr(),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
           const SizedBox(height: 12),
           Text(widget.race.flag, style: const TextStyle(fontSize: 42)),
           const SizedBox(height: 10),
           Text(
             widget.race.name,
-            style: TextStyle(
-              fontSize: 24,
+            style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 12),
@@ -13510,21 +16101,59 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
             runSpacing: 12,
             children: [
               _buildHubMetric(
-                loc.translate('temp'),
+                't.temp'.tr(),
                 '$_temperature°C',
                 Icons.thermostat,
               ),
               _buildHubMetric(
-                loc.translate('rain'),
+                't.rain'.tr(),
                 '$_rainChance%',
                 Icons.umbrella,
               ),
               _buildHubMetric(
-                loc.translate('wind'),
+                't.wind'.tr(),
                 '$_windSpeed km/h',
                 Icons.air,
               ),
             ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            't.session'.tr(),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          DropdownButtonFormField<String>(
+            key: ValueKey(dropdownValue),
+            initialValue: dropdownValue,
+            isExpanded: true,
+            decoration: const InputDecoration(
+              isDense: true,
+              prefixIcon: Icon(Icons.schedule, size: 18),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
+            ),
+            items: availableSessions
+                .map(
+                  (session) => DropdownMenuItem<String>(
+                    value: session,
+                    child: Text(_sessionDisplayTitle(context, session)),
+                  ),
+                )
+                .toList(growable: false),
+            onChanged: (value) {
+              if (value == null) return;
+              setState(() {
+                _selectedWeekendSession = value;
+                _showAllRaceControlMessages = false;
+              });
+            },
           ),
         ],
       ),
@@ -13535,32 +16164,20 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
     BuildContext context,
     String selectedSession,
   ) {
-    final loc = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final tokens = _themeTokens(context);
     final topThree = _sessionTopThree(selectedSession);
 
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: tokens.panelStrong.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: tokens.outline.withValues(alpha: 0.7)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
+    return _weekendHubCard(
+      context,
+      padding: const EdgeInsets.all(18),
+      fillWidth: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            loc.translate('top_3'),
-            style: TextStyle(
-              fontSize: 14,
+            't.top_3'.tr(),
+            style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w800,
               color: theme.colorScheme.onSurface,
             ),
@@ -13568,7 +16185,7 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
           const SizedBox(height: 10),
           if (topThree.isEmpty)
             Text(
-              loc.format('session_data_unavailable', {
+              't.session_data_unavailable'.tr(namedArgs: {
                 'session': _sessionDisplayTitle(context, selectedSession),
               }),
               style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
@@ -13585,16 +16202,16 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
   }
 
   Widget _buildTopThreeRow(BuildContext context, WeekendHubPodiumEntry entry) {
-    final loc = AppLocalizations.of(context);
+
     final theme = Theme.of(context);
     final tokens = _themeTokens(context);
     final driverLabel = entry.driverNumber == null
         ? entry.driver
         : '#${entry.driverNumber} ${entry.driver}';
-    final accent = _topThreeAccent(entry.position);
+    final accent = _topThreeAccent(context, entry.position);
     final timingLabel = entry.position == 1
-        ? loc.translate('total_time')
-        : loc.translate('gap');
+        ? 't.total_time'.tr()
+        : 't.gap'.tr();
     final timingValue = entry.position == 1
         ? entry.totalTime
         : entry.gapToLeader;
@@ -13656,7 +16273,7 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
               Expanded(
                 child: _buildTopThreeFact(
                   context,
-                  loc.translate('best_lap'),
+                  't.best_lap'.tr(),
                   entry.fastestLap,
                   highlight: entry.hasFastestLap,
                 ),
@@ -13681,8 +16298,8 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
         Text(
           label,
           style: TextStyle(
-            fontSize: 9,
-            fontWeight: FontWeight.w700,
+            fontSize: 8,
+            fontWeight: FontWeight.w500,
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
@@ -13692,10 +16309,10 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 13,
             fontWeight: FontWeight.w800,
             color: highlight
-                ? const Color(0xFF8E24AA)
+                ? theme.colorScheme.tertiary
                 : theme.colorScheme.onSurface,
           ),
         ),
@@ -13703,26 +16320,27 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
     );
   }
 
-  Color _topThreeAccent(int position) {
+  Color _topThreeAccent(BuildContext context, int position) {
+    final scheme = Theme.of(context).colorScheme;
     switch (position) {
       case 1:
-        return const Color(0xFFD4AF37);
+        return scheme.tertiary;
       case 2:
-        return const Color(0xFF9EA7B8);
+        return scheme.outline;
       case 3:
-        return const Color(0xFFB87333);
+        return scheme.secondary;
       default:
-        return const Color(0xFF2196F3);
+        return scheme.primary;
     }
   }
 
   Widget _buildSectionCardTitle(BuildContext context, String title) {
+    final theme = Theme.of(context);
     return Text(
       title,
-      style: TextStyle(
-        fontSize: 16,
+      style: theme.textTheme.titleMedium?.copyWith(
         fontWeight: FontWeight.w800,
-        color: Theme.of(context).colorScheme.onSurface,
+        color: theme.colorScheme.onSurface,
       ),
     );
   }
@@ -13881,7 +16499,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
   }
 
   Future<void> _runPrompt([String? value]) async {
-    final loc = AppLocalizations.of(context);
+
     final router = GoRouter.of(context);
     final navigator = Navigator.of(context);
     final prompt = (value ?? _controller.text).trim();
@@ -13903,7 +16521,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           lower.contains('haal laatste resultaten')) {
         final latestRace = await _findLatestCompletedRace();
         if (latestRace == null) {
-          _response = loc.translate('ai_no_completed_race');
+          _response = 't.ai_no_completed_race'.tr();
         } else {
           await RaceRepository.standard().forceRefreshLatestResults();
           final roundIndex = raceRoundFor(latestRace);
@@ -13914,9 +16532,9 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
               const <RaceResultRow>[];
           final topThree = rows.take(3).map((row) => row.driver).join(' • ');
           _response = topThree.isEmpty
-              ? loc.translate('ai_latest_results_refreshed')
-              : loc.format('ai_latest_results_podium', {'podium': topThree});
-          _actionLabel = loc.translate('ai_open_latest_results');
+              ? 't.ai_latest_results_refreshed'.tr()
+              : 't.ai_latest_results_podium'.tr(namedArgs: {'podium': topThree});
+          _actionLabel = 't.ai_open_latest_results'.tr();
           _action = () {
             navigator.pop();
             Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -13931,12 +16549,12 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           (race) => race.date.isAfter(DateTime.now()),
           orElse: () => races.last,
         );
-        _response = loc.format('ai_next_weekend', {
+        _response = 't.ai_next_weekend'.tr(namedArgs: {
           'race': nextRace.name,
           'date':
               '${nextRace.date.day}-${nextRace.date.month}-${nextRace.date.year}',
         });
-        _actionLabel = loc.translate('ai_open_weekend_hub');
+        _actionLabel = 't.ai_open_weekend_hub'.tr();
         _action = () {
           navigator.pop();
           Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -13949,7 +16567,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           RegExp(r'\bvs\b|\btegen\b', caseSensitive: false),
         );
         if (parts.length < 2) {
-          _response = loc.translate('ai_compare_parse_error');
+          _response = 't.ai_compare_parse_error'.tr();
         } else {
           final left = parts.first
               .replaceAll(
@@ -13993,11 +16611,11 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           }
 
           if (driver1 != null && driver2 != null) {
-            _response = loc.format('ai_driver_compare_ready', {
+            _response = 't.ai_driver_compare_ready'.tr(namedArgs: {
               'left': driver1.name,
               'right': driver2.name,
             });
-            _actionLabel = loc.translate('ai_open_driver_compare');
+            _actionLabel = 't.ai_open_driver_compare'.tr();
             _action = () {
               navigator.pop();
               Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -14005,11 +16623,11 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
               });
             };
           } else if (team1 != null && team2 != null) {
-            _response = loc.format('ai_team_compare_ready', {
+            _response = 't.ai_team_compare_ready'.tr(namedArgs: {
               'left': team1.name,
               'right': team2.name,
             });
-            _actionLabel = loc.translate('ai_open_team_compare');
+            _actionLabel = 't.ai_open_team_compare'.tr();
             _action = () {
               navigator.pop();
               Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -14017,7 +16635,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
               });
             };
           } else {
-            _response = loc.translate('ai_compare_no_match');
+            _response = 't.ai_compare_no_match'.tr();
           }
         }
       } else if (lower.contains('form') || lower.contains('trend')) {
@@ -14031,11 +16649,11 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
         }
 
         if (target == null) {
-          _response = loc.translate('ai_form_no_driver');
+          _response = 't.ai_form_no_driver'.tr();
         } else {
           final entries = _buildDriverRecentFormEntries(target.name);
           if (entries.isEmpty) {
-            _response = loc.format('ai_form_no_cache', {'driver': target.name});
+            _response = 't.ai_form_no_cache'.tr(namedArgs: {'driver': target.name});
           } else {
             final summary = entries.expand((e) => e)
                 .map(
@@ -14043,7 +16661,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
                       '${entry.race.name.replaceAll(' Grand Prix', '')}: ${entry.label}',
                 )
                 .join(' • ');
-            _response = loc.format('ai_form_summary', {
+            _response = 't.ai_form_summary'.tr(namedArgs: {
               'driver': target.name,
               'summary': summary,
             });
@@ -14066,11 +16684,11 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
                   '${driver.name} ${_formatAiPoints(driver.points)} pts',
             )
             .join(' • ');
-        _response = loc.format('ai_driver_standings_summary', {
+        _response = 't.ai_driver_standings_summary'.tr(namedArgs: {
           'year': '$year',
           'summary': summary,
         });
-        _actionLabel = loc.translate('ai_open_driver_standings');
+        _actionLabel = 't.ai_open_driver_standings'.tr();
         _action = () {
           navigator.pop();
           Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -14089,11 +16707,11 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
             .take(3)
             .map((team) => '${team.name} ${team.points} pts')
             .join(' • ');
-        _response = loc.format('ai_team_standings_summary', {
+        _response = 't.ai_team_standings_summary'.tr(namedArgs: {
           'year': '$year',
           'summary': summary,
         });
-        _actionLabel = loc.translate('ai_open_team_standings');
+        _actionLabel = 't.ai_open_team_standings'.tr();
         _action = () {
           navigator.pop();
           Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -14106,8 +16724,8 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
               lower.contains('grafiek coureurs')) &&
           !lower.contains('compare')) {
         final year = _latestKnownSeasonYear();
-        _response = loc.format('ai_drivers_chart_ready', {'year': '$year'});
-        _actionLabel = loc.translate('ai_open_drivers_chart');
+        _response = 't.ai_drivers_chart_ready'.tr(namedArgs: {'year': '$year'});
+        _actionLabel = 't.ai_open_drivers_chart'.tr();
         _action = () {
           navigator.pop();
           Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -14132,13 +16750,13 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           (race) => race.date.isAfter(DateTime.now()),
           orElse: () => races.last,
         );
-        _response = loc.format('ai_next_weekend_weather', {
+        _response = 't.ai_next_weekend_weather'.tr(namedArgs: {
           'race': nextRace.name,
           'temp': '${nextRace.weather.temperature}',
           'rain': '${nextRace.weather.rainChance}',
           'wind': '${nextRace.weather.windSpeed}',
         });
-        _actionLabel = loc.translate('ai_open_weekend_hub');
+        _actionLabel = 't.ai_open_weekend_hub'.tr();
         _action = () {
           navigator.pop();
           Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -14150,7 +16768,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           lower.contains('penalties')) {
         final latestRace = await _findLatestCompletedRace();
         if (latestRace == null) {
-          _response = loc.translate('ai_no_completed_race');
+          _response = 't.ai_no_completed_race'.tr();
         } else {
           final roundIndex = raceRoundFor(latestRace);
           await SessionDataManager().fetchDataForRace(latestRace, roundIndex);
@@ -14165,7 +16783,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
               )
               .toList(growable: false);
           if (penalties.isEmpty) {
-            _response = loc.format('ai_latest_penalties_none', {
+            _response = 't.ai_latest_penalties_none'.tr(namedArgs: {
               'race': latestRace.name,
             });
           } else {
@@ -14173,13 +16791,13 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
                 .take(3)
                 .map((row) => '${row.driver} (${row.penalty})')
                 .join(' • ');
-            _response = loc.format('ai_latest_penalties_summary', {
+            _response = 't.ai_latest_penalties_summary'.tr(namedArgs: {
               'race': latestRace.name,
               'count': '${penalties.length}',
               'details': details,
             });
           }
-          _actionLabel = loc.translate('ai_open_weekend_hub');
+          _actionLabel = 't.ai_open_weekend_hub'.tr();
           _action = () {
             navigator.pop();
             Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -14192,7 +16810,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           lower.contains('racecontrol')) {
         final latestRace = await _findLatestCompletedRace();
         if (latestRace == null) {
-          _response = loc.translate('ai_no_completed_race');
+          _response = 't.ai_no_completed_race'.tr();
         } else {
           final roundIndex = raceRoundFor(latestRace);
           await SessionDataManager().fetchDataForRace(latestRace, roundIndex);
@@ -14201,18 +16819,18 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
                   .raceControlKeyFor(latestRace)] ??
               const <Map<String, dynamic>>[];
           if (messages.isEmpty) {
-            _response = loc.format('ai_latest_race_control_none', {
+            _response = 't.ai_latest_race_control_none'.tr(namedArgs: {
               'race': latestRace.name,
             });
           } else {
             final latestMessage = messages.last['message']?.toString() ?? '-';
-            _response = loc.format('ai_latest_race_control_summary', {
+            _response = 't.ai_latest_race_control_summary'.tr(namedArgs: {
               'race': latestRace.name,
               'count': '${messages.length}',
               'message': latestMessage,
             });
           }
-          _actionLabel = loc.translate('ai_open_weekend_hub');
+          _actionLabel = 't.ai_open_weekend_hub'.tr();
           _action = () {
             navigator.pop();
             Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -14228,10 +16846,10 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
 
         if ((lower.contains('driver') || lower.contains('coureur')) &&
             requestedDriver != null) {
-          _response = loc.format('ai_driver_profile_ready', {
+          _response = 't.ai_driver_profile_ready'.tr(namedArgs: {
             'driver': requestedDriver.name,
           });
-          _actionLabel = loc.translate('ai_open_driver_profile');
+          _actionLabel = 't.ai_open_driver_profile'.tr();
           _action = () {
             navigator.pop();
             Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -14240,10 +16858,10 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           };
         } else if ((lower.contains('team') || lower.contains('constructor')) &&
             requestedTeam != null) {
-          _response = loc.format('ai_team_profile_ready', {
+          _response = 't.ai_team_profile_ready'.tr(namedArgs: {
             'team': requestedTeam.name,
           });
-          _actionLabel = loc.translate('ai_open_team_profile');
+          _actionLabel = 't.ai_open_team_profile'.tr();
           _action = () {
             navigator.pop();
             Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -14254,12 +16872,12 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
                 lower.contains('race') ||
                 lower.contains('circuit')) &&
             requestedRace != null) {
-          _response = loc.format('ai_next_weekend', {
+          _response = 't.ai_next_weekend'.tr(namedArgs: {
             'race': requestedRace.name,
             'date':
                 '${requestedRace.date.day}-${requestedRace.date.month}-${requestedRace.date.year}',
           });
-          _actionLabel = loc.translate('ai_open_weekend_hub');
+          _actionLabel = 't.ai_open_weekend_hub'.tr();
           _action = () {
             final router = GoRouter.of(context);
             Navigator.of(context).pop();
@@ -14268,11 +16886,11 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
             });
           };
         } else {
-          _response = loc.translate('ai_supported_commands');
+          _response = 't.ai_supported_commands'.tr();
         }
       }
     } catch (error) {
-      _response = loc.format('ai_crash', {'error': '$error'});
+      _response = 't.ai_crash'.tr(namedArgs: {'error': '$error'});
     }
 
     if (mounted) {
@@ -14282,10 +16900,10 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
+
     final theme = Theme.of(context);
     final responseText = _response.isEmpty
-        ? loc.translate('ai_example_prompt')
+        ? 't.ai_example_prompt'.tr()
         : _response;
 
     return SafeArea(
@@ -14301,7 +16919,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              loc.translate('ai_race_engineer'),
+              't.ai_race_engineer'.tr(),
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -14312,28 +16930,28 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
               runSpacing: 8,
               children: [
                 ActionChip(
-                  label: Text(loc.translate('ai_chip_fetch_latest_results')),
+                  label: Text('t.ai_chip_fetch_latest_results'.tr()),
                   onPressed: () => _runPrompt('Fetch latest results'),
                 ),
                 ActionChip(
-                  label: Text(loc.translate('ai_chip_show_next_weekend')),
+                  label: Text('t.ai_chip_show_next_weekend'.tr()),
                   onPressed: () => _runPrompt('Show next weekend'),
                 ),
                 ActionChip(
-                  label: Text(loc.translate('ai_chip_compare_max_lando')),
+                  label: Text('t.ai_chip_compare_max_lando'.tr()),
                   onPressed: () =>
                       _runPrompt('Compare Max Verstappen vs Lando Norris'),
                 ),
                 ActionChip(
-                  label: Text(loc.translate('ai_chip_show_form_piastri')),
+                  label: Text('t.ai_chip_show_form_piastri'.tr()),
                   onPressed: () => _runPrompt('Show form Oscar Piastri'),
                 ),
                 ActionChip(
-                  label: Text(loc.translate('ai_chip_show_driver_standings')),
+                  label: Text('t.ai_chip_show_driver_standings'.tr()),
                   onPressed: () => _runPrompt('Show driver standings'),
                 ),
                 ActionChip(
-                  label: Text(loc.translate('ai_chip_show_latest_penalties')),
+                  label: Text('t.ai_chip_show_latest_penalties'.tr()),
                   onPressed: () => _runPrompt('Show latest penalties'),
                 ),
               ],
@@ -14344,7 +16962,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
               minLines: 1,
               maxLines: 3,
               decoration: InputDecoration(
-                hintText: loc.translate('ai_type_command'),
+                hintText: 't.ai_type_command'.tr(),
                 suffixIcon: IconButton(
                   icon: _isWorking
                       ? const SizedBox(
@@ -14509,7 +17127,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         color: isSelected
-                            ? const Color(0xFF2196F3)
+                            ? Theme.of(context).colorScheme.primary
                             : (isDark ? Colors.white : Colors.black),
                       ),
                     ),
@@ -14639,7 +17257,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
                             width: 10,
                             height: 10,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF2196F3),
+                              color: Theme.of(context).colorScheme.primary,
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: isDark ? Colors.white : Colors.black,
@@ -14701,7 +17319,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
                           width: 10,
                           height: 10,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF2196F3),
+                            color: Theme.of(context).colorScheme.primary,
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: isDark ? Colors.white : Colors.black,
@@ -14795,7 +17413,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
                       width: 10,
                       height: 10,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2196F3),
+                        color: Theme.of(context).colorScheme.primary,
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: isDark ? Colors.white : Colors.black,
@@ -14913,13 +17531,13 @@ class _DriverDetailViewState extends State<DriverDetailView> {
                               decoration: BoxDecoration(
                                 color: entry.isDnf
                                     ? const Color(0xFFE53935)
-                                    : _getTeamColor(widget.driver.team),
+                                    : F1TeamSchemes.getTeamColor(widget.driver.team),
                                 borderRadius: BorderRadius.circular(8),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: _getTeamColor(
+                                    color: F1TeamSchemes.getTeamColor(
                                       widget.driver.team,
-                                    ).withOpacity(0.25),
+                                    ).withValues(alpha: 0.25),
                                     blurRadius: 8,
                                   ),
                                 ],
@@ -15032,10 +17650,10 @@ class _DriverDetailViewState extends State<DriverDetailView> {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isDutch =
-        loc.locale.languageCode == 'nl' || loc.locale.languageCode == 'de';
+        context.locale.languageCode == 'nl' || context.locale.languageCode == 'de';
     final List<String> facts = isDutch
         ? widget.driver.realWorldFactsNl
         : widget.driver.realWorldFactsEn;
@@ -15050,31 +17668,31 @@ class _DriverDetailViewState extends State<DriverDetailView> {
       ExpansionTile(
         initiallyExpanded: true,
         title: Text(
-          loc.translate('driver_history'),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          't.driver_history'.tr(),
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
             child: _buildHistoryChart(
               driverHistory,
-              _getTeamColor(widget.driver.team),
+              F1TeamSchemes.getTeamColor(widget.driver.team),
             ),
           ),
         ],
       ),
       ExpansionTile(
         initiallyExpanded: true,
-        title: const Text(
+        title: Text(
           'Recent Form Trend',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 13,
-            color: Color(0xFF2196F3),
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
         children: [_buildRecentFormTrend()],
@@ -15082,11 +17700,11 @@ class _DriverDetailViewState extends State<DriverDetailView> {
       if (widget.driver.previousTeams.isNotEmpty)
         ExpansionTile(
           title: Text(
-            loc.translate('previous_teams'),
-            style: const TextStyle(
+            't.previous_teams'.tr(),
+            style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
-              color: Color(0xFF2196F3),
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
           children: [
@@ -15105,12 +17723,12 @@ class _DriverDetailViewState extends State<DriverDetailView> {
       ExpansionTile(
         initiallyExpanded: true,
         title: Text(
-          loc.translate('driver_facts_title'),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          't.driver_facts_title'.tr(),
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           Container(
@@ -15127,11 +17745,11 @@ class _DriverDetailViewState extends State<DriverDetailView> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             "📌 ",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF2196F3),
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
                           Expanded(
@@ -15153,38 +17771,38 @@ class _DriverDetailViewState extends State<DriverDetailView> {
       ),
       ExpansionTile(
         title: Text(
-          loc.translate('personal_info'),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          't.personal_info'.tr(),
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
-          _statTile(loc.translate('age'), widget.driver.age, Icons.cake),
+          _statTile('t.age'.tr(), widget.driver.age, Icons.cake),
           _statTile(
-            loc.translate('height'),
+            't.height'.tr(),
             widget.driver.height,
             Icons.height,
           ),
           _statTile(
-            loc.translate('birth_place'),
+            't.birth_place'.tr(),
             widget.driver.birthPlace,
             Icons.location_on,
           ),
           _statTile(
-            loc.translate('partner'),
+            't.partner'.tr(),
             widget.driver.partner,
             Icons.favorite,
           ),
           _statTile(
-            loc.translate('children'),
+            't.children'.tr(),
             widget.driver.children,
             Icons.child_care,
           ),
-          _statTile(loc.translate('pets'), widget.driver.pets, Icons.pets),
+          _statTile('t.pets'.tr(), widget.driver.pets, Icons.pets),
           _statTile(
-            loc.translate('manager'),
+            't.manager'.tr(),
             widget.driver.manager,
             Icons.work,
           ),
@@ -15193,26 +17811,26 @@ class _DriverDetailViewState extends State<DriverDetailView> {
       ),
       ExpansionTile(
         title: Text(
-          loc.translate('general'),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          't.general'.tr(),
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           _statTile(
-            loc.translate('nationality'),
-            loc.translate('nat_${widget.driver.nationality}'),
+            't.nationality'.tr(),
+            't.nat_${widget.driver.nationality}'.tr(),
             Icons.public,
           ),
           _statTile(
-            loc.translate('f1_debut'),
+            't.f1_debut'.tr(),
             widget.driver.debutYear,
             Icons.start,
           ),
           _statTile(
-            loc.translate('contract_until'),
+            't.contract_until'.tr(),
             widget.driver.contractUntil,
             Icons.edit_document,
           ),
@@ -15221,52 +17839,52 @@ class _DriverDetailViewState extends State<DriverDetailView> {
       ),
       ExpansionTile(
         title: Text(
-          loc.translate('career_stats'),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          't.career_stats'.tr(),
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           _statTile(
-            loc.translate('championships'),
+            't.championships'.tr(),
             widget.driver.championships,
             Icons.workspace_premium,
           ),
           _statTile(
-            loc.translate('wins'),
+            't.wins'.tr(),
             widget.driver.wins,
             Icons.emoji_events,
           ),
           _statTile(
-            loc.translate('podiums'),
+            't.podiums'.tr(),
             widget.driver.podiums,
             Icons.leaderboard,
           ),
-          _statTile(loc.translate('poles'), widget.driver.poles, Icons.flag),
+          _statTile('t.poles'.tr(), widget.driver.poles, Icons.flag),
           _statTile(
-            loc.translate('fastest_laps'),
+            't.fastest_laps'.tr(),
             widget.driver.fastestLaps,
             Icons.timer,
           ),
           _statTile(
-            loc.translate('highestFinish'),
+            't.highestFinish'.tr(),
             widget.driver.highestFinish,
             Icons.military_tech,
           ),
           _statTile(
-            loc.translate('highestGrid'),
+            't.highestGrid'.tr(),
             widget.driver.highestGrid,
             Icons.grid_3x3,
           ),
           _statTile(
-            loc.translate('hatTricks'),
+            't.hatTricks'.tr(),
             widget.driver.hatTricks,
             Icons.auto_awesome,
           ),
           _statTile(
-            loc.translate('frontRowStarts'),
+            't.frontRowStarts'.tr(),
             widget.driver.frontRowStarts,
             Icons.looks_two,
           ),
@@ -15292,7 +17910,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        loc.translate('total_points'),
+                        't.total_points'.tr(),
                         style: TextStyle(
                           color: Theme.of(
                             context,
@@ -15316,7 +17934,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
             ),
           ),
           _statTile(
-            loc.translate('overtakes'),
+            't.overtakes'.tr(),
             widget.driver.overtakes,
             Icons.compare_arrows,
           ),
@@ -15325,28 +17943,28 @@ class _DriverDetailViewState extends State<DriverDetailView> {
       ),
       ExpansionTile(
         title: Text(
-          loc.translate('experience'),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          't.experience'.tr(),
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           _statTile(
-            loc.translate('starts'),
+            't.starts'.tr(),
             widget.driver.starts,
             Icons.traffic,
           ),
           _statTile(
-            loc.translate('laps_led'),
+            't.laps_led'.tr(),
             widget.driver.lapsLed,
             Icons.looks_one,
           ),
-          _statTile(loc.translate('dnf'), widget.driver.dnfs, Icons.car_crash),
-          _statTile(loc.translate('dsqs'), widget.driver.dsqs, Icons.block),
+          _statTile('t.dnf'.tr(), widget.driver.dnfs, Icons.car_crash),
+          _statTile('t.dsqs'.tr(), widget.driver.dsqs, Icons.block),
           _statTile(
-            loc.translate('dnqs'),
+            't.dnqs'.tr(),
             widget.driver.dnqs,
             Icons.cancel_schedule_send,
           ),
@@ -15372,7 +17990,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          loc.translate('retirements'),
+                          't.retirements'.tr(),
                           style: TextStyle(
                             color: Theme.of(
                               context,
@@ -15400,12 +18018,12 @@ class _DriverDetailViewState extends State<DriverDetailView> {
       ),
       ExpansionTile(
         title: Text(
-          loc.translate('personal_sponsors'),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          't.personal_sponsors'.tr(),
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           ...widget.driver.personalSponsors.map(
@@ -15439,7 +18057,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
             style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.bold,
-              color: _getTeamColor(widget.driver.team),
+              color: F1TeamSchemes.getTeamColor(widget.driver.team),
             ),
           ),
           const SizedBox(height: 20),
@@ -15679,7 +18297,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
                       width: 10,
                       height: 10,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2196F3),
+                        color: Theme.of(context).colorScheme.primary,
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: isDark ? Colors.white : Colors.black,
@@ -15745,7 +18363,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
                       width: 10,
                       height: 10,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2196F3),
+                        color: Theme.of(context).colorScheme.primary,
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: isDark ? Colors.white : Colors.black,
@@ -15838,7 +18456,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
                       width: 10,
                       height: 10,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2196F3),
+                        color: Theme.of(context).colorScheme.primary,
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: isDark ? Colors.white : Colors.black,
@@ -16029,7 +18647,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
                       width: 10,
                       height: 10,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2196F3),
+                        color: Theme.of(context).colorScheme.primary,
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: isDark ? Colors.white : Colors.black,
@@ -16188,7 +18806,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
   }
 
   Widget _buildDriverRosterTimeline() {
-    final loc = AppLocalizations.of(context);
+
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final entries = _buildDriverTenureEntries();
@@ -16246,7 +18864,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
             children: [
               Expanded(
                 child: Text(
-                  loc.translate('drivers'),
+                  't.drivers'.tr(),
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -16259,7 +18877,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
               const SizedBox(width: 18),
               Expanded(
                 child: Text(
-                  loc.translate('reserve_driver'),
+                  't.reserve_driver'.tr(),
                   textAlign: TextAlign.left,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -16385,7 +19003,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         color: isSelected
-                            ? const Color(0xFF2196F3)
+                            ? Theme.of(context).colorScheme.primary
                             : (isDark ? Colors.white : Colors.black),
                       ),
                     ),
@@ -16473,10 +19091,10 @@ class _TeamDetailViewState extends State<TeamDetailView> {
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.person,
                         size: 16,
-                        color: Color(0xFF2196F3),
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -16594,7 +19212,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
+
     final teamHistory = _getTeamHistory(widget.team.name);
 
     String title = widget.team.name.toUpperCase();
@@ -16602,50 +19220,103 @@ class _TeamDetailViewState extends State<TeamDetailView> {
       title = "${widget.team.flag} $title";
     }
 
+    final List<String> teamFacts = () {
+      switch (context.locale.languageCode) {
+        case 'nl': return widget.team.factsNl;
+        case 'fr': return widget.team.factsFr;
+        case 'de': return widget.team.factsDe;
+        default:   return widget.team.factsEn;
+      }
+    }();
+
     final List<Widget> teamSections = [
       ExpansionTile(
         initiallyExpanded: true,
         title: Text(
           "📊 Performance History",
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
             child: _buildHistoryChart(
               teamHistory,
-              _getTeamColor(widget.team.name),
+              F1TeamSchemes.getTeamColor(widget.team.name),
             ),
           ),
         ],
       ),
+      if (teamFacts.isNotEmpty)
+        ExpansionTile(
+          initiallyExpanded: true,
+          title: Text(
+            '💡 ${'t.team_facts_title'.tr()}',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          children: [
+            ...teamFacts.map((fact) => Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4, right: 10),
+                    child: Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: F1TeamSchemes.getTeamColor(widget.team.name),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      fact,
+                      style: TextStyle(
+                        fontSize: 13,
+                        height: 1.45,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.88),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )),
+            const SizedBox(height: 4),
+          ],
+        ),
       ExpansionTile(
         initiallyExpanded: true,
         title: Text(
-          loc.translate('general'),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          't.general'.tr(),
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           _statTile(
-            loc.translate('engine'),
+            't.engine'.tr(),
             widget.team.engine,
             Icons.settings_input_component,
           ),
           _statTile(
-            loc.translate('headquarters'),
+            't.headquarters'.tr(),
             widget.team.headquarters,
             Icons.location_city,
           ),
           _statTile(
-            loc.translate('total_points'),
+            't.total_points'.tr(),
             widget.team.totalPoints == widget.team.totalPoints.roundToDouble()
                 ? widget.team.totalPoints.toInt().toString()
                 : widget.team.totalPoints.toString(),
@@ -16663,7 +19334,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
                 ),
                 childrenPadding: const EdgeInsets.only(bottom: 8),
                 title: Text(
-                  loc.translate('team_history'),
+                  't.team_history'.tr(),
                   style: TextStyle(
                     color: Theme.of(
                       context,
@@ -16680,12 +19351,12 @@ class _TeamDetailViewState extends State<TeamDetailView> {
       ExpansionTile(
         initiallyExpanded: true,
         title: Text(
-          loc.translate('championships'),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          't.championships'.tr(),
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           if (widget.team.ccYears.isNotEmpty)
@@ -16700,7 +19371,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
                 ),
                 childrenPadding: const EdgeInsets.only(bottom: 8),
                 title: Text(
-                  loc.translate('cc_wins'),
+                  't.cc_wins'.tr(),
                   style: TextStyle(
                     color: Theme.of(
                       context,
@@ -16721,7 +19392,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
             )
           else
             _statTile(
-              loc.translate('cc_wins'),
+              't.cc_wins'.tr(),
               widget.team.ccWins,
               Icons.emoji_events,
             ),
@@ -16738,7 +19409,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
                 ),
                 childrenPadding: const EdgeInsets.only(bottom: 8),
                 title: Text(
-                  loc.translate('dc_wins'),
+                  't.dc_wins'.tr(),
                   style: TextStyle(
                     color: Theme.of(
                       context,
@@ -16761,7 +19432,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
             )
           else
             _statTile(
-              loc.translate('dc_wins'),
+              't.dc_wins'.tr(),
               widget.team.dcWins,
               Icons.workspace_premium,
             ),
@@ -16770,32 +19441,32 @@ class _TeamDetailViewState extends State<TeamDetailView> {
       ),
       ExpansionTile(
         title: Text(
-          loc.translate('race_stats'),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          't.race_stats'.tr(),
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           _statTile(
-            loc.translate('total_entries'),
+            't.total_entries'.tr(),
             widget.team.totalEntries,
             Icons.traffic,
           ),
           _statTile(
-            loc.translate('wins'),
+            't.wins'.tr(),
             widget.team.podiums,
             Icons.leaderboard,
           ),
           _statTile(
-            loc.translate('one_two'),
+            't.one_two'.tr(),
             widget.team.oneTwo,
             Icons.filter_2,
           ),
-          _statTile(loc.translate('poles'), widget.team.poles, Icons.flag),
+          _statTile('t.poles'.tr(), widget.team.poles, Icons.flag),
           _statTile(
-            loc.translate('fastest_laps'),
+            't.fastest_laps'.tr(),
             widget.team.fastestLaps,
             Icons.timer,
           ),
@@ -16804,27 +19475,27 @@ class _TeamDetailViewState extends State<TeamDetailView> {
       ),
       ExpansionTile(
         title: Text(
-          loc.translate('pitstop_leadership'),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          't.pitstop_leadership'.tr(),
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           _statTile(
-            loc.translate('team_principal'),
+            't.team_principal'.tr(),
             "${widget.team.principalName} (${widget.team.principalAge})",
             Icons.person_outline,
           ),
           _statTile(
-            loc.translate('technical_director'),
+            't.technical_director'.tr(),
             "${widget.team.technicalDirectorName} (${widget.team.technicalDirectorAge})",
             Icons.engineering,
           ),
           _statTile(
-            loc.translate('fastestPit'),
-            "${widget.team.fastestPitstopTime} (${loc.translate('country_${widget.team.fastestPitstopCircuit}')} ${widget.team.fastestPitstopYear})",
+            't.fastestPit'.tr(),
+            "${widget.team.fastestPitstopTime} (${'t.country_${widget.team.fastestPitstopCircuit}'.tr()} ${widget.team.fastestPitstopYear})",
             Icons.build,
           ),
           const SizedBox(height: 8),
@@ -16832,37 +19503,37 @@ class _TeamDetailViewState extends State<TeamDetailView> {
       ),
       ExpansionTile(
         title: Text(
-          loc.translate('drivers'),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          't.drivers'.tr(),
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [_buildDriverRosterTimeline(), const SizedBox(height: 8)],
       ),
       ExpansionTile(
         title: Text(
-          '⚙️ ${loc.translate('engine_supplier')}',
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          '⚙️ ${'t.engine_supplier'.tr()}',
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           _statTile(
-            loc.translate('name').split(' ').last,
+            't.name'.tr().split(' ').last,
             widget.team.engineSupplier.name,
             Icons.business,
           ),
           _statTile(
-            loc.translate('engine_name').split(' ').last,
+            't.engine_name'.tr().split(' ').last,
             widget.team.engineSupplier.engineName,
             Icons.settings,
           ),
           _statTile(
-            loc.translate('city').split(' ').last,
+            't.city'.tr().split(' ').last,
             widget.team.engineSupplier.city,
             Icons.location_city,
           ),
@@ -16871,12 +19542,12 @@ class _TeamDetailViewState extends State<TeamDetailView> {
       ),
       ExpansionTile(
         title: Text(
-          '💰 ${loc.translate('sponsors')}',
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-            color: Color(0xFF2196F3),
-          ),
+          '💰 ${'t.sponsors'.tr()}',
+style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+            ),
         ),
         children: [
           ...widget.team.sponsors.map(
@@ -16959,11 +19630,11 @@ class _SessionResultsScreenState extends State<SessionResultsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "🏁 ${loc.translate('gp_${widget.race.name}')} - 📊 ${loc.translate('session_results')}",
+          "🏁 ${'t.gp_${widget.race.name}'.tr()} - 📊 ${'t.session_results'.tr()}",
           style: const TextStyle(fontSize: 14),
         ),
       ),
@@ -16984,22 +19655,22 @@ class _SessionResultsScreenState extends State<SessionResultsScreen> {
                                 OpenF1SessionWidget(
                                   race: widget.race,
                                   sessionName: 'Practice 1',
-                                  displayTitle: loc.translate('fp1'),
+                                  displayTitle: 't.fp1'.tr(),
                                 ),
                                 OpenF1SessionWidget(
                                   race: widget.race,
                                   sessionName: 'Sprint Qualifying',
-                                  displayTitle: loc.translate('sprint_quali'),
+                                  displayTitle: 't.sprint_quali'.tr(),
                                 ),
                                 OpenF1SessionWidget(
                                   race: widget.race,
                                   sessionName: 'Qualifying',
-                                  displayTitle: loc.translate('qualifying'),
+                                  displayTitle: 't.qualifying'.tr(),
                                 ),
                                 OpenF1SessionWidget(
                                   race: widget.race,
                                   sessionName: 'Sprint',
-                                  displayTitle: loc.translate('sprint'),
+                                  displayTitle: 't.sprint'.tr(),
                                 ),
                                 OpenF1SessionWidget(
                                   race: widget.race,
@@ -17014,22 +19685,22 @@ class _SessionResultsScreenState extends State<SessionResultsScreen> {
                                 OpenF1SessionWidget(
                                   race: widget.race,
                                   sessionName: 'Practice 1',
-                                  displayTitle: loc.translate('fp1'),
+                                  displayTitle: 't.fp1'.tr(),
                                 ),
                                 OpenF1SessionWidget(
                                   race: widget.race,
                                   sessionName: 'Practice 2',
-                                  displayTitle: loc.translate('fp2'),
+                                  displayTitle: 't.fp2'.tr(),
                                 ),
                                 OpenF1SessionWidget(
                                   race: widget.race,
                                   sessionName: 'Practice 3',
-                                  displayTitle: loc.translate('fp3'),
+                                  displayTitle: 't.fp3'.tr(),
                                 ),
                                 OpenF1SessionWidget(
                                   race: widget.race,
                                   sessionName: 'Qualifying',
-                                  displayTitle: loc.translate('qualifying'),
+                                  displayTitle: 't.qualifying'.tr(),
                                 ),
                                 OpenF1SessionWidget(
                                   race: widget.race,
@@ -17256,7 +19927,7 @@ class OpenF1SessionWidget extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               letterSpacing: 0.2,
             ),
           ),
@@ -17364,7 +20035,7 @@ class OpenF1SessionWidget extends StatelessWidget {
     BuildContext context,
     SessionTyreLapBreakdownEntry entry,
   ) {
-    final loc = AppLocalizations.of(context);
+
     final theme = Theme.of(context);
     final assetPath = _tyreAssetPath(entry.compound);
 
@@ -17377,7 +20048,7 @@ class OpenF1SessionWidget extends StatelessWidget {
             width: 34,
             height: 20,
             fit: BoxFit.contain,
-            semanticsLabel: '${entry.compound} ${loc.translate('tyre')}',
+            semanticsLabel: '${entry.compound} ${'t.tyre'.tr()}',
           )
         else
           Text(
@@ -17462,13 +20133,12 @@ class OpenF1SessionWidget extends StatelessWidget {
     return '-';
   }
 
-  Color? _racePositionDeltaColor(String finish) {
+  Color? _racePositionDeltaColor(BuildContext context, String finish) {
     final match = RegExp(r'\(([+-]\d+)\)').firstMatch(finish);
     final delta = match == null ? null : int.tryParse(match.group(1)!);
-    if (delta == null || delta == 0) {
-      return null;
-    }
-    return delta > 0 ? const Color(0xFF2E7D32) : const Color(0xFFC62828);
+    if (delta == null || delta == 0) return null;
+    final tokens = _themeTokens(context);
+    return delta > 0 ? tokens.statusSuccess : tokens.statusError;
   }
 
   Widget _buildRaceFinishCell(
@@ -17478,10 +20148,10 @@ class OpenF1SessionWidget extends StatelessWidget {
   }) {
     final theme = Theme.of(context);
     final baseColor = finish == 'DNF' || finish == 'DNS' || finish == 'NC'
-        ? const Color(0xFFE53935)
+        ? theme.colorScheme.error
         : theme.colorScheme.onSurface;
     final deltaMatch = RegExp(r'^(.*?)(\s*\(([+-]\d+)\))$').firstMatch(finish);
-    final deltaColor = _racePositionDeltaColor(finish);
+    final deltaColor = _racePositionDeltaColor(context, finish);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 11),
@@ -17604,7 +20274,7 @@ class OpenF1SessionWidget extends StatelessWidget {
     BuildContext context,
     List<RaceResultRow> rows,
   ) {
-    final loc = AppLocalizations.of(context);
+
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final tokens = _themeTokens(context);
@@ -17669,14 +20339,14 @@ class OpenF1SessionWidget extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    buildCompactHeaderCell(loc.translate('driver'), flex: 6),
+                    buildCompactHeaderCell('t.driver'.tr(), flex: 6),
                     buildCompactHeaderCell(
-                      loc.translate('finish'),
+                      't.finish'.tr(),
                       flex: 4,
                       align: TextAlign.center,
                     ),
                     buildCompactHeaderCell(
-                      loc.translate('time'),
+                      't.time'.tr(),
                       flex: 4,
                       align: TextAlign.right,
                     ),
@@ -17765,7 +20435,7 @@ class OpenF1SessionWidget extends StatelessWidget {
                     children: [
                       _buildCompactRaceDetailRow(
                         context,
-                        label: loc.translate('best_lap'),
+                        label: 't.best_lap'.tr(),
                         child: buildValueText(
                           row.fastestLap,
                           strong: row.hasFastestLap,
@@ -17776,7 +20446,7 @@ class OpenF1SessionWidget extends StatelessWidget {
                       ),
                       _buildCompactRaceDetailRow(
                         context,
-                        label: loc.translate('tyre'),
+                        label: 't.tyre'.tr(),
                         child: Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
@@ -17788,12 +20458,12 @@ class OpenF1SessionWidget extends StatelessWidget {
                       ),
                       _buildCompactRaceDetailRow(
                         context,
-                        label: loc.translate('points'),
+                        label: 't.points'.tr(),
                         child: buildValueText(row.points, strong: true),
                       ),
                       _buildCompactRaceDetailRow(
                         context,
-                        label: loc.translate('penalty'),
+                        label: 't.penalty'.tr(),
                         child: buildValueText(
                           penaltyText,
                           strong: penaltyText != '-',
@@ -17817,7 +20487,7 @@ class OpenF1SessionWidget extends StatelessWidget {
     BuildContext context,
     List<SessionOverviewRow> rows,
   ) {
-    final loc = AppLocalizations.of(context);
+
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final tokens = _themeTokens(context);
@@ -17866,11 +20536,11 @@ class OpenF1SessionWidget extends StatelessWidget {
 
     String headerTitle() {
       if (_isPracticeSession) {
-        return loc.translate('time');
+        return 't.time'.tr();
       }
       return _isPracticeLikeSession
-          ? loc.translate('time')
-          : loc.translate('result');
+          ? 't.time'.tr()
+          : 't.result'.tr();
     }
 
     String? qualifyingEliminationLabel(int rowIndex, int totalRows) {
@@ -17878,10 +20548,10 @@ class OpenF1SessionWidget extends StatelessWidget {
         return null;
       }
       if (rowIndex >= totalRows - 6) {
-        return loc.translate('q1_out');
+        return 't.q1_out'.tr();
       }
       if (rowIndex >= totalRows - 12) {
-        return loc.translate('q2_out');
+        return 't.q2_out'.tr();
       }
       return null;
     }
@@ -17915,9 +20585,9 @@ class OpenF1SessionWidget extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    buildCompactHeaderCell(loc.translate('driver'), flex: 6),
+                    buildCompactHeaderCell('t.driver'.tr(), flex: 6),
                     buildCompactHeaderCell(
-                      loc.translate('pos'),
+                      't.pos'.tr(),
                       flex: 3,
                       align: TextAlign.center,
                     ),
@@ -18038,7 +20708,7 @@ class OpenF1SessionWidget extends StatelessWidget {
                       if (_isPracticeSession)
                         _buildCompactRaceDetailRow(
                           context,
-                          label: loc.translate('laps'),
+                          label: 't.laps'.tr(),
                           child: buildValueText(
                             row.totalLaps?.toString() ?? '-',
                             strong: true,
@@ -18046,7 +20716,7 @@ class OpenF1SessionWidget extends StatelessWidget {
                         ),
                       _buildCompactRaceDetailRow(
                         context,
-                        label: loc.translate('tyre'),
+                        label: 't.tyre'.tr(),
                         child: buildDetailPanel(
                           _isPracticeSession
                               ? _buildTyreLapBreakdownCell(
@@ -18060,13 +20730,13 @@ class OpenF1SessionWidget extends StatelessWidget {
                       if (!_isPracticeSession && eliminationLabel != null)
                         _buildCompactRaceDetailRow(
                           context,
-                          label: loc.translate('status'),
+                          label: 't.status'.tr(),
                           child: buildValueText(
                             eliminationLabel,
                             strong: true,
-                            color: eliminationLabel == loc.translate('q1_out')
-                                ? const Color(0xFFC62828)
-                                : const Color(0xFFEF6C00),
+                            color: eliminationLabel == 't.q1_out'.tr()
+                                ? tokens.statusError
+                                : tokens.statusWarning,
                           ),
                         ),
                     ],
@@ -18097,9 +20767,7 @@ class OpenF1SessionWidget extends StatelessWidget {
       width: double.infinity,
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
       decoration: BoxDecoration(
-        color: Theme.of(context).brightness == Brightness.dark
-            ? const Color(0xFF171C25)
-            : const Color(0xFFFFFFFF),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: borderColor),
       ),
@@ -18202,11 +20870,9 @@ class OpenF1SessionWidget extends StatelessWidget {
     }
 
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final headerColor = isDark
-        ? const Color(0xFF1D2430)
-        : const Color(0xFFEAF5FF);
-    final borderColor = isDark ? Colors.white12 : Colors.black12;
+    final tokens = _themeTokens(context);
+    final headerColor = theme.colorScheme.primaryContainer;
+    final borderColor = tokens.borderSubtle;
 
     Widget buildHeaderCell(String label, {TextAlign align = TextAlign.left}) {
       return Padding(
@@ -18332,7 +20998,7 @@ class OpenF1SessionWidget extends StatelessWidget {
           final rowIndex = entry.key;
           final row = entry.value;
           final timerIcon = row.hasFastestLap
-              ? const Icon(Icons.timer, size: 14, color: Color(0xFF8E24AA))
+              ? Icon(Icons.timer, size: 14, color: theme.colorScheme.tertiary)
               : null;
           final eliminationLabel = qualifyingEliminationLabel(
             rowIndex,
@@ -18343,11 +21009,11 @@ class OpenF1SessionWidget extends StatelessWidget {
               : buildQualifyingBadge(
                   eliminationLabel,
                   eliminationLabel == 'Q1 out'
-                      ? const Color(0xFFFFEBEE)
-                      : const Color(0xFFFFF3E0),
+                      ? tokens.statusError.withValues(alpha: 0.12)
+                      : tokens.statusWarning.withValues(alpha: 0.12),
                   eliminationLabel == 'Q1 out'
-                      ? const Color(0xFFC62828)
-                      : const Color(0xFFEF6C00),
+                      ? tokens.statusError
+                      : tokens.statusWarning,
                 );
 
           return _isSprintSession
@@ -18363,7 +21029,7 @@ class OpenF1SessionWidget extends StatelessWidget {
                   buildBodyCell(
                     row.fastestLap,
                     strong: row.hasFastestLap,
-                    color: row.hasFastestLap ? const Color(0xFF8E24AA) : null,
+                    color: row.hasFastestLap ? theme.colorScheme.tertiary : null,
                   ),
                   buildBodyCell(
                     row.points,
@@ -18382,7 +21048,7 @@ class OpenF1SessionWidget extends StatelessWidget {
                   buildBodyCell(
                     row.result,
                     strong: row.hasFastestLap,
-                    color: row.hasFastestLap ? const Color(0xFF8E24AA) : null,
+                    color: row.hasFastestLap ? theme.colorScheme.tertiary : null,
                   ),
                   buildBodyCell(
                     row.totalLaps?.toString() ?? '-',
@@ -18410,7 +21076,7 @@ class OpenF1SessionWidget extends StatelessWidget {
                   buildBodyCell(
                     row.result,
                     strong: row.hasFastestLap,
-                    color: row.hasFastestLap ? const Color(0xFF8E24AA) : null,
+                    color: row.hasFastestLap ? theme.colorScheme.tertiary : null,
                   ),
                   _buildTyreCell(context, row.tyreCompound),
                 ];
@@ -18430,14 +21096,14 @@ class OpenF1SessionWidget extends StatelessWidget {
           rows.length,
         );
         if (eliminationLabel == 'Q1 out') {
-          return isDark ? const Color(0xFF2B1719) : const Color(0xFFFFF2F2);
+          return tokens.statusError.withValues(alpha: 0.08);
         }
         if (eliminationLabel == 'Q2 out') {
-          return isDark ? const Color(0xFF2B2117) : const Color(0xFFFFF7ED);
+          return tokens.statusWarning.withValues(alpha: 0.08);
         }
         return rowIndex.isEven
             ? Colors.transparent
-            : (isDark ? const Color(0xFF141922) : const Color(0xFFF8FBFF));
+            : theme.colorScheme.surfaceContainer.withValues(alpha: 0.5);
       },
     );
   }
@@ -18451,11 +21117,9 @@ class OpenF1SessionWidget extends StatelessWidget {
     }
 
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final headerColor = isDark
-        ? const Color(0xFF1D2430)
-        : const Color(0xFFEAF5FF);
-    final borderColor = isDark ? Colors.white12 : Colors.black12;
+    final tokens = _themeTokens(context);
+    final headerColor = theme.colorScheme.primaryContainer;
+    final borderColor = tokens.borderSubtle;
 
     Widget buildHeaderCell(String label, {TextAlign align = TextAlign.left}) {
       return Padding(
@@ -18510,7 +21174,7 @@ class OpenF1SessionWidget extends StatelessWidget {
       return buildBodyCell(
         row.fastestLap,
         strong: row.hasFastestLap,
-        color: row.hasFastestLap ? const Color(0xFF8E24AA) : null,
+        color: row.hasFastestLap ? theme.colorScheme.tertiary : null,
       );
     }
 
@@ -18562,7 +21226,7 @@ class OpenF1SessionWidget extends StatelessWidget {
       borderColor: borderColor,
       rowBackgroundBuilder: (rowIndex) => rowIndex.isEven
           ? Colors.transparent
-          : (isDark ? const Color(0xFF141922) : const Color(0xFFF8FBFF)),
+          : theme.colorScheme.surfaceContainer.withValues(alpha: 0.5),
     );
   }
 
@@ -18638,7 +21302,7 @@ class OpenF1SessionWidget extends StatelessWidget {
     return AnimatedBuilder(
       animation: SessionDataManager(),
       builder: (context, child) {
-        final loc = AppLocalizations.of(context);
+    
         final results = SessionDataManager().cache[key];
         final raceResults =
             SessionDataManager().raceResultsCache[raceResultsKey];
@@ -18652,9 +21316,9 @@ class OpenF1SessionWidget extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2196F3),
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(height: 4),
@@ -18684,7 +21348,7 @@ class OpenF1SessionWidget extends StatelessWidget {
         if (sessionTime.isAfter(DateTime.now()) && !hasRaceData && !hasSessionData) {
           return buildEmpty(
             displayTitle,
-            '${loc.translate('session_future')} ${sessionTime.toString().substring(0, 16)}',
+            '${'t.session_future'.tr()} ${sessionTime.toString().substring(0, 16)}',
           );
         }
         if (results == null && !SessionDataManager().isInitialized) {
@@ -18692,7 +21356,7 @@ class OpenF1SessionWidget extends StatelessWidget {
         }
         if (sessionName == 'Race') {
           if (raceResults == null || raceResults.isEmpty) {
-            return buildEmpty(displayTitle, loc.translate('no_data_yet'));
+            return buildEmpty(displayTitle, 't.no_data_yet'.tr());
           }
 
           return Column(
@@ -18705,15 +21369,15 @@ class OpenF1SessionWidget extends StatelessWidget {
                     Expanded(
                       child: Text(
                         displayTitle,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF2196F3),
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.fullscreen),
-                      tooltip: loc.translate('fullscreen_table'),
+                      tooltip: 't.fullscreen_table'.tr(),
                       onPressed: () =>
                           _openFullscreenRaceResults(context, raceResults),
                     ),
@@ -18736,9 +21400,9 @@ class OpenF1SessionWidget extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 16, top: 12, bottom: 8),
                 child: Text(
                   displayTitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2196F3),
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),
@@ -18751,7 +21415,7 @@ class OpenF1SessionWidget extends StatelessWidget {
           );
         }
         if (results == null || results.isEmpty) {
-          return buildEmpty(displayTitle, loc.translate('no_data_yet'));
+          return buildEmpty(displayTitle, 't.no_data_yet'.tr());
         }
 
         return Column(
@@ -18761,9 +21425,9 @@ class OpenF1SessionWidget extends StatelessWidget {
               padding: const EdgeInsets.only(left: 16, top: 12, bottom: 8),
               child: Text(
                 displayTitle,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2196F3),
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ),
@@ -18952,7 +21616,7 @@ class ChangelogScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final List<Map<String, dynamic>> changelog = [
       {
@@ -18990,14 +21654,14 @@ class ChangelogScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: Text(loc.translate('changelog'))),
+      appBar: AppBar(title: Text('t.changelog'.tr())),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: changelog.length,
         itemBuilder: (context, index) {
           final entry = changelog[index];
           final changes =
-              loc.locale.languageCode == 'nl' || loc.locale.languageCode == 'de'
+              context.locale.languageCode == 'nl' || context.locale.languageCode == 'de'
               ? entry['changes_nl']
               : entry['changes_en'];
           return Card(
@@ -19011,10 +21675,10 @@ class ChangelogScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '${loc.translate('version')} ${entry['version']}',
-                        style: const TextStyle(
+                        '${'t.version'.tr()} ${entry['version']}',
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF2196F3),
+                          color: Theme.of(context).colorScheme.primary,
                           fontSize: 18,
                         ),
                       ),
@@ -19062,18 +21726,400 @@ class ChangelogScreen extends StatelessWidget {
   }
 }
 
+/// Full-page profile route with theme settings and favorites. Syncs to Supabase on change.
+/// Shown as 4th tab in main navigation (Circuits | Drivers | Teams | Profile).
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key, required this.settingsMenu});
+
+  final Widget settingsMenu;
+  static const double _maxContentWidth = 600;
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  List<String> _teamNames = [];
+  List<String> _driverNames = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final teams = await ProfileFavoritesService.instance.loadTeamNames();
+    final drivers = await ProfileFavoritesService.instance.loadDriverNames();
+    if (mounted) {
+      setState(() {
+        _teamNames = teams;
+        _driverNames = drivers;
+      });
+    }
+  }
+
+  void _saveFavorites(ProfileFavorites next) {
+    context.read<ProfileFavoritesNotifier>().update(next);
+    ProfileFavoritesService.instance.saveToSupabase(next);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('t.profile'.tr()),
+        actions: _desktopAwareSettingsActions(context, widget.settingsMenu),
+      ),
+      body: user != null
+          ? Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: ProfileScreen._maxContentWidth),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Consumer<ThemeController>(
+                    builder: (context, controller, _) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _ProfileUserCard(email: user.email ?? user.phone ?? ''),
+                          const SizedBox(height: 24),
+                          Consumer<ProfileFavoritesNotifier>(
+                            builder: (_, notifier, child) =>
+                                _ProfileFavoritesCard(
+                                  teamNames: _teamNames,
+                                  driverNames: _driverNames,
+                                  favorites: notifier.value,
+                                  onFavoritesChanged: _saveFavorites,
+                                ),
+                          ),
+                          const SizedBox(height: 24),
+                          _ProfileThemeModeCard(controller: controller),
+                          const SizedBox(height: 24),
+                          _ProfileBrandThemeCard(controller: controller),
+                          const SizedBox(height: 24),
+                          _ProfileLogoutButton(
+                            onPressed: () async {
+                              await Supabase.instance.client.auth.signOut();
+                              if (context.mounted) context.go(_circuitsPath());
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            )
+          : Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('t.login'.tr(), style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 16),
+                    FilledButton(
+                      onPressed: () => context.push(_loginPath()),
+                      child: Text('t.login'.tr()),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+    );
+  }
+}
+
+class _ProfileFavoritesCard extends StatelessWidget {
+  final List<String> teamNames;
+  final List<String> driverNames;
+  final ProfileFavorites favorites;
+  final ValueChanged<ProfileFavorites> onFavoritesChanged;
+
+  const _ProfileFavoritesCard({
+    required this.teamNames,
+    required this.driverNames,
+    required this.favorites,
+    required this.onFavoritesChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final circuitKeys = races.map((r) => r.name).toList();
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(context.tr('t.favorite_team'), style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              initialValue: favorites.favoriteTeam != null && teamNames.contains(favorites.favoriteTeam)
+                  ? favorites.favoriteTeam
+                  : null,
+              decoration: InputDecoration(
+                hintText: context.tr('t.select_favorite'),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              items: [
+                DropdownMenuItem<String>(value: null, child: Text(context.tr('t.select_favorite'))),
+                ...teamNames.map((t) => DropdownMenuItem(value: t, child: Text(t))),
+              ],
+              onChanged: (v) => onFavoritesChanged(ProfileFavorites(
+                favoriteTeam: v,
+                favoriteDriver: favorites.favoriteDriver,
+                favoriteCircuit: favorites.favoriteCircuit,
+              )),
+            ),
+            const SizedBox(height: 16),
+            Text(context.tr('t.favorite_driver'), style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              initialValue: favorites.favoriteDriver != null && driverNames.contains(favorites.favoriteDriver)
+                  ? favorites.favoriteDriver
+                  : null,
+              decoration: InputDecoration(
+                hintText: context.tr('t.select_favorite'),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              items: [
+                DropdownMenuItem<String>(value: null, child: Text(context.tr('t.select_favorite'))),
+                ...driverNames.map((d) => DropdownMenuItem(value: d, child: Text(d))),
+              ],
+              onChanged: (v) => onFavoritesChanged(ProfileFavorites(
+                favoriteTeam: favorites.favoriteTeam,
+                favoriteDriver: v,
+                favoriteCircuit: favorites.favoriteCircuit,
+              )),
+            ),
+            const SizedBox(height: 16),
+            Text(context.tr('t.favorite_circuit'), style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              initialValue: favorites.favoriteCircuit != null && circuitKeys.contains(favorites.favoriteCircuit)
+                  ? favorites.favoriteCircuit
+                  : null,
+              decoration: InputDecoration(
+                hintText: context.tr('t.select_favorite'),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              items: [
+                DropdownMenuItem<String>(value: null, child: Text(context.tr('t.select_favorite'))),
+                ...circuitKeys.map((key) => DropdownMenuItem(
+                  value: key,
+                  child: Text(context.tr('t.gp_$key')),
+                )),
+              ],
+              onChanged: (v) => onFavoritesChanged(ProfileFavorites(
+                favoriteTeam: favorites.favoriteTeam,
+                favoriteDriver: favorites.favoriteDriver,
+                favoriteCircuit: v,
+              )),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileUserCard extends StatelessWidget {
+  final String email;
+
+  const _ProfileUserCard({required this.email});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              child: Icon(Icons.person, color: Theme.of(context).colorScheme.onPrimaryContainer),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                email,
+                style: Theme.of(context).textTheme.titleMedium,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileThemeModeCard extends StatelessWidget {
+  final ThemeController controller;
+
+  const _ProfileThemeModeCard({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              't.theme_mode'.tr(),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
+            SegmentedButton<ThemeMode>(
+              segments: [
+                ButtonSegment(value: ThemeMode.light, label: Text('t.theme_mode_light'.tr())),
+                ButtonSegment(value: ThemeMode.dark, label: Text('t.theme_mode_dark'.tr())),
+                ButtonSegment(value: ThemeMode.system, label: Text('t.theme_mode_system'.tr())),
+              ],
+              selected: {controller.themeMode},
+              onSelectionChanged: (modes) => controller.setThemeMode(modes.first),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileBrandThemeCard extends StatelessWidget {
+  final ThemeController controller;
+
+  const _ProfileBrandThemeCard({required this.controller});
+
+  Widget _buildTeamTile(
+    BuildContext context, {
+    required FlexSchemeData teamScheme,
+    required int index,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final heroStart = isDark ? teamScheme.dark.primary : teamScheme.light.primary;
+    final heroEnd = isDark ? teamScheme.dark.primaryContainer : teamScheme.light.primaryContainer;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [heroStart, heroEnd],
+            ),
+            border: isSelected ? Border.all(color: scheme.primary, width: 3) : null,
+            boxShadow: isSelected
+                ? [BoxShadow(color: scheme.primary.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))]
+                : null,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Center(
+            child: Text(
+              teamScheme.name,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: F1ThemeTokens.textOnBackground(heroStart),
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              't.team_theme'.tr(),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                const crossAxisCount = 3;
+                const spacing = 8.0;
+                final itemWidth = (constraints.maxWidth - (crossAxisCount - 1) * spacing) / crossAxisCount;
+                return Wrap(
+                  spacing: spacing,
+                  runSpacing: spacing,
+                  children: [
+                    for (var i = 0; i < F1TeamSchemes.count; i++)
+                      SizedBox(
+                        width: itemWidth,
+                        height: (itemWidth * 0.5).clamp(40.0, 56.0),
+                        child: _buildTeamTile(
+                          context,
+                          teamScheme: F1TeamSchemes.schemes[i],
+                          index: i,
+                          isSelected: controller.schemeIndex == i,
+                          onTap: () => controller.setBrandTheme(F1TeamSchemes.brandFromIndex(i)),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileLogoutButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _ProfileLogoutButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      icon: const Icon(Icons.logout),
+      label: Text('t.logout'.tr()),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Theme.of(context).colorScheme.error,
+        side: BorderSide(color: Theme.of(context).colorScheme.error.withValues(alpha: 0.5)),
+      ),
+    );
+  }
+}
+
 class PlaceholderSettingsScreen extends StatelessWidget {
   const PlaceholderSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
+
 
     return Scaffold(
-      appBar: AppBar(title: Text(loc.translate('placeholder_page'))),
+      appBar: AppBar(title: Text('t.placeholder_page'.tr())),
       body: Center(
         child: Text(
-          loc.translate('placeholder_page_empty'),
+          't.placeholder_page_empty'.tr(),
           textAlign: TextAlign.center,
         ),
       ),

@@ -1,0 +1,3046 @@
+{
+  "standings": [
+    {
+      "team": "McLaren",
+      "points": 666
+    },
+    {
+      "team": "Ferrari",
+      "points": 652
+    },
+    {
+      "team": "Red Bull Racing",
+      "points": 589
+    },
+    {
+      "team": "Mercedes",
+      "points": 468
+    },
+    {
+      "team": "Aston Martin",
+      "points": 94
+    },
+    {
+      "team": "Alpine",
+      "points": 65
+    },
+    {
+      "team": "Haas F1 Team",
+      "points": 58
+    },
+    {
+      "team": "RB",
+      "points": 46
+    },
+    {
+      "team": "Williams",
+      "points": 17
+    },
+    {
+      "team": "Kick Sauber",
+      "points": 4
+    }
+  ],
+  "rounds": [
+    {
+      "round": "1",
+      "teams": {
+        "Red Bull Racing": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 44,
+            "points_received": 44,
+            "position_start": null,
+            "position_finish": 1,
+            "position_changed": null
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 27,
+            "points_received": 27,
+            "position_start": null,
+            "position_finish": 2,
+            "position_changed": null
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 16,
+            "points_received": 16,
+            "position_start": null,
+            "position_finish": 3,
+            "position_changed": null
+          }
+        },
+        "McLaren": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 12,
+            "points_received": 12,
+            "position_start": null,
+            "position_finish": 4,
+            "position_changed": null
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 3,
+            "points_received": 3,
+            "position_start": null,
+            "position_finish": 5,
+            "position_changed": null
+          }
+        },
+        "Kick Sauber": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 6,
+            "position_changed": null
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 7,
+            "position_changed": null
+          }
+        },
+        "RB": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 8,
+            "position_changed": null
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 9,
+            "position_changed": null
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": null,
+            "position_finish": 10,
+            "position_changed": null
+          }
+        }
+      }
+    },
+    {
+      "round": "2",
+      "teams": {
+        "Red Bull Racing": {
+          "Race": {
+            "points_start": 44,
+            "points_finish": 87,
+            "points_received": 43,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_start": 27,
+            "points_finish": 49,
+            "points_received": 22,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "McLaren": {
+          "Race": {
+            "points_start": 12,
+            "points_finish": 28,
+            "points_received": 16,
+            "position_start": 4,
+            "position_finish": 3,
+            "position_changed": "-1"
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_start": 16,
+            "points_finish": 26,
+            "points_received": 10,
+            "position_start": 3,
+            "position_finish": 4,
+            "position_changed": "+1"
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_start": 3,
+            "points_finish": 13,
+            "points_received": 10,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 1,
+            "points_received": 1,
+            "position_start": 7,
+            "position_finish": 6,
+            "position_changed": "-1"
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 7,
+            "position_changed": "-2"
+          }
+        },
+        "Kick Sauber": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 6,
+            "position_finish": 8,
+            "position_changed": "+2"
+          }
+        },
+        "RB": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 9,
+            "position_changed": "+1"
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "3",
+      "teams": {
+        "Red Bull Racing": {
+          "Race": {
+            "points_start": 87,
+            "points_finish": 97,
+            "points_received": 10,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_start": 49,
+            "points_finish": 93,
+            "points_received": 44,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "McLaren": {
+          "Race": {
+            "points_start": 28,
+            "points_finish": 55,
+            "points_received": 27,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_start": 13,
+            "points_finish": 27,
+            "points_received": 14,
+            "position_start": 5,
+            "position_finish": 4,
+            "position_changed": "-1"
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_start": 26,
+            "points_finish": 26,
+            "points_received": 0,
+            "position_start": 4,
+            "position_finish": 5,
+            "position_changed": "+1"
+          }
+        },
+        "RB": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 4,
+            "points_received": 4,
+            "position_start": 9,
+            "position_finish": 6,
+            "position_changed": "-3"
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_start": 1,
+            "points_finish": 4,
+            "points_received": 3,
+            "position_start": 6,
+            "position_finish": 7,
+            "position_changed": "+1"
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 7,
+            "position_finish": 8,
+            "position_changed": "+1"
+          }
+        },
+        "Kick Sauber": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 9,
+            "position_changed": "+1"
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "4",
+      "teams": {
+        "Red Bull Racing": {
+          "Race": {
+            "points_start": 97,
+            "points_finish": 141,
+            "points_received": 44,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_start": 93,
+            "points_finish": 120,
+            "points_received": 27,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "McLaren": {
+          "Race": {
+            "points_start": 55,
+            "points_finish": 69,
+            "points_received": 14,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_start": 26,
+            "points_finish": 34,
+            "points_received": 8,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_start": 25,
+            "points_finish": 33,
+            "points_received": 8,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "RB": {
+          "Race": {
+            "points_start": 6,
+            "points_finish": 7,
+            "points_received": 1,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_start": 4,
+            "points_finish": 4,
+            "points_received": 0,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          }
+        },
+        "Kick Sauber": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "5",
+      "teams": {
+        "Red Bull Racing": {
+          "Sprint": {
+            "points_start": 141,
+            "points_finish": 155,
+            "points_received": 14,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 155,
+            "points_finish": 188,
+            "points_received": 33,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Sprint": {
+            "points_start": 120,
+            "points_finish": 129,
+            "points_received": 9,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 129,
+            "points_finish": 151,
+            "points_received": 22,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "McLaren": {
+          "Sprint": {
+            "points_start": 69,
+            "points_finish": 74,
+            "points_received": 5,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 74,
+            "points_finish": 103,
+            "points_received": 29,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Sprint": {
+            "points_start": 34,
+            "points_finish": 42,
+            "points_received": 8,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 42,
+            "points_finish": 52,
+            "points_received": 10,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Sprint": {
+            "points_start": 33,
+            "points_finish": 33,
+            "points_received": 0,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 33,
+            "points_finish": 40,
+            "points_received": 7,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "RB": {
+          "Sprint": {
+            "points_start": 7,
+            "points_finish": 7,
+            "points_received": 0,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 7,
+            "points_finish": 7,
+            "points_received": 0,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Sprint": {
+            "points_start": 4,
+            "points_finish": 4,
+            "points_received": 0,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 4,
+            "points_finish": 5,
+            "points_received": 1,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          }
+        },
+        "Williams": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          }
+        },
+        "Kick Sauber": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 10,
+            "position_changed": "+1"
+          }
+        },
+        "Alpine": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 9,
+            "position_changed": "-1"
+          }
+        }
+      }
+    },
+    {
+      "round": "6",
+      "teams": {
+        "Red Bull Racing": {
+          "Sprint": {
+            "points_start": 195,
+            "points_finish": 209,
+            "points_received": 14,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 209,
+            "points_finish": 237,
+            "points_received": 28,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Sprint": {
+            "points_start": 151,
+            "points_finish": 162,
+            "points_received": 11,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 162,
+            "points_finish": 189,
+            "points_received": 27,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "McLaren": {
+          "Sprint": {
+            "points_start": 96,
+            "points_finish": 99,
+            "points_received": 3,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 99,
+            "points_finish": 124,
+            "points_received": 25,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Sprint": {
+            "points_start": 52,
+            "points_finish": 52,
+            "points_received": 0,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 52,
+            "points_finish": 64,
+            "points_received": 12,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Sprint": {
+            "points_start": 40,
+            "points_finish": 40,
+            "points_received": 0,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 40,
+            "points_finish": 42,
+            "points_received": 2,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "RB": {
+          "Sprint": {
+            "points_start": 7,
+            "points_finish": 13,
+            "points_received": 6,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 13,
+            "points_finish": 19,
+            "points_received": 6,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Sprint": {
+            "points_start": 5,
+            "points_finish": 7,
+            "points_received": 2,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 7,
+            "points_finish": 7,
+            "points_received": 0,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          }
+        },
+        "Williams": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 9,
+            "position_changed": "+1"
+          }
+        },
+        "Alpine": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 1,
+            "points_received": 1,
+            "position_start": 9,
+            "position_finish": 8,
+            "position_changed": "-1"
+          }
+        },
+        "Kick Sauber": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "7",
+      "teams": {
+        "Red Bull Racing": {
+          "Race": {
+            "points_start": 239,
+            "points_finish": 268,
+            "points_received": 29,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_start": 187,
+            "points_finish": 212,
+            "points_received": 25,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "McLaren": {
+          "Race": {
+            "points_start": 124,
+            "points_finish": 154,
+            "points_received": 30,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_start": 64,
+            "points_finish": 79,
+            "points_received": 15,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_start": 42,
+            "points_finish": 44,
+            "points_received": 2,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "RB": {
+          "Race": {
+            "points_start": 19,
+            "points_finish": 20,
+            "points_received": 1,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_start": 7,
+            "points_finish": 7,
+            "points_received": 0,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_start": 1,
+            "points_finish": 1,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          }
+        },
+        "Kick Sauber": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "8",
+      "teams": {
+        "Red Bull Racing": {
+          "Race": {
+            "points_start": 268,
+            "points_finish": 276,
+            "points_received": 8,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_start": 212,
+            "points_finish": 252,
+            "points_received": 40,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "McLaren": {
+          "Race": {
+            "points_start": 154,
+            "points_finish": 184,
+            "points_received": 30,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_start": 79,
+            "points_finish": 96,
+            "points_received": 17,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_start": 44,
+            "points_finish": 44,
+            "points_received": 0,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "RB": {
+          "Race": {
+            "points_start": 20,
+            "points_finish": 24,
+            "points_received": 4,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_start": 7,
+            "points_finish": 7,
+            "points_received": 0,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 2,
+            "points_received": 2,
+            "position_start": 9,
+            "position_finish": 8,
+            "position_changed": "-1"
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_start": 1,
+            "points_finish": 2,
+            "points_received": 1,
+            "position_start": 8,
+            "position_finish": 9,
+            "position_changed": "+1"
+          }
+        },
+        "Kick Sauber": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "9",
+      "teams": {
+        "Red Bull Racing": {
+          "Race": {
+            "points_start": 276,
+            "points_finish": 301,
+            "points_received": 25,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_start": 252,
+            "points_finish": 252,
+            "points_received": 0,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "McLaren": {
+          "Race": {
+            "points_start": 184,
+            "points_finish": 212,
+            "points_received": 28,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_start": 96,
+            "points_finish": 124,
+            "points_received": 28,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_start": 44,
+            "points_finish": 58,
+            "points_received": 14,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "RB": {
+          "Race": {
+            "points_start": 24,
+            "points_finish": 28,
+            "points_received": 4,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_start": 7,
+            "points_finish": 7,
+            "points_received": 0,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_start": 2,
+            "points_finish": 5,
+            "points_received": 3,
+            "position_start": 9,
+            "position_finish": 8,
+            "position_changed": "-1"
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_start": 2,
+            "points_finish": 2,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 9,
+            "position_changed": "+1"
+          }
+        },
+        "Kick Sauber": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "10",
+      "teams": {
+        "Red Bull Racing": {
+          "Race": {
+            "points_start": 301,
+            "points_finish": 330,
+            "points_received": 29,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_start": 252,
+            "points_finish": 270,
+            "points_received": 18,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "McLaren": {
+          "Race": {
+            "points_start": 212,
+            "points_finish": 237,
+            "points_received": 25,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_start": 124,
+            "points_finish": 151,
+            "points_received": 27,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_start": 58,
+            "points_finish": 58,
+            "points_received": 0,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "RB": {
+          "Race": {
+            "points_start": 28,
+            "points_finish": 28,
+            "points_received": 0,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_start": 5,
+            "points_finish": 8,
+            "points_received": 3,
+            "position_start": 8,
+            "position_finish": 7,
+            "position_changed": "-1"
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_start": 7,
+            "points_finish": 7,
+            "points_received": 0,
+            "position_start": 7,
+            "position_finish": 8,
+            "position_changed": "+1"
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_start": 2,
+            "points_finish": 2,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          }
+        },
+        "Kick Sauber": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "11",
+      "teams": {
+        "Red Bull Racing": {
+          "Sprint": {
+            "points_start": 330,
+            "points_finish": 339,
+            "points_received": 9,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 339,
+            "points_finish": 355,
+            "points_received": 16,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Sprint": {
+            "points_start": 270,
+            "points_finish": 276,
+            "points_received": 6,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 276,
+            "points_finish": 291,
+            "points_received": 15,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "McLaren": {
+          "Sprint": {
+            "points_start": 237,
+            "points_finish": 250,
+            "points_received": 13,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 250,
+            "points_finish": 268,
+            "points_received": 18,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Sprint": {
+            "points_start": 151,
+            "points_finish": 159,
+            "points_received": 8,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 159,
+            "points_finish": 196,
+            "points_received": 37,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Sprint": {
+            "points_start": 58,
+            "points_finish": 58,
+            "points_received": 0,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 58,
+            "points_finish": 58,
+            "points_received": 0,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "RB": {
+          "Sprint": {
+            "points_start": 28,
+            "points_finish": 28,
+            "points_received": 0,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 28,
+            "points_finish": 30,
+            "points_received": 2,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          }
+        },
+        "Alpine": {
+          "Sprint": {
+            "points_start": 8,
+            "points_finish": 8,
+            "points_received": 0,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 8,
+            "points_finish": 9,
+            "points_received": 1,
+            "position_start": 7,
+            "position_finish": 8,
+            "position_changed": "+1"
+          }
+        },
+        "Haas F1 Team": {
+          "Sprint": {
+            "points_start": 7,
+            "points_finish": 7,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 7,
+            "points_finish": 19,
+            "points_received": 12,
+            "position_start": 8,
+            "position_finish": 7,
+            "position_changed": "-1"
+          }
+        },
+        "Williams": {
+          "Sprint": {
+            "points_start": 2,
+            "points_finish": 2,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 2,
+            "points_finish": 2,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          }
+        },
+        "Kick Sauber": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "12",
+      "teams": {
+        "Red Bull Racing": {
+          "Race": {
+            "points_start": 355,
+            "points_finish": 373,
+            "points_received": 18,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_start": 291,
+            "points_finish": 302,
+            "points_received": 11,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "McLaren": {
+          "Race": {
+            "points_start": 268,
+            "points_finish": 295,
+            "points_received": 27,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_start": 196,
+            "points_finish": 221,
+            "points_received": 25,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_start": 58,
+            "points_finish": 68,
+            "points_received": 10,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "RB": {
+          "Race": {
+            "points_start": 30,
+            "points_finish": 31,
+            "points_received": 1,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_start": 19,
+            "points_finish": 27,
+            "points_received": 8,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_start": 9,
+            "points_finish": 9,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_start": 2,
+            "points_finish": 4,
+            "points_received": 2,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          }
+        },
+        "Kick Sauber": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "13",
+      "teams": {
+        "Red Bull Racing": {
+          "Race": {
+            "points_start": 373,
+            "points_finish": 389,
+            "points_received": 16,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "McLaren": {
+          "Race": {
+            "points_start": 295,
+            "points_finish": 338,
+            "points_received": 43,
+            "position_start": 3,
+            "position_finish": 2,
+            "position_changed": "-1"
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_start": 302,
+            "points_finish": 322,
+            "points_received": 20,
+            "position_start": 2,
+            "position_finish": 3,
+            "position_changed": "+1"
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_start": 221,
+            "points_finish": 241,
+            "points_received": 20,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_start": 68,
+            "points_finish": 69,
+            "points_received": 1,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "RB": {
+          "Race": {
+            "points_start": 31,
+            "points_finish": 33,
+            "points_received": 2,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_start": 27,
+            "points_finish": 27,
+            "points_received": 0,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_start": 9,
+            "points_finish": 9,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_start": 4,
+            "points_finish": 4,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          }
+        },
+        "Kick Sauber": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "14",
+      "teams": {
+        "Red Bull Racing": {
+          "Race": {
+            "points_start": 389,
+            "points_finish": 404,
+            "points_received": 15,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "McLaren": {
+          "Race": {
+            "points_start": 338,
+            "points_finish": 361,
+            "points_received": 23,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_start": 322,
+            "points_finish": 340,
+            "points_received": 18,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_start": 241,
+            "points_finish": 284,
+            "points_received": 43,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_start": 69,
+            "points_finish": 71,
+            "points_received": 2,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "RB": {
+          "Race": {
+            "points_start": 33,
+            "points_finish": 33,
+            "points_received": 0,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_start": 27,
+            "points_finish": 27,
+            "points_received": 0,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_start": 9,
+            "points_finish": 10,
+            "points_received": 1,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_start": 4,
+            "points_finish": 4,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          }
+        },
+        "Kick Sauber": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "15",
+      "teams": {
+        "Red Bull Racing": {
+          "Race": {
+            "points_start": 408,
+            "points_finish": 434,
+            "points_received": 26,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "McLaren": {
+          "Race": {
+            "points_start": 366,
+            "points_finish": 404,
+            "points_received": 38,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_start": 345,
+            "points_finish": 370,
+            "points_received": 25,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_start": 266,
+            "points_finish": 276,
+            "points_received": 10,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_start": 73,
+            "points_finish": 74,
+            "points_received": 1,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "RB": {
+          "Race": {
+            "points_start": 34,
+            "points_finish": 34,
+            "points_received": 0,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_start": 27,
+            "points_finish": 27,
+            "points_received": 0,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_start": 11,
+            "points_finish": 13,
+            "points_received": 2,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_start": 4,
+            "points_finish": 4,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          }
+        },
+        "Kick Sauber": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "16",
+      "teams": {
+        "Red Bull Racing": {
+          "Race": {
+            "points_start": 434,
+            "points_finish": 446,
+            "points_received": 12,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "McLaren": {
+          "Race": {
+            "points_start": 404,
+            "points_finish": 438,
+            "points_received": 34,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_start": 370,
+            "points_finish": 407,
+            "points_received": 37,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_start": 276,
+            "points_finish": 292,
+            "points_received": 16,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_start": 74,
+            "points_finish": 74,
+            "points_received": 0,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "RB": {
+          "Race": {
+            "points_start": 34,
+            "points_finish": 34,
+            "points_received": 0,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_start": 27,
+            "points_finish": 28,
+            "points_received": 1,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_start": 13,
+            "points_finish": 13,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_start": 4,
+            "points_finish": 6,
+            "points_received": 2,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          }
+        },
+        "Kick Sauber": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "17",
+      "teams": {
+        "McLaren": {
+          "Race": {
+            "points_start": 438,
+            "points_finish": 476,
+            "points_received": 38,
+            "position_start": 2,
+            "position_finish": 1,
+            "position_changed": "-1"
+          }
+        },
+        "Red Bull Racing": {
+          "Race": {
+            "points_start": 446,
+            "points_finish": 456,
+            "points_received": 10,
+            "position_start": 1,
+            "position_finish": 2,
+            "position_changed": "+1"
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_start": 407,
+            "points_finish": 425,
+            "points_received": 18,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_start": 292,
+            "points_finish": 309,
+            "points_received": 17,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_start": 74,
+            "points_finish": 82,
+            "points_received": 8,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "RB": {
+          "Race": {
+            "points_start": 34,
+            "points_finish": 34,
+            "points_received": 0,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_start": 28,
+            "points_finish": 29,
+            "points_received": 1,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_start": 6,
+            "points_finish": 16,
+            "points_received": 10,
+            "position_start": 9,
+            "position_finish": 8,
+            "position_changed": "-1"
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_start": 13,
+            "points_finish": 13,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 9,
+            "position_changed": "+1"
+          }
+        },
+        "Kick Sauber": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "18",
+      "teams": {
+        "McLaren": {
+          "Race": {
+            "points_start": 476,
+            "points_finish": 516,
+            "points_received": 40,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "Red Bull Racing": {
+          "Race": {
+            "points_start": 456,
+            "points_finish": 475,
+            "points_received": 19,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_start": 425,
+            "points_finish": 441,
+            "points_received": 16,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_start": 309,
+            "points_finish": 329,
+            "points_received": 20,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_start": 82,
+            "points_finish": 86,
+            "points_received": 4,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "RB": {
+          "Race": {
+            "points_start": 34,
+            "points_finish": 34,
+            "points_received": 0,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_start": 29,
+            "points_finish": 31,
+            "points_received": 2,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_start": 16,
+            "points_finish": 16,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_start": 13,
+            "points_finish": 13,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          }
+        },
+        "Kick Sauber": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "19",
+      "teams": {
+        "McLaren": {
+          "Sprint": {
+            "points_start": 516,
+            "points_finish": 522,
+            "points_received": 6,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 522,
+            "points_finish": 544,
+            "points_received": 22,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "Red Bull Racing": {
+          "Sprint": {
+            "points_start": 475,
+            "points_finish": 483,
+            "points_received": 8,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 483,
+            "points_finish": 504,
+            "points_received": 21,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Sprint": {
+            "points_start": 441,
+            "points_finish": 453,
+            "points_received": 12,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 453,
+            "points_finish": 496,
+            "points_received": 43,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Sprint": {
+            "points_start": 329,
+            "points_finish": 336,
+            "points_received": 7,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 336,
+            "points_finish": 344,
+            "points_received": 8,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Sprint": {
+            "points_start": 86,
+            "points_finish": 86,
+            "points_received": 0,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 86,
+            "points_finish": 86,
+            "points_received": 0,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Sprint": {
+            "points_start": 31,
+            "points_finish": 34,
+            "points_received": 3,
+            "position_start": 7,
+            "position_finish": 6,
+            "position_changed": "-1"
+          },
+          "Race": {
+            "points_start": 34,
+            "points_finish": 38,
+            "points_received": 4,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          }
+        },
+        "RB": {
+          "Sprint": {
+            "points_start": 34,
+            "points_finish": 34,
+            "points_received": 0,
+            "position_start": 6,
+            "position_finish": 7,
+            "position_changed": "+1"
+          },
+          "Race": {
+            "points_start": 34,
+            "points_finish": 36,
+            "points_received": 2,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          }
+        },
+        "Williams": {
+          "Sprint": {
+            "points_start": 16,
+            "points_finish": 16,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 16,
+            "points_finish": 17,
+            "points_received": 1,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          }
+        },
+        "Alpine": {
+          "Sprint": {
+            "points_start": 13,
+            "points_finish": 13,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 13,
+            "points_finish": 13,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          }
+        },
+        "Kick Sauber": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "20",
+      "teams": {
+        "McLaren": {
+          "Race": {
+            "points_start": 544,
+            "points_finish": 566,
+            "points_received": 22,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_start": 496,
+            "points_finish": 537,
+            "points_received": 41,
+            "position_start": 3,
+            "position_finish": 2,
+            "position_changed": "-1"
+          }
+        },
+        "Red Bull Racing": {
+          "Race": {
+            "points_start": 504,
+            "points_finish": 512,
+            "points_received": 8,
+            "position_start": 2,
+            "position_finish": 3,
+            "position_changed": "+1"
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_start": 344,
+            "points_finish": 366,
+            "points_received": 22,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_start": 86,
+            "points_finish": 86,
+            "points_received": 0,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_start": 38,
+            "points_finish": 46,
+            "points_received": 8,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          }
+        },
+        "RB": {
+          "Race": {
+            "points_start": 36,
+            "points_finish": 36,
+            "points_received": 0,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_start": 17,
+            "points_finish": 17,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_start": 13,
+            "points_finish": 14,
+            "points_received": 1,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          }
+        },
+        "Kick Sauber": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "21",
+      "teams": {
+        "McLaren": {
+          "Sprint": {
+            "points_start": 566,
+            "points_finish": 581,
+            "points_received": 15,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 581,
+            "points_finish": 593,
+            "points_received": 12,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Sprint": {
+            "points_start": 537,
+            "points_finish": 546,
+            "points_received": 9,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 547,
+            "points_finish": 557,
+            "points_received": 10,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "Red Bull Racing": {
+          "Sprint": {
+            "points_start": 512,
+            "points_finish": 519,
+            "points_received": 7,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 518,
+            "points_finish": 544,
+            "points_received": 26,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Sprint": {
+            "points_start": 366,
+            "points_finish": 369,
+            "points_received": 3,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 369,
+            "points_finish": 382,
+            "points_received": 13,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Sprint": {
+            "points_start": 86,
+            "points_finish": 86,
+            "points_received": 0,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 86,
+            "points_finish": 86,
+            "points_received": 0,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Sprint": {
+            "points_start": 46,
+            "points_finish": 46,
+            "points_received": 0,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 46,
+            "points_finish": 46,
+            "points_received": 0,
+            "position_start": 6,
+            "position_finish": 7,
+            "position_changed": "+1"
+          }
+        },
+        "RB": {
+          "Sprint": {
+            "points_start": 36,
+            "points_finish": 36,
+            "points_received": 0,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 36,
+            "points_finish": 44,
+            "points_received": 8,
+            "position_start": 7,
+            "position_finish": 8,
+            "position_changed": "+1"
+          }
+        },
+        "Williams": {
+          "Sprint": {
+            "points_start": 17,
+            "points_finish": 17,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 17,
+            "points_finish": 17,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 9,
+            "position_changed": "+1"
+          }
+        },
+        "Alpine": {
+          "Sprint": {
+            "points_start": 14,
+            "points_finish": 16,
+            "points_received": 2,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 16,
+            "points_finish": 49,
+            "points_received": 33,
+            "position_start": 9,
+            "position_finish": 6,
+            "position_changed": "-3"
+          }
+        },
+        "Kick Sauber": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "22",
+      "teams": {
+        "McLaren": {
+          "Race": {
+            "points_start": 593,
+            "points_finish": 608,
+            "points_received": 15,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_start": 557,
+            "points_finish": 584,
+            "points_received": 27,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "Red Bull Racing": {
+          "Race": {
+            "points_start": 544,
+            "points_finish": 555,
+            "points_received": 11,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_start": 382,
+            "points_finish": 425,
+            "points_received": 43,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_start": 86,
+            "points_finish": 86,
+            "points_received": 0,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_start": 46,
+            "points_finish": 50,
+            "points_received": 4,
+            "position_start": 7,
+            "position_finish": 6,
+            "position_changed": "-1"
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_start": 49,
+            "points_finish": 49,
+            "points_received": 0,
+            "position_start": 6,
+            "position_finish": 7,
+            "position_changed": "+1"
+          }
+        },
+        "RB": {
+          "Race": {
+            "points_start": 44,
+            "points_finish": 46,
+            "points_received": 2,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_start": 17,
+            "points_finish": 17,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          }
+        },
+        "Kick Sauber": {
+          "Race": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "23",
+      "teams": {
+        "McLaren": {
+          "Sprint": {
+            "points_start": 608,
+            "points_finish": 623,
+            "points_received": 15,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 623,
+            "points_finish": 640,
+            "points_received": 17,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Sprint": {
+            "points_start": 584,
+            "points_finish": 593,
+            "points_received": 9,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 593,
+            "points_finish": 619,
+            "points_received": 26,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "Red Bull Racing": {
+          "Sprint": {
+            "points_start": 555,
+            "points_finish": 556,
+            "points_received": 1,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 556,
+            "points_finish": 581,
+            "points_received": 25,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Sprint": {
+            "points_start": 425,
+            "points_finish": 434,
+            "points_received": 9,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 434,
+            "points_finish": 446,
+            "points_received": 12,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Sprint": {
+            "points_start": 86,
+            "points_finish": 86,
+            "points_received": 0,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 86,
+            "points_finish": 92,
+            "points_received": 6,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Sprint": {
+            "points_start": 50,
+            "points_finish": 52,
+            "points_received": 2,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 52,
+            "points_finish": 54,
+            "points_received": 2,
+            "position_start": 6,
+            "position_finish": 7,
+            "position_changed": "+1"
+          }
+        },
+        "Alpine": {
+          "Sprint": {
+            "points_start": 49,
+            "points_finish": 49,
+            "points_received": 0,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 49,
+            "points_finish": 59,
+            "points_received": 10,
+            "position_start": 7,
+            "position_finish": 6,
+            "position_changed": "-1"
+          }
+        },
+        "RB": {
+          "Sprint": {
+            "points_start": 46,
+            "points_finish": 46,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 46,
+            "points_finish": 46,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          }
+        },
+        "Williams": {
+          "Sprint": {
+            "points_start": 17,
+            "points_finish": 17,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 17,
+            "points_finish": 17,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          }
+        },
+        "Kick Sauber": {
+          "Sprint": {
+            "points_start": 0,
+            "points_finish": 0,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          },
+          "Race": {
+            "points_start": 0,
+            "points_finish": 4,
+            "points_received": 4,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    },
+    {
+      "round": "24",
+      "teams": {
+        "McLaren": {
+          "Race": {
+            "points_start": 640,
+            "points_finish": 666,
+            "points_received": 26,
+            "position_start": 1,
+            "position_finish": 1,
+            "position_changed": "+0"
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_start": 619,
+            "points_finish": 652,
+            "points_received": 33,
+            "position_start": 2,
+            "position_finish": 2,
+            "position_changed": "+0"
+          }
+        },
+        "Red Bull Racing": {
+          "Race": {
+            "points_start": 581,
+            "points_finish": 589,
+            "points_received": 8,
+            "position_start": 3,
+            "position_finish": 3,
+            "position_changed": "+0"
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_start": 446,
+            "points_finish": 468,
+            "points_received": 22,
+            "position_start": 4,
+            "position_finish": 4,
+            "position_changed": "+0"
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_start": 92,
+            "points_finish": 94,
+            "points_received": 2,
+            "position_start": 5,
+            "position_finish": 5,
+            "position_changed": "+0"
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_start": 59,
+            "points_finish": 65,
+            "points_received": 6,
+            "position_start": 6,
+            "position_finish": 6,
+            "position_changed": "+0"
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_start": 54,
+            "points_finish": 58,
+            "points_received": 4,
+            "position_start": 7,
+            "position_finish": 7,
+            "position_changed": "+0"
+          }
+        },
+        "RB": {
+          "Race": {
+            "points_start": 46,
+            "points_finish": 46,
+            "points_received": 0,
+            "position_start": 8,
+            "position_finish": 8,
+            "position_changed": "+0"
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_start": 17,
+            "points_finish": 17,
+            "points_received": 0,
+            "position_start": 9,
+            "position_finish": 9,
+            "position_changed": "+0"
+          }
+        },
+        "Kick Sauber": {
+          "Race": {
+            "points_start": 4,
+            "points_finish": 4,
+            "points_received": 0,
+            "position_start": 10,
+            "position_finish": 10,
+            "position_changed": "+0"
+          }
+        }
+      }
+    }
+  ]
+}

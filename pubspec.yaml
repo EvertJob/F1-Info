@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.1+13
+version: 1.0.1+14
 
 environment:
   sdk: ^3.11.1
@@ -43,12 +43,20 @@ dependencies:
   firebase_core: ^4.5.0
   firebase_auth: ^6.2.0
   cloud_firestore: ^6.1.3
-  google_sign_in: ^7.2.0
+  google_sign_in: ^6.2.1
   go_router: ^17.1.0
   web: ^1.1.1
   hive: ^2.2.3
   two_dimensional_scrollables: ^0.3.8
   hive_flutter: ^1.1.0
+  easy_localization: ^3.0.3
+  supabase_flutter: ^2.8.1
+  supabase_auth_ui: ^0.5.5
+  flex_color_scheme: ^8.4.0
+  google_fonts: ^6.2.1
+  provider: ^6.1.2
+  web_socket_channel: ^3.0.2
+  archive: ^4.0.6
 
 dev_dependencies:
   flutter_test:
@@ -73,7 +81,10 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/translations/
     - data/results/
+    - data/results/drivers/
+    - data/results/teams/
     - assets/summer_break_flag.svg
     - assets/tires/F1_tire_Pirelli_PZero_Red.svg
     - assets/tires/F1_tire_Pirelli_PZero_Yellow.svg
