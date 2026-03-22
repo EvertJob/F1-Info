@@ -1,11 +1,11 @@
 {
-    "name": "f1",
-    "short_name": "f1",
+    "name": "F1 Hub",
+    "short_name": "F1 Hub",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#E10600",
+    "theme_color": "#E10600",
+    "description": "F1 Hub — calendars, results, standings, and live timing.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

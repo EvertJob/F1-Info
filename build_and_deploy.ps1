@@ -28,6 +28,12 @@ if (Test-Path CNAME) {
   Copy-Item CNAME build/web/CNAME
 }
 
+# 2c. Zelfde build naar repo-root kopiëren: GitHub Pages serveert de branch-root
+# (index.html, main.dart.js, assets/, …), niet de map build/web/.
+Get-ChildItem -Path build\web -Force | ForEach-Object {
+  Copy-Item $_.FullName -Destination . -Recurse -Force
+}
+
 # 3. Pushen naar gh-pages (build/web inhoud naar root voor GitHub Pages)
 git add -f build/web
 $commitMsg = "Auto build: versie verhoogd naar $newVersion"
