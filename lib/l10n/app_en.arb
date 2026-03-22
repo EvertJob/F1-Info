@@ -1,0 +1,770 @@
+{
+  "@@locale": "en",
+  "accident": "Accident Chance",
+  "age": "Age",
+  "ai_avg_gap": "Avg. Gap",
+  "ai_chip_compare_max_lando": "Compare Max vs Lando",
+  "ai_chip_fetch_latest_results": "Fetch latest results",
+  "ai_chip_show_driver_standings": "Show driver standings",
+  "ai_chip_show_form_piastri": "Show form Piastri",
+  "ai_chip_show_latest_penalties": "Show latest penalties",
+  "ai_chip_show_next_weekend": "Show next weekend",
+  "ai_coach_title": "Coach''s Corner",
+  "ai_compare_no_match": "I could not find two valid drivers or teams for this comparison.",
+  "ai_compare_parse_error": "I could not read the comparison. Use: name1 vs name2",
+  "ai_crash": "The assistant ran into: {error}",
+  "@ai_crash": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_driver_compare_ready": "Driver comparison is ready for {left} and {right}.",
+  "@ai_driver_compare_ready": {
+    "placeholders": {
+      "left": {
+        "type": "String"
+      },
+      "right": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_driver_profile_ready": "Driver profile ready for {driver}.",
+  "@ai_driver_profile_ready": {
+    "placeholders": {
+      "driver": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_driver_standings_summary": "Driver standings {year}: {summary}",
+  "@ai_driver_standings_summary": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      },
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_drivers_chart_ready": "The drivers chart is ready for {year}.",
+  "@ai_drivers_chart_ready": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_example_prompt": "Try for example: \"Fetch latest results\", \"Show next weekend\", \"Show driver standings\", \"Open driver Charles Leclerc\" or \"Show latest penalties\".",
+  "ai_form_no_cache": "No cached recent races for {driver} yet.",
+  "@ai_form_no_cache": {
+    "placeholders": {
+      "driver": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_form_no_driver": "I could not find a driver for the form analysis.",
+  "ai_form_summary": "Recent form for {driver}: {summary}",
+  "@ai_form_summary": {
+    "placeholders": {
+      "driver": {
+        "type": "String"
+      },
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_latest_penalties_none": "No penalties found for {race}.",
+  "@ai_latest_penalties_none": {
+    "placeholders": {
+      "race": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_latest_penalties_summary": "Latest penalties at {race}: {count}. {details}",
+  "@ai_latest_penalties_summary": {
+    "placeholders": {
+      "race": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      },
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_latest_race_control_none": "No Race Control messages found for {race}.",
+  "@ai_latest_race_control_none": {
+    "placeholders": {
+      "race": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_latest_race_control_summary": "Race Control at {race}: {count} messages. Latest update: {message}",
+  "@ai_latest_race_control_summary": {
+    "placeholders": {
+      "race": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_latest_results_podium": "Latest results refreshed. Podium: {podium}",
+  "@ai_latest_results_podium": {
+    "placeholders": {
+      "podium": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_latest_results_refreshed": "The latest results were refreshed.",
+  "ai_next_weekend": "Next weekend: {race} on {date}.",
+  "@ai_next_weekend": {
+    "placeholders": {
+      "race": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_next_weekend_weather": "Weather for {race}: {temp}C, {rain}% rain, {wind} km/h wind.",
+  "@ai_next_weekend_weather": {
+    "placeholders": {
+      "race": {
+        "type": "String"
+      },
+      "temp": {
+        "type": "String"
+      },
+      "rain": {
+        "type": "String"
+      },
+      "wind": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_no_completed_race": "No completed race has been found yet.",
+  "ai_open_driver_compare": "Open driver compare",
+  "ai_open_driver_profile": "Open driver profile",
+  "ai_open_driver_standings": "Open driver standings",
+  "ai_open_drivers_chart": "Open drivers chart",
+  "ai_open_latest_results": "Open latest results",
+  "ai_open_team_compare": "Open team compare",
+  "ai_open_team_profile": "Open team profile",
+  "ai_open_team_standings": "Open team standings",
+  "ai_open_weekend_hub": "Open weekend hub",
+  "ai_qualifying_duel": "Qualifying Duel",
+  "ai_race_engineer": "AI Race Engineer",
+  "ai_rain_chance_label": "Rain Chance",
+  "ai_rain_chance_slider": "Rain Chance",
+  "ai_sentiment_generic_neutral": "Team Vibe: Mixed signals from team radios.",
+  "ai_sentiment_generic_positive": "Team Vibe: Positive energy across the paddock.",
+  "ai_sentiment_label": "Team Vibe",
+  "ai_sentiment_mercedes_positive": "Team Vibe: Morale rises at Mercedes after Hamilton grid penalty.",
+  "ai_strategist_tap_hint": "Tap to ask questions...",
+  "ai_strategist_title": "AI Strategist",
+  "ai_prefs_section_title": "AI Strategist",
+  "ai_prefs_section_subtitle": "Customize the AI Strategist card on the home screen.",
+  "ai_prefs_disable_card": "Disable AI Strategist card",
+  "ai_prefs_hide_teambattle": "Hide Teammate Battle",
+  "ai_prefs_hide_teambattle_hint": "When the card is visible, hide the teammate comparison.",
+  "ai_prefs_hide_coach_corner": "Hide Coach''s Corner",
+  "ai_prefs_hide_coach_corner_hint": "When the card is visible, hide coaching tips.",
+  "ai_prefs_hide_team_vibe": "Hide Team Vibe",
+  "ai_prefs_hide_team_vibe_hint": "When the card is visible, hide sentiment.",
+  "ai_supported_commands": "Supported commands: Fetch latest results, Show next weekend, Compare name1 vs name2, Show form [driver], Show driver standings, Show team standings, Open driver [name], Open team [name], Show drivers chart, Show latest penalties, Show latest race control.",
+  "ai_team_compare_ready": "Team comparison is ready for {left} and {right}.",
+  "@ai_team_compare_ready": {
+    "placeholders": {
+      "left": {
+        "type": "String"
+      },
+      "right": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_team_profile_ready": "Team profile ready for {team}.",
+  "@ai_team_profile_ready": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_team_standings_summary": "Constructor standings {year}: {summary}",
+  "@ai_team_standings_summary": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      },
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_teammate_battle": "Teammate Battle",
+  "ai_teammate_insight": "{driver} is traditionally stronger on this circuit in qualifying, while {teammate} excels in tyre preservation.",
+  "@ai_teammate_insight": {
+    "placeholders": {
+      "driver": {
+        "type": "String"
+      },
+      "teammate": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_type_command": "Type a command...",
+  "ai_weather_effect": "At {pct}% rain: Podium chance for {driver} rises {pct2}% due to superior wet pace.",
+  "@ai_weather_effect": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      },
+      "driver": {
+        "type": "String"
+      },
+      "pct2": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_weather_effect_at": "At {pct}% rain: {insight}",
+  "@ai_weather_effect_at": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      },
+      "insight": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_weather_insight_alonso": "Podium chance for Alonso rises 15% due to superior wet pace.",
+  "ai_weather_insight_generic": "Wet conditions favor strong wet-weather drivers.",
+  "air_temperature": "Air temperature",
+  "all_scopes": "All scopes",
+  "app_title": "F1 Hub",
+  "average_speed": "Average Speed",
+  "avg_finish": "Avg finish",
+  "avg_finish_l5": "Avg finish (L5)",
+  "avg_gforce": "Avg G-Force",
+  "avg_lap": "Average Lap",
+  "best_combination": "Best Combination",
+  "best_lap": "Best lap",
+  "birth_place": "Birthplace",
+  "cache_cleared": "Cache cleared successfully!",
+  "car_label": "Car {number}",
+  "@car_label": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "career_stats": "Career Stats",
+  "cc_wins": "Constructors Titles",
+  "championship_progression": "Championship progression",
+  "championships": "Championships",
+  "calendar_prefs_section_title": "Calendar",
+  "calendar_prefs_section_subtitle": "Customize the circuits calendar.",
+  "calendar_prefs_hide_cancelled": "Hide placeholder races",
+  "calendar_prefs_hide_cancelled_hint": "Hide cancelled or placeholder races not on the real calendar.",
+  "changelog": "Changelog",
+  "characteristics": "CIRCUIT CHARACTERISTICS",
+  "chart_no_data": "No chart data is available for this season.",
+  "children": "Children",
+  "circuit": "Circuit",
+  "circuit_difficulty": "Circuit Difficulty",
+  "circuit_info": "Circuit Info",
+  "circuit_layout": "Circuit Layout",
+  "circuits": "Circuits",
+  "city": "City",
+  "clear_cache": "Clear Cache",
+  "close": "Close",
+  "compare": "Compare",
+  "compare_overall": "Overall",
+  "compare_season": "By season",
+  "compare_season_unavailable": "Season data is unavailable for this comparison.",
+  "compare_year": "Season",
+  "contract_until": "Contract until",
+  "country": "Country",
+  "country_australia": "Australia",
+  "country_austria": "Austria",
+  "country_azerbaijan": "Azerbaijan",
+  "country_bahrain": "Bahrain",
+  "country_belgium": "Belgium",
+  "country_brazil": "Brazil",
+  "country_canada": "Canada",
+  "country_china": "China",
+  "country_hungary": "Hungary",
+  "country_italy": "Italy",
+  "country_japan": "Japan",
+  "country_mexico": "Mexico",
+  "country_monaco": "Monaco",
+  "country_netherlands": "Netherlands",
+  "country_qatar": "Qatar",
+  "country_saudi_arabia": "Saudi Arabia",
+  "country_singapore": "Singapore",
+  "country_spain": "Spain",
+  "country_uae": "UAE",
+  "country_uk": "UK",
+  "country_usa": "USA",
+  "current_team": "Current Team",
+  "date": "Date",
+  "day": "day",
+  "days": "days",
+  "dc_wins": "Drivers Titles",
+  "distance_to_turn1": "Distance to Turn 1",
+  "dnf": "Did Not Finish",
+  "dnf_percentage": "DNF %",
+  "dnqs": "Did Not Qualify",
+  "driver": "Driver",
+  "driver_facts_title": "Facts & Trivia",
+  "driver_history": "History (Last 5 Years)",
+  "drivers": "Drivers",
+  "drivers_chart": "Drivers chart",
+  "dsqs": "Disqualified",
+  "engine": "Engine",
+  "engine_name": "Engine Name",
+  "engine_supplier": "Engine Supplier",
+  "experience": "Experience",
+  "f1_debut": "F1 Debut",
+  "fastest_lap": "Fastest Lap",
+  "fastest_lap_rate": "Fastest lap rate %",
+  "fastest_laps": "Fastest Laps",
+  "fastest_pit": "Fastest Pitstop",
+  "favorite_circuit": "Favorite Circuit",
+  "favorite_driver": "Favorite Driver",
+  "favorite_team": "Favorite Team",
+  "finish": "Finish",
+  "fp1": "Practice 1",
+  "fp2": "Practice 2",
+  "fp3": "Practice 3",
+  "front_row_starts": "Front Row Starts",
+  "fullscreen_table": "Fullscreen table",
+  "gap": "Gap",
+  "general": "General",
+  "gp_abu_dhabi_grand_prix": "Abu Dhabi Grand Prix",
+  "gp_australian_grand_prix": "Australian Grand Prix",
+  "gp_austrian_grand_prix": "Austrian Grand Prix",
+  "gp_azerbaijan_grand_prix": "Azerbaijan Grand Prix",
+  "gp_bahrain_grand_prix": "Bahrain Grand Prix",
+  "gp_barcelona_grand_prix": "Barcelona Grand Prix",
+  "gp_belgian_grand_prix": "Belgian Grand Prix",
+  "gp_british_grand_prix": "British Grand Prix",
+  "gp_canadian_grand_prix": "Canadian Grand Prix",
+  "gp_chinese_grand_prix": "Chinese Grand Prix",
+  "gp_dutch_grand_prix": "Dutch Grand Prix",
+  "gp_hungarian_grand_prix": "Hungarian Grand Prix",
+  "gp_italian_grand_prix": "Italian Grand Prix",
+  "gp_japanese_grand_prix": "Japanese Grand Prix",
+  "gp_las_vegas_grand_prix": "Las Vegas Grand Prix",
+  "gp_mexico_city_grand_prix": "Mexico City Grand Prix",
+  "gp_miami_grand_prix": "Miami Grand Prix",
+  "gp_monaco_grand_prix": "Monaco Grand Prix",
+  "gp_qatar_grand_prix": "Qatar Grand Prix",
+  "gp_s_o_paulo_grand_prix": "São Paulo Grand Prix",
+  "gp_saudi_arabian_grand_prix": "Saudi Arabian Grand Prix",
+  "gp_singapore_grand_prix": "Singapore Grand Prix",
+  "gp_spanish_grand_prix": "Spanish Grand Prix",
+  "gp_united_states_grand_prix": "United States Grand Prix",
+  "hard_tire": "Hard",
+  "hat_tricks": "Hat Tricks",
+  "headquarters": "Headquarters",
+  "height": "Height",
+  "help_and_ideas": "Help & ideas",
+  "hide_all": "None",
+  "highest_finish": "Highest Finish",
+  "highest_grid": "Highest Grid Position",
+  "hours": "hours",
+  "humidity": "Humidity",
+  "language": "Language",
+  "language_chooser": "English",
+  "language_selector": "English",
+  "lap_label": "Lap {lap}",
+  "@lap_label": {
+    "placeholders": {
+      "lap": {
+        "type": "String"
+      }
+    }
+  },
+  "lap_speed_stats": "LAP & SPEED STATS",
+  "laps": "Laps",
+  "laps_led": "Laps Led",
+  "last_5_points": "Last 5 points",
+  "last_podium_prefs_section_title": "Last podium",
+  "last_podium_prefs_section_subtitle": "How many recent races to show on circuit cards.",
+  "last_podium_prefs_races_label": "Number of races",
+  "last_winner": "Last year winner",
+  "length": "Length",
+  "level_1": "Very Easy",
+  "level_2": "Easy",
+  "level_3": "Medium",
+  "level_4": "Hard",
+  "level_5": "Very Hard",
+  "linked_update_many": "{count} linked updates",
+  "@linked_update_many": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "linked_update_one": "1 linked update",
+  "live_leaderboard": "Leaderboard",
+  "live_switch_test": "Switch to Test Data",
+  "live_teammate_battle": "Teammate Battle",
+  "live_timing_title": "Live Timing",
+  "live_waiting": "Waiting for live data...",
+  "loading": "Loading",
+  "logged_in": "You are logged in",
+  "login": "Login",
+  "logout": "Logout",
+  "manager": "Manager",
+  "max_g_force": "Max G-Force",
+  "medium_tire": "Medium",
+  "minutes": "minutes",
+  "name": "Name",
+  "nat_argentine": "Argentine",
+  "nat_australian": "Australian",
+  "nat_brazilian": "Brazilian",
+  "nat_british": "British",
+  "nat_canadian": "Canadian",
+  "nat_dutch": "Dutch",
+  "nat_finnish": "Finnish",
+  "nat_french": "French",
+  "nat_german": "German",
+  "nat_italian": "Italian",
+  "nat_japanese": "Japanese",
+  "nat_mexican": "Mexican",
+  "nat_monegasque": "Monegasque",
+  "nat_new_zealander": "New Zealander",
+  "nat_spanish": "Spanish",
+  "nat_thai": "Thai",
+  "nationality": "Nationality",
+  "next_race": "Next Race",
+  "no_data_yet": "Data not available yet or API pending update",
+  "no_finish_data": "No finish data",
+  "no_race_results_available": "No race results available yet.",
+  "one_two": "1-2 Finishes",
+  "overtakes": "Overtakes",
+  "overtaking_difficulty": "Overtaking Difficulty",
+  "partner": "Partner",
+  "penalties": "Penalties",
+  "penalties_empty": "No penalties found in the current weekend cache.",
+  "penalty": "Penalty",
+  "personal_info": "Personal Info",
+  "personal_sponsors": "Personal Sponsors",
+  "pets": "Pets",
+  "pitstop_leadership": "Pitstop & Leadership",
+  "placeholder_page": "New page",
+  "placeholder_page_empty": "This page is empty for now.",
+  "podiums": "Podiums",
+  "points": "Points",
+  "points_after_each_race": "Standings after each race",
+  "points_history": "Points per Season",
+  "points_per_entry": "Points / entry",
+  "points_per_start": "Points / start",
+  "points_progression": "Points progression",
+  "pole_rate": "Pole rate %",
+  "poles": "Pole Positions",
+  "pos": "Pos",
+  "pressure": "Pressure",
+  "previous_teams": "Teams",
+  "previous_winners": "Previous winners",
+  "profile": "Profile",
+  "pts": "PTS",
+  "q1_out": "Q1 out",
+  "q2_out": "Q2 out",
+  "qualifying": "Qualifying",
+  "race": "Race",
+  "race_control": "Race Control",
+  "race_control_detail": "Race Control detail",
+  "race_control_empty": "No race control messages found for this filter or search.",
+  "race_control_filter_alerts": "Alerts",
+  "race_control_filter_all": "All",
+  "race_control_filter_stewards": "Stewards",
+  "race_control_message_count": "{visible} of {total} messages",
+  "@race_control_message_count": {
+    "placeholders": {
+      "visible": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "race_control_no_linked_message": "No linked steward message found.",
+  "race_control_related_updates": "Related steward updates",
+  "race_control_relation_investigation": "Investigation",
+  "race_control_relation_issued_earlier": "Issued earlier",
+  "race_control_relation_linked": "Linked message",
+  "race_control_relation_message": "Race Control message",
+  "race_control_relation_noted": "Noted",
+  "race_control_relation_outcome": "Outcome",
+  "race_control_relation_penalty_message": "Penalty message",
+  "race_control_relation_served_later": "Served later",
+  "race_control_relation_served_penalty": "Served penalty",
+  "race_control_search_hint": "Search by message, flag, category, lap or driver",
+  "race_stats": "Race Stats",
+  "rain": "Rain",
+  "rain_chance": "Rain Chance",
+  "rainfall": "Rainfall",
+  "red_flag": "Red Flag Chance",
+  "reserve_driver": "Reserve Driver",
+  "result": "Result",
+  "results": "Results",
+  "retirements": "Retirements",
+  "risks": "Risks",
+  "risks_incidents": "RISKS & INCIDENTS",
+  "round_short": "R",
+  "scope": "Scope",
+  "season_2026": "2026 Season",
+  "select_drivers_to_compare": "Select 2 drivers",
+  "select_favorite": "Select...",
+  "select_teams_to_compare": "Select 2 teams",
+  "session": "Session",
+  "session_data_unavailable": "{session} data is loading or not available yet.",
+  "@session_data_unavailable": {
+    "placeholders": {
+      "session": {
+        "type": "String"
+      }
+    }
+  },
+  "session_future": "Session begins at",
+  "session_results": "Session Results",
+  "session_status_completed": "Completed",
+  "session_status_live_recent": "Live / Recent",
+  "session_status_upcoming": "Upcoming",
+  "session_weather_unavailable": "No weather data available for {session}.",
+  "@session_weather_unavailable": {
+    "placeholders": {
+      "session": {
+        "type": "String"
+      }
+    }
+  },
+  "settings": "Settings",
+  "show_all": "All",
+  "show_all_messages": "Show all {count} messages",
+  "@show_all_messages": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "show_less_messages": "Show fewer messages",
+  "since": "On calendar since",
+  "slowest_lap": "Slowest Lap",
+  "soft_tire": "Soft",
+  "sponsors": "Sponsors",
+  "sprint": "Sprint",
+  "sprint_quali": "Sprint Qualifying",
+  "standings": "Standings",
+  "start": "Start",
+  "starts": "Starts",
+  "starts_in": "Starts in",
+  "status": "Status",
+  "strategy": "Strategy",
+  "strategy_1_stop": "1 stop",
+  "strategy_2_stops": "2 stops",
+  "strategy_3_stops": "3 stops",
+  "summer_break": "Summer break",
+  "summer_break_subtitle": "The summer break sits between Hungary and the Netherlands.",
+  "team_facts_title": "Did You Know?",
+  "team_history": "Team History",
+  "team_principal": "Team Principal",
+  "team_theme": "Team Theme",
+  "teams": "Teams",
+  "teams_chart": "Teams chart",
+  "technical_director": "Technical Director",
+  "temp": "Temperature",
+  "theme_mode": "Theme Mode",
+  "theme_mode_dark": "Dark",
+  "theme_mode_light": "Light",
+  "theme_mode_system": "System",
+  "time": "Time",
+  "time_gap": "Time / Gap",
+  "tire_wear": "Tire Wear",
+  "toggle_theme": "Toggle Theme",
+  "top_10": "Top 10",
+  "top_3": "Top 3",
+  "top_5": "Top 5",
+  "top_speed": "Top Speed",
+  "total_entries": "Total Entries",
+  "total_length": "Total Length",
+  "total_points": "Total Points",
+  "total_time": "Total time",
+  "track_flag_double_yellow": "Double yellow",
+  "track_flag_green": "Green flag",
+  "track_flag_red": "Red flag",
+  "track_flag_yellow": "Yellow flag",
+  "track_playback_dry_track": "Dry track",
+  "track_playback_interpolated_minute": "interpolated minute",
+  "track_playback_no_weather": "No weather data available for this session.",
+  "track_playback_rain_active": "Rain active",
+  "track_playback_recorded_sample": "recorded sample",
+  "track_playback_title": "Track Playback",
+  "track_playback_unknown_sample": "Unknown sample",
+  "track_temperature": "Track temperature",
+  "turn1_accident": "Turn 1 Accident Chance",
+  "tyre": "Tyre",
+  "tyres": "Tyres",
+  "tyres_strategy": "TYRES & STRATEGY",
+  "unknown": "Unknown",
+  "unknown_sample": "Unknown sample",
+  "unknown_time": "Unknown time",
+  "until": "Contract until",
+  "used_tyre": "used",
+  "using_fallback_data": "Using offline/fallback data.",
+  "version": "Version",
+  "vsc": "VSC Chance",
+  "wear_high": "High",
+  "wear_low": "Low",
+  "wear_medium": "Medium",
+  "weather_forecast": "Weather Forecast",
+  "week": "week",
+  "weekend_hub": "Weekend Hub",
+  "weekend_hub_card_subtitle": "Schedule, weather, podium and penalties in one screen",
+  "weekend_hub_load_error": "Weekend Hub could not be fully loaded. Cached data is being shown.",
+  "weekend_hub_loading": "Loading Weekend Hub...",
+  "weekend_schedule": "Weekend schedule",
+  "weeks": "weeks",
+  "win_rate": "Win rate %",
+  "wind": "Wind",
+  "wind_speed": "Wind Speed",
+  "wins": "Wins",
+  "ai_fab_label": "AI",
+  "auth_error_message": "{message}",
+  "@auth_error_message": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "calendar_race_status_cancelled": "Cancelled",
+  "calendar_race_status_ended": "Ended",
+  "calendar_race_status_ongoing": "Ongoing",
+  "circuit_open_in_maps": "Open in Maps",
+  "live_timing_air_temp_abbr": "A {temp}",
+  "@live_timing_air_temp_abbr": {
+    "placeholders": {
+      "temp": {
+        "type": "String"
+      }
+    }
+  },
+  "live_timing_banner_green": "GREEN",
+  "live_timing_banner_red_flag": "RED FLAG",
+  "live_timing_banner_safety_car": "SAFETY CAR",
+  "live_timing_banner_vsc_deployed": "VSC DEPLOYED",
+  "live_timing_banner_vsc_ending": "VSC ENDING",
+  "live_timing_banner_yellow_flag": "YELLOW FLAG",
+  "live_timing_chip_red_flag": "RED FLAG",
+  "live_timing_chip_safety_car": "SAFETY CAR",
+  "live_timing_chip_vsc": "VSC",
+  "live_timing_chip_vsc_end": "VSC END",
+  "live_timing_chip_yellow": "YELLOW",
+  "live_timing_data_source": "Source: {source}",
+  "@live_timing_data_source": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "live_timing_demo_session_title": "Silverstone 2024",
+  "live_timing_driver_out": "OUT",
+  "live_timing_driver_pit": "PIT",
+  "live_timing_header_driver": "DRIVER",
+  "live_timing_header_gain": "GAIN",
+  "live_timing_header_int_gap": "INT / GAP",
+  "live_timing_header_pos": "POS",
+  "live_timing_header_s1": "S1",
+  "live_timing_header_s2": "S2",
+  "live_timing_header_s3": "S3",
+  "live_timing_header_tyre": "TYRE",
+  "live_timing_hub_timestamp_tooltip": "Timestamp of last message (stream)",
+  "live_timing_lap_of_total": "Lap {current} / {total}",
+  "@live_timing_lap_of_total": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "live_timing_session_pre_start": "PRE-START",
+  "live_timing_session_starting_grid": "STARTING GRID",
+  "live_timing_status_green": "GREEN",
+  "live_timing_track_temp_abbr": "T {temp}",
+  "@live_timing_track_temp_abbr": {
+    "placeholders": {
+      "temp": {
+        "type": "String"
+      }
+    }
+  },
+  "metric_label_value": "{label}: {value}",
+  "@metric_label_value": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "news_load_error": "Could not load news: {error}",
+  "@news_load_error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "news_title": "F1 News",
+  "race_results_empty": "No race results available yet.",
+  "secure_page_authorized": "You are authorized!",
+  "secure_page_title": "Secure Page",
+  "team_comparison_title": "{team1} vs {team2}",
+  "@team_comparison_title": {
+    "placeholders": {
+      "team1": {
+        "type": "String"
+      },
+      "team2": {
+        "type": "String"
+      }
+    }
+  },
+  "unauthorized_page_message": "You are not authorized to view this page.",
+  "unauthorized_page_title": "Unauthorized"
+}

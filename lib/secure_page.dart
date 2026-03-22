@@ -1,3 +1,4 @@
+import 'package:f1/utils/l10n_extension.dart';
 import 'package:flutter/material.dart';
 
 class SecurePage extends StatelessWidget {
@@ -5,8 +6,8 @@ class SecurePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Secure Page')),
-      body: const Center(child: Text('You are authorized!')),
+      appBar: AppBar(title: Text(context.l10n.secure_page_title)),
+      body: Center(child: Text(context.l10n.secure_page_authorized)),
     );
   }
 }
@@ -16,9 +17,9 @@ class UnauthorizedPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Unauthorized')),
-      body: const Center(
-        child: Text('You are not authorized to view this page.'),
+      appBar: AppBar(title: Text(context.l10n.unauthorized_page_title)),
+      body: Center(
+        child: Text(context.l10n.unauthorized_page_message),
       ),
     );
   }

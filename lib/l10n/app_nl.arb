@@ -1,0 +1,770 @@
+{
+  "@@locale": "nl",
+  "accident": "Kans op crash",
+  "age": "Leeftijd",
+  "ai_avg_gap": "Gem. verschil",
+  "ai_chip_compare_max_lando": "Compare Max vs Lando",
+  "ai_chip_fetch_latest_results": "Fetch latest results",
+  "ai_chip_show_driver_standings": "Show driver standings",
+  "ai_chip_show_form_piastri": "Show form Piastri",
+  "ai_chip_show_latest_penalties": "Show latest penalties",
+  "ai_chip_show_next_weekend": "Show next weekend",
+  "ai_coach_title": "Coach''s Corner",
+  "ai_compare_no_match": "Ik kon geen twee geldige drivers of teams vinden voor deze vergelijking.",
+  "ai_compare_parse_error": "Ik kon de vergelijking niet lezen. Gebruik: naam1 vs naam2",
+  "ai_crash": "De assistent liep vast op: {error}",
+  "@ai_crash": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_driver_compare_ready": "Driver comparison klaar voor {left} en {right}.",
+  "@ai_driver_compare_ready": {
+    "placeholders": {
+      "left": {
+        "type": "String"
+      },
+      "right": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_driver_profile_ready": "Driverprofiel klaar voor {driver}.",
+  "@ai_driver_profile_ready": {
+    "placeholders": {
+      "driver": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_driver_standings_summary": "Driver standings {year}: {summary}",
+  "@ai_driver_standings_summary": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      },
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_drivers_chart_ready": "De coureursgrafiek staat klaar voor {year}.",
+  "@ai_drivers_chart_ready": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_example_prompt": "Probeer bijvoorbeeld: \"Fetch latest results\", \"Show next weekend\", \"Show driver standings\", \"Open driver Charles Leclerc\" of \"Show latest penalties\".",
+  "ai_form_no_cache": "Nog geen gecachte recente races voor {driver}.",
+  "@ai_form_no_cache": {
+    "placeholders": {
+      "driver": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_form_no_driver": "Ik kon geen coureur vinden voor de form-analyse.",
+  "ai_form_summary": "Laatste vorm van {driver}: {summary}",
+  "@ai_form_summary": {
+    "placeholders": {
+      "driver": {
+        "type": "String"
+      },
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_latest_penalties_none": "Geen penalties gevonden voor {race}.",
+  "@ai_latest_penalties_none": {
+    "placeholders": {
+      "race": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_latest_penalties_summary": "Laatste penalties bij {race}: {count}. {details}",
+  "@ai_latest_penalties_summary": {
+    "placeholders": {
+      "race": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      },
+      "details": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_latest_race_control_none": "Geen Race Control-berichten gevonden voor {race}.",
+  "@ai_latest_race_control_none": {
+    "placeholders": {
+      "race": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_latest_race_control_summary": "Race Control bij {race}: {count} berichten. Laatste update: {message}",
+  "@ai_latest_race_control_summary": {
+    "placeholders": {
+      "race": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_latest_results_podium": "Laatste resultaten vernieuwd. Podium: {podium}",
+  "@ai_latest_results_podium": {
+    "placeholders": {
+      "podium": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_latest_results_refreshed": "De laatste uitslag is opnieuw opgehaald.",
+  "ai_next_weekend": "Volgend weekend: {race} op {date}.",
+  "@ai_next_weekend": {
+    "placeholders": {
+      "race": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_next_weekend_weather": "Weer voor {race}: {temp}C, {rain}% regen, {wind} km/u wind.",
+  "@ai_next_weekend_weather": {
+    "placeholders": {
+      "race": {
+        "type": "String"
+      },
+      "temp": {
+        "type": "String"
+      },
+      "rain": {
+        "type": "String"
+      },
+      "wind": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_no_completed_race": "Er is nog geen verreden race gevonden.",
+  "ai_open_driver_compare": "Open driver compare",
+  "ai_open_driver_profile": "Open driverprofiel",
+  "ai_open_driver_standings": "Open driver standings",
+  "ai_open_drivers_chart": "Open coureursgrafiek",
+  "ai_open_latest_results": "Open laatste resultaten",
+  "ai_open_team_compare": "Open team compare",
+  "ai_open_team_profile": "Open teamprofiel",
+  "ai_open_team_standings": "Open constructor standings",
+  "ai_open_weekend_hub": "Open weekend hub",
+  "ai_qualifying_duel": "Kwalificatie-duel",
+  "ai_race_engineer": "AI Race Engineer",
+  "ai_rain_chance_label": "Regenkans",
+  "ai_rain_chance_slider": "Regenkans",
+  "ai_sentiment_generic_neutral": "Team Vibe: Gemengde signalen van teamradio''s.",
+  "ai_sentiment_generic_positive": "Team Vibe: Positieve energie in de paddock.",
+  "ai_sentiment_label": "Team Vibe",
+  "ai_sentiment_mercedes_positive": "Team Vibe: Spanning stijgt bij Mercedes na gridstraf Hamilton.",
+  "ai_strategist_tap_hint": "Tik om vragen te stellen...",
+  "ai_strategist_title": "AI Strategist",
+  "ai_prefs_section_title": "AI Strategist",
+  "ai_prefs_section_subtitle": "Pas de AI Strategist-kaart op het startscherm aan.",
+  "ai_prefs_disable_card": "AI Strategist-kaart uitschakelen",
+  "ai_prefs_hide_teambattle": "Teammate Battle verbergen",
+  "ai_prefs_hide_teambattle_hint": "Verberg de teamgenoot-vergelijking als de kaart zichtbaar is.",
+  "ai_prefs_hide_coach_corner": "Coach''s Corner verbergen",
+  "ai_prefs_hide_coach_corner_hint": "Verberg coachtips als de kaart zichtbaar is.",
+  "ai_prefs_hide_team_vibe": "Team Vibe verbergen",
+  "ai_prefs_hide_team_vibe_hint": "Verberg sentiment als de kaart zichtbaar is.",
+  "ai_supported_commands": "Ondersteunde commando''s: Fetch latest results, Show next weekend, Compare naam1 vs naam2, Show form [driver], Show driver standings, Show team standings, Open driver [naam], Open team [naam], Show drivers chart, Show latest penalties, Show latest race control.",
+  "ai_team_compare_ready": "Team comparison klaar voor {left} en {right}.",
+  "@ai_team_compare_ready": {
+    "placeholders": {
+      "left": {
+        "type": "String"
+      },
+      "right": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_team_profile_ready": "Teamprofiel klaar voor {team}.",
+  "@ai_team_profile_ready": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_team_standings_summary": "Constructor standings {year}: {summary}",
+  "@ai_team_standings_summary": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      },
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_teammate_battle": "Teamgenoten-duel",
+  "ai_teammate_insight": "{driver} is traditioneel sterker op dit circuit in de kwalificatie, terwijl {teammate} uitblinkt in bandenbeheer.",
+  "@ai_teammate_insight": {
+    "placeholders": {
+      "driver": {
+        "type": "String"
+      },
+      "teammate": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_type_command": "Typ een opdracht...",
+  "ai_weather_effect": "Bij {pct}% regen: Kans op podium voor {driver} stijgt {pct2}% vanwege superieure regen-pace.",
+  "@ai_weather_effect": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      },
+      "driver": {
+        "type": "String"
+      },
+      "pct2": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_weather_effect_at": "Bij {pct}% regen: {insight}",
+  "@ai_weather_effect_at": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      },
+      "insight": {
+        "type": "String"
+      }
+    }
+  },
+  "ai_weather_insight_alonso": "Kans op podium voor Alonso stijgt 15% vanwege superieure regen-pace.",
+  "ai_weather_insight_generic": "Natte omstandigheden gunstig voor sterke regen-coureurs.",
+  "air_temperature": "Luchttemperatuur",
+  "all_scopes": "Alle scopes",
+  "app_title": "F1 Hub",
+  "average_speed": "Gemiddelde snelheid",
+  "avg_finish": "Gem. finish",
+  "avg_finish_l5": "Gem. finish (L5)",
+  "avg_gforce": "Gem. G-kracht",
+  "avg_lap": "Gemiddelde ronde",
+  "best_combination": "Beste combinatie",
+  "best_lap": "Beste ronde",
+  "birth_place": "Geboorteplaats",
+  "cache_cleared": "Cache succesvol geleegd!",
+  "car_label": "Auto {number}",
+  "@car_label": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "career_stats": "Carrière statistieken",
+  "cc_wins": "Constructeurstitels",
+  "championship_progression": "Kampioenschapsverloop",
+  "championships": "Wereldtitels",
+  "calendar_prefs_section_title": "Kalender",
+  "calendar_prefs_section_subtitle": "Pas de circuits-kalender aan.",
+  "calendar_prefs_hide_cancelled": "Placeholder-races verbergen",
+  "calendar_prefs_hide_cancelled_hint": "Verberg geannuleerde of placeholder-races die niet op de echte kalender staan.",
+  "changelog": "Changelog",
+  "characteristics": "CIRCUIT KENMERKEN",
+  "chart_no_data": "Geen grafiekdata beschikbaar voor dit seizoen.",
+  "children": "Kinderen",
+  "circuit": "Circuit",
+  "circuit_difficulty": "Circuit moeilijkheid",
+  "circuit_info": "Circuit info",
+  "circuit_layout": "Circuit lay-out",
+  "circuits": "Circuits",
+  "city": "Stad",
+  "clear_cache": "Cache legen",
+  "close": "Sluiten",
+  "compare": "Vergelijken",
+  "compare_overall": "Overall",
+  "compare_season": "Per seizoen",
+  "compare_season_unavailable": "Seizoensdata voor deze vergelijking is niet beschikbaar.",
+  "compare_year": "Seizoen",
+  "contract_until": "Contract tot",
+  "country": "Land",
+  "country_australia": "Australië",
+  "country_austria": "Oostenrijk",
+  "country_azerbaijan": "Azerbeidzjan",
+  "country_bahrain": "Bahrein",
+  "country_belgium": "België",
+  "country_brazil": "Brazilië",
+  "country_canada": "Canada",
+  "country_china": "China",
+  "country_hungary": "Hongarije",
+  "country_italy": "Italië",
+  "country_japan": "Japan",
+  "country_mexico": "Mexico",
+  "country_monaco": "Monaco",
+  "country_netherlands": "Nederland",
+  "country_qatar": "Qatar",
+  "country_saudi_arabia": "Saoedi-Arabië",
+  "country_singapore": "Singapore",
+  "country_spain": "Spanje",
+  "country_uae": "V.A.E.",
+  "country_uk": "Groot-Brittannië",
+  "country_usa": "VS",
+  "current_team": "Huidig team",
+  "date": "Datum",
+  "day": "dag",
+  "days": "dagen",
+  "dc_wins": "Coureurstitels",
+  "distance_to_turn1": "Afstand tot bocht 1",
+  "dnf": "Uitvalbeurten (DNF)",
+  "dnf_percentage": "Uitval %",
+  "dnqs": "Niet gekwalificeerd",
+  "driver": "Coureur",
+  "driver_facts_title": "Feiten & weetjes",
+  "driver_history": "Historie (laatste 5 jaar)",
+  "drivers": "Coureurs",
+  "drivers_chart": "Coureursgrafiek",
+  "dsqs": "Gediskwalificeerd",
+  "engine": "Motor",
+  "engine_name": "Motornaam",
+  "engine_supplier": "Motorleverancier",
+  "experience": "Ervaring",
+  "f1_debut": "F1 debuut",
+  "fastest_lap": "Snelste ronde",
+  "fastest_lap_rate": "Snelste ronde %",
+  "fastest_laps": "Snelste rondes",
+  "fastest_pit": "Snelste pitstop",
+  "favorite_circuit": "Favoriete circuit",
+  "favorite_driver": "Favoriete coureur",
+  "favorite_team": "Favoriete team",
+  "finish": "Finish",
+  "fp1": "Vrije training 1",
+  "fp2": "Vrije training 2",
+  "fp3": "Vrije training 3",
+  "front_row_starts": "Starts 1e rij",
+  "fullscreen_table": "Tabel op volledig scherm",
+  "gap": "Verschil",
+  "general": "Algemeen",
+  "gp_abu_dhabi_grand_prix": "Grand Prix van Abu Dhabi",
+  "gp_australian_grand_prix": "Grand Prix van Australië",
+  "gp_austrian_grand_prix": "Grand Prix van Oostenrijk",
+  "gp_azerbaijan_grand_prix": "Grand Prix van Azerbeidzjan",
+  "gp_bahrain_grand_prix": "Grand Prix van Bahrein",
+  "gp_barcelona_grand_prix": "Grand Prix van Barcelona",
+  "gp_belgian_grand_prix": "Grand Prix van België",
+  "gp_british_grand_prix": "Grand Prix van Groot-Brittannië",
+  "gp_canadian_grand_prix": "Grand Prix van Canada",
+  "gp_chinese_grand_prix": "Grand Prix van China",
+  "gp_dutch_grand_prix": "Grand Prix van Nederland",
+  "gp_hungarian_grand_prix": "Grand Prix van Hongarije",
+  "gp_italian_grand_prix": "Grand Prix van Italië",
+  "gp_japanese_grand_prix": "Grand Prix van Japan",
+  "gp_las_vegas_grand_prix": "Grand Prix van Las Vegas",
+  "gp_mexico_city_grand_prix": "Grand Prix van Mexico",
+  "gp_miami_grand_prix": "Grand Prix van Miami",
+  "gp_monaco_grand_prix": "Grand Prix van Monaco",
+  "gp_qatar_grand_prix": "Grand Prix van Qatar",
+  "gp_s_o_paulo_grand_prix": "Grand Prix van São Paulo",
+  "gp_saudi_arabian_grand_prix": "Grand Prix van Saoedi-Arabië",
+  "gp_singapore_grand_prix": "Grand Prix van Singapore",
+  "gp_spanish_grand_prix": "Grand Prix van Spanje",
+  "gp_united_states_grand_prix": "Grand Prix van de VS",
+  "hard_tire": "Hard",
+  "hat_tricks": "Hattricks",
+  "headquarters": "Hoofdkantoor",
+  "height": "Lengte",
+  "help_and_ideas": "Hulp & ideeën",
+  "hide_all": "Geen",
+  "highest_finish": "Hoogste finish",
+  "highest_grid": "Hoogste startplek",
+  "hours": "uur",
+  "humidity": "Luchtvochtigheid",
+  "language": "Taal",
+  "language_chooser": "Nederlands",
+  "language_selector": "Nederlands",
+  "lap_label": "Ronde {lap}",
+  "@lap_label": {
+    "placeholders": {
+      "lap": {
+        "type": "String"
+      }
+    }
+  },
+  "lap_speed_stats": "RONDE & SNELHEID",
+  "laps": "Rondes",
+  "laps_led": "Rondes aan de leiding",
+  "last_5_points": "Punten laatste 5",
+  "last_podium_prefs_section_title": "Laatste podium",
+  "last_podium_prefs_section_subtitle": "Hoeveel recente races op circuitkaarten tonen.",
+  "last_podium_prefs_races_label": "Aantal races",
+  "last_winner": "Winnaar vorig jaar",
+  "length": "Lengte",
+  "level_1": "Zeer makkelijk",
+  "level_2": "Makkelijk",
+  "level_3": "Gemiddeld",
+  "level_4": "Moeilijk",
+  "level_5": "Zeer moeilijk",
+  "linked_update_many": "{count} gekoppelde updates",
+  "@linked_update_many": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "linked_update_one": "1 gekoppelde update",
+  "live_leaderboard": "Klassement",
+  "live_switch_test": "Schakel naar testdata",
+  "live_teammate_battle": "Teamgenoten-duel",
+  "live_timing_title": "Live Timing",
+  "live_waiting": "Wachten op live data...",
+  "loading": "Laden",
+  "logged_in": "Je bent ingelogd",
+  "login": "Inloggen",
+  "logout": "Uitloggen",
+  "manager": "Manager",
+  "max_g_force": "Max G-kracht",
+  "medium_tire": "Medium",
+  "minutes": "minuten",
+  "name": "Naam",
+  "nat_argentine": "Argentijns",
+  "nat_australian": "Australisch",
+  "nat_brazilian": "Braziliaans",
+  "nat_british": "Brits",
+  "nat_canadian": "Canadees",
+  "nat_dutch": "Nederlands",
+  "nat_finnish": "Fins",
+  "nat_french": "Frans",
+  "nat_german": "Duits",
+  "nat_italian": "Italiaans",
+  "nat_japanese": "Japans",
+  "nat_mexican": "Mexicaans",
+  "nat_monegasque": "Monegaskisch",
+  "nat_new_zealander": "Nieuw-Zeelands",
+  "nat_spanish": "Spaans",
+  "nat_thai": "Thais",
+  "nationality": "Nationaliteit",
+  "next_race": "Volgende race",
+  "no_data_yet": "Data nog niet beschikbaar of API is nog niet geüpdatet",
+  "no_finish_data": "Geen finishdata",
+  "no_race_results_available": "Nog geen race-uitslag beschikbaar.",
+  "one_two": "1-2 finishes",
+  "overtakes": "Inhaalacties",
+  "overtaking_difficulty": "Inhaal moeilijkheid",
+  "partner": "Partner",
+  "penalties": "Penalties",
+  "penalties_empty": "Geen penalties gevonden in de huidige weekendcache.",
+  "penalty": "Straf",
+  "personal_info": "Persoonlijke info",
+  "personal_sponsors": "Persoonlijke sponsors",
+  "pets": "Huisdieren",
+  "pitstop_leadership": "Pitstop & leiderschap",
+  "placeholder_page": "Nieuwe pagina",
+  "placeholder_page_empty": "Deze pagina is nog leeg.",
+  "podiums": "Podiums",
+  "points": "Punten",
+  "points_after_each_race": "Stand na elke race",
+  "points_history": "Punten per seizoen",
+  "points_per_entry": "Punten / entry",
+  "points_per_start": "Punten / start",
+  "points_progression": "Puntenverloop",
+  "pole_rate": "Pole %",
+  "poles": "Pole positions",
+  "pos": "Pos",
+  "pressure": "Druk",
+  "previous_teams": "Teams",
+  "previous_winners": "Eerdere winnaars",
+  "profile": "Profiel",
+  "pts": "PNT",
+  "q1_out": "Q1 uit",
+  "q2_out": "Q2 uit",
+  "qualifying": "Kwalificatie",
+  "race": "Race",
+  "race_control": "Race Control",
+  "race_control_detail": "Race Control detail",
+  "race_control_empty": "Geen race control-berichten gevonden voor deze filter of zoekopdracht.",
+  "race_control_filter_alerts": "Waarschuwingen",
+  "race_control_filter_all": "Alle",
+  "race_control_filter_stewards": "Commissarissen",
+  "race_control_message_count": "{visible} van {total} berichten",
+  "@race_control_message_count": {
+    "placeholders": {
+      "visible": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "race_control_no_linked_message": "Geen gekoppeld steward-bericht gevonden.",
+  "race_control_related_updates": "Gerelateerde steward-updates",
+  "race_control_relation_investigation": "Onderzoek",
+  "race_control_relation_issued_earlier": "Eerder opgelegd",
+  "race_control_relation_linked": "Gekoppeld bericht",
+  "race_control_relation_message": "Race Control-bericht",
+  "race_control_relation_noted": "Genoteerd",
+  "race_control_relation_outcome": "Uitkomst",
+  "race_control_relation_penalty_message": "Strafbericht",
+  "race_control_relation_served_later": "Later uitgevoerd",
+  "race_control_relation_served_penalty": "Uitgevoerde straf",
+  "race_control_search_hint": "Zoek op bericht, vlag, categorie, ronde of coureur",
+  "race_stats": "Race statistieken",
+  "rain": "Regen",
+  "rain_chance": "Regenkans",
+  "rainfall": "Neerslag",
+  "red_flag": "Kans op rode vlag",
+  "reserve_driver": "Reservecoureur",
+  "result": "Resultaat",
+  "results": "Resultaten",
+  "retirements": "Uitvalbeurten",
+  "risks": "Risico''s",
+  "risks_incidents": "RISICO''S & INCIDENTEN",
+  "round_short": "R",
+  "scope": "Scope",
+  "season_2026": "2026 Seizoen",
+  "select_drivers_to_compare": "Selecteer 2 coureurs",
+  "select_favorite": "Selecteer...",
+  "select_teams_to_compare": "Selecteer 2 teams",
+  "session": "Sessie",
+  "session_data_unavailable": "{session}-data wordt geladen of is nog niet beschikbaar.",
+  "@session_data_unavailable": {
+    "placeholders": {
+      "session": {
+        "type": "String"
+      }
+    }
+  },
+  "session_future": "Sessie begint op",
+  "session_results": "Sessie resultaten",
+  "session_status_completed": "Voltooid",
+  "session_status_live_recent": "Live / recent",
+  "session_status_upcoming": "Aankomend",
+  "session_weather_unavailable": "Geen weerdata beschikbaar voor {session}.",
+  "@session_weather_unavailable": {
+    "placeholders": {
+      "session": {
+        "type": "String"
+      }
+    }
+  },
+  "settings": "Instellingen",
+  "show_all": "Alles",
+  "show_all_messages": "Alle {count} berichten tonen",
+  "@show_all_messages": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "show_less_messages": "Minder berichten tonen",
+  "since": "Op kalender sinds",
+  "slowest_lap": "Langzaamste ronde",
+  "soft_tire": "Zacht",
+  "sponsors": "Sponsors",
+  "sprint": "Sprintrace",
+  "sprint_quali": "Sprint kwalificatie",
+  "standings": "Standen",
+  "start": "Start",
+  "starts": "Starts",
+  "starts_in": "Start in",
+  "status": "Status",
+  "strategy": "Strategie",
+  "strategy_1_stop": "1 stop",
+  "strategy_2_stops": "2 stops",
+  "strategy_3_stops": "3 stops",
+  "summer_break": "Zomerstop",
+  "summer_break_subtitle": "Tussen Hongarije en Nederland ligt de zomerstop.",
+  "team_facts_title": "Wist je dat?",
+  "team_history": "Teamgeschiedenis",
+  "team_principal": "Teambaas",
+  "team_theme": "Teamthema",
+  "teams": "Teams",
+  "teams_chart": "Teamsgrafiek",
+  "technical_director": "Technisch directeur",
+  "temp": "Temperatuur",
+  "theme_mode": "Weergavemodus",
+  "theme_mode_dark": "Donker",
+  "theme_mode_light": "Licht",
+  "theme_mode_system": "Systeem",
+  "time": "Tijd",
+  "time_gap": "Tijd / verschil",
+  "tire_wear": "Bandenslijtage",
+  "toggle_theme": "Wissel thema",
+  "top_10": "Top 10",
+  "top_3": "Top 3",
+  "top_5": "Top 5",
+  "top_speed": "Topsnelheid",
+  "total_entries": "Totale inschrijvingen",
+  "total_length": "Totale lengte",
+  "total_points": "Totale punten",
+  "total_time": "Totale tijd",
+  "track_flag_double_yellow": "Dubbel geel",
+  "track_flag_green": "Groene vlag",
+  "track_flag_red": "Rode vlag",
+  "track_flag_yellow": "Gele vlag",
+  "track_playback_dry_track": "Droge baan",
+  "track_playback_interpolated_minute": "geïnterpoleerde minuut",
+  "track_playback_no_weather": "Geen weerdata beschikbaar voor deze sessie.",
+  "track_playback_rain_active": "Regen actief",
+  "track_playback_recorded_sample": "opgenomen sample",
+  "track_playback_title": "Track Playback",
+  "track_playback_unknown_sample": "Onbekend sample",
+  "track_temperature": "Baantemperatuur",
+  "turn1_accident": "Kans crash bocht 1",
+  "tyre": "Band",
+  "tyres": "Banden",
+  "tyres_strategy": "BANDEN & STRATEGIE",
+  "unknown": "Onbekend",
+  "unknown_sample": "Onbekend",
+  "unknown_time": "Onbekende tijd",
+  "until": "Contract tot",
+  "used_tyre": "gebruikt",
+  "using_fallback_data": "Offline/fallback data in gebruik.",
+  "version": "Versie",
+  "vsc": "Kans op VSC",
+  "wear_high": "Hoog",
+  "wear_low": "Laag",
+  "wear_medium": "Gemiddeld",
+  "weather_forecast": "Weerverwachting",
+  "week": "week",
+  "weekend_hub": "Weekend hub",
+  "weekend_hub_card_subtitle": "Schema, weer, podium en penalties in één scherm",
+  "weekend_hub_load_error": "Weekend hub kon niet volledig laden. Cachedata wordt getoond.",
+  "weekend_hub_loading": "Weekend hub laden...",
+  "weekend_schedule": "Weekend schema",
+  "weeks": "weken",
+  "win_rate": "Winrate %",
+  "wind": "Wind",
+  "wind_speed": "Windsnelheid",
+  "wins": "Overwinningen",
+  "ai_fab_label": "AI",
+  "auth_error_message": "{message}",
+  "@auth_error_message": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "calendar_race_status_cancelled": "Geannuleerd",
+  "calendar_race_status_ended": "Beëindigd",
+  "calendar_race_status_ongoing": "Bezig",
+  "circuit_open_in_maps": "Openen in Maps",
+  "live_timing_air_temp_abbr": "A {temp}",
+  "@live_timing_air_temp_abbr": {
+    "placeholders": {
+      "temp": {
+        "type": "String"
+      }
+    }
+  },
+  "live_timing_banner_green": "GREEN",
+  "live_timing_banner_red_flag": "RODE VLAG",
+  "live_timing_banner_safety_car": "SAFETY CAR",
+  "live_timing_banner_vsc_deployed": "VSC INGEZET",
+  "live_timing_banner_vsc_ending": "VSC EINDIGT",
+  "live_timing_banner_yellow_flag": "GELE VLAG",
+  "live_timing_chip_red_flag": "RODE VLAG",
+  "live_timing_chip_safety_car": "SAFETY CAR",
+  "live_timing_chip_vsc": "VSC",
+  "live_timing_chip_vsc_end": "VSC EINDE",
+  "live_timing_chip_yellow": "GEEL",
+  "live_timing_data_source": "Bron: {source}",
+  "@live_timing_data_source": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "live_timing_demo_session_title": "Silverstone 2024",
+  "live_timing_driver_out": "OUT",
+  "live_timing_driver_pit": "PIT",
+  "live_timing_header_driver": "DRIVER",
+  "live_timing_header_gain": "WINST",
+  "live_timing_header_int_gap": "INT / GAP",
+  "live_timing_header_pos": "POS",
+  "live_timing_header_s1": "S1",
+  "live_timing_header_s2": "S2",
+  "live_timing_header_s3": "S3",
+  "live_timing_header_tyre": "BAND",
+  "live_timing_hub_timestamp_tooltip": "Tijdstempel laatste bericht (stream)",
+  "live_timing_lap_of_total": "Ronde {current} / {total}",
+  "@live_timing_lap_of_total": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "live_timing_session_pre_start": "PRE-START",
+  "live_timing_session_starting_grid": "STARTGRID",
+  "live_timing_status_green": "GREEN",
+  "live_timing_track_temp_abbr": "T {temp}",
+  "@live_timing_track_temp_abbr": {
+    "placeholders": {
+      "temp": {
+        "type": "String"
+      }
+    }
+  },
+  "metric_label_value": "{label}: {value}",
+  "@metric_label_value": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "news_load_error": "Kon nieuws niet laden: {error}",
+  "@news_load_error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "news_title": "F1 Nieuws",
+  "race_results_empty": "Nog geen race-resultaten beschikbaar.",
+  "secure_page_authorized": "Je bent geautoriseerd!",
+  "secure_page_title": "Beveiligde pagina",
+  "team_comparison_title": "{team1} vs {team2}",
+  "@team_comparison_title": {
+    "placeholders": {
+      "team1": {
+        "type": "String"
+      },
+      "team2": {
+        "type": "String"
+      }
+    }
+  },
+  "unauthorized_page_message": "Je hebt geen toestemming om deze pagina te bekijken.",
+  "unauthorized_page_title": "Niet geautoriseerd"
+}

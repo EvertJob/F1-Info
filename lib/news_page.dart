@@ -1,3 +1,4 @@
+import 'package:f1/utils/l10n_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
@@ -71,11 +72,11 @@ class _NewsPageState extends State<NewsPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('F1 Nieuws')),
+      appBar: AppBar(title: Text(context.l10n.news_title)),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-          ? Center(child: Text('Fout bij laden: $_error'))
+          ? Center(child: Text(context.l10n.news_load_error('$_error')))
           : RefreshIndicator(
               onRefresh: _fetchNews,
               child: ListView.builder(

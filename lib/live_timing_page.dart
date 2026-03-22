@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:archive/archive.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:f1/l10n/app_localizations.dart';
+import 'package:f1/utils/l10n_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -2778,18 +2779,18 @@ class _LiveTimingPageState extends State<LiveTimingPage>
     return rows;
   }
 
-  String _sessionDisplayTitle() {
+  String _sessionDisplayTitle(AppLocalizations l10n) {
     final a = _sessionTypeLabel.trim();
     final b = _sessionPartLabel.trim();
-    if (a.isEmpty && b.isEmpty) return 'Silverstone 2024';
+    if (a.isEmpty && b.isEmpty) return l10n.live_timing_demo_session_title;
     if (a.isNotEmpty && b.isNotEmpty) return '$a · $b';
     return a.isNotEmpty ? a : b;
   }
 
-  String _sessionStatusLabel() {
-    if (_raceTimingLiveActive) return 'GREEN';
-    if (_racePreStartBufferActive) return 'STARTING GRID';
-    return 'PRE-START';
+  String _sessionStatusLabel(AppLocalizations l10n) {
+    if (_raceTimingLiveActive) return l10n.live_timing_status_green;
+    if (_racePreStartBufferActive) return l10n.live_timing_session_starting_grid;
+    return l10n.live_timing_session_pre_start;
   }
 
   Color _sessionStatusAccent(ColorScheme scheme) {
@@ -2799,7 +2800,8 @@ class _LiveTimingPageState extends State<LiveTimingPage>
     return _kLiveSecondaryText;
   }
 
-  Widget _buildTrackStatusChip(ColorScheme scheme) {
+  Widget _buildTrackStatusChip(BuildContext context, ColorScheme scheme) {
+    final l10n = context.l10n;
     Color bg;
     Color fg;
     String label;
@@ -2807,32 +2809,32 @@ class _LiveTimingPageState extends State<LiveTimingPage>
       case 2:
         bg = const Color(0xFFFDE047);
         fg = const Color(0xFF1A1D21);
-        label = 'YELLOW';
+        label = l10n.live_timing_chip_yellow;
         break;
       case 4:
         bg = const Color(0xFFFF9000);
         fg = Colors.white;
-        label = 'SAFETY CAR';
+        label = l10n.live_timing_chip_safety_car;
         break;
       case 5:
         bg = const Color(0xFFDC2626);
         fg = Colors.white;
-        label = 'RED FLAG';
+        label = l10n.live_timing_chip_red_flag;
         break;
       case 6:
         bg = const Color(0xFFFF9000);
         fg = Colors.white;
-        label = 'VSC';
+        label = l10n.live_timing_chip_vsc;
         break;
       case 7:
         bg = const Color(0xFFFF9000);
         fg = Colors.white;
-        label = 'VSC END';
+        label = l10n.live_timing_chip_vsc_end;
         break;
       default:
         bg = const Color(0xFF22C55E).withValues(alpha: 0.12);
         fg = const Color(0xFF22C55E);
-        label = _sessionStatusLabel();
+        label = _sessionStatusLabel(l10n);
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -2880,7 +2882,7 @@ class _LiveTimingPageState extends State<LiveTimingPage>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  't.live_timing_title'.tr(),
+                  context.l10n.live_timing_title,
                   style: const TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 17,
@@ -2888,7 +2890,7 @@ class _LiveTimingPageState extends State<LiveTimingPage>
                   ),
                 ),
                 Text(
-                  _sessionDisplayTitle(),
+                  _sessionDisplayTitle(context.l10n),
                   style: const TextStyle(fontSize: 11, color: _kLiveSecondaryText),
                 ),
               ],
@@ -2901,6 +2903,7 @@ class _LiveTimingPageState extends State<LiveTimingPage>
   }
 
   Widget _buildSlimSessionBar(BuildContext context) {
+    final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
     var maxLap = 0;
     for (final id in _driverStorage.keys) {
@@ -2938,7 +2941,7 @@ class _LiveTimingPageState extends State<LiveTimingPage>
               children: [
               Flexible(
                 child: Text(
-                  _sessionDisplayTitle(),
+                  _sessionDisplayTitle(l10n),
                   style: const TextStyle(
                     fontWeight: FontWeight.w800,
                     color: _kLivePrimaryText,
@@ -2950,7 +2953,7 @@ class _LiveTimingPageState extends State<LiveTimingPage>
               ),
               const SizedBox(width: 12),
               Text(
-                'Lap $leadLap / $_raceTotalLaps',
+                l10n.live_timing_lap_of_total('$leadLap', '$_raceTotalLaps'),
                 style: TextStyle(
                   color: scheme.primary,
                   fontWeight: FontWeight.w700,
@@ -2963,19 +2966,19 @@ class _LiveTimingPageState extends State<LiveTimingPage>
                 const SizedBox(width: 4),
               ],
               Text(
-                'T $trackStr',
+                l10n.live_timing_track_temp_abbr(trackStr),
                 style: const TextStyle(fontSize: 10, color: _kLiveSecondaryText),
               ),
               const SizedBox(width: 8),
               Text(
-                'A $airStr',
+                l10n.live_timing_air_temp_abbr(airStr),
                 style: const TextStyle(fontSize: 10, color: _kLiveSecondaryText),
               ),
               const SizedBox(width: 12),
-              _buildTrackStatusChip(scheme),
+              _buildTrackStatusChip(context, scheme),
               const SizedBox(width: 8),
               Tooltip(
-                message: 'Tijdstempel laatste bericht (stream)',
+                message: l10n.live_timing_hub_timestamp_tooltip,
                 child: Text(
                   _hubMessageTimeLabel(),
                   style: GoogleFonts.robotoMono(
@@ -3429,7 +3432,7 @@ class _LiveTimingPageState extends State<LiveTimingPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  't.live_timing_title'.tr(),
+                  context.l10n.live_timing_title,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
                         color: _kLivePrimaryText,
@@ -3716,7 +3719,7 @@ class _LiveTimingPageState extends State<LiveTimingPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          't.live_leaderboard'.tr(),
+          context.l10n.live_leaderboard,
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -4051,6 +4054,7 @@ class _LiveCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final isLeader = entry.position == 1;
     final dsLabel = entry.tyreDataSourceLabel ?? '';
     final lastLapColor = entry.overallFastestLap || entry.isFastestLap
@@ -4142,9 +4146,9 @@ class _LiveCard extends StatelessWidget {
                                         color: Color(0xFFD32F2F),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                      child: const Text(
-                                        'OUT',
-                                        style: TextStyle(
+                                      child: Text(
+                                        l10n.live_timing_driver_out,
+                                        style: const TextStyle(
                                           fontSize: 9,
                                           fontWeight: FontWeight.w800,
                                           color: Colors.white,
@@ -4192,9 +4196,9 @@ class _LiveCard extends StatelessWidget {
                                         color: Colors.red,
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                      child: const Text(
-                                        'PIT',
-                                        style: TextStyle(
+                                      child: Text(
+                                        l10n.live_timing_driver_pit,
+                                        style: const TextStyle(
                                           fontSize: 9,
                                           fontWeight: FontWeight.w800,
                                           color: Colors.white,
@@ -4207,7 +4211,7 @@ class _LiveCard extends StatelessWidget {
                               if (dsLabel.isNotEmpty) ...[
                                 const SizedBox(height: 5),
                                 Text(
-                                  'Source: $dsLabel',
+                                  l10n.live_timing_data_source(dsLabel),
                                   style: TextStyle(
                                     fontSize: 7,
                                     fontWeight: FontWeight.w500,
@@ -4237,21 +4241,21 @@ class _LiveCard extends StatelessWidget {
                           const SizedBox(width: 10),
                           if (sectorMiniTiers != null && sectorMiniTiers!.length >= 3) ...[
                             _SectorCellColumn(
-                              label: 'S1',
+                              label: l10n.live_timing_header_s1,
                               status: sectorHighlights?[0] ?? SectorStatus.yellow,
                               timeText: sectorTimes?[0],
                               miniBlocks: sectorMiniTiers![0],
                             ),
                             const SizedBox(width: 6),
                             _SectorCellColumn(
-                              label: 'S2',
+                              label: l10n.live_timing_header_s2,
                               status: sectorHighlights?[1] ?? SectorStatus.yellow,
                               timeText: sectorTimes?[1],
                               miniBlocks: sectorMiniTiers![1],
                             ),
                             const SizedBox(width: 6),
                             _SectorCellColumn(
-                              label: 'S3',
+                              label: l10n.live_timing_header_s3,
                               status: sectorHighlights?[2] ?? SectorStatus.yellow,
                               timeText: sectorTimes?[2],
                               miniBlocks: sectorMiniTiers![2],
@@ -4261,19 +4265,19 @@ class _LiveCard extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 _SectorPill(
-                                  label: 'S1',
+                                  label: l10n.live_timing_header_s1,
                                   status: sectorHighlights?[0] ?? SectorStatus.yellow,
                                   timeText: sectorTimes?[0],
                                 ),
                                 const SizedBox(width: 5),
                                 _SectorPill(
-                                  label: 'S2',
+                                  label: l10n.live_timing_header_s2,
                                   status: sectorHighlights?[1] ?? SectorStatus.yellow,
                                   timeText: sectorTimes?[1],
                                 ),
                                 const SizedBox(width: 5),
                                 _SectorPill(
-                                  label: 'S3',
+                                  label: l10n.live_timing_header_s3,
                                   status: sectorHighlights?[2] ?? SectorStatus.yellow,
                                   timeText: sectorTimes?[2],
                                 ),

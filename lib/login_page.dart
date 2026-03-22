@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:f1/utils/l10n_extension.dart';
 import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
 import 'profile_favorites_service.dart';
@@ -55,7 +55,7 @@ class LoginPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  't.login'.tr(),
+                  context.l10n.login,
                   style: Theme.of(context).textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -67,7 +67,7 @@ class LoginPage extends StatelessWidget {
                   onError: (err) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('$err')),
+                        SnackBar(content: Text(context.l10n.auth_error_message('$err'))),
                       );
                     }
                   },

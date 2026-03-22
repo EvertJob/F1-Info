@@ -19,8 +19,9 @@ if ($versionLine) {
     Write-Host "Versie verhoogd naar $newVersion"
 }
 
-# 2. Builden (base-href voor GitHub Pages project site: /F1-Info/)
-flutter build web --base-href "/F1-Info/"
+# 2. Builden — base-href "/" voor custom domain f1hub.app (GitHub Pages root).
+# Voor de oude project-URL username.github.io/F1-Info/ zou je apart met --base-href "/F1-Info/" moeten bouwen.
+flutter build web --base-href "/"
 
 # 2b. CNAME voor custom domain (f1hub.app) - moet in root van gh-pages staan
 if (Test-Path CNAME) {

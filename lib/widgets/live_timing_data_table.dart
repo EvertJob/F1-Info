@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:f1/utils/l10n_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -234,7 +235,7 @@ class _LiveTimingDataTableState extends State<LiveTimingDataTable>
               ),
             SizedBox(
               height: hdrH,
-              child: _buildHeaderRow(hdrH, labelBase),
+              child: _buildHeaderRow(context, hdrH, labelBase),
             ),
             Expanded(
               child: ClipRect(
@@ -265,7 +266,8 @@ class _LiveTimingDataTableState extends State<LiveTimingDataTable>
     );
   }
 
-  Widget _buildHeaderRow(double h, TextStyle base) {
+  Widget _buildHeaderRow(BuildContext context, double h, TextStyle base) {
+    final l10n = context.l10n;
     final s = base.copyWith(
       fontSize: 9,
       fontWeight: FontWeight.w800,
@@ -280,22 +282,22 @@ class _LiveTimingDataTableState extends State<LiveTimingDataTable>
       ),
       child: Row(
         children: [
-          _HdrCell(w: 42, label: 'POS', style: s),
-          _HdrCell(w: 34, label: 'GAIN', style: s),
+          _HdrCell(w: 42, label: l10n.live_timing_header_pos, style: s),
+          _HdrCell(w: 34, label: l10n.live_timing_header_gain, style: s),
           const SizedBox(width: 6),
-          _HdrCell(w: 140, label: 'DRIVER', style: s),
-          _HdrCell(w: 68, label: 'TYRE', style: s),
+          _HdrCell(w: 140, label: l10n.live_timing_header_driver, style: s),
+          _HdrCell(w: 68, label: l10n.live_timing_header_tyre, style: s),
           Expanded(
             flex: 3,
             child: Row(
               children: [
-                _SectorHdrCell(label: 'S1', best: widget.sectorBestCodes[0] ?? '', style: s),
-                _SectorHdrCell(label: 'S2', best: widget.sectorBestCodes[1] ?? '', style: s),
-                _SectorHdrCell(label: 'S3', best: widget.sectorBestCodes[2] ?? '', style: s),
+                _SectorHdrCell(label: l10n.live_timing_header_s1, best: widget.sectorBestCodes[0] ?? '', style: s),
+                _SectorHdrCell(label: l10n.live_timing_header_s2, best: widget.sectorBestCodes[1] ?? '', style: s),
+                _SectorHdrCell(label: l10n.live_timing_header_s3, best: widget.sectorBestCodes[2] ?? '', style: s),
               ],
             ),
           ),
-          _HdrCell(w: 100, label: 'INT / GAP', style: s, align: TextAlign.right),
+          _HdrCell(w: 100, label: l10n.live_timing_header_int_gap, style: s, align: TextAlign.right),
           const SizedBox(width: 8),
         ],
       ),
@@ -316,6 +318,7 @@ class _TrackStatusBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     Color bg;
     Color fg;
     String label;
@@ -323,32 +326,32 @@ class _TrackStatusBanner extends StatelessWidget {
       case 2:
         bg = const Color(0xFFFDE047);
         fg = const Color(0xFF1A1D21);
-        label = message.isNotEmpty ? message : 'YELLOW FLAG';
+        label = message.isNotEmpty ? message : l10n.live_timing_banner_yellow_flag;
         break;
       case 4:
         bg = const Color(0xFFFF9000);
         fg = Colors.white;
-        label = message.isNotEmpty ? message : 'SAFETY CAR';
+        label = message.isNotEmpty ? message : l10n.live_timing_banner_safety_car;
         break;
       case 5:
         bg = const Color(0xFFDC2626);
         fg = Colors.white;
-        label = message.isNotEmpty ? message : 'RED FLAG';
+        label = message.isNotEmpty ? message : l10n.live_timing_banner_red_flag;
         break;
       case 6:
         bg = const Color(0xFFFF9000);
         fg = Colors.white;
-        label = message.isNotEmpty ? message : 'VSC DEPLOYED';
+        label = message.isNotEmpty ? message : l10n.live_timing_banner_vsc_deployed;
         break;
       case 7:
         bg = const Color(0xFFFF9000);
         fg = Colors.white;
-        label = message.isNotEmpty ? message : 'VSC ENDING';
+        label = message.isNotEmpty ? message : l10n.live_timing_banner_vsc_ending;
         break;
       default:
         bg = const Color(0xFF22C55E);
         fg = Colors.white;
-        label = 'GREEN';
+        label = l10n.live_timing_banner_green;
     }
     return Container(
       height: height,
@@ -1008,7 +1011,7 @@ class _PitTimerDisplay extends StatelessWidget {
                 borderRadius: BorderRadius.circular(3),
               ),
               child: Text(
-                'PIT',
+                context.l10n.live_timing_driver_pit,
                 style: monoBase.copyWith(
                   fontSize: fontSize - 1,
                   fontWeight: FontWeight.w900,

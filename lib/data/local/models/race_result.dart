@@ -59,7 +59,7 @@ class RaceResult {
           ? (json['points'] as int).toDouble()
           : (json['points'] as num?)?.toDouble() ?? 0.0,
       status: json['status'] as String? ?? '',
-      fastestLap: json['fastestLap'] as bool? ?? false,
+      fastestLap: json['fastest_lap'] as bool? ?? false,
     );
   }
 
@@ -107,7 +107,7 @@ class RaceResult {
       'position': position,
       'points': points,
       'status': status,
-      'fastestLap': fastestLap,
+      'fastest_lap': fastestLap,
     };
   }
 }

@@ -6,13 +6,13 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 import 'package:go_router/go_router.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'live_timing_page.dart';
@@ -24,13 +24,21 @@ import 'theme/theme_controller.dart';
 import 'widgets/f1_module.dart';
 import 'theme/theme_service.dart';
 import 'profile_favorites_service.dart';
+import 'ai_strategist_prefs_service.dart';
+import 'calendar_prefs_service.dart';
+import 'last_podium_prefs_service.dart';
+import 'detail_expansion_prefs_service.dart';
 import 'utils/driver_name_utils.dart';
+import 'package:f1/utils/l10n_extension.dart';
+import 'utils/l10n_lookups.dart';
+import 'package:f1/l10n/app_localizations.dart';
 import 'data/repositories/race_repository.dart';
 import 'data/local/hive/hive_boxes.dart';
 import 'data/local/hive/hive_bootstrap.dart';
 import 'browser_bridge.dart' as browser_bridge;
 import 'open_meteo_api.dart';
-
+import 'changelog_page.dart';
+import 'coach_corner_data.dart';
 part 'f1_data.dart';
 
 // Normalizes driver names for lookup (diacritics, special chars, etc.)
@@ -287,12 +295,12 @@ class _AmbientGlowPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final topLeft = RadialGradient(
       center: Alignment.topLeft,
-      radius: 1.2,
+      radius: 1.45,
       colors: [topLeftGlow, Colors.transparent],
     );
     final bottomRight = RadialGradient(
       center: Alignment.bottomRight,
-      radius: 1.2,
+      radius: 1.45,
       colors: [bottomRightGlow, Colors.transparent],
     );
     canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height), Paint());
@@ -686,15 +694,17 @@ class _PulsingAIIconState extends State<_PulsingAIIcon>
   }
 }
 
-/// AI Strategist card: Teammate Battle, Coach's Corner, Sentiment Tracker.
+/// AI Strategist card: Teammate Battle, Coach's Corner (5 lines), Sentiment Tracker.
 /// Historical/seasonal focus. Tappable to open the full AI chat overlay.
 class _AIStrategistCard extends StatefulWidget {
   const _AIStrategistCard({
     required this.race,
+    required this.strategistPrefs,
     required this.onTap,
   });
 
   final Race race;
+  final AiStrategistPrefs strategistPrefs;
   final VoidCallback onTap;
 
   @override
@@ -771,7 +781,7 @@ class _AIStrategistCardState extends State<_AIStrategistCard>
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    't.ai_strategist_title'.tr(),
+                    context.l10n.ai_strategist_title,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
@@ -784,101 +794,107 @@ class _AIStrategistCardState extends State<_AIStrategistCard>
               ],
             ),
             const SizedBox(height: 16),
-            _buildTeammateBattleSection(context, theme, favoriteDriver),
-            const SizedBox(height: 16),
-            _buildCoachCornerSection(theme, primary),
-            const SizedBox(height: 16),
-            Text(
-              't.ai_sentiment_label'.tr(),
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.2,
-                color: theme.colorScheme.onSurfaceVariant,
+            if (!widget.strategistPrefs.hideTeambattle) ...[
+              _buildTeammateBattleSection(context, theme, favoriteDriver),
+              const SizedBox(height: 16),
+            ],
+            if (!widget.strategistPrefs.hideCoachCorner) ...[
+              _buildCoachCornerSection(theme, primary),
+              const SizedBox(height: 16),
+            ],
+            if (!widget.strategistPrefs.hideTeamVibe) ...[
+              Text(
+                context.l10n.ai_sentiment_label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.2,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
-            ),
-            const SizedBox(height: 6),
-            RepaintBoundary(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  const sentimentValue = 0.72;
-                  final indicatorLeft = (constraints.maxWidth * sentimentValue) - 4;
-                  return Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Container(
-                        height: 6,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(3),
-                          gradient: LinearGradient(
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                            colors: [
-                              theme.colorScheme.error,
-                              theme.colorScheme.tertiary,
-                              theme.colorScheme.primary,
-                            ],
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        left: indicatorLeft - 6,
-                        top: -9,
-                        child: AnimatedBuilder(
-                          animation: _pulseController,
-                          builder: (context, _) {
-                            return Container(
-                              width: 20 + (_pulseScale.value * 12),
-                              height: 20 + (_pulseScale.value * 12),
-                              margin: EdgeInsets.all((10 - (_pulseScale.value * 6)).clamp(0.0, 10.0)),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: primary.withValues(alpha: _pulseOpacity.value * 0.2),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: primary.withValues(alpha: _pulseOpacity.value),
-                                    blurRadius: 8 + (_pulseScale.value * 4),
-                                    spreadRadius: 2,
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      Positioned(
-                        left: indicatorLeft,
-                        top: -3,
-                        child: Container(
-                          width: 8,
-                          height: 12,
+              const SizedBox(height: 6),
+              RepaintBoundary(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    const sentimentValue = 0.72;
+                    final indicatorLeft = (constraints.maxWidth * sentimentValue) - 4;
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          height: 6,
                           decoration: BoxDecoration(
-                            color: primary,
-                            borderRadius: BorderRadius.circular(4),
-                            boxShadow: [
-                              BoxShadow(
-                                color: theme.colorScheme.shadow.withValues(alpha: 0.25),
-                                blurRadius: 2,
-                                offset: const Offset(0, 1),
-                              ),
-                            ],
+                            borderRadius: BorderRadius.circular(3),
+                            gradient: LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: [
+                                theme.colorScheme.error,
+                                theme.colorScheme.tertiary,
+                                theme.colorScheme.primary,
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  );
-                },
+                        Positioned(
+                          left: indicatorLeft - 6,
+                          top: -9,
+                          child: AnimatedBuilder(
+                            animation: _pulseController,
+                            builder: (context, _) {
+                              return Container(
+                                width: 20 + (_pulseScale.value * 12),
+                                height: 20 + (_pulseScale.value * 12),
+                                margin: EdgeInsets.all((10 - (_pulseScale.value * 6)).clamp(0.0, 10.0)),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: primary.withValues(alpha: _pulseOpacity.value * 0.2),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: primary.withValues(alpha: _pulseOpacity.value),
+                                      blurRadius: 8 + (_pulseScale.value * 4),
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        Positioned(
+                          left: indicatorLeft,
+                          top: -3,
+                          child: Container(
+                            width: 8,
+                            height: 12,
+                            decoration: BoxDecoration(
+                              color: primary,
+                              borderRadius: BorderRadius.circular(4),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: theme.colorScheme.shadow.withValues(alpha: 0.25),
+                                  blurRadius: 2,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              _sentimentSummary(favoriteTeam),
-              style: TextStyle(
-                fontSize: 12,
-                height: 1.35,
-                color: scheme.onSurface,
+              const SizedBox(height: 6),
+              Text(
+                _sentimentSummary(favoriteTeam),
+                style: TextStyle(
+                  fontSize: 12,
+                  height: 1.35,
+                  color: scheme.onSurface,
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -910,7 +926,7 @@ class _AIStrategistCardState extends State<_AIStrategistCard>
             Icon(Icons.emoji_events_outlined, size: 16, color: primary),
             const SizedBox(width: 6),
             Text(
-              't.ai_teammate_battle'.tr(),
+              context.l10n.ai_teammate_battle,
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
@@ -971,7 +987,7 @@ class _AIStrategistCardState extends State<_AIStrategistCard>
                     ),
                   ),
                   Text(
-                    't.ai_qualifying_duel'.tr(),
+                    context.l10n.ai_qualifying_duel,
                     style: TextStyle(
                       fontSize: 9,
                       color: theme.colorScheme.onSurfaceVariant,
@@ -1043,7 +1059,7 @@ class _AIStrategistCardState extends State<_AIStrategistCard>
             Icon(Icons.swap_horiz, size: 14, color: secondary),
             const SizedBox(width: 4),
             Text(
-              't.ai_avg_gap'.tr(),
+              context.l10n.ai_avg_gap,
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
@@ -1063,10 +1079,10 @@ class _AIStrategistCardState extends State<_AIStrategistCard>
         ),
         const SizedBox(height: 6),
         Text(
-          't.ai_teammate_insight'.tr(namedArgs: {
-            'driver': fav.name.split(' ').last,
-            'teammate': teammate.name.split(' ').last,
-          }),
+          context.l10n.ai_teammate_insight(
+            fav.name.split(' ').last,
+            teammate.name.split(' ').last,
+          ),
           style: TextStyle(
             fontSize: 11,
             height: 1.35,
@@ -1078,6 +1094,13 @@ class _AIStrategistCardState extends State<_AIStrategistCard>
   }
 
   Widget _buildCoachCornerSection(ThemeData theme, Color primary) {
+    final l10n = context.l10n;
+    final onSurface = theme.colorScheme.onSurface;
+    final lines = coachCornerFiveLines(
+      widget.race.name,
+      Localizations.localeOf(context).languageCode,
+    );
+    assert(lines.length == 5, 'Coach corner expects exactly 5 lines per circuit');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1086,7 +1109,7 @@ class _AIStrategistCardState extends State<_AIStrategistCard>
             Icon(Icons.lightbulb_outline, size: 16, color: primary),
             const SizedBox(width: 6),
             Text(
-              't.ai_coach_title'.tr(),
+              l10n.ai_coach_title,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -1100,49 +1123,48 @@ class _AIStrategistCardState extends State<_AIStrategistCard>
         AnimatedBuilder(
           animation: _coachPulseController,
           builder: (context, _) {
-            return Row(
+            final opacity = _coachPulseOpacity.value;
+            return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Opacity(
-                  opacity: _coachPulseOpacity.value,
-                  child: Icon(Icons.psychology, size: 14, color: primary),
+                _coachCornerPulseRow(
+                  opacity,
+                  primary,
+                  onSurface,
+                  Icons.flag_outlined,
+                  lines[0],
                 ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    _coachTipForCircuit(widget.race.name, ''),
-                    style: TextStyle(
-                      fontSize: 12,
-                      height: 1.35,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
+                const SizedBox(height: 6),
+                _coachCornerPulseRow(
+                  opacity,
+                  primary,
+                  onSurface,
+                  Icons.insights_outlined,
+                  lines[1],
                 ),
-              ],
-            );
-          },
-        ),
-        const SizedBox(height: 6),
-        AnimatedBuilder(
-          animation: _coachPulseController,
-          builder: (context, _) {
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Opacity(
-                  opacity: _coachPulseOpacity.value,
-                  child: Icon(Icons.psychology, size: 14, color: primary),
+                const SizedBox(height: 6),
+                _coachCornerPulseRow(
+                  opacity,
+                  primary,
+                  onSurface,
+                  Icons.wb_cloudy_outlined,
+                  lines[2],
                 ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    't.ai_strategy_history'.tr(),
-                    style: TextStyle(
-                      fontSize: 12,
-                      height: 1.35,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
+                const SizedBox(height: 6),
+                _coachCornerPulseRow(
+                  opacity,
+                  primary,
+                  onSurface,
+                  Icons.sports_motorsports_outlined,
+                  lines[3],
+                ),
+                const SizedBox(height: 6),
+                _coachCornerPulseRow(
+                  opacity,
+                  primary,
+                  onSurface,
+                  Icons.event_note_outlined,
+                  lines[4],
                 ),
               ],
             );
@@ -1152,31 +1174,42 @@ class _AIStrategistCardState extends State<_AIStrategistCard>
     );
   }
 
-  String _sentimentSummary(String team) {
-    if (team.toLowerCase().contains('mercedes')) {
-      return 't.ai_sentiment_mercedes_positive'.tr();
-    }
-    return 't.ai_sentiment_generic_positive'.tr();
+  Widget _coachCornerPulseRow(
+    double opacity,
+    Color primary,
+    Color onSurface,
+    IconData icon,
+    String text,
+  ) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Opacity(
+          opacity: opacity,
+          child: Icon(icon, size: 14, color: primary),
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              height: 1.35,
+              color: onSurface,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
-  String _coachTipForCircuit(String raceName, String driver) {
-    if (raceName.contains('Australian')) {
-      return 't.ai_coach_tip_australia'.tr();
+  String _sentimentSummary(String team) {
+    if (team.toLowerCase().contains('mercedes')) {
+      return context.l10n.ai_sentiment_mercedes_positive;
     }
-    if (raceName.contains('Monaco')) {
-      return 't.ai_coach_tip_monaco'.tr();
-    }
-    if (raceName.contains('Spa') || raceName.contains('Belgian')) {
-      return 't.ai_coach_tip_leclerc_turn13'.tr();
-    }
-    if (raceName.contains('Suzuka') || raceName.contains('Japanese')) {
-      return 't.ai_coach_tip_suzuka'.tr();
-    }
-    if (raceName.contains('Hungar') || raceName.contains('Hungary')) {
-      return 't.ai_coach_tip_hungary'.tr();
-    }
-    return 't.ai_coach_tip_generic'.tr();
+    return context.l10n.ai_sentiment_generic_positive;
   }
+
 }
 
 class _SummerBreakFlagPainter extends CustomPainter {
@@ -2562,7 +2595,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
 
     if (_resolvedSamples.isEmpty) {
       final content = Text(
-        't.track_playback_no_weather'.tr(),
+        context.l10n.track_playback_no_weather,
         style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
       );
       if (!widget.embedInCard) {
@@ -2606,11 +2639,12 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
       widget.raceControlMessages,
       widget.sessionName,
     );
-    final translatedTrackFlagLabel = 't.${trackFlagState.labelKey}'.tr();
+    final translatedTrackFlagLabel =
+        l10nTrackFlagLabel(context.l10n, trackFlagState.labelKey);
     final trackStatusLabel =
         trackFlagState.labelKey == _trackClearState.labelKey &&
             currentLap != null
-        ? 't.lap_label'.tr(namedArgs: {'lap': '$currentLap'})
+        ? context.l10n.lap_label('$currentLap')
         : translatedTrackFlagLabel;
 
     final columnContent = Column(
@@ -2623,7 +2657,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      't.track_playback_title'.tr(),
+                      context.l10n.track_playback_title,
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 15,
@@ -2634,8 +2668,8 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                     const SizedBox(height: 4),
                     Text(
                       timestamp == null
-                          ? 't.track_playback_unknown_sample'.tr()
-                          : '${_formatWeatherTimestampLabel(timestamp)} • ${(isInterpolated ? 't.track_playback_interpolated_minute' : 't.track_playback_recorded_sample').tr()}',
+                          ? context.l10n.track_playback_unknown_sample
+                          : '${_formatWeatherTimestampLabel(timestamp)} • ${isInterpolated ? context.l10n.track_playback_interpolated_minute : context.l10n.track_playback_recorded_sample}',
                       style: TextStyle(
                         fontSize: 11,
                         color: theme.colorScheme.onSurfaceVariant,
@@ -2684,10 +2718,9 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
-                      (rain > 0
-                              ? 't.track_playback_rain_active'
-                              : 't.track_playback_dry_track')
-                          .tr(),
+                      rain > 0
+                          ? context.l10n.track_playback_rain_active
+                          : context.l10n.track_playback_dry_track,
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 11,
@@ -2801,7 +2834,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            't.wind'.tr(),
+                            context.l10n.wind,
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
@@ -2907,7 +2940,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
               SizedBox(
                 width: 150,
                 child: _WeatherMetricTile(
-                  label: 't.air_temperature'.tr(),
+                  label: context.l10n.air_temperature,
                   value: air == null ? '-' : '${air.toStringAsFixed(1)} C',
                   icon: Icons.thermostat,
                 ),
@@ -2915,7 +2948,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
               SizedBox(
                 width: 150,
                 child: _WeatherMetricTile(
-                  label: 't.track_temperature'.tr(),
+                  label: context.l10n.track_temperature,
                   value: track == null ? '-' : '${track.toStringAsFixed(1)} C',
                   icon: Icons.device_thermostat,
                 ),
@@ -2923,7 +2956,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
               SizedBox(
                 width: 150,
                 child: _WeatherMetricTile(
-                  label: 't.humidity'.tr(),
+                  label: context.l10n.humidity,
                   value: humidity == null
                       ? '-'
                       : '${humidity.toStringAsFixed(1)}%',
@@ -2933,7 +2966,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
               SizedBox(
                 width: 150,
                 child: _WeatherMetricTile(
-                  label: 't.rainfall'.tr(),
+                  label: context.l10n.rainfall,
                   value: '${rain.toStringAsFixed(1)} mm',
                   icon: Icons.umbrella,
                 ),
@@ -2941,7 +2974,7 @@ class _CircuitWeatherPlaybackCardState extends State<CircuitWeatherPlaybackCard>
               SizedBox(
                 width: 150,
                 child: _WeatherMetricTile(
-                  label: 't.pressure'.tr(),
+                  label: context.l10n.pressure,
                   value: pressure == null
                       ? '-'
                       : '${pressure.toStringAsFixed(1)} hPa',
@@ -3122,11 +3155,15 @@ Driver? _getTeammate2026(Driver driver) {
 String _circuitsPath() => '/circuits';
 String _driversPath() => '/drivers';
 String _teamsPath() => '/teams';
-String _changelogPath() => '/changelog';
+String _changelogPath() => '/profile/changelog';
 String _placeholderPagePath() => '/placeholder';
 String _loginPath() => '/login';
 String _livePath() => '/live';
 String _profilePath() => '/profile';
+
+const String _kGithubHelpIssuesUrl =
+    'https://github.com/EvertJob/F1-Info/issues/new/choose';
+
 String _racePath(Race race) => '${_circuitsPath()}/${_raceSlug(race)}';
 String _weekendHubPath(Race race) => '${_racePath(race)}/weekend';
 String _raceResultsPath(Race race) => '${_racePath(race)}/results';
@@ -3143,7 +3180,6 @@ String _teamComparePath(Team team1, Team team2) =>
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await EasyLocalization.ensureInitialized();
   await Supabase.initialize(
     url: 'https://aeekchoaetlksooyylsv.supabase.co',
     anonKey: 'sb_publishable_38F48DBpJ7cWwVo-2yZjhA_rE6wE9uz',
@@ -3165,24 +3201,26 @@ void main() async {
   await themeController.initFromSupabase();
 
   runApp(
-    EasyLocalization(
-      supportedLocales: const [
-        Locale('en'),
-        Locale('nl'),
-        Locale('de'),
-        Locale('fr'),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<ThemeController>.value(value: themeController),
+        ChangeNotifierProvider<ProfileFavoritesNotifier>(
+          create: (_) => ProfileFavoritesNotifier(),
+        ),
+        ChangeNotifierProvider<AiStrategistPrefsNotifier>(
+          create: (_) => AiStrategistPrefsNotifier(),
+        ),
+        ChangeNotifierProvider<CalendarPrefsNotifier>(
+          create: (_) => CalendarPrefsNotifier(),
+        ),
+        ChangeNotifierProvider<LastPodiumPrefsNotifier>(
+          create: (_) => LastPodiumPrefsNotifier(),
+        ),
+        ChangeNotifierProvider<DetailExpansionPrefsNotifier>(
+          create: (_) => DetailExpansionPrefsNotifier(),
+        ),
       ],
-      path: 'assets/translations',
-      fallbackLocale: const Locale('en'),
-      child: MultiProvider(
-        providers: [
-          ChangeNotifierProvider<ThemeController>.value(value: themeController),
-          ChangeNotifierProvider<ProfileFavoritesNotifier>(
-            create: (_) => ProfileFavoritesNotifier(),
-          ),
-        ],
-        child: const F1HubApp(),
-      ),
+      child: const F1HubApp(),
     ),
   );
 }
@@ -3194,6 +3232,11 @@ class F1HubApp extends StatefulWidget {
     final state = context.findAncestorStateOfType<_F1HubAppState>();
     assert(state != null, 'F1HubApp state not found in context');
     return state!;
+  }
+
+  static Future<void> setAppLocale(BuildContext context, Locale locale) async {
+    final state = context.findAncestorStateOfType<_F1HubAppState>();
+    await state?._applyLocale(locale);
   }
 
   @override
@@ -3275,7 +3318,7 @@ class _SplashScreenState extends State<_SplashScreen>
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  't.appTitle'.tr(),
+                  context.l10n.app_title,
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.2,
@@ -3284,7 +3327,7 @@ class _SplashScreenState extends State<_SplashScreen>
                 ),
                 const Spacer(),
                 Text(
-                  't.season_2026'.tr(),
+                  context.l10n.season_2026,
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                     letterSpacing: 1.0,
@@ -3292,7 +3335,7 @@ class _SplashScreenState extends State<_SplashScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  't.loading'.tr(),
+                  context.l10n.loading,
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
                   ),
@@ -3341,9 +3384,27 @@ class _F1HubAppState extends State<F1HubApp> {
   static const _splashDuration = Duration(milliseconds: 2200);
   static const _splashFadeOut = Duration(milliseconds: 400);
 
+  Locale _locale = const Locale('en');
+
+  Future<void> _restoreLocale() async {
+    final prefs = await SharedPreferences.getInstance();
+    final code = prefs.getString('locale');
+    if (!mounted) return;
+    if (code != null && code.isNotEmpty) {
+      setState(() => _locale = Locale(code));
+    }
+  }
+
+  Future<void> _applyLocale(Locale locale) async {
+    setState(() => _locale = locale);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('locale', locale.languageCode);
+  }
+
   @override
   void initState() {
     super.initState();
+    unawaited(_restoreLocale());
     Future.delayed(_splashDuration, () {
       if (!mounted) return;
       setState(() => _splashFadingOut = true);
@@ -3366,6 +3427,10 @@ class _F1HubAppState extends State<F1HubApp> {
     initialLocation: _circuitsPath(),
     routes: [
       GoRoute(path: '/', redirect: (_, _) => _circuitsPath()),
+      GoRoute(
+        path: '/changelog',
+        redirect: (context, state) => _changelogPath(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             _LoggedInSnackBarTrigger(
@@ -3589,6 +3654,14 @@ class _F1HubAppState extends State<F1HubApp> {
                 path: _profilePath(),
                 builder: (context, state) =>
                     ProfileScreen(settingsMenu: _buildSettingsMenu(context)),
+                routes: [
+                  GoRoute(
+                    path: 'changelog',
+                    builder: (context, state) => ChangelogPage(
+                      settingsMenu: _buildSettingsMenu(context),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -3601,10 +3674,6 @@ class _F1HubAppState extends State<F1HubApp> {
       GoRoute(
         path: _livePath(),
         builder: (context, state) => const LiveTimingPage(),
-      ),
-      GoRoute(
-        path: _changelogPath(),
-        builder: (context, state) => const ChangelogScreen(),
       ),
       GoRoute(
         path: _placeholderPagePath(),
@@ -3628,9 +3697,14 @@ class _F1HubAppState extends State<F1HubApp> {
       themeAnimationCurve: Curves.easeInOutCubic,
       themeAnimationDuration: const Duration(milliseconds: 320),
       themeMode: themeController.themeMode,
-      locale: context.locale,
-      supportedLocales: context.supportedLocales,
-      localizationsDelegates: context.localizationDelegates,
+      locale: _locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       builder: (context, child) {
         return Stack(
           fit: StackFit.expand,
@@ -3663,53 +3737,6 @@ class _F1HubAppState extends State<F1HubApp> {
 }
 
 /// --- Globale UI Helpers ----------------------------------------------
-
-String _getFlag(String nat) {
-  final Map<String, String> flags = {
-    'Dutch': '',
-    'British': '',
-    'Monegasque': '',
-    'Spanish': '',
-    'Australian': '',
-    'Italian': '',
-    'German': '',
-    'French': '',
-    'Austrian': '',
-    'Swiss': '',
-    'Thai': '',
-    'Japanese': '',
-    'American': '',
-    'Mexican': '',
-    'Finnish': '',
-    'Argentine': '',
-    'New Zealander': '',
-    'Chinese': '',
-    'Danish': '',
-    'Netherlands': '',
-    'Australia': '',
-    'Bahrain': '',
-    'Saudi Arabia': '',
-    'Japan': '',
-    'China': '',
-    'USA': '',
-    'Monaco': '',
-    'Canada': '',
-    'Spain': '',
-    'Austria': '',
-    'UK': '',
-    'Hungary': '',
-    'Belgium': '',
-    'Azerbaijan': '',
-    'Singapore': '',
-    'Mexico': '',
-    'Brazil': '',
-    'Qatar': '',
-    'UAE': '',
-    'United States': '',
-    'Italy': '',
-  };
-  return flags[nat] ?? '';
-}
 
 String getTireEmoji(String compound) {
   switch (compound.toUpperCase()) {
@@ -3882,6 +3909,47 @@ Widget _buildResponsiveSections({
   },
 );
 
+/// Section card for circuit / driver / team detail: [F1Module] surface + fading
+/// primary border (calendar style); inner [ExpansionTile] without outline border.
+Widget _detailOverviewSectionCard(
+  BuildContext context, {
+  required Widget child,
+}) {
+  final theme = Theme.of(context);
+  final scheme = theme.colorScheme;
+  return F1Module(
+    fillWidth: true,
+    padding: EdgeInsets.zero,
+    borderRadius: kF1ModuleRadius,
+    backgroundColor: scheme.surface,
+    showFadingBorder: true,
+    child: Theme(
+      data: theme.copyWith(
+        dividerColor: Colors.transparent,
+        expansionTileTheme: ExpansionTileThemeData(
+          backgroundColor: Colors.transparent,
+          collapsedBackgroundColor: Colors.transparent,
+          textColor: scheme.primary,
+          collapsedTextColor: scheme.primary,
+          iconColor: scheme.primary,
+          collapsedIconColor: scheme.primary.withValues(alpha: 0.9),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+            side: BorderSide.none,
+          ),
+          collapsedShape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+            side: BorderSide.none,
+          ),
+          tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          childrenPadding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+        ),
+      ),
+      child: child,
+    ),
+  );
+}
+
 /// --- Data Manager voor OpenF1 Sessies -----------------------
 
 class SessionResult {
@@ -3963,7 +4031,7 @@ class RaceResultRow {
       start: json['start']?.toString() ?? '-',
       finish: json['finish']?.toString() ?? '-',
       timeOrGap: json['timeOrGap']?.toString() ?? '-',
-      fastestLap: json['fastestLap']?.toString() ?? '-',
+      fastestLap: json['fastest_lap']?.toString() ?? '-',
       tyreCompound: json['tyreCompound']?.toString() ?? '-',
       penalty: json['penalty']?.toString() ?? '-',
       points: json['points']?.toString() ?? '0',
@@ -4034,7 +4102,7 @@ class RaceResultRow {
       'start': start,
       'finish': finish,
       'timeOrGap': timeOrGap,
-      'fastestLap': fastestLap,
+      'fastest_lap': fastestLap,
       'tyreCompound': tyreCompound,
       'penalty': penalty,
       'points': points,
@@ -4090,7 +4158,7 @@ class SessionOverviewRow {
       driver: json['driver']?.toString() ?? '-',
       position: json['position']?.toString() ?? '-',
       result: json['result']?.toString() ?? '-',
-      fastestLap: json['fastestLap']?.toString() ?? '-',
+      fastestLap: json['fastest_lap']?.toString() ?? '-',
       tyreCompound: json['tyreCompound']?.toString() ?? '-',
       points: json['points']?.toString() ?? '-',
       hasFastestLap: json['hasFastestLap'] == true,
@@ -4117,7 +4185,7 @@ class SessionOverviewRow {
       'driver': driver,
       'position': position,
       'result': result,
-      'fastestLap': fastestLap,
+      'fastest_lap': fastestLap,
       'tyreCompound': tyreCompound,
       'points': points,
       'hasFastestLap': hasFastestLap,
@@ -4443,8 +4511,8 @@ class SeasonalDriverComparisonStats {
       fastestLaps: (json['fastestLaps'] as num?)?.toInt() ?? 0,
       dnfPercentage: (json['dnfPercentage'] as num?)?.toDouble() ?? 0,
       podiums: (json['podiums'] as num?)?.toInt() ?? 0,
-      highestFinish: json['highestFinish']?.toString() ?? '-',
-      highestGrid: json['highestGrid']?.toString() ?? '-',
+      highestFinish: json['highest_finish']?.toString() ?? '-',
+      highestGrid: json['highest_grid']?.toString() ?? '-',
       winRate: (json['winRate'] as num?)?.toDouble() ?? 0,
     );
   }
@@ -4457,8 +4525,8 @@ class SeasonalDriverComparisonStats {
       'fastestLaps': fastestLaps,
       'dnfPercentage': dnfPercentage,
       'podiums': podiums,
-      'highestFinish': highestFinish,
-      'highestGrid': highestGrid,
+      'highest_finish': highestFinish,
+      'highest_grid': highestGrid,
       'winRate': winRate,
     };
   }
@@ -7338,6 +7406,143 @@ class SessionDataManager extends ChangeNotifier {
   }
 }
 
+/// Native display names for each supported locale (gen-l10n [language_selector]).
+Map<Locale, String> _f1LanguageDisplayNames(List<Locale> supportedLocales) {
+  final entries = <Locale, String>{};
+  for (final locale in supportedLocales) {
+    try {
+      entries[locale] = lookupAppLocalizations(locale).language_selector;
+    } catch (_) {
+      entries[locale] = locale.languageCode;
+    }
+  }
+  return entries;
+}
+
+/// Shared language picker (also used from full settings menu).
+Future<void> showF1LanguageDialog(BuildContext context) async {
+  final entries = _f1LanguageDisplayNames(AppLocalizations.supportedLocales);
+  if (!context.mounted) return;
+  final Locale? selectedLocale = await showDialog<Locale>(
+    context: context,
+    builder: (dialogContext) {
+      return SimpleDialog(
+        title: Text(context.l10n.language),
+        children: entries.entries
+            .map(
+              (e) => SimpleDialogOption(
+                onPressed: () => Navigator.pop(dialogContext, e.key),
+                child: Text(e.value),
+              ),
+            )
+            .toList(),
+      );
+    },
+  );
+  if (selectedLocale != null && context.mounted) {
+    await F1HubApp.setAppLocale(context, selectedLocale);
+  }
+}
+
+/// Desktop sidebar: account actions only (no theme/cache here — use profile when logged in).
+class RailAccountMenuButton extends StatelessWidget {
+  const RailAccountMenuButton({super.key});
+
+  static Stream<AuthState> get _authStream =>
+      Supabase.instance.client.auth.onAuthStateChange;
+
+  @override
+  Widget build(BuildContext menuButtonContext) {
+    return StreamBuilder<AuthState>(
+      stream: _authStream,
+      builder: (streamContext, snapshot) {
+        final session = snapshot.hasData
+            ? snapshot.data!.session
+            : Supabase.instance.client.auth.currentSession;
+        final isLoggedIn = session != null;
+
+        return PopupMenuButton<String>(
+          icon: _buildGlyphIcon('⚙', size: 20),
+          tooltip: isLoggedIn
+              ? menuButtonContext.l10n.profile
+              : menuButtonContext.l10n.login,
+          onSelected: (value) async {
+            switch (value) {
+              case 'login':
+                streamContext.push(_loginPath());
+                break;
+              case 'profile':
+                streamContext.go(_profilePath());
+                break;
+              case 'logout':
+                await Supabase.instance.client.auth.signOut();
+                if (streamContext.mounted) {
+                  streamContext.go(_circuitsPath());
+                }
+                break;
+              case 'help_github':
+                browser_bridge.openExternalUrl(_kGithubHelpIssuesUrl);
+                break;
+            }
+          },
+          // Use menuButtonContext for tr(): overlay itemBuilder context can miss
+          // Localizations in some builds (e.g. web).
+          itemBuilder: (_) => [
+            if (!isLoggedIn)
+              PopupMenuItem<String>(
+                value: 'login',
+                child: Row(
+                  children: [
+                    _buildGlyphIcon('🔐', size: 18),
+                    const SizedBox(width: 12),
+                    Text(menuButtonContext.l10n.login),
+                  ],
+                ),
+              ),
+            if (isLoggedIn) ...[
+              PopupMenuItem<String>(
+                value: 'profile',
+                child: Row(
+                  children: [
+                    _buildGlyphIcon('👤', size: 18),
+                    const SizedBox(width: 12),
+                    Text(menuButtonContext.l10n.profile),
+                  ],
+                ),
+              ),
+              PopupMenuItem<String>(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    _buildGlyphIcon('🚪', size: 18),
+                    const SizedBox(width: 12),
+                    Text(menuButtonContext.l10n.logout),
+                  ],
+                ),
+              ),
+            ],
+            const PopupMenuDivider(),
+            PopupMenuItem<String>(
+              value: 'help_github',
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.lightbulb_outline,
+                    size: 18,
+                    color: Theme.of(menuButtonContext).colorScheme.onSurface,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(menuButtonContext.l10n.help_and_ideas),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
 class AppSettingsMenuButton extends StatelessWidget {
   final VoidCallback onToggleTheme;
   final Widget? icon;
@@ -7360,7 +7565,7 @@ class AppSettingsMenuButton extends StatelessWidget {
         await _showThemeBottomSheet(context);
         break;
       case 'language':
-        await _showLanguageDialog(context);
+        await showF1LanguageDialog(context);
         break;
       case 'changelog':
         context.push(_changelogPath());
@@ -7382,6 +7587,9 @@ class AppSettingsMenuButton extends StatelessWidget {
         if (context.mounted) {
           context.go(_circuitsPath());
         }
+        break;
+      case 'help_github':
+        browser_bridge.openExternalUrl(_kGithubHelpIssuesUrl);
         break;
     }
   }
@@ -7414,44 +7622,7 @@ class AppSettingsMenuButton extends StatelessWidget {
 
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text('t.cache_cleared'.tr())));
-  }
-
-  Future<void> _showLanguageDialog(BuildContext context) async {
-    final supportedLocales = context.supportedLocales;
-    final entries = <Locale, String>{};
-    for (final locale in supportedLocales) {
-      try {
-        final json = await rootBundle.loadString(
-          'assets/translations/${locale.languageCode}.json',
-        );
-        final map = jsonDecode(json) as Map<String, dynamic>;
-        entries[locale] =
-            map['language_selector'] as String? ?? locale.languageCode;
-      } catch (_) {
-        entries[locale] = locale.languageCode;
-      }
-    }
-    if (!context.mounted) return;
-    final Locale? selectedLocale = await showDialog<Locale>(
-      context: context,
-      builder: (dialogContext) {
-        return SimpleDialog(
-          title: Text('t.language'.tr()),
-          children: entries.entries
-              .map(
-                (e) => SimpleDialogOption(
-                  onPressed: () => Navigator.pop(dialogContext, e.key),
-                  child: Text(e.value),
-                ),
-              )
-              .toList(),
-        );
-      },
-    );
-    if (selectedLocale != null && context.mounted) {
-      context.setLocale(selectedLocale);
-    }
+    ).showSnackBar(SnackBar(content: Text(context.l10n.cache_cleared)));
   }
 
   Widget _buildThemeCard(
@@ -7541,7 +7712,7 @@ class AppSettingsMenuButton extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  't.toggleTheme'.tr(),
+                  context.l10n.toggle_theme,
                   style: Theme.of(ctx).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 12),
@@ -7550,9 +7721,9 @@ class AppSettingsMenuButton extends StatelessWidget {
                     Expanded(
                       child: SegmentedButton<ThemeMode>(
                         segments: [
-                          ButtonSegment(value: ThemeMode.light, label: Text('Light')),
-                          ButtonSegment(value: ThemeMode.dark, label: Text('Dark')),
-                          ButtonSegment(value: ThemeMode.system, label: Text('System')),
+                          ButtonSegment(value: ThemeMode.light, label: Text(context.l10n.theme_mode_light)),
+                          ButtonSegment(value: ThemeMode.dark, label: Text(context.l10n.theme_mode_dark)),
+                          ButtonSegment(value: ThemeMode.system, label: Text(context.l10n.theme_mode_system)),
                         ],
                         selected: {controller.themeMode},
                         onSelectionChanged: (modes) {
@@ -7564,7 +7735,7 @@ class AppSettingsMenuButton extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Team theme',
+                  context.l10n.team_theme,
                   style: Theme.of(ctx).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
@@ -7610,108 +7781,125 @@ class AppSettingsMenuButton extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext menuButtonContext) {
     return StreamBuilder<AuthState>(
       stream: _authStateStream,
-      builder: (context, snapshot) {
+      builder: (streamContext, snapshot) {
         final session = snapshot.hasData
             ? snapshot.data!.session
             : Supabase.instance.client.auth.currentSession;
         final isLoggedIn = session != null;
 
-        final items = <PopupMenuItem<String>>[
-          if (!isLoggedIn)
+        return PopupMenuButton<String>(
+          icon: icon ?? _buildGlyphIcon('⚙', size: 20),
+          tooltip: menuButtonContext.l10n.settings,
+          onSelected: (value) =>
+              _handleSettingsSelection(streamContext, value),
+          itemBuilder: (_) => [
+            if (!isLoggedIn)
+              PopupMenuItem<String>(
+                value: 'login',
+                child: Row(
+                  children: [
+                    _buildGlyphIcon('🔐', size: 18),
+                    const SizedBox(width: 12),
+                    Text(menuButtonContext.l10n.login),
+                  ],
+                ),
+              ),
+            if (isLoggedIn) ...[
+              PopupMenuItem<String>(
+                value: 'profile',
+                child: Row(
+                  children: [
+                    _buildGlyphIcon('👤', size: 18),
+                    const SizedBox(width: 12),
+                    Text(menuButtonContext.l10n.profile),
+                  ],
+                ),
+              ),
+              PopupMenuItem<String>(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    _buildGlyphIcon('🚪', size: 18),
+                    const SizedBox(width: 12),
+                    Text(menuButtonContext.l10n.logout),
+                  ],
+                ),
+              ),
+            ],
+            const PopupMenuDivider(),
             PopupMenuItem<String>(
-              value: 'login',
+              value: 'help_github',
               child: Row(
                 children: [
-                  _buildGlyphIcon('🔐', size: 18),
+                  Icon(
+                    Icons.lightbulb_outline,
+                    size: 18,
+                    color: Theme.of(menuButtonContext).colorScheme.onSurface,
+                  ),
                   const SizedBox(width: 12),
-                  Text('t.login'.tr()),
+                  Text(menuButtonContext.l10n.help_and_ideas),
                 ],
               ),
             ),
-          if (isLoggedIn) ...[
             PopupMenuItem<String>(
-              value: 'profile',
+              value: 'theme',
               child: Row(
                 children: [
-                  _buildGlyphIcon('👤', size: 18),
+                  _buildGlyphIcon('◐', size: 18),
                   const SizedBox(width: 12),
-                  Text('t.profile'.tr()),
+                  Text(menuButtonContext.l10n.toggle_theme),
                 ],
               ),
             ),
             PopupMenuItem<String>(
-              value: 'logout',
+              value: 'language',
               child: Row(
                 children: [
-                  _buildGlyphIcon('🚪', size: 18),
+                  _buildGlyphIcon('🌐', size: 18),
                   const SizedBox(width: 12),
-                  Text('t.logout'.tr()),
+                  Text(menuButtonContext.l10n.language),
+                ],
+              ),
+            ),
+            PopupMenuItem<String>(
+              value: 'placeholder_page',
+              child: Row(
+                children: [
+                  _buildGlyphIcon('▣', size: 18),
+                  const SizedBox(width: 12),
+                  Text(menuButtonContext.l10n.placeholder_page),
+                ],
+              ),
+            ),
+            PopupMenuItem<String>(
+              value: 'changelog',
+              child: Row(
+                children: [
+                  _buildGlyphIcon('↻', size: 18),
+                  const SizedBox(width: 12),
+                  Text(menuButtonContext.l10n.changelog),
+                ],
+              ),
+            ),
+            PopupMenuItem<String>(
+              value: 'clear_cache',
+              child: Row(
+                children: [
+                  _buildGlyphIcon('🗑', size: 18),
+                  const SizedBox(width: 12),
+                  Text(
+                    menuButtonContext.l10n.clear_cache,
+                    style: TextStyle(
+                      color: Theme.of(menuButtonContext).colorScheme.error,
+                    ),
+                  ),
                 ],
               ),
             ),
           ],
-          PopupMenuItem<String>(
-            value: 'theme',
-            child: Row(
-              children: [
-                _buildGlyphIcon('◐', size: 18),
-                const SizedBox(width: 12),
-                Text('t.toggleTheme'.tr()),
-              ],
-            ),
-          ),
-        PopupMenuItem<String>(
-          value: 'language',
-          child: Row(
-            children: [
-              _buildGlyphIcon('🌐', size: 18),
-              const SizedBox(width: 12),
-              Text('t.language'.tr()),
-            ],
-          ),
-        ),
-        PopupMenuItem<String>(
-          value: 'placeholder_page',
-          child: Row(
-            children: [
-              _buildGlyphIcon('▣', size: 18),
-              const SizedBox(width: 12),
-              Text('t.placeholder_page'.tr()),
-            ],
-          ),
-        ),
-        PopupMenuItem<String>(
-          value: 'changelog',
-          child: Row(
-            children: [
-              _buildGlyphIcon('↻', size: 18),
-              const SizedBox(width: 12),
-              Text('t.changelog'.tr()),
-            ],
-          ),
-        ),
-        PopupMenuItem<String>(
-          value: 'clear_cache',
-          child: Row(
-            children: [
-              _buildGlyphIcon('🗑', size: 18),
-              const SizedBox(width: 12),
-              Text(
-                't.clear_cache'.tr(),
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-            ],
-          ),
-        ),
-        ];
-        return PopupMenuButton<String>(
-          icon: icon ?? _buildGlyphIcon('⚙', size: 20),
-          tooltip: 't.settings'.tr(),
-          onSelected: (value) => _handleSettingsSelection(context, value),
-          itemBuilder: (context) => items,
         );
       },
     );
@@ -7737,7 +7925,7 @@ class _LoggedInSnackBarTriggerState extends State<_LoggedInSnackBarTrigger> {
       if (LoggedInNotifier.shouldShowAndClear()) {
         final controller = ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('t.logged_in'.tr()),
+            content: Text(context.l10n.logged_in),
             duration: const Duration(seconds: 3),
             behavior: SnackBarBehavior.floating,
           ),
@@ -7756,7 +7944,8 @@ class _LoggedInSnackBarTriggerState extends State<_LoggedInSnackBarTrigger> {
 /// Custom nav rail: neutral inactive icons, primary + 3px stripe for active,
 /// hover tint from F1ThemeTokens.hoverHighlight. No bright bubble.
 class _F1NavRail extends StatefulWidget {
-  final int selectedIndex;
+  /// Index of selected tab, or `null` when the active route has no rail tile (e.g. profile-only branch).
+  final int? selectedIndex;
   final bool extended;
   final ValueChanged<int> onDestinationSelected;
   final List<NavigationRailDestination> destinations;
@@ -7795,7 +7984,7 @@ class _F1NavRailState extends State<_F1NavRail> {
               if (widget.extended) ...[
                 const SizedBox(width: 10),
                 Text(
-                  't.appTitle'.tr().toUpperCase(),
+                  context.l10n.app_title.toUpperCase(),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -7810,7 +7999,8 @@ class _F1NavRailState extends State<_F1NavRail> {
         for (int i = 0; i < widget.destinations.length; i++)
           _F1NavTile(
             destination: widget.destinations[i],
-            isSelected: widget.selectedIndex == i,
+            isSelected:
+                widget.selectedIndex != null && widget.selectedIndex == i,
             isHovered: _hoveredIndex == i,
             inactiveColor: inactiveColor,
             primaryColor: primary,
@@ -7941,7 +8131,6 @@ class MainNavigation extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
   /// Width >= 600: sidebar (rail). Width < 600: bottom bar.
   static const double _desktopShellBreakpoint = 600;
-  static const double _desktopContentMaxWidth = 1400;
 
   const MainNavigation({required this.navigationShell, super.key});
 
@@ -7961,30 +8150,37 @@ class MainNavigation extends StatelessWidget {
       NavigationRailDestination(
         icon: _buildGlyphIcon('🏁', size: 20),
         selectedIcon: _buildGlyphIcon('🏁', size: 20),
-        label: Text('t.circuits'.tr().toUpperCase()),
+        label: Text(context.l10n.circuits.toUpperCase()),
       ),
       NavigationRailDestination(
         icon: _buildGlyphIcon('👤', size: 20),
         selectedIcon: _buildGlyphIcon('👤', size: 20),
-        label: Text('t.drivers'.tr().toUpperCase()),
+        label: Text(context.l10n.drivers.toUpperCase()),
       ),
       NavigationRailDestination(
         icon: _buildGlyphIcon('👥', size: 20),
         selectedIcon: _buildGlyphIcon('👥', size: 20),
-        label: Text('t.teams'.tr().toUpperCase()),
+        label: Text(context.l10n.teams.toUpperCase()),
       ),
       NavigationRailDestination(
-        icon: _buildGlyphIcon('⚙', size: 20),
-        selectedIcon: _buildGlyphIcon('⚙', size: 20),
-        label: Text('t.profile'.tr().toUpperCase()),
+        icon: _buildGlyphIcon('👤', size: 20),
+        selectedIcon: _buildGlyphIcon('👤', size: 20),
+        label: Text(context.l10n.profile.toUpperCase()),
       ),
     ];
+    final railDestinations = destinations.sublist(0, 3);
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final isDesktop = constraints.maxWidth >= _desktopShellBreakpoint;
         final scheme = Theme.of(context).colorScheme;
-        final ambientGlow = scheme.primary.withValues(alpha: 0.06);
+        // Ambient behind rail + content; tuned for visible but calm team-colored depth.
+        final ambientGlow = scheme.primary.withValues(alpha: 0.10);
+        final shellBase = Color.lerp(
+          scheme.surfaceContainerLow,
+          scheme.primary,
+          0.04,
+        )!;
 
         return Scaffold(
           body: Stack(
@@ -7992,7 +8188,7 @@ class MainNavigation extends StatelessWidget {
             children: [
               DecoratedBox(
                 decoration: BoxDecoration(
-                  color: scheme.surfaceContainerLow,
+                  color: shellBase,
                 ),
                 child: CustomPaint(
                   painter: _AmbientGlowPainter(
@@ -8030,17 +8226,18 @@ class MainNavigation extends StatelessWidget {
                                 children: [
                                   Expanded(
                                     child: _F1NavRail(
-                                      selectedIndex: navigationShell.currentIndex,
+                                      selectedIndex:
+                                          navigationShell.currentIndex < 3
+                                              ? navigationShell.currentIndex
+                                              : null,
                                       extended: constraints.maxWidth >= 1320,
                                       onDestinationSelected: (i) =>
                                           navigationShell.goBranch(i, initialLocation: true),
-                                      destinations: destinations,
+                                      destinations: railDestinations,
                                     ),
                                   ),
                                   const SizedBox(height: 12),
-                                  AppSettingsMenuButton(
-                                    onToggleTheme: () => context.read<ThemeController>().toggleBrightness(),
-                                  ),
+                                  const RailAccountMenuButton(),
                                 ],
                               ),
                             ),
@@ -8052,17 +8249,7 @@ class MainNavigation extends StatelessWidget {
                                 topLeft: Radius.circular(20),
                                 bottomLeft: Radius.circular(20),
                               ),
-                              child: Center(
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                    maxWidth: _desktopContentMaxWidth,
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 20),
-                                    child: navigationShell,
-                                  ),
-                                ),
-                              ),
+                              child: navigationShell,
                             ),
                           ),
                         ],
@@ -8076,7 +8263,7 @@ class MainNavigation extends StatelessWidget {
               : FloatingActionButton.extended(
                   onPressed: () => _openAiAssistant(context),
                   icon: _buildGlyphIcon('🤖', size: 18),
-                  label: const Text('AI'),
+                  label: Text(context.l10n.ai_fab_label),
                 ),
           bottomNavigationBar: isDesktop
               ? null
@@ -8134,19 +8321,19 @@ class MainNavigation extends StatelessWidget {
                             items: <BottomNavigationBarItem>[
                               BottomNavigationBarItem(
                                 icon: _buildGlyphIcon('🏁', size: 20),
-                                label: 't.circuits'.tr().toUpperCase(),
+                                label: context.l10n.circuits.toUpperCase(),
                               ),
                               BottomNavigationBarItem(
                                 icon: _buildGlyphIcon('👤', size: 20),
-                                label: 't.drivers'.tr().toUpperCase(),
+                                label: context.l10n.drivers.toUpperCase(),
                               ),
                               BottomNavigationBarItem(
                                 icon: _buildGlyphIcon('👥', size: 20),
-                                label: 't.teams'.tr().toUpperCase(),
+                                label: context.l10n.teams.toUpperCase(),
                               ),
                               BottomNavigationBarItem(
-                                icon: _buildGlyphIcon('⚙', size: 20),
-                                label: 't.profile'.tr().toUpperCase(),
+                                icon: _buildGlyphIcon('👤', size: 20),
+                                label: context.l10n.profile.toUpperCase(),
                               ),
                             ],
                           ),
@@ -8188,8 +8375,12 @@ class _CircuitsViewState extends State<CircuitsView> {
       return cachedResults != null && cachedResults.isNotEmpty;
     }
   static const double _desktopCircuitsBreakpoint = 1100;
+  /// Between this and [_desktopCircuitsBreakpoint]: show “Last podium” below the featured card (narrow 14″ / split view).
+  static const double _circuitsPodiumBelowBreakpoint = 960;
   String liveTemp = "--";
   int liveRain = 0;
+  /// Display e.g. "18 km/h"; '--' when unknown.
+  String liveWind = '--';
   Timer? _timer;
 
   @override
@@ -8229,13 +8420,22 @@ class _CircuitsViewState extends State<CircuitsView> {
   }
 
   Race? _latestCompletedRace() {
+    final list = _lastNCompletedRaces(1);
+    return list.isEmpty ? null : list.first;
+  }
+
+  /// Most recent past races by calendar date, newest first (up to [maxCount]).
+  List<Race> _lastNCompletedRaces(int maxCount) {
+    if (maxCount < 1) return const [];
     final now = DateTime.now();
+    final out = <Race>[];
     for (final race in races.reversed) {
       if (!race.date.isAfter(now)) {
-        return race;
+        out.add(race);
+        if (out.length >= maxCount) break;
       }
     }
-    return null;
+    return out;
   }
 
   Future<void> _primeHomeData() async {
@@ -8245,22 +8445,20 @@ class _CircuitsViewState extends State<CircuitsView> {
   }
 
   Future<void> _preloadLatestRacePodium() async {
-    final latestRace = _latestCompletedRace();
-    if (latestRace == null) {
+    final toLoad = _lastNCompletedRaces(3);
+    if (toLoad.isEmpty) {
       return;
     }
 
-    final cacheKey = SessionDataManager().raceResultsKeyFor(latestRace);
-    final cachedResults = SessionDataManager().raceResultsCache[cacheKey];
-    if (cachedResults != null && cachedResults.length >= 3) {
-      if (mounted) {
-        setState(() {});
+    for (final race in toLoad) {
+      final cacheKey = SessionDataManager().raceResultsKeyFor(race);
+      final cachedResults = SessionDataManager().raceResultsCache[cacheKey];
+      if (cachedResults != null && cachedResults.length >= 3) {
+        continue;
       }
-      return;
+      final roundIndex = raceRoundFor(race);
+      await SessionDataManager().fetchDataForRace(race, roundIndex);
     }
-
-    final roundIndex = raceRoundFor(latestRace);
-    await SessionDataManager().fetchDataForRace(latestRace, roundIndex);
 
     if (mounted) {
       setState(() {});
@@ -8297,11 +8495,13 @@ class _CircuitsViewState extends State<CircuitsView> {
         setState(() {
           liveTemp = w.temperature.round().toString();
           liveRain = w.precipitationProbability;
+          liveWind = '${w.windspeed.round()} km/h';
         });
       } else if (mounted) {
         setState(() {
           liveTemp = '-';
           liveRain = 0;
+          liveWind = '-';
         });
       }
     } catch (_) {
@@ -8309,6 +8509,7 @@ class _CircuitsViewState extends State<CircuitsView> {
         setState(() {
           liveTemp = '-';
           liveRain = 0;
+          liveWind = '-';
         });
       }
     }
@@ -8342,41 +8543,45 @@ class _CircuitsViewState extends State<CircuitsView> {
       final weeks = (diff.inDays / 7).floor();
       final remainingDays = diff.inDays % 7;
       String w =
-          '$weeks ${weeks == 1 ? 't.week'.tr() : 't.weeks'.tr()}';
+          '$weeks ${weeks == 1 ? context.l10n.week : context.l10n.weeks}';
       if (remainingDays > 0) {
         w +=
-            ', $remainingDays ${remainingDays == 1 ? 't.day'.tr() : 't.days'.tr()}';
+            ', $remainingDays ${remainingDays == 1 ? context.l10n.day : context.l10n.days}';
       }
       return w;
     } else if (diff.inDays >= 1) {
       final days = diff.inDays;
       final hours = diff.inHours % 24;
-      return '$days ${days == 1 ? 't.day'.tr() : 't.days'.tr()}${hours > 0 ? ', $hours ${'t.hours'.tr()}' : ''}';
+      return '$days ${days == 1 ? context.l10n.day : context.l10n.days}${hours > 0 ? ', $hours ${context.l10n.hours}' : ''}';
     } else if (diff.inHours >= 1) {
-      return '${diff.inHours} ${'t.hours'.tr()}, ${diff.inMinutes % 60} ${'t.minutes'.tr()}';
+      return '${diff.inHours} ${context.l10n.hours}, ${diff.inMinutes % 60} ${context.l10n.minutes}';
     } else {
-      return '${diff.inMinutes} ${'t.minutes'.tr()}';
+      return '${diff.inMinutes} ${context.l10n.minutes}';
     }
   }
 
   String _getPodiumString(Race race) {
     final results = _circuitPodiumRows(race);
     final medals = ['🥇', '🥈', '🥉'];
-    if (results.length >= 3) {
-      final top3 = results.take(3).toList();
-      return top3
+    if (results.isNotEmpty) {
+      return results
           .asMap()
           .map((i, row) => MapEntry(i, '${medals[i]} ${row.driver.split(' ').last}'))
           .values
           .join('  ');
     }
-    // fallback with medals if not enough results
     final fallback = ['Verstappen', 'Norris', 'Leclerc'];
     return List.generate(3, (i) => '${medals[i]} ${fallback[i]}').join('  ');
   }
 
   bool _hasSummerBreakAfter(Race race) {
     return race.name == 'Hungarian Grand Prix';
+  }
+
+  /// Placeholder “cancelled” races (not on calendar when user hides them).
+  bool _isCancelledGrandPrix(Race race) {
+    return race.name == 'Bahrain Grand Prix' ||
+        race.name == 'Saudi Arabian Grand Prix';
   }
 
   List<Race> _summerBreakRaces() {
@@ -8444,7 +8649,7 @@ class _CircuitsViewState extends State<CircuitsView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          compact ? 't.last_winner'.tr() : 't.previous_winners'.tr(),
+          compact ? context.l10n.last_winner : context.l10n.previous_winners,
           style: TextStyle(
             fontSize: 10,
             letterSpacing: 1.1,
@@ -8495,8 +8700,15 @@ class _CircuitsViewState extends State<CircuitsView> {
   }
 
   List<Widget> _buildCalendarEntries(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+    final hideCancelled = user != null &&
+        context.watch<CalendarPrefsNotifier>().value.hideCancelledRaces;
+    final calendarRaces = hideCancelled
+        ? races.where((r) => !_isCancelledGrandPrix(r))
+        : races;
+
     final entries = <Widget>[];
-    for (final race in races) {
+    for (final race in calendarRaces) {
       entries.add(_buildCalendarRaceCard(context, race));
       if (_hasSummerBreakAfter(race)) {
         entries.add(_buildSummerBreakCard(context));
@@ -8505,41 +8717,12 @@ class _CircuitsViewState extends State<CircuitsView> {
     return entries;
   }
 
-  /// Index of the separator between Hungary card and Summer Break card.
-  int get _summerBreakSeparatorIndex {
-    final hungaryIndex = races.indexWhere(
-      (r) => r.name == 'Hungarian Grand Prix',
-    );
-    return hungaryIndex;
+  /// Vertical gap between consecutive calendar cards.
+  Widget _buildCalendarSeparator() {
+    return const SizedBox(height: 16);
   }
 
-  /// Builds the separator between calendar entry[index] and entry[index+1].
-  /// Returns SizedBox(height: 16) normally; SizedBox(height: 48) with Summer Break
-  /// label when index is the gap between Hungary and the Netherlands.
-  Widget _buildCalendarSeparator(BuildContext context, int index) {
-    const gap = 16.0;
-    const summerBreakGap = 48.0;
-
-    if (index == _summerBreakSeparatorIndex) {
-      final theme = Theme.of(context);
-      return SizedBox(
-        height: summerBreakGap,
-        child: Center(
-          child: Text(
-            't.summer_break'.tr(),
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              letterSpacing: 1.0,
-            ),
-          ),
-        ),
-      );
-    }
-    return const SizedBox(height: gap);
-  }
-
-  /// Returns calendar entries interleaved with separators. Each pair of cards
-  /// is separated by 16px (or 48px with Summer Break label between Hungary/Netherlands).
+  /// Returns calendar entries interleaved with separators.
   List<Widget> _buildCalendarListWithSeparators(BuildContext context) {
     final entries = _buildCalendarEntries(context);
     if (entries.isEmpty) return [];
@@ -8548,139 +8731,82 @@ class _CircuitsViewState extends State<CircuitsView> {
     for (var i = 0; i < entries.length; i++) {
       result.add(entries[i]);
       if (i < entries.length - 1) {
-        result.add(_buildCalendarSeparator(context, i));
+        result.add(_buildCalendarSeparator());
       }
     }
     return result;
   }
 
-  Widget _buildDesktopOverviewSidebar(BuildContext context, Race upcoming) {
+  /// Desktop / compact: one card listing podiums for the most recent races (profile 1–3).
+  Widget _buildDesktopOverviewSidebar(BuildContext context) {
     final theme = Theme.of(context);
-    final latestRace = _latestCompletedRace();
+    final n = context.watch<LastPodiumPrefsNotifier>().value.raceCount;
+    final completed = _lastNCompletedRaces(n);
+    if (completed.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
-    return Column(
-      children: [
-        Card(
-          color: theme.colorScheme.surface,
-          elevation: 1,
-          shadowColor: theme.colorScheme.shadow,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          clipBehavior: Clip.antiAlias,
-          child: F1Module(
-            fillWidth: true,
-            padding: const EdgeInsets.all(18),
-            borderRadius: 20,
-            backgroundColor: theme.colorScheme.surface,
-            showFadingBorder: true,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  't.nextRace'.tr().toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 10,
-                    letterSpacing: 1.4,
-                    fontWeight: FontWeight.w800,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  '$liveTemp°C',
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w800,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  upcoming.name,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      _AnimatedWeatherIcon(
-                        isRain: liveRain > 30,
-                        isCloudy: liveRain <= 30 && liveRain > 10,
-                        color: liveRain > 30 ? theme.colorScheme.primary : theme.colorScheme.tertiary,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '$liveRain% ${'t.rain'.tr().toLowerCase()}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.onSurface,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+    final children = <Widget>[
+      Text(
+        context.l10n.last_podium_prefs_section_title.toUpperCase(),
+        style: TextStyle(
+          fontSize: 10,
+          letterSpacing: 1.4,
+          fontWeight: FontWeight.w800,
+          color: theme.colorScheme.secondary,
+        ),
+      ),
+    ];
+
+    for (var i = 0; i < completed.length; i++) {
+      final race = completed[i];
+      if (i > 0) {
+        children.addAll([
+          const SizedBox(height: 16),
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: theme.colorScheme.outline.withValues(alpha: 0.2),
+          ),
+          const SizedBox(height: 14),
+        ]);
+      } else {
+        children.add(const SizedBox(height: 10));
+      }
+      children.addAll([
+        Text(
+          l10nGrandPrix(context.l10n, race.name),
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            color: theme.colorScheme.onSurface,
           ),
         ),
-        const SizedBox(height: 12),
-        if (latestRace != null)
-          Card(
-            color: theme.colorScheme.surface,
-            elevation: 1,
-            shadowColor: theme.colorScheme.shadow,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            clipBehavior: Clip.antiAlias,
-            child: F1Module(
-              fillWidth: true,
-              padding: const EdgeInsets.all(18),
-              borderRadius: 20,
-              backgroundColor: theme.colorScheme.surface,
-              showFadingBorder: true,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'LAST PODIUM',
-                    style: TextStyle(
-                      fontSize: 10,
-                      letterSpacing: 1.4,
-                      fontWeight: FontWeight.w800,
-                      color: theme.colorScheme.secondary,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    't.gp_${latestRace.name}'.tr(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _buildCircuitPodiumPreview(
-                    context,
-                    latestRace,
-                    alignment: CrossAxisAlignment.start,
-                  ),
-                ],
-              ),
-            ),
-          ),
-      ],
+        const SizedBox(height: 10),
+        _buildCircuitPodiumPreview(
+          context,
+          race,
+          alignment: CrossAxisAlignment.start,
+        ),
+      ]);
+    }
+
+    return Card(
+      color: theme.colorScheme.surface,
+      elevation: 1,
+      shadowColor: theme.colorScheme.shadow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      clipBehavior: Clip.antiAlias,
+      child: F1Module(
+        fillWidth: true,
+        padding: const EdgeInsets.all(18),
+        borderRadius: 20,
+        backgroundColor: theme.colorScheme.surface,
+        showFadingBorder: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: children,
+        ),
+      ),
     );
   }
 
@@ -8706,7 +8832,7 @@ class _CircuitsViewState extends State<CircuitsView> {
               children: [
                 const SizedBox(width: 48),
                 Text(
-                  't.race'.tr().toUpperCase(),
+                  context.l10n.race.toUpperCase(),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
@@ -8720,7 +8846,7 @@ class _CircuitsViewState extends State<CircuitsView> {
           Expanded(
             flex: 3,
             child: Text(
-              't.country'.tr().toUpperCase(),
+              context.l10n.country.toUpperCase(),
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
@@ -8732,7 +8858,7 @@ class _CircuitsViewState extends State<CircuitsView> {
           Expanded(
             flex: 2,
             child: Text(
-              't.date'.tr().toUpperCase(),
+              context.l10n.date.toUpperCase(),
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
@@ -8744,7 +8870,7 @@ class _CircuitsViewState extends State<CircuitsView> {
           Expanded(
             flex: 3,
             child: Text(
-              't.last_winner'.tr().toUpperCase(),
+              context.l10n.last_winner.toUpperCase(),
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
@@ -8758,7 +8884,7 @@ class _CircuitsViewState extends State<CircuitsView> {
             child: Align(
               alignment: Alignment.centerRight,
               child: Text(
-                't.status'.tr().toUpperCase(),
+                context.l10n.status.toUpperCase(),
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
@@ -8824,7 +8950,7 @@ class _CircuitsViewState extends State<CircuitsView> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              chip('Ended', tokens.statusSuccess.withValues(alpha: 0.10), tokens.statusSuccess.withValues(alpha: 0.24), tokens.statusSuccess),
+              chip(context.l10n.calendar_race_status_ended, tokens.statusSuccess.withValues(alpha: 0.10), tokens.statusSuccess.withValues(alpha: 0.24), tokens.statusSuccess),
               const SizedBox(width: 8),
               OutlinedButton(
                 onPressed: () => context.push(_weekendHubPath(race)),
@@ -8835,7 +8961,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                   side: BorderSide(color: tokens.statusSuccess.withValues(alpha: 0.24)),
                 ),
                 child: Text(
-                  't.results'.tr(),
+                  context.l10n.results,
                   style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: tokens.statusSuccess),
                 ),
               ),
@@ -8858,15 +8984,15 @@ class _CircuitsViewState extends State<CircuitsView> {
         ],
       );
     } else if (!isCancelled && (isOngoing || (isToday && !hasResults))) {
-      return chip('Ongoing', tokens.statusWarning.withValues(alpha: 0.10), tokens.statusWarning.withValues(alpha: 0.24), tokens.statusWarning);
+      return chip(context.l10n.calendar_race_status_ongoing, tokens.statusWarning.withValues(alpha: 0.10), tokens.statusWarning.withValues(alpha: 0.24), tokens.statusWarning);
     } else if (!isCancelled && !isFinished) {
-      return chip('${'t.startsIn'.tr()} $timeLabel', theme.colorScheme.primary.withValues(alpha: 0.10), theme.colorScheme.primary.withValues(alpha: 0.18), theme.colorScheme.primary);
+      return chip('${context.l10n.starts_in} $timeLabel', theme.colorScheme.primary.withValues(alpha: 0.10), theme.colorScheme.primary.withValues(alpha: 0.18), theme.colorScheme.primary);
     } else if (isCancelled) {
-      return chip('Cancelled', tokens.statusError.withValues(alpha: 0.08), tokens.statusError.withValues(alpha: 0.24), tokens.statusError);
+      return chip(context.l10n.calendar_race_status_cancelled, tokens.statusError.withValues(alpha: 0.08), tokens.statusError.withValues(alpha: 0.24), tokens.statusError);
     } else if (isFinished && !hasResults) {
-      return chip('Ended', tokens.statusSuccess.withValues(alpha: 0.10), tokens.statusSuccess.withValues(alpha: 0.24), tokens.statusSuccess);
+      return chip(context.l10n.calendar_race_status_ended, tokens.statusSuccess.withValues(alpha: 0.10), tokens.statusSuccess.withValues(alpha: 0.24), tokens.statusSuccess);
     } else {
-      return chip('Unknown', theme.colorScheme.outline.withValues(alpha: 0.10), theme.colorScheme.outline.withValues(alpha: 0.24), theme.colorScheme.outline);
+      return chip(context.l10n.unknown, theme.colorScheme.outline.withValues(alpha: 0.10), theme.colorScheme.outline.withValues(alpha: 0.24), theme.colorScheme.outline);
     }
   }
 
@@ -8909,7 +9035,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                 children: [
                   Expanded(
                     child: Text(
-                      't.appTitle'.tr().toUpperCase(),
+                      context.l10n.app_title.toUpperCase(),
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
@@ -8955,63 +9081,89 @@ class _CircuitsViewState extends State<CircuitsView> {
     final tokens = _themeTokens(context);
     final primary = theme.colorScheme.primary;
     final textColor = onBlueBackground ? Colors.white : theme.colorScheme.onSurface;
-    final variantColor = onBlueBackground ? Colors.white70 : theme.colorScheme.onSurfaceVariant;
 
-    final chipColor = onBlueBackground
-        ? (isCancelled ? tokens.statusError : Colors.white.withValues(alpha: 0.25))
-        : (isCancelled ? tokens.statusError.withValues(alpha: 0.08) : primary.withValues(alpha: 0.1));
-    final chipBorder = onBlueBackground
-        ? (isCancelled ? tokens.statusError : Colors.white.withValues(alpha: 0.5))
-        : (isCancelled ? tokens.statusError.withValues(alpha: 0.24) : primary.withValues(alpha: 0.18));
-    final chipText = isCancelled ? tokens.statusError : (onBlueBackground ? Colors.white : primary);
+    final windSegment =
+        (liveWind == '--' || liveWind == '-') ? '—' : liveWind;
+    final weatherLine =
+        '$liveTemp°C · $liveRain% ${context.l10n.rain.toLowerCase()} · $windSegment';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: chipColor,
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: chipBorder),
+        if (isCancelled) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: onBlueBackground
+                      ? tokens.statusError.withValues(alpha: 0.35)
+                      : tokens.statusError.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: onBlueBackground
+                        ? tokens.statusError
+                        : tokens.statusError.withValues(alpha: 0.24),
+                  ),
+                ),
+                child: Text(
+                  context.l10n.calendar_race_status_cancelled,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: onBlueBackground ? Colors.white : tokens.statusError,
+                  ),
+                ),
               ),
-              child: Text(
-                isCancelled ? 'Cancelled' : 't.session_status_upcoming'.tr(),
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: chipText),
-              ),
-            ),
-          ],
+            ],
+          ),
+          const SizedBox(height: 10),
+        ],
+        Text(
+          context.l10n.next_race.toUpperCase(),
+          style: TextStyle(
+            color: onBlueBackground ? Colors.white70 : primary,
+            fontWeight: FontWeight.bold,
+            fontSize: 10,
+            letterSpacing: 1.5,
+          ),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              't.nextRace'.tr().toUpperCase(),
-              style: TextStyle(
-                color: onBlueBackground ? Colors.white70 : primary,
-                fontWeight: FontWeight.bold,
-                fontSize: 10,
-                letterSpacing: 1.5,
+        const SizedBox(height: 10),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(
+            color: onBlueBackground
+                ? Colors.white.withValues(alpha: 0.15)
+                : primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _AnimatedWeatherIcon(
+                isRain: isRainy,
+                isCloudy: isCloudy,
+                color: onBlueBackground
+                    ? Colors.white
+                    : (isRainy ? primary : theme.colorScheme.tertiary),
+                size: 24,
               ),
-            ),
-            Row(
-              children: [
-                Text(
-                  '$liveTemp°C ',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: textColor),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  weatherLine,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    height: 1.3,
+                    color: textColor,
+                  ),
                 ),
-                _AnimatedWeatherIcon(
-                  isRain: isRainy,
-                  isCloudy: isCloudy,
-                  color: onBlueBackground ? Colors.white : (isRainy ? primary : theme.colorScheme.tertiary),
-                  size: 20,
-                ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
         Row(
@@ -9019,23 +9171,19 @@ class _CircuitsViewState extends State<CircuitsView> {
           children: [
             _buildFlagHero(
               tag: _raceFlagHeroTag(upcoming, source: 'featured'),
-              flag: _getFlag('t.country_${upcoming.country}'.tr()),
+              flag: upcoming.flag,
               fontSize: 32,
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                't.gp_${upcoming.name}'.tr(),
+                l10nGrandPrix(context.l10n, upcoming.name),
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textColor),
               ),
             ),
           ],
         ),
-        Text(
-          upcoming.name,
-          style: TextStyle(color: variantColor, fontSize: 14),
-        ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
         _buildPreviousWinnersBlock(
           context,
           upcoming,
@@ -9057,7 +9205,7 @@ class _CircuitsViewState extends State<CircuitsView> {
           )
         else
           Text(
-            '${'t.startsIn'.tr()} $timeStrNext',
+            '${context.l10n.starts_in} $timeStrNext',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -9151,7 +9299,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              't.gp_${race.name}'.tr(),
+                              l10nGrandPrix(context.l10n, race.name),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -9179,7 +9327,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                 Expanded(
                   flex: 3,
                   child: Text(
-                    't.country_${race.country}'.tr(),
+                    l10nCountry(context.l10n, race.country),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -9243,14 +9391,14 @@ class _CircuitsViewState extends State<CircuitsView> {
           DateTime.now().day == race.date.day;
       if (race.date.year == 2026) {
         if (isCancelled) {
-          return Text('Cancelled',
+          return Text(context.l10n.calendar_race_status_cancelled,
               style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.bold,
                   color: tokens.statusError,
                   fontFamily: 'TitilliumWeb'));
         } else if (isOngoing || (isToday && !hasResults)) {
-          return Text('Ongoing',
+          return Text(context.l10n.calendar_race_status_ongoing,
               style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.bold,
@@ -9259,7 +9407,7 @@ class _CircuitsViewState extends State<CircuitsView> {
         } else if (isFinished && hasResults) {
           return _buildCircuitPodiumPreview(context, race);
         } else if (isFinished && !hasResults) {
-          return Text('Ended',
+          return Text(context.l10n.calendar_race_status_ended,
               style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.bold,
@@ -9277,13 +9425,13 @@ class _CircuitsViewState extends State<CircuitsView> {
         if (isFinished && hasResults) {
           return _buildCircuitPodiumPreview(context, race);
         } else if (isCancelled) {
-          return Text('Cancelled',
+          return Text(context.l10n.calendar_race_status_cancelled,
               style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.bold,
                   color: tokens.statusError));
         } else if (isOngoing || (isToday && !hasResults)) {
-          return Text('Ongoing',
+          return Text(context.l10n.calendar_race_status_ongoing,
               style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.bold,
@@ -9305,14 +9453,14 @@ class _CircuitsViewState extends State<CircuitsView> {
           DateTime.now().day == race.date.day;
       if (race.date.year == 2026) {
         if (isCancelled) {
-          return Text('Cancelled',
+          return Text(context.l10n.calendar_race_status_cancelled,
               style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.bold,
                   color: tokens.statusError,
                   fontFamily: 'TitilliumWeb'));
         } else if (isOngoing || (isToday && !hasResults)) {
-          return Text('Ongoing',
+          return Text(context.l10n.calendar_race_status_ongoing,
               style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.bold,
@@ -9321,7 +9469,7 @@ class _CircuitsViewState extends State<CircuitsView> {
         } else if (isFinished && hasResults) {
           return _buildCircuitPodiumPreview(context, race);
         } else if (isFinished && !hasResults) {
-          return Text('Ended',
+          return Text(context.l10n.calendar_race_status_ended,
               style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.bold,
@@ -9339,13 +9487,13 @@ class _CircuitsViewState extends State<CircuitsView> {
         if (isFinished && hasResults) {
           return _buildCircuitPodiumPreview(context, race);
         } else if (isCancelled) {
-          return Text('Cancelled',
+          return Text(context.l10n.calendar_race_status_cancelled,
               style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.bold,
                   color: tokens.statusError));
         } else if (isOngoing || (isToday && !hasResults)) {
-          return Text('Ongoing',
+          return Text(context.l10n.calendar_race_status_ongoing,
               style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.bold,
@@ -9392,7 +9540,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            't.gp_${race.name}'.tr(),
+                            l10nGrandPrix(context.l10n, race.name),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
@@ -9447,11 +9595,11 @@ class _CircuitsViewState extends State<CircuitsView> {
     final breakLabel = breakDays == null
         ? ''
         : breakDays % 7 == 0
-        ? '${breakDays ~/ 7} ${breakDays ~/ 7 == 1 ? 't.week'.tr() : 't.weeks'.tr()}'
-        : '$breakDays ${breakDays == 1 ? 't.day'.tr() : 't.days'.tr()}';
+        ? '${breakDays ~/ 7} ${breakDays ~/ 7 == 1 ? context.l10n.week : context.l10n.weeks}'
+        : '$breakDays ${breakDays == 1 ? context.l10n.day : context.l10n.days}';
     final dateLabel = startRace != null && endRace != null
         ? '${_calendarDateLabel(startRace.date)} - ${_calendarDateLabel(endRace.date)}'
-        : 't.summer_break_subtitle'.tr();
+        : context.l10n.summer_break_subtitle;
 
     if (showDesktopLayout) {
       return F1Module(
@@ -9472,7 +9620,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          't.summer_break'.tr(),
+                          context.l10n.summer_break,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -9483,7 +9631,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          't.summer_break_subtitle'.tr(),
+                          context.l10n.summer_break_subtitle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -9543,7 +9691,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                         ),
                       ),
                       child: Text(
-                        't.summer_break'.tr(),
+                        context.l10n.summer_break,
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
@@ -9587,7 +9735,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    't.summer_break'.tr(),
+                    context.l10n.summer_break,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -9604,7 +9752,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    't.summer_break_subtitle'.tr(),
+                    context.l10n.summer_break_subtitle,
                     style: TextStyle(
                       fontSize: 10,
                       color: theme.colorScheme.onSurfaceVariant,
@@ -9769,38 +9917,31 @@ class _CircuitsViewState extends State<CircuitsView> {
     final timeStrNext = _timeUntil(upcoming.date, context);
 
     final scheme = Theme.of(context).colorScheme;
-    final ambientGlow = scheme.primary.withValues(alpha: 0.08);
+    final ambientGlow = scheme.primary.withValues(alpha: 0.13);
+    final shellBase = Color.lerp(
+      scheme.surfaceContainerLow,
+      scheme.primary,
+      0.04,
+    )!;
+    final desktopShell = _isDesktopShellLayout(context);
 
     return Scaffold(
       extendBodyBehindAppBar: false,
       backgroundColor: Colors.transparent,
-      appBar: _isDesktopShellLayout(context)
-          ? AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              foregroundColor: scheme.onSurface,
-              title: Text(
-                't.appTitle'.tr().toUpperCase(),
-                style: TextStyle(
-                  color: scheme.onSurface,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              actions: const <Widget>[],
-            )
-          : null,
+      appBar: null,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          DecoratedBox(
-            decoration: BoxDecoration(color: scheme.surfaceContainerLow),
-            child: CustomPaint(
-              painter: _AmbientGlowPainter(
-                topLeftGlow: ambientGlow,
-                bottomRightGlow: ambientGlow,
+          if (!desktopShell)
+            DecoratedBox(
+              decoration: BoxDecoration(color: shellBase),
+              child: CustomPaint(
+                painter: _AmbientGlowPainter(
+                  topLeftGlow: ambientGlow,
+                  bottomRightGlow: ambientGlow,
+                ),
               ),
             ),
-          ),
           RefreshIndicator(
             onRefresh: _refreshCircuits,
             child: SafeArea(
@@ -9809,7 +9950,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.fromLTRB(
                   16,
-                  _isDesktopShellLayout(context) ? 16 : 0,
+                  desktopShell ? 16 : 0,
                   16,
                   16,
                 ),
@@ -9820,44 +9961,83 @@ class _CircuitsViewState extends State<CircuitsView> {
                     case 0:
                       return LayoutBuilder(
                         builder: (context, constraints) {
+                          final w = constraints.maxWidth;
                           final isDesktop =
-                              constraints.maxWidth >= _desktopCircuitsBreakpoint;
-                          if (!isDesktop) {
+                              w >= _desktopCircuitsBreakpoint;
+                          final showPodiumCompact =
+                              w >= _circuitsPodiumBelowBreakpoint &&
+                              w < _desktopCircuitsBreakpoint;
+                          if (!isDesktop && !showPodiumCompact) {
                             return _buildUnifiedNextRaceBlock(
                               context,
                               upcoming,
                               timeStrNext,
                             );
                           }
-                          return Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                flex: 5,
-                                child: _buildFeaturedRaceCard(
-                                  context,
-                                  upcoming,
-                                  timeStrNext,
+                          final showPodiumSidebar =
+                              _latestCompletedRace() != null;
+                          final featured = _buildFeaturedRaceCard(
+                            context,
+                            upcoming,
+                            timeStrNext,
+                          );
+                          if (isDesktop) {
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  flex: 5,
+                                  child: featured,
                                 ),
-                              ),
-                              const SizedBox(width: 16),
-                              SizedBox(
-                                width: 320,
-                                child: _buildDesktopOverviewSidebar(context, upcoming),
-                              ),
+                                if (showPodiumSidebar) ...[
+                                  const SizedBox(width: 16),
+                                  SizedBox(
+                                    width: 320,
+                                    child: _buildDesktopOverviewSidebar(
+                                      context,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            );
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              featured,
+                              if (showPodiumSidebar) ...[
+                                const SizedBox(height: 16),
+                                _buildDesktopOverviewSidebar(context),
+                              ],
                             ],
                           );
                         },
                       );
                     case 1:
-                      return _AIStrategistCard(
-                        race: upcoming,
-                        onTap: () async {
-                          await showModalBottomSheet<void>(
-                            context: context,
-                            isScrollControlled: true,
-                            showDragHandle: true,
-                            builder: (_) => const AIAssistantSheet(),
+                      return Builder(
+                        builder: (context) {
+                          final user =
+                              Supabase.instance.client.auth.currentUser;
+                          final prefs = context
+                              .watch<AiStrategistPrefsNotifier>()
+                              .value;
+                          final effective = user != null
+                              ? prefs
+                              : AiStrategistPrefs.defaults;
+                          if (user != null && effective.cardDisabled) {
+                            return const SizedBox.shrink();
+                          }
+                          return _AIStrategistCard(
+                            race: upcoming,
+                            strategistPrefs: effective,
+                            onTap: () async {
+                              await showModalBottomSheet<void>(
+                                context: context,
+                                isScrollControlled: true,
+                                showDragHandle: true,
+                                builder: (_) => const AIAssistantSheet(),
+                              );
+                            },
                           );
                         },
                       );
@@ -9878,8 +10058,8 @@ class _CircuitsViewState extends State<CircuitsView> {
                                   physics: const NeverScrollableScrollPhysics(),
                                   itemCount: entries.length,
                                   itemBuilder: (_, i) => _LiftOnTap(child: entries[i]),
-                                  separatorBuilder: (_, i) =>
-                                      _buildCalendarSeparator(context, i),
+                                  separatorBuilder: (_, __) =>
+                                      _buildCalendarSeparator(),
                                 );
                               }
                               return _buildDesktopCalendarGrid(context);
@@ -10261,36 +10441,37 @@ class _StandingsViewState extends State<StandingsView> {
               : driver.championshipYears.join(', '))
         : 'CC ${team!.ccWins}  DC ${team.dcWins}';
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? F1TeamSchemes.getTeamColor(teamName).withValues(alpha: 0.16)
-            : (isDark ? theme.colorScheme.surface : theme.colorScheme.surface),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isSelected
-              ? F1TeamSchemes.getTeamColor(teamName).withValues(alpha: 0.6)
-              : (isDark ? Colors.white10 : Colors.black12),
-        ),
-        boxShadow: isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: () => _handleStandingsTap(item, widget.isDriverView),
-        child: F1Hoverable(
-          borderRadius: BorderRadius.circular(14),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-            child: Row(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () => _handleStandingsTap(item, widget.isDriverView),
+          child: F1Module(
+            fillWidth: true,
+            borderRadius: 20,
+            backgroundColor: isSelected
+                ? F1TeamSchemes.getTeamColor(teamName).withValues(alpha: 0.16)
+                : theme.colorScheme.surface,
+            showFadingBorder: true,
+            borderColor: isSelected
+                ? F1TeamSchemes.getTeamColor(teamName)
+                : null,
+            boxShadow: isDark
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+            child: F1Hoverable(
+              borderRadius: BorderRadius.circular(20),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                child: Row(
             children: [
               SizedBox(
                 width: 52,
@@ -10389,8 +10570,10 @@ class _StandingsViewState extends State<StandingsView> {
                       ),
               ),
             ],
+                ),
+              ),
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -10423,8 +10606,11 @@ class _StandingsViewState extends State<StandingsView> {
         borderRadius: 20,
         backgroundColor: isSelected
             ? F1TeamSchemes.getTeamColor(teamName).withValues(alpha: 0.16)
-            : Colors.white,
+            : theme.colorScheme.surface,
         showFadingBorder: true,
+        borderColor: isSelected
+            ? F1TeamSchemes.getTeamColor(teamName)
+            : null,
         child: ListTile(
         onTap: () => _handleStandingsTap(item, widget.isDriverView),
         leading: Text(
@@ -10475,7 +10661,7 @@ class _StandingsViewState extends State<StandingsView> {
           ],
         ),
         trailing: Text(
-          '${_formatPoints(points)} ${'t.pts'.tr()}',
+          '${_formatPoints(points)} ${context.l10n.pts}',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 12,
@@ -10534,12 +10720,19 @@ class _StandingsViewState extends State<StandingsView> {
   Widget build(BuildContext context) {
 
     final isDriverView = widget.isDriverView;
+    final desktopShell = _isDesktopShellLayout(context);
+    final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      backgroundColor: desktopShell ? Colors.transparent : null,
       appBar: AppBar(
+        backgroundColor: desktopShell ? Colors.transparent : null,
+        elevation: desktopShell ? 0 : null,
+        scrolledUnderElevation: desktopShell ? 0 : null,
+        foregroundColor: desktopShell ? scheme.onSurface : null,
         title: _isCompareMode
             ? Text(
-                '${isDriverView ? 't.select_drivers_to_compare'.tr() : 't.select_teams_to_compare'.tr()} (${_selectedForComparison.length}/2)',
+                '${isDriverView ? context.l10n.select_drivers_to_compare : context.l10n.select_teams_to_compare} (${_selectedForComparison.length}/2)',
               )
             : DropdownButton<int>(
                 value: _selectedYear,
@@ -10572,7 +10765,7 @@ class _StandingsViewState extends State<StandingsView> {
           if (isDriverView)
             IconButton(
               icon: const Icon(Icons.show_chart),
-              tooltip: 't.drivers_chart'.tr(),
+              tooltip: context.l10n.drivers_chart,
               onPressed: () => _openDriverStandingsChartSheet(
                 context,
                 initialYear: _selectedYear,
@@ -10583,7 +10776,7 @@ class _StandingsViewState extends State<StandingsView> {
           else
             IconButton(
               icon: const Icon(Icons.show_chart),
-              tooltip: 't.teams_chart'.tr(),
+              tooltip: context.l10n.teams_chart,
               onPressed: () => _openTeamStandingsChartSheet(
                 context,
                 initialYear: _selectedYear,
@@ -10593,7 +10786,7 @@ class _StandingsViewState extends State<StandingsView> {
             ),
           IconButton(
             icon: Icon(_isCompareMode ? Icons.cancel : Icons.compare_arrows),
-            tooltip: 't.compare'.tr(),
+            tooltip: context.l10n.compare,
             onPressed: () => setState(() {
               _isCompareMode = !_isCompareMode;
               _selectedForComparison.clear();
@@ -10621,7 +10814,7 @@ class _StandingsViewState extends State<StandingsView> {
                       horizontal: 16,
                     ),
                     child: Text(
-                      't.using_fallback_data'.tr(),
+                      context.l10n.using_fallback_data,
                       style: const TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
@@ -11046,14 +11239,14 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        't.drivers_chart'.tr(),
+                        context.l10n.drivers_chart,
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        't.championship_progression'.tr(),
+                        context.l10n.championship_progression,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -11100,7 +11293,7 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                       data.series.isEmpty) {
                     return Center(
                       child: Text(
-                        't.chart_no_data'.tr(),
+                        context.l10n.chart_no_data,
                         style: TextStyle(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -11148,21 +11341,21 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                                 runSpacing: 6,
                                 children: [
                                   ActionChip(
-                                    label: Text('t.top_5'.tr()),
+                                    label: Text(context.l10n.top_5),
                                     onPressed: () => _selectTopDrivers(data, 5),
                                   ),
                                   ActionChip(
-                                    label: Text('t.top_10'.tr()),
+                                    label: Text(context.l10n.top_10),
                                     onPressed: () =>
                                         _selectTopDrivers(data, 10),
                                   ),
                                   ActionChip(
-                                    label: Text('t.show_all'.tr()),
+                                    label: Text(context.l10n.show_all),
                                     onPressed: () =>
                                         _setAllDriversVisible(data),
                                   ),
                                   ActionChip(
-                                    label: Text('t.hide_all'.tr()),
+                                    label: Text(context.l10n.hide_all),
                                     onPressed: _clearAllDrivers,
                                   ),
                                 ],
@@ -11819,14 +12012,14 @@ class _TeamStandingsChartSheetState extends State<TeamStandingsChartSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        't.teams_chart'.tr(),
+                        context.l10n.teams_chart,
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        't.championship_progression'.tr(),
+                        context.l10n.championship_progression,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -11873,7 +12066,7 @@ class _TeamStandingsChartSheetState extends State<TeamStandingsChartSheet> {
                       data.series.isEmpty) {
                     return Center(
                       child: Text(
-                        't.chart_no_data'.tr(),
+                        context.l10n.chart_no_data,
                         style: TextStyle(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -11921,21 +12114,21 @@ class _TeamStandingsChartSheetState extends State<TeamStandingsChartSheet> {
                                 runSpacing: 6,
                                 children: [
                                   ActionChip(
-                                    label: Text('t.top_5'.tr()),
+                                    label: Text(context.l10n.top_5),
                                     onPressed: () => _selectTopTeams(data, 5),
                                   ),
                                   ActionChip(
-                                    label: Text('t.top_10'.tr()),
+                                    label: Text(context.l10n.top_10),
                                     onPressed: () =>
                                         _selectTopTeams(data, 10),
                                   ),
                                   ActionChip(
-                                    label: Text('t.show_all'.tr()),
+                                    label: Text(context.l10n.show_all),
                                     onPressed: () =>
                                         _setAllTeamsVisible(data),
                                   ),
                                   ActionChip(
-                                    label: Text('t.hide_all'.tr()),
+                                    label: Text(context.l10n.hide_all),
                                     onPressed: _clearAllTeams,
                                   ),
                                 ],
@@ -12404,52 +12597,90 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
     final starts1 = leftDriver.starts == 0 ? 1 : leftDriver.starts;
     final starts2 = rightDriver.starts == 0 ? 1 : rightDriver.starts;
 
+    final scheme = Theme.of(context).colorScheme;
+    final desktopShell = _isDesktopShellLayout(context);
+    final ambientGlow = scheme.primary.withValues(
+      alpha: desktopShell ? 0.10 : 0.13,
+    );
+    final shellBase = Color.lerp(
+      scheme.surfaceContainerLow,
+      scheme.primary,
+      0.04,
+    )!;
+    final topInset = MediaQuery.paddingOf(context).top + kToolbarHeight;
+    final listTopPadding = desktopShell ? 20.0 : topInset + 20;
+
     return Scaffold(
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: !desktopShell,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        foregroundColor: desktopShell ? scheme.onSurface : null,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        forceMaterialTransparency: !desktopShell,
         title: Text(
           '${widget.driver1.name.split(' ').last} vs ${widget.driver2.name.split(' ').last}',
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
+      body: Stack(
+        fit: StackFit.expand,
         children: [
-          _buildHeader(context, leftDriver, rightDriver),
+          if (!desktopShell)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: shellBase),
+                child: CustomPaint(
+                  painter: _AmbientGlowPainter(
+                    topLeftGlow: ambientGlow,
+                    bottomRightGlow: ambientGlow,
+                  ),
+                ),
+              ),
+            ),
+          Positioned.fill(
+            child: ListView(
+              padding: EdgeInsets.fromLTRB(16, listTopPadding, 16, 16),
+              children: [
+                _buildHeader(context, leftDriver, rightDriver),
           const SizedBox(height: 20),
           _buildCompareScopeControls(context),
           const SizedBox(height: 20),
           if (_showOverall) ...[
             ComparisonRow(
-              label: 't.championships'.tr(),
+              label: context.l10n.championships,
               value1: leftDriver.championships,
               value2: rightDriver.championships,
               isDark: isDark,
             ),
             ComparisonRow(
-              label: 't.wins'.tr(),
+              label: context.l10n.wins,
               value1: leftDriver.wins,
               value2: rightDriver.wins,
               isDark: isDark,
             ),
             ComparisonRow(
-              label: 't.podiums'.tr(),
+              label: context.l10n.podiums,
               value1: leftDriver.podiums,
               value2: rightDriver.podiums,
               isDark: isDark,
             ),
             ComparisonRow(
-              label: 't.poles'.tr(),
+              label: context.l10n.poles,
               value1: leftDriver.poles,
               value2: rightDriver.poles,
               isDark: isDark,
             ),
             ComparisonRow(
-              label: 't.fastest_laps'.tr(),
+              label: context.l10n.fastest_laps,
               value1: leftDriver.fastestLaps,
               value2: rightDriver.fastestLaps,
               isDark: isDark,
             ),
             ComparisonRow(
-              label: 't.total_points'.tr(),
+              label: context.l10n.total_points,
               value1: leftDriver.totalPoints,
               value2: rightDriver.totalPoints,
               isDark: isDark,
@@ -12457,58 +12688,58 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
           ],
           if (_showOverall) ...[
             ComparisonRow(
-              label: 't.starts'.tr(),
+              label: context.l10n.starts,
               value1: leftDriver.starts,
               value2: rightDriver.starts,
               isDark: isDark,
             ),
             ComparisonRow(
-              label: 't.dnf'.tr(),
+              label: context.l10n.dnf,
               value1: leftDriver.dnfs,
               value2: rightDriver.dnfs,
               isDark: isDark,
               lowerIsBetter: true,
             ),
             ComparisonRow(
-              label: 't.laps_led'.tr(),
+              label: context.l10n.laps_led,
               value1: leftDriver.lapsLed,
               value2: rightDriver.lapsLed,
               isDark: isDark,
             ),
             ComparisonRow(
-              label: 't.highestFinish'.tr(),
+              label: context.l10n.highest_finish,
               value1: leftDriver.highestFinish,
               value2: rightDriver.highestFinish,
               isDark: isDark,
               lowerIsBetter: true,
             ),
             ComparisonRow(
-              label: 't.highestGrid'.tr(),
+              label: context.l10n.highest_grid,
               value1: leftDriver.highestGrid,
               value2: rightDriver.highestGrid,
               isDark: isDark,
               lowerIsBetter: true,
             ),
             ComparisonRow(
-              label: 't.points_per_start'.tr(),
+              label: context.l10n.points_per_start,
               value1: (leftDriver.totalPoints / starts1).toStringAsFixed(2),
               value2: (rightDriver.totalPoints / starts2).toStringAsFixed(2),
               isDark: isDark,
             ),
             ComparisonRow(
-              label: 't.win_rate'.tr(),
+              label: context.l10n.win_rate,
               value1: ((leftDriver.wins / starts1) * 100).toStringAsFixed(1),
               value2: ((rightDriver.wins / starts2) * 100).toStringAsFixed(1),
               isDark: isDark,
             ),
             ComparisonRow(
-              label: 't.last_5_points'.tr(),
+              label: context.l10n.last_5_points,
               value1: _formatFormPoints(recentForm1),
               value2: _formatFormPoints(recentForm2),
               isDark: isDark,
             ),
             ComparisonRow(
-              label: 't.avg_finish_l5'.tr(),
+              label: context.l10n.avg_finish_l5,
               value1: _formatDriverAverageFinish(recentForm1),
               value2: _formatDriverAverageFinish(recentForm2),
               isDark: isDark,
@@ -12520,6 +12751,9 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
               year: _selectedYear!,
               isDark: isDark,
             ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -12555,7 +12789,7 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Text(
-                't.compare_season_unavailable'.tr(),
+                context.l10n.compare_season_unavailable,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -12569,7 +12803,7 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
           return Column(
             children: [
               ComparisonRow(
-                label: 't.points'.tr(),
+                label: context.l10n.points,
                 value1: leftStats.points.toStringAsFixed(
                   leftStats.points == leftStats.points.roundToDouble() ? 0 : 1,
                 ),
@@ -12581,46 +12815,46 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
                 isDark: isDark,
               ),
               ComparisonRow(
-                label: 't.poles'.tr(),
+                label: context.l10n.poles,
                 value1: leftStats.poles,
                 value2: rightStats.poles,
                 isDark: isDark,
               ),
               ComparisonRow(
-                label: 't.fastest_laps'.tr(),
+                label: context.l10n.fastest_laps,
                 value1: leftStats.fastestLaps,
                 value2: rightStats.fastestLaps,
                 isDark: isDark,
               ),
               ComparisonRow(
-                label: 't.dnf_percentage'.tr(),
+                label: context.l10n.dnf_percentage,
                 value1: leftStats.dnfPercentage.toStringAsFixed(1),
                 value2: rightStats.dnfPercentage.toStringAsFixed(1),
                 isDark: isDark,
                 lowerIsBetter: true,
               ),
               ComparisonRow(
-                label: 't.podiums'.tr(),
+                label: context.l10n.podiums,
                 value1: leftStats.podiums,
                 value2: rightStats.podiums,
                 isDark: isDark,
               ),
               ComparisonRow(
-                label: 't.highestFinish'.tr(),
+                label: context.l10n.highest_finish,
                 value1: leftStats.highestFinish,
                 value2: rightStats.highestFinish,
                 isDark: isDark,
                 lowerIsBetter: true,
               ),
               ComparisonRow(
-                label: 't.highestGrid'.tr(),
+                label: context.l10n.highest_grid,
                 value1: leftStats.highestGrid,
                 value2: rightStats.highestGrid,
                 isDark: isDark,
                 lowerIsBetter: true,
               ),
               ComparisonRow(
-                label: 't.win_rate'.tr(),
+                label: context.l10n.win_rate,
                 value1: leftStats.winRate.toStringAsFixed(1),
                 value2: rightStats.winRate.toStringAsFixed(1),
                 isDark: isDark,
@@ -12681,10 +12915,10 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
             ),
             childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             title: Text(
-              't.points_progression'.tr(),
+              context.l10n.points_progression,
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
-            subtitle: Text('t.points_after_each_race'.tr()),
+            subtitle: Text(context.l10n.points_after_each_race),
             children: rounds
                 .map((round) {
                   final leftEntry = leftByRound[round];
@@ -12721,7 +12955,7 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
                           child: Column(
                             children: [
                               Text(
-                                '${'t.round_short'.tr()} $round',
+                                '${context.l10n.round_short} $round',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 11,
@@ -12815,12 +13049,12 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
           runSpacing: 8,
           children: [
             ChoiceChip(
-              label: Text('t.compare_overall'.tr()),
+              label: Text(context.l10n.compare_overall),
               selected: _showOverall,
               onSelected: (_) => setState(() => _showOverall = true),
             ),
             ChoiceChip(
-              label: Text('t.compare_season'.tr()),
+              label: Text(context.l10n.compare_season),
               selected: !_showOverall,
               onSelected: seasonsAvailable
                   ? (_) => setState(() => _showOverall = false)
@@ -12833,7 +13067,7 @@ class _DriverComparisonViewState extends State<DriverComparisonView> {
           Row(
             children: [
               Text(
-                '${'t.compare_year'.tr()}:',
+                '${context.l10n.compare_year}:',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   color: theme.colorScheme.onSurface,
@@ -12932,84 +13166,122 @@ class _TeamComparisonViewState extends State<TeamComparisonView> {
     final entries1 = leftTeam.totalEntries == 0 ? 1 : leftTeam.totalEntries;
     final entries2 = rightTeam.totalEntries == 0 ? 1 : rightTeam.totalEntries;
 
+    final scheme = Theme.of(context).colorScheme;
+    final desktopShell = _isDesktopShellLayout(context);
+    final ambientGlow = scheme.primary.withValues(
+      alpha: desktopShell ? 0.10 : 0.13,
+    );
+    final shellBase = Color.lerp(
+      scheme.surfaceContainerLow,
+      scheme.primary,
+      0.04,
+    )!;
+    final topInset = MediaQuery.paddingOf(context).top + kToolbarHeight;
+    final listTopPadding = desktopShell ? 20.0 : topInset + 20;
+
     return Scaffold(
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: !desktopShell,
       appBar: AppBar(
-        title: Text('${widget.team1.name} vs ${widget.team2.name}'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        foregroundColor: desktopShell ? scheme.onSurface : null,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        forceMaterialTransparency: !desktopShell,
+        title: Text(context.l10n.team_comparison_title(widget.team1.name, widget.team2.name)),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
+      body: Stack(
+        fit: StackFit.expand,
         children: [
-          _buildHeader(context, leftTeam, rightTeam),
+          if (!desktopShell)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: shellBase),
+                child: CustomPaint(
+                  painter: _AmbientGlowPainter(
+                    topLeftGlow: ambientGlow,
+                    bottomRightGlow: ambientGlow,
+                  ),
+                ),
+              ),
+            ),
+          Positioned.fill(
+            child: ListView(
+              padding: EdgeInsets.fromLTRB(16, listTopPadding, 16, 16),
+              children: [
+                _buildHeader(context, leftTeam, rightTeam),
           const SizedBox(height: 20),
           ComparisonRow(
-            label: 't.cc_wins'.tr(),
+            label: context.l10n.cc_wins,
             value1: widget.team1.ccWins,
             value2: widget.team2.ccWins,
             isDark: isDark,
           ),
           ComparisonRow(
-            label: 't.dc_wins'.tr(),
+            label: context.l10n.dc_wins,
             value1: widget.team1.dcWins,
             value2: widget.team2.dcWins,
             isDark: isDark,
           ),
           ComparisonRow(
-            label: 't.wins'.tr(),
+            label: context.l10n.wins,
             value1: widget.team1.podiums,
             value2: widget.team2.podiums,
             isDark: isDark,
           ),
           ComparisonRow(
-            label: 't.one_two'.tr(),
+            label: context.l10n.one_two,
             value1: widget.team1.oneTwo,
             value2: widget.team2.oneTwo,
             isDark: isDark,
           ),
           ComparisonRow(
-            label: 't.poles'.tr(),
+            label: context.l10n.poles,
             value1: widget.team1.poles,
             value2: widget.team2.poles,
             isDark: isDark,
           ),
           ComparisonRow(
-            label: 't.fastest_laps'.tr(),
+            label: context.l10n.fastest_laps,
             value1: widget.team1.fastestLaps,
             value2: widget.team2.fastestLaps,
             isDark: isDark,
           ),
           ComparisonRow(
-            label: 't.total_points'.tr(),
+            label: context.l10n.total_points,
             value1: widget.team1.totalPoints,
             value2: widget.team2.totalPoints,
             isDark: isDark,
           ),
           ComparisonRow(
-            label: 't.total_entries'.tr(),
+            label: context.l10n.total_entries,
             value1: widget.team1.totalEntries,
             value2: widget.team2.totalEntries,
             isDark: isDark,
           ),
           ComparisonRow(
-            label: 't.fastestPit'.tr(),
+            label: context.l10n.fastest_pit,
             value1: widget.team1.fastestPitstopTime,
             value2: widget.team2.fastestPitstopTime,
             isDark: isDark,
             lowerIsBetter: true,
           ),
           ComparisonRow(
-            label: 't.points_per_entry'.tr(),
+            label: context.l10n.points_per_entry,
             value1: (leftTeam.totalPoints / entries1).toStringAsFixed(2),
             value2: (rightTeam.totalPoints / entries2).toStringAsFixed(2),
             isDark: isDark,
           ),
           ComparisonRow(
-            label: 't.pole_rate'.tr(),
+            label: context.l10n.pole_rate,
             value1: ((leftTeam.poles / entries1) * 100).toStringAsFixed(1),
             value2: ((rightTeam.poles / entries2) * 100).toStringAsFixed(1),
             isDark: isDark,
           ),
           ComparisonRow(
-            label: 't.fastest_lap_rate'.tr(),
+            label: context.l10n.fastest_lap_rate,
             value1: ((leftTeam.fastestLaps / entries1) * 100).toStringAsFixed(
               1,
             ),
@@ -13017,6 +13289,9 @@ class _TeamComparisonViewState extends State<TeamComparisonView> {
               1,
             ),
             isDark: isDark,
+          ),
+              ],
+            ),
           ),
         ],
       ),
@@ -13167,7 +13442,7 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            't.gp_${widget.race.name}'.tr().toUpperCase(),
+            l10nGrandPrix(context.l10n, widget.race.name).toUpperCase(),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: theme.colorScheme.onSurface,
@@ -13200,12 +13475,12 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
               _buildHeroChip(
                 context,
                 Icons.format_list_numbered,
-                '${widget.race.laps} ${'t.laps'.tr().toLowerCase()}',
+                '${widget.race.laps} ${context.l10n.laps.toLowerCase()}',
               ),
               _buildHeroChip(
                 context,
                 Icons.workspace_premium,
-                't.${widget.race.circuitDifficulty}'.tr(),
+                l10nDifficultyLevel(context.l10n, widget.race.circuitDifficulty),
               ),
             ],
           ),
@@ -13257,7 +13532,7 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            't.circuit_layout'.tr(),
+            context.l10n.circuit_layout,
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -13360,24 +13635,37 @@ class _CircuitDetailScreenState extends State<CircuitDetailScreen> {
   Widget build(BuildContext context) {
 
     String translatedStrategy = widget.race.bestCombination
-        .replaceAll('Soft', 't.soft_tire'.tr())
-        .replaceAll('Medium', 't.medium_tire'.tr())
-        .replaceAll('Hard', 't.hard_tire'.tr());
+        .replaceAll('Soft', context.l10n.soft_tire)
+        .replaceAll('Medium', context.l10n.medium_tire)
+        .replaceAll('Hard', context.l10n.hard_tire);
     final isDutch =
-        context.locale.languageCode == 'nl' || context.locale.languageCode == 'de';
+        Localizations.localeOf(context).languageCode == 'nl' ||
+            Localizations.localeOf(context).languageCode == 'de';
     final List<String> characteristics = isDutch
         ? widget.race.characteristicsNl
         : widget.race.characteristicsEn;
-    String title = 't.gp_${widget.race.name}'.tr().toUpperCase();
+    String title =
+        l10nGrandPrix(context.l10n, widget.race.name).toUpperCase();
     if (_showFlagInTitle) {
       title = '${widget.race.flag} $title';
     }
 
+    final expPrefs = context.watch<DetailExpansionPrefsNotifier>();
+
     final List<Widget> circuitSections = [
-      ExpansionTile(
-        initiallyExpanded: true,
+      _detailOverviewSectionCard(context, child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.circuit,
+          DetailExpansionSection.circuitWeather,
+          true,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.circuit,
+          DetailExpansionSection.circuitWeather,
+          v,
+        ),
         title: Text(
-          't.weather_forecast'.tr(),
+          context.l10n.weather_forecast,
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -13388,18 +13676,27 @@ style: TextStyle(
           if (_isWeatherLoading)
             _buildWeatherSkeletonRows(context)
           else ...[
-            _statTile('t.temp'.tr(), '$t°C', Icons.thermostat),
-            _statTile('t.rain_chance'.tr(), '$r%', Icons.umbrella),
-            _statTile('t.wind_speed'.tr(), '$w km/h', Icons.air),
-            _statTile('t.humidity'.tr(), '$h%', Icons.water_drop),
+            _statTile(context.l10n.temp, '$t°C', Icons.thermostat),
+            _statTile(context.l10n.rain_chance, '$r%', Icons.umbrella),
+            _statTile(context.l10n.wind_speed, '$w km/h', Icons.air),
+            _statTile(context.l10n.humidity, '$h%', Icons.water_drop),
             const SizedBox(height: 8),
           ],
         ],
-      ),
-      ExpansionTile(
-        initiallyExpanded: true,
+      )),
+      _detailOverviewSectionCard(context, child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.circuit,
+          DetailExpansionSection.circuitInfo,
+          true,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.circuit,
+          DetailExpansionSection.circuitInfo,
+          v,
+        ),
         title: Text(
-          't.circuit_info'.tr(),
+          context.l10n.circuit_info,
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -13408,34 +13705,34 @@ style: TextStyle(
         ),
         children: [
           _statTile(
-            't.length'.tr(),
+            context.l10n.length,
             '${widget.race.length} m',
             Icons.straighten,
           ),
           _statTile(
-            't.distanceToTurn1'.tr(),
+            context.l10n.distance_to_turn1,
             widget.race.distanceToTurn1,
             Icons.turn_right,
           ),
           _statTile(
-            't.laps'.tr(),
+            context.l10n.laps,
             widget.race.laps.toString(),
             Icons.format_list_numbered,
           ),
           _statTile(
-            't.since'.tr(),
+            context.l10n.since,
             widget.race.firstGrandPrix.toString(),
             Icons.history,
           ),
           _statTile(
-            't.until'.tr(),
+            context.l10n.until,
             widget.race.contractUntil,
             Icons.event,
           ),
           _statTile(
-            't.circuitDifficulty'.tr(),
+            context.l10n.circuit_difficulty,
             Text(
-              't.${widget.race.circuitDifficulty}'.tr(),
+              l10nDifficultyLevel(context.l10n, widget.race.circuitDifficulty),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
@@ -13445,9 +13742,9 @@ style: TextStyle(
             Icons.speed,
           ),
           _statTile(
-            't.overtakingDifficulty'.tr(),
+            context.l10n.overtaking_difficulty,
             Text(
-              't.${widget.race.overtakingDifficulty}'.tr(),
+              l10nDifficultyLevel(context.l10n, widget.race.overtakingDifficulty),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
@@ -13463,16 +13760,25 @@ style: TextStyle(
               child: TextButton.icon(
                 onPressed: _openCircuitMap,
                 icon: const Icon(Icons.map_outlined, size: 18),
-                label: const Text('Open in Maps'),
+                label: Text(context.l10n.circuit_open_in_maps),
               ),
             ),
           ),
         ],
-      ),
-      ExpansionTile(
-        initiallyExpanded: true,
+      )),
+      _detailOverviewSectionCard(context, child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.circuit,
+          DetailExpansionSection.circuitLapSpeed,
+          true,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.circuit,
+          DetailExpansionSection.circuitLapSpeed,
+          v,
+        ),
         title: Text(
-          '⚡ ${'t.lap_speed_stats'.tr()}',
+          '⚡ ${context.l10n.lap_speed_stats}',
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -13481,7 +13787,7 @@ style: TextStyle(
         ),
         children: [
           _statTile(
-            't.fastestLap'.tr(),
+            context.l10n.fastest_lap,
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
@@ -13506,7 +13812,7 @@ style: TextStyle(
             Icons.timer,
           ),
           _statTile(
-            't.slowestLap'.tr(),
+            context.l10n.slowest_lap,
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
@@ -13531,36 +13837,46 @@ style: TextStyle(
             Icons.timer_off,
           ),
           _statTile(
-            't.avgLap'.tr(),
+            context.l10n.avg_lap,
             widget.race.averageLap,
             Icons.av_timer,
           ),
           _statTile(
-            't.topSpeed'.tr(),
+            context.l10n.top_speed,
             widget.race.topSpeed,
             Icons.speed,
           ),
           _statTile(
-            't.averageSpeed'.tr(),
+            context.l10n.average_speed,
             widget.race.averageSpeed,
             Icons.directions_car,
           ),
           _statTile(
-            't.max_g_force'.tr(),
+            context.l10n.max_g_force,
             widget.race.maxGForce,
             Icons.compress,
           ),
           _statTile(
-            't.avgForce'.tr(),
+            context.l10n.avg_gforce,
             widget.race.avgGForce,
             Icons.compress,
           ),
           const SizedBox(height: 8),
         ],
-      ),
-      ExpansionTile(
+      )),
+      _detailOverviewSectionCard(context, child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.circuit,
+          DetailExpansionSection.circuitRisks,
+          false,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.circuit,
+          DetailExpansionSection.circuitRisks,
+          v,
+        ),
         title: Text(
-          't.risks_incidents'.tr(),
+          context.l10n.risks_incidents,
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -13569,31 +13885,41 @@ style: TextStyle(
         ),
         children: [
           _statTile(
-            't.redFlag'.tr(),
+            context.l10n.red_flag,
             '${widget.race.redFlagChance}%',
             Icons.flag,
           ),
           _statTile(
-            't.vsc'.tr(),
+            context.l10n.vsc,
             '${widget.race.vscChance}%',
             Icons.warning_amber,
           ),
           _statTile(
-            't.accident'.tr(),
+            context.l10n.accident,
             '${widget.race.accidentChance}%',
             Icons.car_crash,
           ),
           _statTile(
-            't.turn1Accident'.tr(),
+            context.l10n.turn1_accident,
             '${widget.race.turn1AccidentChance}%',
             Icons.turn_right,
           ),
           const SizedBox(height: 8),
         ],
-      ),
-      ExpansionTile(
+      )),
+      _detailOverviewSectionCard(context, child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.circuit,
+          DetailExpansionSection.circuitTyres,
+          false,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.circuit,
+          DetailExpansionSection.circuitTyres,
+          v,
+        ),
         title: Text(
-          '🛞 ${'t.tyres_strategy'.tr()}',
+          '🛞 ${context.l10n.tyres_strategy}',
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -13602,22 +13928,22 @@ style: TextStyle(
         ),
         children: [
           _statTile(
-            't.tireWear'.tr(),
-            't.wear_${widget.race.tireWear}'.tr(),
+            context.l10n.tire_wear,
+            l10nWearLabel(context.l10n, widget.race.tireWear),
             Icons.layers,
           ),
           _statTile(
-            't.strategy'.tr(),
-            't.strategy_${widget.race.tireStrategy}'.tr(),
+            context.l10n.strategy,
+            l10nStrategyLabel(context.l10n, widget.race.tireStrategy),
             Icons.settings_suggest,
           ),
           _statTile(
-            't.bestCombination'.tr(),
+            context.l10n.best_combination,
             translatedStrategy,
             Icons.donut_large,
           ),
           _statTile(
-            't.fastestPit'.tr(),
+            context.l10n.fastest_pit,
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
@@ -13643,10 +13969,20 @@ style: TextStyle(
           ),
           const SizedBox(height: 8),
         ],
-      ),
-      ExpansionTile(
+      )),
+      _detailOverviewSectionCard(context, child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.circuit,
+          DetailExpansionSection.circuitCharacteristics,
+          false,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.circuit,
+          DetailExpansionSection.circuitCharacteristics,
+          v,
+        ),
         title: Text(
-          '📍 ${'t.characteristics'.tr()}',
+          '📍 ${context.l10n.characteristics}',
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -13695,41 +14031,84 @@ style: TextStyle(
             ),
           ),
         ],
-      ),
+      )),
     ];
 
+    final scheme = Theme.of(context).colorScheme;
+    final desktopShell = _isDesktopShellLayout(context);
+    final ambientGlow = scheme.primary.withValues(
+      alpha: desktopShell ? 0.10 : 0.13,
+    );
+    final shellBase = Color.lerp(
+      scheme.surfaceContainerLow,
+      scheme.primary,
+      0.04,
+    )!;
+    final topInset = MediaQuery.paddingOf(context).top + kToolbarHeight;
+    final listTopPadding = desktopShell ? 20.0 : topInset + 20;
+
     return Scaffold(
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: !desktopShell,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        foregroundColor: desktopShell ? scheme.onSurface : null,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        forceMaterialTransparency: !desktopShell,
         actions: _desktopAwareSettingsActions(context, widget.settingsMenu),
         title: Text(title),
       ),
-      body: RefreshIndicator(
-        onRefresh: _fetchWeather,
-        child: ListView(
-          controller: _scrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(20),
-          children: [
-            const SizedBox(height: 20),
-            _buildCircuitTopArea(context),
-            const SizedBox(height: 16),
-            Card(
-              color: Theme.of(context).colorScheme.secondaryContainer,
-              child: ListTile(
-                leading: const Icon(Icons.view_timeline),
-                title: Text(
-                  't.weekend_hub'.tr(),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (!desktopShell)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: shellBase),
+                child: CustomPaint(
+                  painter: _AmbientGlowPainter(
+                    topLeftGlow: ambientGlow,
+                    bottomRightGlow: ambientGlow,
+                  ),
                 ),
-                subtitle: Text('t.weekend_hub_card_subtitle'.tr()),
-                trailing: const Icon(Icons.arrow_forward),
-                onTap: () => context.push(_weekendHubPath(widget.race)),
               ),
             ),
-            const SizedBox(height: 20),
-            _buildResponsiveSections(sections: circuitSections),
-          ],
-        ),
+          Positioned.fill(
+            child: RefreshIndicator(
+              onRefresh: _fetchWeather,
+              child: ListView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(20, listTopPadding, 20, 20),
+                children: [
+                  _buildCircuitTopArea(context),
+                  const SizedBox(height: 16),
+                  Card(
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                    child: ListTile(
+                      leading: const Icon(Icons.view_timeline),
+                      title: Text(
+                        context.l10n.weekend_hub,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(context.l10n.weekend_hub_card_subtitle),
+                      trailing: const Icon(Icons.arrow_forward),
+                      onTap: () => context.push(_weekendHubPath(widget.race)),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  KeyedSubtree(
+                    key: ValueKey('circuit-sections-${expPrefs.loadedRevision}'),
+                    child: _buildResponsiveSections(sections: circuitSections),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -13765,19 +14144,19 @@ String _sessionDisplayTitle(BuildContext context, String sessionName) {
 
   switch (sessionName) {
     case 'Practice 1':
-      return 't.fp1'.tr();
+      return context.l10n.fp1;
     case 'Practice 2':
-      return 't.fp2'.tr();
+      return context.l10n.fp2;
     case 'Practice 3':
-      return 't.fp3'.tr();
+      return context.l10n.fp3;
     case 'Sprint Qualifying':
-      return 't.sprint_quali'.tr();
+      return context.l10n.sprint_quali;
     case 'Sprint':
-      return 't.sprint'.tr();
+      return context.l10n.sprint;
     case 'Qualifying':
-      return 't.qualifying'.tr();
+      return context.l10n.qualifying;
     case 'Race':
-      return '🏁 ${'t.race'.tr()}';
+      return '🏁 ${context.l10n.race}';
     default:
       return sessionName;
   }
@@ -13884,7 +14263,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
         }
       } catch (_) {}
     } catch (_) {
-      _loadError = 't.weekend_hub_load_error'.tr();
+      _loadError = context.l10n.weekend_hub_load_error;
     }
 
     if (mounted) {
@@ -14294,7 +14673,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     String? timestampUtc,
   ) {
     if (timestampUtc == null || timestampUtc.trim().isEmpty) {
-      return 't.unknown_time'.tr();
+      return context.l10n.unknown_time;
     }
 
     final date = DateTime.tryParse(timestampUtc)?.toLocal();
@@ -14694,36 +15073,31 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
   ) {
 
     if (_isRaceControlPenaltyServedMessage(rawMessage)) {
-      return (isSource
-              ? 't.race_control_relation_served_penalty'
-              : 't.race_control_relation_issued_earlier')
-          .tr();
+      return isSource
+          ? context.l10n.race_control_relation_served_penalty
+          : context.l10n.race_control_relation_issued_earlier;
     }
     if (_isRaceControlPenaltyMessage(rawMessage)) {
-      return (isSource
-              ? 't.race_control_relation_penalty_message'
-              : 't.race_control_relation_served_later')
-          .tr();
+      return isSource
+          ? context.l10n.race_control_relation_penalty_message
+          : context.l10n.race_control_relation_served_later;
     }
     if (_isRaceControlNotedMessage(rawMessage)) {
-      return 't.race_control_relation_noted'.tr();
+      return context.l10n.race_control_relation_noted;
     }
     if (_isRaceControlInvestigationMessage(rawMessage)) {
-      return (isSource
-              ? 't.race_control_relation_investigation'
-              : 't.race_control_relation_outcome')
-          .tr();
+      return isSource
+          ? context.l10n.race_control_relation_investigation
+          : context.l10n.race_control_relation_outcome;
     }
     if (_isRaceControlResolutionMessage(rawMessage)) {
-      return (isSource
-              ? 't.race_control_relation_outcome'
-              : 't.race_control_relation_investigation')
-          .tr();
+      return isSource
+          ? context.l10n.race_control_relation_outcome
+          : context.l10n.race_control_relation_investigation;
     }
-    return (isSource
-            ? 't.race_control_relation_message'
-            : 't.race_control_relation_linked')
-        .tr();
+    return isSource
+        ? context.l10n.race_control_relation_message
+        : context.l10n.race_control_relation_linked;
   }
 
   List<Map<String, dynamic>> _relatedRaceControlMessages(
@@ -14906,15 +15280,13 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                 _buildRaceControlTag(
                   context,
                   Icons.looks_one,
-                  't.lap_label'.tr(namedArgs: {'lap': '${message['lap']}'}),
+                  context.l10n.lap_label('${message['lap']}'),
                 ),
               if (message['driverNumber'] != null)
                 _buildRaceControlTag(
                   context,
                   Icons.directions_car,
-                  't.car_label'.tr(namedArgs: {
-                    'number': '${message['driverNumber']}',
-                  }),
+                  context.l10n.car_label('${message['driverNumber']}'),
                 ),
               if ((message['flag']?.toString() ?? '').trim().isNotEmpty)
                 _buildRaceControlTag(
@@ -14971,7 +15343,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       true,
     );
     final relatedTitle = sourceIsInvestigation || sourceIsResolution
-        ? 't.race_control_related_updates'.tr()
+        ? context.l10n.race_control_related_updates
         : _raceControlRelationTitle(
             context,
             message['message']?.toString(),
@@ -14982,7 +15354,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: Text('t.race_control_detail'.tr()),
+          title: Text(context.l10n.race_control_detail),
           content: SizedBox(
             width: 520,
             child: SingleChildScrollView(
@@ -15022,7 +15394,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                     ),
                   ] else ...[
                     Text(
-                      't.race_control_no_linked_message'.tr(),
+                      context.l10n.race_control_no_linked_message,
                       style: TextStyle(
                         fontSize: 12,
                         color: Theme.of(
@@ -15038,7 +15410,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text('t.close'.tr()),
+              child: Text(context.l10n.close),
             ),
           ],
         );
@@ -15097,7 +15469,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                     : null,
               ),
               child: Text(
-                scope == _allRaceControlScopes ? 't.all_scopes'.tr() : scope,
+                scope == _allRaceControlScopes ? context.l10n.all_scopes : scope,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
@@ -15122,21 +15494,21 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
         children: [
           _buildRaceControlFilterChip(
             context,
-            label: 't.race_control_filter_all'.tr(),
+            label: context.l10n.race_control_filter_all,
             filter: _rcFilterAll,
             selected: isSelected(_rcFilterAll),
           ),
           const SizedBox(width: 8),
           _buildRaceControlFilterChip(
             context,
-            label: 't.race_control_filter_alerts'.tr(),
+            label: context.l10n.race_control_filter_alerts,
             filter: _rcFilterAlerts,
             selected: isSelected(_rcFilterAlerts),
           ),
           const SizedBox(width: 8),
           _buildRaceControlFilterChip(
             context,
-            label: 't.race_control_filter_stewards'.tr(),
+            label: context.l10n.race_control_filter_stewards,
             filter: _rcFilterStewards,
             selected: isSelected(_rcFilterStewards),
           ),
@@ -15234,7 +15606,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionCardTitle(context, 't.race_control'.tr()),
+          _buildSectionCardTitle(context, context.l10n.race_control),
             const SizedBox(height: 12),
             TextField(
               controller: _raceControlSearchController,
@@ -15246,12 +15618,12 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
               },
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.search),
-                hintText: 't.race_control_search_hint'.tr(),
+                hintText: context.l10n.race_control_search_hint,
               ),
             ),
             const SizedBox(height: 12),
             Text(
-              't.scope'.tr(),
+              context.l10n.scope,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
@@ -15268,10 +15640,10 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
             _buildRaceControlFilterBar(context),
             const SizedBox(height: 12),
             Text(
-              't.race_control_message_count'.tr(namedArgs: {
-                'visible': '${visibleMessages.length}',
-                'total': '${filteredMessages.length}',
-              }),
+              context.l10n.race_control_message_count(
+                '${visibleMessages.length}',
+                '${filteredMessages.length}',
+              ),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
@@ -15281,7 +15653,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
             const SizedBox(height: 12),
             if (filteredMessages.isEmpty)
               Text(
-                't.race_control_empty'.tr(),
+                context.l10n.race_control_empty,
                 style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
               )
             else
@@ -15376,8 +15748,8 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                   ),
                   label: Text(
                     _showAllRaceControlMessages
-                        ? 't.show_less_messages'.tr()
-                        : 't.show_all_messages'.tr(namedArgs: {'count': '${filteredMessages.length}'}),
+                        ? context.l10n.show_less_messages
+                        : context.l10n.show_all_messages('${filteredMessages.length}'),
                   ),
                 ),
               ),
@@ -15410,7 +15782,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
               context,
               Icons.schedule,
               _normalizeSessionName(message['sessionName']) == ''
-                  ? 't.unknown'.tr()
+                  ? context.l10n.unknown
                   : _normalizeSessionName(message['sessionName']),
               forceTextColor: textColor,
             ),
@@ -15439,16 +15811,14 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
               _buildRaceControlTag(
                 context,
                 Icons.looks_one,
-                't.lap_label'.tr(namedArgs: {'lap': '${message['lap']}'}),
+                context.l10n.lap_label('${message['lap']}'),
                 forceTextColor: textColor,
               ),
             if (message['driverNumber'] != null)
               _buildRaceControlTag(
                 context,
                 Icons.directions_car,
-                't.car_label'.tr(namedArgs: {
-                  'number': '${message['driverNumber']}',
-                }),
+                context.l10n.car_label('${message['driverNumber']}'),
                 forceTextColor: textColor,
               ),
             if (relatedMessages.isNotEmpty)
@@ -15456,10 +15826,8 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                 context,
                 Icons.link,
                 relatedMessages.length == 1
-                    ? 't.linked_update_one'.tr()
-                    : 't.linked_update_many'.tr(namedArgs: {
-                        'count': '${relatedMessages.length}',
-                      }),
+                    ? context.l10n.linked_update_one
+                    : context.l10n.linked_update_many('${relatedMessages.length}'),
                 forceTextColor: textColor,
               ),
           ],
@@ -15569,44 +15937,90 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
         )
         .toList(growable: false);
 
+    final scheme = theme.colorScheme;
+    final desktopShell = _isDesktopShellLayout(context);
+    final ambientGlow = scheme.primary.withValues(
+      alpha: desktopShell ? 0.10 : 0.13,
+    );
+    final shellBase = Color.lerp(
+      scheme.surfaceContainerLow,
+      scheme.primary,
+      0.04,
+    )!;
+    final topInset = MediaQuery.paddingOf(context).top + kToolbarHeight;
+    final listTopPadding = desktopShell ? 20.0 : topInset + 20;
+
     return Scaffold(
-      appBar: AppBar(title: Text('Weekend Hub')),
-      body: SafeArea(
-        child: _loading
-            ? Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const CircularProgressIndicator(),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Weekend Hub laden...',
-                      style: TextStyle(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            : RefreshIndicator(
-                onRefresh: _loadWeekendData,
-                child: ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(20),
-                  children: [
-                    _buildWeekendHubHeader(context, availableSessions),
-                    const SizedBox(height: 24),
-                    _buildWeekendHubLowerRow(
-                      context,
-                      selectedSession,
-                      selectedWeather,
-                      selectedLapTimeline,
-                      raceControlMessages,
-                      penalties,
-                    ),
-                  ],
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: !desktopShell,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        foregroundColor: desktopShell ? scheme.onSurface : null,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        forceMaterialTransparency: !desktopShell,
+        title: Text(context.l10n.weekend_hub),
+      ),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (!desktopShell)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: shellBase),
+                child: CustomPaint(
+                  painter: _AmbientGlowPainter(
+                    topLeftGlow: ambientGlow,
+                    bottomRightGlow: ambientGlow,
+                  ),
                 ),
               ),
+            ),
+          Positioned.fill(
+            child: _loading
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const CircularProgressIndicator(),
+                        const SizedBox(height: 16),
+                        Text(
+                          context.l10n.weekend_hub_loading,
+                          style: TextStyle(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: _loadWeekendData,
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: EdgeInsets.fromLTRB(
+                        20,
+                        listTopPadding,
+                        20,
+                        20,
+                      ),
+                      children: [
+                        _buildWeekendHubHeader(context, availableSessions),
+                        const SizedBox(height: 24),
+                        _buildWeekendHubLowerRow(
+                          context,
+                          selectedSession,
+                          selectedWeather,
+                          selectedLapTimeline,
+                          raceControlMessages,
+                          penalties,
+                        ),
+                      ],
+                    ),
+                  ),
+          ),
+        ],
       ),
     );
   }
@@ -15693,7 +16107,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            't.weekend_schedule'.tr(),
+            context.l10n.weekend_schedule,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w800,
               color: theme.colorScheme.onSurface,
@@ -15775,11 +16189,11 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                             minimumSize: Size.zero,
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                          child: Text('t.results'.tr(), style: const TextStyle(fontSize: 11)),
+                          child: Text(context.l10n.results, style: const TextStyle(fontSize: 11)),
                         )
                       else
                         Text(
-                          't.$status'.tr(),
+                          l10nSessionStatusLabel(context.l10n, status),
                           style: TextStyle(
                             fontSize: 11,
                             color: theme.colorScheme.onSurfaceVariant,
@@ -15984,7 +16398,7 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
         children: [
           Icon(icon, size: 18),
           const SizedBox(width: 8),
-          Text('$label: $value'),
+          Text(context.l10n.metric_label_value(label, value)),
         ],
       ),
     );
@@ -16079,7 +16493,7 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            't.circuit'.tr(),
+            context.l10n.circuit,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w800,
               color: theme.colorScheme.onSurface,
@@ -16101,17 +16515,17 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
             runSpacing: 12,
             children: [
               _buildHubMetric(
-                't.temp'.tr(),
+                context.l10n.temp,
                 '$_temperature°C',
                 Icons.thermostat,
               ),
               _buildHubMetric(
-                't.rain'.tr(),
+                context.l10n.rain,
                 '$_rainChance%',
                 Icons.umbrella,
               ),
               _buildHubMetric(
-                't.wind'.tr(),
+                context.l10n.wind,
                 '$_windSpeed km/h',
                 Icons.air,
               ),
@@ -16119,7 +16533,7 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
           ),
           const SizedBox(height: 16),
           Text(
-            't.session'.tr(),
+            context.l10n.session,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w800,
@@ -16176,7 +16590,7 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            't.top_3'.tr(),
+            context.l10n.top_3,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w800,
               color: theme.colorScheme.onSurface,
@@ -16185,9 +16599,9 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
           const SizedBox(height: 10),
           if (topThree.isEmpty)
             Text(
-              't.session_data_unavailable'.tr(namedArgs: {
-                'session': _sessionDisplayTitle(context, selectedSession),
-              }),
+              context.l10n.session_data_unavailable(
+                _sessionDisplayTitle(context, selectedSession),
+              ),
               style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
             )
           else
@@ -16210,8 +16624,8 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
         : '#${entry.driverNumber} ${entry.driver}';
     final accent = _topThreeAccent(context, entry.position);
     final timingLabel = entry.position == 1
-        ? 't.total_time'.tr()
-        : 't.gap'.tr();
+        ? context.l10n.total_time
+        : context.l10n.gap;
     final timingValue = entry.position == 1
         ? entry.totalTime
         : entry.gapToLeader;
@@ -16273,7 +16687,7 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
               Expanded(
                 child: _buildTopThreeFact(
                   context,
-                  't.best_lap'.tr(),
+                  context.l10n.best_lap,
                   entry.fastestLap,
                   highlight: entry.hasFastestLap,
                 ),
@@ -16521,7 +16935,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           lower.contains('haal laatste resultaten')) {
         final latestRace = await _findLatestCompletedRace();
         if (latestRace == null) {
-          _response = 't.ai_no_completed_race'.tr();
+          _response = context.l10n.ai_no_completed_race;
         } else {
           await RaceRepository.standard().forceRefreshLatestResults();
           final roundIndex = raceRoundFor(latestRace);
@@ -16532,9 +16946,9 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
               const <RaceResultRow>[];
           final topThree = rows.take(3).map((row) => row.driver).join(' • ');
           _response = topThree.isEmpty
-              ? 't.ai_latest_results_refreshed'.tr()
-              : 't.ai_latest_results_podium'.tr(namedArgs: {'podium': topThree});
-          _actionLabel = 't.ai_open_latest_results'.tr();
+              ? context.l10n.ai_latest_results_refreshed
+              : context.l10n.ai_latest_results_podium(topThree);
+          _actionLabel = context.l10n.ai_open_latest_results;
           _action = () {
             navigator.pop();
             Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -16549,12 +16963,11 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           (race) => race.date.isAfter(DateTime.now()),
           orElse: () => races.last,
         );
-        _response = 't.ai_next_weekend'.tr(namedArgs: {
-          'race': nextRace.name,
-          'date':
-              '${nextRace.date.day}-${nextRace.date.month}-${nextRace.date.year}',
-        });
-        _actionLabel = 't.ai_open_weekend_hub'.tr();
+        _response = context.l10n.ai_next_weekend(
+          nextRace.name,
+          '${nextRace.date.day}-${nextRace.date.month}-${nextRace.date.year}',
+        );
+        _actionLabel = context.l10n.ai_open_weekend_hub;
         _action = () {
           navigator.pop();
           Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -16567,7 +16980,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           RegExp(r'\bvs\b|\btegen\b', caseSensitive: false),
         );
         if (parts.length < 2) {
-          _response = 't.ai_compare_parse_error'.tr();
+          _response = context.l10n.ai_compare_parse_error;
         } else {
           final left = parts.first
               .replaceAll(
@@ -16611,11 +17024,11 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           }
 
           if (driver1 != null && driver2 != null) {
-            _response = 't.ai_driver_compare_ready'.tr(namedArgs: {
-              'left': driver1.name,
-              'right': driver2.name,
-            });
-            _actionLabel = 't.ai_open_driver_compare'.tr();
+            _response = context.l10n.ai_driver_compare_ready(
+              driver1.name,
+              driver2.name,
+            );
+            _actionLabel = context.l10n.ai_open_driver_compare;
             _action = () {
               navigator.pop();
               Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -16623,11 +17036,11 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
               });
             };
           } else if (team1 != null && team2 != null) {
-            _response = 't.ai_team_compare_ready'.tr(namedArgs: {
-              'left': team1.name,
-              'right': team2.name,
-            });
-            _actionLabel = 't.ai_open_team_compare'.tr();
+            _response = context.l10n.ai_team_compare_ready(
+              team1.name,
+              team2.name,
+            );
+            _actionLabel = context.l10n.ai_open_team_compare;
             _action = () {
               navigator.pop();
               Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -16635,7 +17048,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
               });
             };
           } else {
-            _response = 't.ai_compare_no_match'.tr();
+            _response = context.l10n.ai_compare_no_match;
           }
         }
       } else if (lower.contains('form') || lower.contains('trend')) {
@@ -16649,11 +17062,11 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
         }
 
         if (target == null) {
-          _response = 't.ai_form_no_driver'.tr();
+          _response = context.l10n.ai_form_no_driver;
         } else {
           final entries = _buildDriverRecentFormEntries(target.name);
           if (entries.isEmpty) {
-            _response = 't.ai_form_no_cache'.tr(namedArgs: {'driver': target.name});
+            _response = context.l10n.ai_form_no_cache(target.name);
           } else {
             final summary = entries.expand((e) => e)
                 .map(
@@ -16661,10 +17074,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
                       '${entry.race.name.replaceAll(' Grand Prix', '')}: ${entry.label}',
                 )
                 .join(' • ');
-            _response = 't.ai_form_summary'.tr(namedArgs: {
-              'driver': target.name,
-              'summary': summary,
-            });
+            _response = context.l10n.ai_form_summary(target.name, summary);
           }
         }
       } else if ((lower.contains('driver standings') ||
@@ -16684,11 +17094,8 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
                   '${driver.name} ${_formatAiPoints(driver.points)} pts',
             )
             .join(' • ');
-        _response = 't.ai_driver_standings_summary'.tr(namedArgs: {
-          'year': '$year',
-          'summary': summary,
-        });
-        _actionLabel = 't.ai_open_driver_standings'.tr();
+        _response = context.l10n.ai_driver_standings_summary('$year', summary);
+        _actionLabel = context.l10n.ai_open_driver_standings;
         _action = () {
           navigator.pop();
           Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -16707,11 +17114,8 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
             .take(3)
             .map((team) => '${team.name} ${team.points} pts')
             .join(' • ');
-        _response = 't.ai_team_standings_summary'.tr(namedArgs: {
-          'year': '$year',
-          'summary': summary,
-        });
-        _actionLabel = 't.ai_open_team_standings'.tr();
+        _response = context.l10n.ai_team_standings_summary('$year', summary);
+        _actionLabel = context.l10n.ai_open_team_standings;
         _action = () {
           navigator.pop();
           Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -16724,8 +17128,8 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
               lower.contains('grafiek coureurs')) &&
           !lower.contains('compare')) {
         final year = _latestKnownSeasonYear();
-        _response = 't.ai_drivers_chart_ready'.tr(namedArgs: {'year': '$year'});
-        _actionLabel = 't.ai_open_drivers_chart'.tr();
+        _response = context.l10n.ai_drivers_chart_ready('$year');
+        _actionLabel = context.l10n.ai_open_drivers_chart;
         _action = () {
           navigator.pop();
           Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -16750,13 +17154,13 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           (race) => race.date.isAfter(DateTime.now()),
           orElse: () => races.last,
         );
-        _response = 't.ai_next_weekend_weather'.tr(namedArgs: {
-          'race': nextRace.name,
-          'temp': '${nextRace.weather.temperature}',
-          'rain': '${nextRace.weather.rainChance}',
-          'wind': '${nextRace.weather.windSpeed}',
-        });
-        _actionLabel = 't.ai_open_weekend_hub'.tr();
+        _response = context.l10n.ai_next_weekend_weather(
+          nextRace.name,
+          '${nextRace.weather.temperature}',
+          '${nextRace.weather.rainChance}',
+          '${nextRace.weather.windSpeed}',
+        );
+        _actionLabel = context.l10n.ai_open_weekend_hub;
         _action = () {
           navigator.pop();
           Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -16768,7 +17172,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           lower.contains('penalties')) {
         final latestRace = await _findLatestCompletedRace();
         if (latestRace == null) {
-          _response = 't.ai_no_completed_race'.tr();
+          _response = context.l10n.ai_no_completed_race;
         } else {
           final roundIndex = raceRoundFor(latestRace);
           await SessionDataManager().fetchDataForRace(latestRace, roundIndex);
@@ -16783,21 +17187,19 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
               )
               .toList(growable: false);
           if (penalties.isEmpty) {
-            _response = 't.ai_latest_penalties_none'.tr(namedArgs: {
-              'race': latestRace.name,
-            });
+            _response = context.l10n.ai_latest_penalties_none(latestRace.name);
           } else {
             final details = penalties
                 .take(3)
                 .map((row) => '${row.driver} (${row.penalty})')
                 .join(' • ');
-            _response = 't.ai_latest_penalties_summary'.tr(namedArgs: {
-              'race': latestRace.name,
-              'count': '${penalties.length}',
-              'details': details,
-            });
+            _response = context.l10n.ai_latest_penalties_summary(
+              latestRace.name,
+              '${penalties.length}',
+              details,
+            );
           }
-          _actionLabel = 't.ai_open_weekend_hub'.tr();
+          _actionLabel = context.l10n.ai_open_weekend_hub;
           _action = () {
             navigator.pop();
             Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -16810,7 +17212,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           lower.contains('racecontrol')) {
         final latestRace = await _findLatestCompletedRace();
         if (latestRace == null) {
-          _response = 't.ai_no_completed_race'.tr();
+          _response = context.l10n.ai_no_completed_race;
         } else {
           final roundIndex = raceRoundFor(latestRace);
           await SessionDataManager().fetchDataForRace(latestRace, roundIndex);
@@ -16819,18 +17221,16 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
                   .raceControlKeyFor(latestRace)] ??
               const <Map<String, dynamic>>[];
           if (messages.isEmpty) {
-            _response = 't.ai_latest_race_control_none'.tr(namedArgs: {
-              'race': latestRace.name,
-            });
+            _response = context.l10n.ai_latest_race_control_none(latestRace.name);
           } else {
             final latestMessage = messages.last['message']?.toString() ?? '-';
-            _response = 't.ai_latest_race_control_summary'.tr(namedArgs: {
-              'race': latestRace.name,
-              'count': '${messages.length}',
-              'message': latestMessage,
-            });
+            _response = context.l10n.ai_latest_race_control_summary(
+              latestRace.name,
+              '${messages.length}',
+              latestMessage,
+            );
           }
-          _actionLabel = 't.ai_open_weekend_hub'.tr();
+          _actionLabel = context.l10n.ai_open_weekend_hub;
           _action = () {
             navigator.pop();
             Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -16846,10 +17246,8 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
 
         if ((lower.contains('driver') || lower.contains('coureur')) &&
             requestedDriver != null) {
-          _response = 't.ai_driver_profile_ready'.tr(namedArgs: {
-            'driver': requestedDriver.name,
-          });
-          _actionLabel = 't.ai_open_driver_profile'.tr();
+          _response = context.l10n.ai_driver_profile_ready(requestedDriver.name);
+          _actionLabel = context.l10n.ai_open_driver_profile;
           _action = () {
             navigator.pop();
             Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -16858,10 +17256,8 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           };
         } else if ((lower.contains('team') || lower.contains('constructor')) &&
             requestedTeam != null) {
-          _response = 't.ai_team_profile_ready'.tr(namedArgs: {
-            'team': requestedTeam.name,
-          });
-          _actionLabel = 't.ai_open_team_profile'.tr();
+          _response = context.l10n.ai_team_profile_ready(requestedTeam.name);
+          _actionLabel = context.l10n.ai_open_team_profile;
           _action = () {
             navigator.pop();
             Future<void>.delayed(const Duration(milliseconds: 150), () {
@@ -16872,12 +17268,11 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
                 lower.contains('race') ||
                 lower.contains('circuit')) &&
             requestedRace != null) {
-          _response = 't.ai_next_weekend'.tr(namedArgs: {
-            'race': requestedRace.name,
-            'date':
-                '${requestedRace.date.day}-${requestedRace.date.month}-${requestedRace.date.year}',
-          });
-          _actionLabel = 't.ai_open_weekend_hub'.tr();
+          _response = context.l10n.ai_next_weekend(
+            requestedRace.name,
+            '${requestedRace.date.day}-${requestedRace.date.month}-${requestedRace.date.year}',
+          );
+          _actionLabel = context.l10n.ai_open_weekend_hub;
           _action = () {
             final router = GoRouter.of(context);
             Navigator.of(context).pop();
@@ -16886,11 +17281,11 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
             });
           };
         } else {
-          _response = 't.ai_supported_commands'.tr();
+          _response = context.l10n.ai_supported_commands;
         }
       }
     } catch (error) {
-      _response = 't.ai_crash'.tr(namedArgs: {'error': '$error'});
+      _response = context.l10n.ai_crash('$error');
     }
 
     if (mounted) {
@@ -16903,7 +17298,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
 
     final theme = Theme.of(context);
     final responseText = _response.isEmpty
-        ? 't.ai_example_prompt'.tr()
+        ? context.l10n.ai_example_prompt
         : _response;
 
     return SafeArea(
@@ -16919,7 +17314,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              't.ai_race_engineer'.tr(),
+              context.l10n.ai_race_engineer,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -16930,28 +17325,28 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
               runSpacing: 8,
               children: [
                 ActionChip(
-                  label: Text('t.ai_chip_fetch_latest_results'.tr()),
+                  label: Text(context.l10n.ai_chip_fetch_latest_results),
                   onPressed: () => _runPrompt('Fetch latest results'),
                 ),
                 ActionChip(
-                  label: Text('t.ai_chip_show_next_weekend'.tr()),
+                  label: Text(context.l10n.ai_chip_show_next_weekend),
                   onPressed: () => _runPrompt('Show next weekend'),
                 ),
                 ActionChip(
-                  label: Text('t.ai_chip_compare_max_lando'.tr()),
+                  label: Text(context.l10n.ai_chip_compare_max_lando),
                   onPressed: () =>
                       _runPrompt('Compare Max Verstappen vs Lando Norris'),
                 ),
                 ActionChip(
-                  label: Text('t.ai_chip_show_form_piastri'.tr()),
+                  label: Text(context.l10n.ai_chip_show_form_piastri),
                   onPressed: () => _runPrompt('Show form Oscar Piastri'),
                 ),
                 ActionChip(
-                  label: Text('t.ai_chip_show_driver_standings'.tr()),
+                  label: Text(context.l10n.ai_chip_show_driver_standings),
                   onPressed: () => _runPrompt('Show driver standings'),
                 ),
                 ActionChip(
-                  label: Text('t.ai_chip_show_latest_penalties'.tr()),
+                  label: Text(context.l10n.ai_chip_show_latest_penalties),
                   onPressed: () => _runPrompt('Show latest penalties'),
                 ),
               ],
@@ -16962,7 +17357,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
               minLines: 1,
               maxLines: 3,
               decoration: InputDecoration(
-                hintText: 't.ai_type_command'.tr(),
+                hintText: context.l10n.ai_type_command,
                 suffixIcon: IconButton(
                   icon: _isWorking
                       ? const SizedBox(
@@ -17642,7 +18037,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
         children: [
           Icon(icon, size: 16),
           const SizedBox(width: 8),
-          Text('$label: $value'),
+          Text(context.l10n.metric_label_value(label, value)),
         ],
       ),
     );
@@ -17653,7 +18048,8 @@ class _DriverDetailViewState extends State<DriverDetailView> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isDutch =
-        context.locale.languageCode == 'nl' || context.locale.languageCode == 'de';
+        Localizations.localeOf(context).languageCode == 'nl' ||
+            Localizations.localeOf(context).languageCode == 'de';
     final List<String> facts = isDutch
         ? widget.driver.realWorldFactsNl
         : widget.driver.realWorldFactsEn;
@@ -17664,11 +18060,24 @@ class _DriverDetailViewState extends State<DriverDetailView> {
       title = "${widget.driver.flag} $title - #${widget.driver.number}";
     }
 
+    final expPrefs = context.watch<DetailExpansionPrefsNotifier>();
+
     final List<Widget> driverSections = [
-      ExpansionTile(
-        initiallyExpanded: true,
+      _detailOverviewSectionCard(
+        context,
+        child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.driver,
+          DetailExpansionSection.driverHistory,
+          true,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.driver,
+          DetailExpansionSection.driverHistory,
+          v,
+        ),
         title: Text(
-          't.driver_history'.tr(),
+          context.l10n.driver_history,
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -17684,9 +18093,20 @@ style: TextStyle(
             ),
           ),
         ],
-      ),
-      ExpansionTile(
-        initiallyExpanded: true,
+      )),
+      _detailOverviewSectionCard(
+        context,
+        child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.driver,
+          DetailExpansionSection.driverRecentForm,
+          true,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.driver,
+          DetailExpansionSection.driverRecentForm,
+          v,
+        ),
         title: Text(
           'Recent Form Trend',
           style: TextStyle(
@@ -17696,11 +18116,23 @@ style: TextStyle(
           ),
         ),
         children: [_buildRecentFormTrend()],
-      ),
+      )),
       if (widget.driver.previousTeams.isNotEmpty)
-        ExpansionTile(
+        _detailOverviewSectionCard(
+          context,
+          child: ExpansionTile(
+          initiallyExpanded: expPrefs.initiallyExpanded(
+            DetailExpansionCat.driver,
+            DetailExpansionSection.driverPreviousTeams,
+            false,
+          ),
+          onExpansionChanged: (v) => expPrefs.setExpanded(
+            DetailExpansionCat.driver,
+            DetailExpansionSection.driverPreviousTeams,
+            v,
+          ),
           title: Text(
-            't.previous_teams'.tr(),
+            context.l10n.previous_teams,
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -17719,11 +18151,22 @@ style: TextStyle(
               ),
             ),
           ],
+        )),
+      _detailOverviewSectionCard(
+        context,
+        child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.driver,
+          DetailExpansionSection.driverFacts,
+          true,
         ),
-      ExpansionTile(
-        initiallyExpanded: true,
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.driver,
+          DetailExpansionSection.driverFacts,
+          v,
+        ),
         title: Text(
-          't.driver_facts_title'.tr(),
+          context.l10n.driver_facts_title,
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -17768,10 +18211,22 @@ style: TextStyle(
             ),
           ),
         ],
-      ),
-      ExpansionTile(
+      )),
+      _detailOverviewSectionCard(
+        context,
+        child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.driver,
+          DetailExpansionSection.driverPersonal,
+          false,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.driver,
+          DetailExpansionSection.driverPersonal,
+          v,
+        ),
         title: Text(
-          't.personal_info'.tr(),
+          context.l10n.personal_info,
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -17779,39 +18234,51 @@ style: TextStyle(
             ),
         ),
         children: [
-          _statTile('t.age'.tr(), widget.driver.age, Icons.cake),
+          _statTile(context.l10n.age, widget.driver.age, Icons.cake),
           _statTile(
-            't.height'.tr(),
+            context.l10n.height,
             widget.driver.height,
             Icons.height,
           ),
           _statTile(
-            't.birth_place'.tr(),
+            context.l10n.birth_place,
             widget.driver.birthPlace,
             Icons.location_on,
           ),
           _statTile(
-            't.partner'.tr(),
+            context.l10n.partner,
             widget.driver.partner,
             Icons.favorite,
           ),
           _statTile(
-            't.children'.tr(),
+            context.l10n.children,
             widget.driver.children,
             Icons.child_care,
           ),
-          _statTile('t.pets'.tr(), widget.driver.pets, Icons.pets),
+          _statTile(context.l10n.pets, widget.driver.pets, Icons.pets),
           _statTile(
-            't.manager'.tr(),
+            context.l10n.manager,
             widget.driver.manager,
             Icons.work,
           ),
           const SizedBox(height: 8),
         ],
-      ),
-      ExpansionTile(
+      )),
+      _detailOverviewSectionCard(
+        context,
+        child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.driver,
+          DetailExpansionSection.driverGeneral,
+          false,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.driver,
+          DetailExpansionSection.driverGeneral,
+          v,
+        ),
         title: Text(
-          't.general'.tr(),
+          context.l10n.general,
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -17820,26 +18287,38 @@ style: TextStyle(
         ),
         children: [
           _statTile(
-            't.nationality'.tr(),
-            't.nat_${widget.driver.nationality}'.tr(),
+            context.l10n.nationality,
+            l10nNationality(context.l10n, widget.driver.nationality),
             Icons.public,
           ),
           _statTile(
-            't.f1_debut'.tr(),
+            context.l10n.f1_debut,
             widget.driver.debutYear,
             Icons.start,
           ),
           _statTile(
-            't.contract_until'.tr(),
+            context.l10n.contract_until,
             widget.driver.contractUntil,
             Icons.edit_document,
           ),
           const SizedBox(height: 8),
         ],
-      ),
-      ExpansionTile(
+      )),
+      _detailOverviewSectionCard(
+        context,
+        child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.driver,
+          DetailExpansionSection.driverCareer,
+          false,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.driver,
+          DetailExpansionSection.driverCareer,
+          v,
+        ),
         title: Text(
-          't.career_stats'.tr(),
+          context.l10n.career_stats,
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -17848,43 +18327,43 @@ style: TextStyle(
         ),
         children: [
           _statTile(
-            't.championships'.tr(),
+            context.l10n.championships,
             widget.driver.championships,
             Icons.workspace_premium,
           ),
           _statTile(
-            't.wins'.tr(),
+            context.l10n.wins,
             widget.driver.wins,
             Icons.emoji_events,
           ),
           _statTile(
-            't.podiums'.tr(),
+            context.l10n.podiums,
             widget.driver.podiums,
             Icons.leaderboard,
           ),
-          _statTile('t.poles'.tr(), widget.driver.poles, Icons.flag),
+          _statTile(context.l10n.poles, widget.driver.poles, Icons.flag),
           _statTile(
-            't.fastest_laps'.tr(),
+            context.l10n.fastest_laps,
             widget.driver.fastestLaps,
             Icons.timer,
           ),
           _statTile(
-            't.highestFinish'.tr(),
+            context.l10n.highest_finish,
             widget.driver.highestFinish,
             Icons.military_tech,
           ),
           _statTile(
-            't.highestGrid'.tr(),
+            context.l10n.highest_grid,
             widget.driver.highestGrid,
             Icons.grid_3x3,
           ),
           _statTile(
-            't.hatTricks'.tr(),
+            context.l10n.hat_tricks,
             widget.driver.hatTricks,
             Icons.auto_awesome,
           ),
           _statTile(
-            't.frontRowStarts'.tr(),
+            context.l10n.front_row_starts,
             widget.driver.frontRowStarts,
             Icons.looks_two,
           ),
@@ -17910,7 +18389,7 @@ style: TextStyle(
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        't.total_points'.tr(),
+                        context.l10n.total_points,
                         style: TextStyle(
                           color: Theme.of(
                             context,
@@ -17934,16 +18413,28 @@ style: TextStyle(
             ),
           ),
           _statTile(
-            't.overtakes'.tr(),
+            context.l10n.overtakes,
             widget.driver.overtakes,
             Icons.compare_arrows,
           ),
           const SizedBox(height: 8),
         ],
-      ),
-      ExpansionTile(
+      )),
+      _detailOverviewSectionCard(
+        context,
+        child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.driver,
+          DetailExpansionSection.driverExperience,
+          false,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.driver,
+          DetailExpansionSection.driverExperience,
+          v,
+        ),
         title: Text(
-          't.experience'.tr(),
+          context.l10n.experience,
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -17952,19 +18443,19 @@ style: TextStyle(
         ),
         children: [
           _statTile(
-            't.starts'.tr(),
+            context.l10n.starts,
             widget.driver.starts,
             Icons.traffic,
           ),
           _statTile(
-            't.laps_led'.tr(),
+            context.l10n.laps_led,
             widget.driver.lapsLed,
             Icons.looks_one,
           ),
-          _statTile('t.dnf'.tr(), widget.driver.dnfs, Icons.car_crash),
-          _statTile('t.dsqs'.tr(), widget.driver.dsqs, Icons.block),
+          _statTile(context.l10n.dnf, widget.driver.dnfs, Icons.car_crash),
+          _statTile(context.l10n.dsqs, widget.driver.dsqs, Icons.block),
           _statTile(
-            't.dnqs'.tr(),
+            context.l10n.dnqs,
             widget.driver.dnqs,
             Icons.cancel_schedule_send,
           ),
@@ -17990,7 +18481,7 @@ style: TextStyle(
                         ),
                         const SizedBox(width: 12),
                         Text(
-                          't.retirements'.tr(),
+                          context.l10n.retirements,
                           style: TextStyle(
                             color: Theme.of(
                               context,
@@ -18015,10 +18506,22 @@ style: TextStyle(
             ),
           const SizedBox(height: 8),
         ],
-      ),
-      ExpansionTile(
+      )),
+      _detailOverviewSectionCard(
+        context,
+        child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.driver,
+          DetailExpansionSection.driverSponsors,
+          false,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.driver,
+          DetailExpansionSection.driverSponsors,
+          v,
+        ),
         title: Text(
-          't.personal_sponsors'.tr(),
+          context.l10n.personal_sponsors,
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -18031,37 +18534,81 @@ style: TextStyle(
           ),
           const SizedBox(height: 8),
         ],
-      ),
+      )),
     ];
 
+    final scheme = Theme.of(context).colorScheme;
+    final desktopShell = _isDesktopShellLayout(context);
+    final ambientGlow = scheme.primary.withValues(
+      alpha: desktopShell ? 0.10 : 0.13,
+    );
+    final shellBase = Color.lerp(
+      scheme.surfaceContainerLow,
+      scheme.primary,
+      0.04,
+    )!;
+    final topInset = MediaQuery.paddingOf(context).top + kToolbarHeight;
+    final listTopPadding = desktopShell ? 20.0 : topInset + 20;
+
     return Scaffold(
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: !desktopShell,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        foregroundColor: desktopShell ? scheme.onSurface : null,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        forceMaterialTransparency: !desktopShell,
         title: Text(title),
         actions: _desktopAwareSettingsActions(context, widget.settingsMenu),
       ),
-      body: ListView(
-        controller: _scrollController,
-        padding: const EdgeInsets.all(20),
+      body: Stack(
+        fit: StackFit.expand,
         children: [
-          Center(
-            child: _buildFlagHero(
-              tag: widget.heroTag,
-              flag: widget.driver.flag,
-              fontSize: 64,
+          if (!desktopShell)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: shellBase),
+                child: CustomPaint(
+                  painter: _AmbientGlowPainter(
+                    topLeftGlow: ambientGlow,
+                    bottomRightGlow: ambientGlow,
+                  ),
+                ),
+              ),
+            ),
+          Positioned.fill(
+            child: ListView(
+              controller: _scrollController,
+              padding: EdgeInsets.fromLTRB(20, listTopPadding, 20, 20),
+              children: [
+                Center(
+                  child: _buildFlagHero(
+                    tag: widget.heroTag,
+                    flag: widget.driver.flag,
+                    fontSize: 64,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  "#${widget.driver.number}",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: F1TeamSchemes.getTeamColor(widget.driver.team),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                KeyedSubtree(
+                  key: ValueKey('driver-sections-${expPrefs.loadedRevision}'),
+                  child: _buildResponsiveSections(sections: driverSections),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 10),
-          Text(
-            "#${widget.driver.number}",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: F1TeamSchemes.getTeamColor(widget.driver.team),
-            ),
-          ),
-          const SizedBox(height: 20),
-          _buildResponsiveSections(sections: driverSections),
         ],
       ),
     );
@@ -18864,7 +19411,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
             children: [
               Expanded(
                 child: Text(
-                  't.drivers'.tr(),
+                  context.l10n.drivers,
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -18877,7 +19424,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
               const SizedBox(width: 18),
               Expanded(
                 child: Text(
-                  't.reserve_driver'.tr(),
+                  context.l10n.reserve_driver,
                   textAlign: TextAlign.left,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -19221,7 +19768,7 @@ class _TeamDetailViewState extends State<TeamDetailView> {
     }
 
     final List<String> teamFacts = () {
-      switch (context.locale.languageCode) {
+      switch (Localizations.localeOf(context).languageCode) {
         case 'nl': return widget.team.factsNl;
         case 'fr': return widget.team.factsFr;
         case 'de': return widget.team.factsDe;
@@ -19229,9 +19776,22 @@ class _TeamDetailViewState extends State<TeamDetailView> {
       }
     }();
 
+    final expPrefs = context.watch<DetailExpansionPrefsNotifier>();
+
     final List<Widget> teamSections = [
-      ExpansionTile(
-        initiallyExpanded: true,
+      _detailOverviewSectionCard(
+        context,
+        child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.team,
+          DetailExpansionSection.teamPerformance,
+          true,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.team,
+          DetailExpansionSection.teamPerformance,
+          v,
+        ),
         title: Text(
           "📊 Performance History",
 style: TextStyle(
@@ -19249,12 +19809,23 @@ style: TextStyle(
             ),
           ),
         ],
-      ),
+      )),
       if (teamFacts.isNotEmpty)
-        ExpansionTile(
-          initiallyExpanded: true,
+        _detailOverviewSectionCard(
+          context,
+          child: ExpansionTile(
+          initiallyExpanded: expPrefs.initiallyExpanded(
+            DetailExpansionCat.team,
+            DetailExpansionSection.teamFacts,
+            true,
+          ),
+          onExpansionChanged: (v) => expPrefs.setExpanded(
+            DetailExpansionCat.team,
+            DetailExpansionSection.teamFacts,
+            v,
+          ),
           title: Text(
-            '💡 ${'t.team_facts_title'.tr()}',
+            '💡 ${context.l10n.team_facts_title}',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -19293,11 +19864,22 @@ style: TextStyle(
             )),
             const SizedBox(height: 4),
           ],
+        )),
+      _detailOverviewSectionCard(
+        context,
+        child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.team,
+          DetailExpansionSection.teamGeneral,
+          true,
         ),
-      ExpansionTile(
-        initiallyExpanded: true,
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.team,
+          DetailExpansionSection.teamGeneral,
+          v,
+        ),
         title: Text(
-          't.general'.tr(),
+          context.l10n.general,
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -19306,17 +19888,17 @@ style: TextStyle(
         ),
         children: [
           _statTile(
-            't.engine'.tr(),
+            context.l10n.engine,
             widget.team.engine,
             Icons.settings_input_component,
           ),
           _statTile(
-            't.headquarters'.tr(),
+            context.l10n.headquarters,
             widget.team.headquarters,
             Icons.location_city,
           ),
           _statTile(
-            't.total_points'.tr(),
+            context.l10n.total_points,
             widget.team.totalPoints == widget.team.totalPoints.roundToDouble()
                 ? widget.team.totalPoints.toInt().toString()
                 : widget.team.totalPoints.toString(),
@@ -19334,7 +19916,7 @@ style: TextStyle(
                 ),
                 childrenPadding: const EdgeInsets.only(bottom: 8),
                 title: Text(
-                  't.team_history'.tr(),
+                  context.l10n.team_history,
                   style: TextStyle(
                     color: Theme.of(
                       context,
@@ -19347,11 +19929,22 @@ style: TextStyle(
             ),
           const SizedBox(height: 8),
         ],
-      ),
-      ExpansionTile(
-        initiallyExpanded: true,
+      )),
+      _detailOverviewSectionCard(
+        context,
+        child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.team,
+          DetailExpansionSection.teamChampionships,
+          true,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.team,
+          DetailExpansionSection.teamChampionships,
+          v,
+        ),
         title: Text(
-          't.championships'.tr(),
+          context.l10n.championships,
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -19371,7 +19964,7 @@ style: TextStyle(
                 ),
                 childrenPadding: const EdgeInsets.only(bottom: 8),
                 title: Text(
-                  't.cc_wins'.tr(),
+                  context.l10n.cc_wins,
                   style: TextStyle(
                     color: Theme.of(
                       context,
@@ -19392,7 +19985,7 @@ style: TextStyle(
             )
           else
             _statTile(
-              't.cc_wins'.tr(),
+              context.l10n.cc_wins,
               widget.team.ccWins,
               Icons.emoji_events,
             ),
@@ -19409,7 +20002,7 @@ style: TextStyle(
                 ),
                 childrenPadding: const EdgeInsets.only(bottom: 8),
                 title: Text(
-                  't.dc_wins'.tr(),
+                  context.l10n.dc_wins,
                   style: TextStyle(
                     color: Theme.of(
                       context,
@@ -19432,16 +20025,28 @@ style: TextStyle(
             )
           else
             _statTile(
-              't.dc_wins'.tr(),
+              context.l10n.dc_wins,
               widget.team.dcWins,
               Icons.workspace_premium,
             ),
           const SizedBox(height: 8),
         ],
-      ),
-      ExpansionTile(
+      )),
+      _detailOverviewSectionCard(
+        context,
+        child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.team,
+          DetailExpansionSection.teamRaceStats,
+          false,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.team,
+          DetailExpansionSection.teamRaceStats,
+          v,
+        ),
         title: Text(
-          't.race_stats'.tr(),
+          context.l10n.race_stats,
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -19450,32 +20055,44 @@ style: TextStyle(
         ),
         children: [
           _statTile(
-            't.total_entries'.tr(),
+            context.l10n.total_entries,
             widget.team.totalEntries,
             Icons.traffic,
           ),
           _statTile(
-            't.wins'.tr(),
+            context.l10n.wins,
             widget.team.podiums,
             Icons.leaderboard,
           ),
           _statTile(
-            't.one_two'.tr(),
+            context.l10n.one_two,
             widget.team.oneTwo,
             Icons.filter_2,
           ),
-          _statTile('t.poles'.tr(), widget.team.poles, Icons.flag),
+          _statTile(context.l10n.poles, widget.team.poles, Icons.flag),
           _statTile(
-            't.fastest_laps'.tr(),
+            context.l10n.fastest_laps,
             widget.team.fastestLaps,
             Icons.timer,
           ),
           const SizedBox(height: 8),
         ],
-      ),
-      ExpansionTile(
+      )),
+      _detailOverviewSectionCard(
+        context,
+        child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.team,
+          DetailExpansionSection.teamPitstop,
+          false,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.team,
+          DetailExpansionSection.teamPitstop,
+          v,
+        ),
         title: Text(
-          't.pitstop_leadership'.tr(),
+          context.l10n.pitstop_leadership,
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -19484,26 +20101,38 @@ style: TextStyle(
         ),
         children: [
           _statTile(
-            't.team_principal'.tr(),
+            context.l10n.team_principal,
             "${widget.team.principalName} (${widget.team.principalAge})",
             Icons.person_outline,
           ),
           _statTile(
-            't.technical_director'.tr(),
+            context.l10n.technical_director,
             "${widget.team.technicalDirectorName} (${widget.team.technicalDirectorAge})",
             Icons.engineering,
           ),
           _statTile(
-            't.fastestPit'.tr(),
-            "${widget.team.fastestPitstopTime} (${'t.country_${widget.team.fastestPitstopCircuit}'.tr()} ${widget.team.fastestPitstopYear})",
+            context.l10n.fastest_pit,
+            "${widget.team.fastestPitstopTime} (${l10nCountry(context.l10n, widget.team.fastestPitstopCircuit)} ${widget.team.fastestPitstopYear})",
             Icons.build,
           ),
           const SizedBox(height: 8),
         ],
-      ),
-      ExpansionTile(
+      )),
+      _detailOverviewSectionCard(
+        context,
+        child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.team,
+          DetailExpansionSection.teamDrivers,
+          false,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.team,
+          DetailExpansionSection.teamDrivers,
+          v,
+        ),
         title: Text(
-          't.drivers'.tr(),
+          context.l10n.drivers,
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -19511,10 +20140,22 @@ style: TextStyle(
             ),
         ),
         children: [_buildDriverRosterTimeline(), const SizedBox(height: 8)],
-      ),
-      ExpansionTile(
+      )),
+      _detailOverviewSectionCard(
+        context,
+        child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.team,
+          DetailExpansionSection.teamEngine,
+          false,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.team,
+          DetailExpansionSection.teamEngine,
+          v,
+        ),
         title: Text(
-          '⚙️ ${'t.engine_supplier'.tr()}',
+          '⚙️ ${context.l10n.engine_supplier}',
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -19523,26 +20164,38 @@ style: TextStyle(
         ),
         children: [
           _statTile(
-            't.name'.tr().split(' ').last,
+            context.l10n.name.split(' ').last,
             widget.team.engineSupplier.name,
             Icons.business,
           ),
           _statTile(
-            't.engine_name'.tr().split(' ').last,
+            context.l10n.engine_name.split(' ').last,
             widget.team.engineSupplier.engineName,
             Icons.settings,
           ),
           _statTile(
-            't.city'.tr().split(' ').last,
+            context.l10n.city.split(' ').last,
             widget.team.engineSupplier.city,
             Icons.location_city,
           ),
           const SizedBox(height: 8),
         ],
-      ),
-      ExpansionTile(
+      )),
+      _detailOverviewSectionCard(
+        context,
+        child: ExpansionTile(
+        initiallyExpanded: expPrefs.initiallyExpanded(
+          DetailExpansionCat.team,
+          DetailExpansionSection.teamSponsors,
+          false,
+        ),
+        onExpansionChanged: (v) => expPrefs.setExpanded(
+          DetailExpansionCat.team,
+          DetailExpansionSection.teamSponsors,
+          v,
+        ),
         title: Text(
-          '💰 ${'t.sponsors'.tr()}',
+          '💰 ${context.l10n.sponsors}',
 style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 13,
@@ -19555,41 +20208,85 @@ style: TextStyle(
           ),
           const SizedBox(height: 8),
         ],
-      ),
+      )),
     ];
 
+    final scheme = Theme.of(context).colorScheme;
+    final desktopShell = _isDesktopShellLayout(context);
+    final ambientGlow = scheme.primary.withValues(
+      alpha: desktopShell ? 0.10 : 0.13,
+    );
+    final shellBase = Color.lerp(
+      scheme.surfaceContainerLow,
+      scheme.primary,
+      0.04,
+    )!;
+    final topInset = MediaQuery.paddingOf(context).top + kToolbarHeight;
+    final listTopPadding = desktopShell ? 20.0 : topInset + 20;
+
     return Scaffold(
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: !desktopShell,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        foregroundColor: desktopShell ? scheme.onSurface : null,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        forceMaterialTransparency: !desktopShell,
         title: Text(title),
         actions: _desktopAwareSettingsActions(context, widget.settingsMenu),
       ),
-      body: ListView(
-        controller: _scrollController,
-        padding: const EdgeInsets.all(20),
+      body: Stack(
+        fit: StackFit.expand,
         children: [
-          Center(
-            child: _buildFlagHero(
-              tag: widget.heroTag,
-              flag: widget.team.flag,
-              fontSize: 64,
+          if (!desktopShell)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: shellBase),
+                child: CustomPaint(
+                  painter: _AmbientGlowPainter(
+                    topLeftGlow: ambientGlow,
+                    bottomRightGlow: ambientGlow,
+                  ),
+                ),
+              ),
+            ),
+          Positioned.fill(
+            child: ListView(
+              controller: _scrollController,
+              padding: EdgeInsets.fromLTRB(20, listTopPadding, 20, 20),
+              children: [
+                Center(
+                  child: _buildFlagHero(
+                    tag: widget.heroTag,
+                    flag: widget.team.flag,
+                    fontSize: 64,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                if (widget.team.carImageUrl.isNotEmpty)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 20),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Image.network(
+                      widget.team.carImageUrl,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+
+                KeyedSubtree(
+                  key: ValueKey('team-sections-${expPrefs.loadedRevision}'),
+                  child: _buildResponsiveSections(sections: teamSections),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 20),
-
-          if (widget.team.carImageUrl.isNotEmpty)
-            Container(
-              margin: const EdgeInsets.only(bottom: 20),
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Image.network(
-                widget.team.carImageUrl,
-                fit: BoxFit.contain,
-              ),
-            ),
-
-          _buildResponsiveSections(sections: teamSections),
         ],
       ),
     );
@@ -19631,23 +20328,71 @@ class _SessionResultsScreenState extends State<SessionResultsScreen> {
   @override
   Widget build(BuildContext context) {
 
+    final scheme = Theme.of(context).colorScheme;
+    final desktopShell = _isDesktopShellLayout(context);
+    final ambientGlow = scheme.primary.withValues(
+      alpha: desktopShell ? 0.10 : 0.13,
+    );
+    final shellBase = Color.lerp(
+      scheme.surfaceContainerLow,
+      scheme.primary,
+      0.04,
+    )!;
+    final topInset = MediaQuery.paddingOf(context).top + kToolbarHeight;
+    final scrollTop = desktopShell ? 20.0 : topInset + 20;
+    final scrollPadding = EdgeInsets.fromLTRB(16, scrollTop, 16, 16);
+
     return Scaffold(
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: !desktopShell,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        foregroundColor: desktopShell ? scheme.onSurface : null,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        forceMaterialTransparency: !desktopShell,
         title: Text(
-          "🏁 ${'t.gp_${widget.race.name}'.tr()} - 📊 ${'t.session_results'.tr()}",
+          "🏁 ${l10nGrandPrix(context.l10n, widget.race.name)} - 📊 ${context.l10n.session_results}",
           style: const TextStyle(fontSize: 14),
         ),
       ),
-      body: Column(
+      body: Stack(
+        fit: StackFit.expand,
         children: [
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _refreshData,
-              child: _isFetching
-                  ? _buildSessionResultsSkeleton(context, race: widget.race)
-                  : SingleChildScrollView(
+          if (!desktopShell)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: shellBase),
+                child: CustomPaint(
+                  painter: _AmbientGlowPainter(
+                    topLeftGlow: ambientGlow,
+                    bottomRightGlow: ambientGlow,
+                  ),
+                ),
+              ),
+            ),
+          Positioned.fill(
+            child: Column(
+              children: [
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: _refreshData,
+                    child: _isFetching
+                        ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: scrollPadding,
+                            children: [
+                              _buildSessionResultsSkeleton(
+                                context,
+                                race: widget.race,
+                              ),
+                            ],
+                          )
+                        : SingleChildScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.all(16),
+                      padding: scrollPadding,
                       child: widget.race.hasSprint
                           ? Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -19655,22 +20400,22 @@ class _SessionResultsScreenState extends State<SessionResultsScreen> {
                                 OpenF1SessionWidget(
                                   race: widget.race,
                                   sessionName: 'Practice 1',
-                                  displayTitle: 't.fp1'.tr(),
+                                  displayTitle: context.l10n.fp1,
                                 ),
                                 OpenF1SessionWidget(
                                   race: widget.race,
                                   sessionName: 'Sprint Qualifying',
-                                  displayTitle: 't.sprint_quali'.tr(),
+                                  displayTitle: context.l10n.sprint_quali,
                                 ),
                                 OpenF1SessionWidget(
                                   race: widget.race,
                                   sessionName: 'Qualifying',
-                                  displayTitle: 't.qualifying'.tr(),
+                                  displayTitle: context.l10n.qualifying,
                                 ),
                                 OpenF1SessionWidget(
                                   race: widget.race,
                                   sessionName: 'Sprint',
-                                  displayTitle: 't.sprint'.tr(),
+                                  displayTitle: context.l10n.sprint,
                                 ),
                                 OpenF1SessionWidget(
                                   race: widget.race,
@@ -19685,22 +20430,22 @@ class _SessionResultsScreenState extends State<SessionResultsScreen> {
                                 OpenF1SessionWidget(
                                   race: widget.race,
                                   sessionName: 'Practice 1',
-                                  displayTitle: 't.fp1'.tr(),
+                                  displayTitle: context.l10n.fp1,
                                 ),
                                 OpenF1SessionWidget(
                                   race: widget.race,
                                   sessionName: 'Practice 2',
-                                  displayTitle: 't.fp2'.tr(),
+                                  displayTitle: context.l10n.fp2,
                                 ),
                                 OpenF1SessionWidget(
                                   race: widget.race,
                                   sessionName: 'Practice 3',
-                                  displayTitle: 't.fp3'.tr(),
+                                  displayTitle: context.l10n.fp3,
                                 ),
                                 OpenF1SessionWidget(
                                   race: widget.race,
                                   sessionName: 'Qualifying',
-                                  displayTitle: 't.qualifying'.tr(),
+                                  displayTitle: context.l10n.qualifying,
                                 ),
                                 OpenF1SessionWidget(
                                   race: widget.race,
@@ -19710,6 +20455,9 @@ class _SessionResultsScreenState extends State<SessionResultsScreen> {
                               ],
                             ),
                     ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -19765,21 +20513,74 @@ class _SingleSessionResultsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final desktopShell = _isDesktopShellLayout(context);
+    final ambientGlow = scheme.primary.withValues(
+      alpha: desktopShell ? 0.10 : 0.13,
+    );
+    final shellBase = Color.lerp(
+      scheme.surfaceContainerLow,
+      scheme.primary,
+      0.04,
+    )!;
+    final topInset = MediaQuery.paddingOf(context).top + kToolbarHeight;
+    final scrollTop = desktopShell ? 20.0 : topInset + 20;
+    final scrollPadding = EdgeInsets.fromLTRB(16, scrollTop, 16, 16);
+
     return Scaffold(
-      appBar: AppBar(title: Text(widget.displayTitle)),
-      body: RefreshIndicator(
-        onRefresh: _refreshData,
-        child: _isFetching
-            ? _buildSessionResultsSkeleton(context, race: widget.race)
-            : SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16),
-                child: OpenF1SessionWidget(
-                  race: widget.race,
-                  sessionName: widget.sessionName,
-                  displayTitle: widget.displayTitle,
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: !desktopShell,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        foregroundColor: desktopShell ? scheme.onSurface : null,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        forceMaterialTransparency: !desktopShell,
+        title: Text(widget.displayTitle),
+      ),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (!desktopShell)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: shellBase),
+                child: CustomPaint(
+                  painter: _AmbientGlowPainter(
+                    topLeftGlow: ambientGlow,
+                    bottomRightGlow: ambientGlow,
+                  ),
                 ),
               ),
+            ),
+          Positioned.fill(
+            child: RefreshIndicator(
+              onRefresh: _refreshData,
+              child: _isFetching
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: scrollPadding,
+                      children: [
+                        _buildSessionResultsSkeleton(
+                          context,
+                          race: widget.race,
+                        ),
+                      ],
+                    )
+                  : SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: scrollPadding,
+                      child: OpenF1SessionWidget(
+                        race: widget.race,
+                        sessionName: widget.sessionName,
+                        displayTitle: widget.displayTitle,
+                      ),
+                    ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -20048,7 +20849,7 @@ class OpenF1SessionWidget extends StatelessWidget {
             width: 34,
             height: 20,
             fit: BoxFit.contain,
-            semanticsLabel: '${entry.compound} ${'t.tyre'.tr()}',
+            semanticsLabel: '${entry.compound} ${context.l10n.tyre}',
           )
         else
           Text(
@@ -20339,14 +21140,14 @@ class OpenF1SessionWidget extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    buildCompactHeaderCell('t.driver'.tr(), flex: 6),
+                    buildCompactHeaderCell(context.l10n.driver, flex: 6),
                     buildCompactHeaderCell(
-                      't.finish'.tr(),
+                      context.l10n.finish,
                       flex: 4,
                       align: TextAlign.center,
                     ),
                     buildCompactHeaderCell(
-                      't.time'.tr(),
+                      context.l10n.time,
                       flex: 4,
                       align: TextAlign.right,
                     ),
@@ -20435,7 +21236,7 @@ class OpenF1SessionWidget extends StatelessWidget {
                     children: [
                       _buildCompactRaceDetailRow(
                         context,
-                        label: 't.best_lap'.tr(),
+                        label: context.l10n.best_lap,
                         child: buildValueText(
                           row.fastestLap,
                           strong: row.hasFastestLap,
@@ -20446,7 +21247,7 @@ class OpenF1SessionWidget extends StatelessWidget {
                       ),
                       _buildCompactRaceDetailRow(
                         context,
-                        label: 't.tyre'.tr(),
+                        label: context.l10n.tyre,
                         child: Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
@@ -20458,12 +21259,12 @@ class OpenF1SessionWidget extends StatelessWidget {
                       ),
                       _buildCompactRaceDetailRow(
                         context,
-                        label: 't.points'.tr(),
+                        label: context.l10n.points,
                         child: buildValueText(row.points, strong: true),
                       ),
                       _buildCompactRaceDetailRow(
                         context,
-                        label: 't.penalty'.tr(),
+                        label: context.l10n.penalty,
                         child: buildValueText(
                           penaltyText,
                           strong: penaltyText != '-',
@@ -20536,11 +21337,11 @@ class OpenF1SessionWidget extends StatelessWidget {
 
     String headerTitle() {
       if (_isPracticeSession) {
-        return 't.time'.tr();
+        return context.l10n.time;
       }
       return _isPracticeLikeSession
-          ? 't.time'.tr()
-          : 't.result'.tr();
+          ? context.l10n.time
+          : context.l10n.result;
     }
 
     String? qualifyingEliminationLabel(int rowIndex, int totalRows) {
@@ -20548,10 +21349,10 @@ class OpenF1SessionWidget extends StatelessWidget {
         return null;
       }
       if (rowIndex >= totalRows - 6) {
-        return 't.q1_out'.tr();
+        return context.l10n.q1_out;
       }
       if (rowIndex >= totalRows - 12) {
-        return 't.q2_out'.tr();
+        return context.l10n.q2_out;
       }
       return null;
     }
@@ -20585,9 +21386,9 @@ class OpenF1SessionWidget extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    buildCompactHeaderCell('t.driver'.tr(), flex: 6),
+                    buildCompactHeaderCell(context.l10n.driver, flex: 6),
                     buildCompactHeaderCell(
-                      't.pos'.tr(),
+                      context.l10n.pos,
                       flex: 3,
                       align: TextAlign.center,
                     ),
@@ -20708,7 +21509,7 @@ class OpenF1SessionWidget extends StatelessWidget {
                       if (_isPracticeSession)
                         _buildCompactRaceDetailRow(
                           context,
-                          label: 't.laps'.tr(),
+                          label: context.l10n.laps,
                           child: buildValueText(
                             row.totalLaps?.toString() ?? '-',
                             strong: true,
@@ -20716,7 +21517,7 @@ class OpenF1SessionWidget extends StatelessWidget {
                         ),
                       _buildCompactRaceDetailRow(
                         context,
-                        label: 't.tyre'.tr(),
+                        label: context.l10n.tyre,
                         child: buildDetailPanel(
                           _isPracticeSession
                               ? _buildTyreLapBreakdownCell(
@@ -20730,11 +21531,11 @@ class OpenF1SessionWidget extends StatelessWidget {
                       if (!_isPracticeSession && eliminationLabel != null)
                         _buildCompactRaceDetailRow(
                           context,
-                          label: 't.status'.tr(),
+                          label: context.l10n.status,
                           child: buildValueText(
                             eliminationLabel,
                             strong: true,
-                            color: eliminationLabel == 't.q1_out'.tr()
+                            color: eliminationLabel == context.l10n.q1_out
                                 ? tokens.statusError
                                 : tokens.statusWarning,
                           ),
@@ -21348,7 +22149,7 @@ class OpenF1SessionWidget extends StatelessWidget {
         if (sessionTime.isAfter(DateTime.now()) && !hasRaceData && !hasSessionData) {
           return buildEmpty(
             displayTitle,
-            '${'t.session_future'.tr()} ${sessionTime.toString().substring(0, 16)}',
+            '${context.l10n.session_future} ${sessionTime.toString().substring(0, 16)}',
           );
         }
         if (results == null && !SessionDataManager().isInitialized) {
@@ -21356,7 +22157,7 @@ class OpenF1SessionWidget extends StatelessWidget {
         }
         if (sessionName == 'Race') {
           if (raceResults == null || raceResults.isEmpty) {
-            return buildEmpty(displayTitle, 't.no_data_yet'.tr());
+            return buildEmpty(displayTitle, context.l10n.no_data_yet);
           }
 
           return Column(
@@ -21377,7 +22178,7 @@ class OpenF1SessionWidget extends StatelessWidget {
                     ),
                     IconButton(
                       icon: const Icon(Icons.fullscreen),
-                      tooltip: 't.fullscreen_table'.tr(),
+                      tooltip: context.l10n.fullscreen_table,
                       onPressed: () =>
                           _openFullscreenRaceResults(context, raceResults),
                     ),
@@ -21415,7 +22216,7 @@ class OpenF1SessionWidget extends StatelessWidget {
           );
         }
         if (results == null || results.isEmpty) {
-          return buildEmpty(displayTitle, 't.no_data_yet'.tr());
+          return buildEmpty(displayTitle, context.l10n.no_data_yet);
         }
 
         return Column(
@@ -21571,8 +22372,8 @@ class _FullscreenRaceResultsScreenState
               return ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(24),
-                children: const [
-                  Center(child: Text('No race results available yet.')),
+                children: [
+                  Center(child: Text(context.l10n.race_results_empty)),
                 ],
               );
             }
@@ -21606,121 +22407,6 @@ class _FullscreenRaceResultsScreenState
             );
           },
         ),
-      ),
-    );
-  }
-}
-
-class ChangelogScreen extends StatelessWidget {
-  const ChangelogScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final List<Map<String, dynamic>> changelog = [
-      {
-        'version': '1.0.0',
-        'date': 'Maart 2026',
-        'changes_en': [
-          'F1 Hub 1.0.0 is the first full-featured release with a layout tuned for desktop use, while still staying clear and readable on smaller screens.',
-          'Added driver and team comparison screens to place stats, performance, and key differences side by side.',
-          'Introduced visual timelines across the app, including driver performance history, team history, championship overviews, and points progression.',
-          'Expanded driver pages with a full career path, including previous teams before Formula 1 and the racing class for each step.',
-          'Upgraded Facts & Trivia from 2 to 5 items per driver, with localized content support.',
-          'Added full DNF overviews with the reason for each retirement, plus a compact expandable timeline.',
-          'Updated team championship sections with corrected title years and constructor title context, including the drivers involved.',
-          'Expanded team pages with historical naming, full driver line-ups including reserve drivers, and clearer roster timelines.',
-          'Refined the circuit pages with a more complete overview: layout image, direct key stats, Turn 1 distance, difficulty indicators, lap references, and supporting context.',
-          'Added live-updating session results with richer tables, tyre compounds, fastest lap highlights, penalties, and responsive sticky headers for easier reading on desktop.',
-          'Added quick map opening from the circuit page so the track location can be opened directly in Apple Maps or Google Maps.',
-          'Improved current-season content, data completeness, and overall consistency across circuits, drivers, teams, and session screens.',
-        ],
-        'changes_nl': [
-          'F1 Hub 1.0.0 is de eerste volledige release, met een lay-out die beter werkt op een vaste pc en tegelijk overzichtelijk blijft op kleinere schermen.',
-          'Vergelijkingsschermen toegevoegd voor coureurs en teams, zodat statistieken, prestaties en onderlinge verschillen direct naast elkaar zichtbaar zijn.',
-          'Visuele tijdlijnen toegevoegd in de app, waaronder coureurshistorie, teamgeschiedenis, kampioenschapsoverzichten en puntenverloop per seizoen.',
-          'Coureurspagina\'s uitgebreid met een volledig carrièrepad, inclusief eerdere teams van voor de Formule 1 en de klasse per stap.',
-          'Feiten & weetjes uitgebreid van 2 naar 5 items per coureur, met ondersteuning voor gelokaliseerde inhoud.',
-          'Alle uitvalbeurten opgenomen inclusief reden van uitval, verwerkt in een compacte en uitklapbare tijdlijn.',
-          'De kampioenschapssecties van teams bijgewerkt met gecorrigeerde titeljaren en extra context bij constructeurstitels, inclusief de betrokken coureurs.',
-          'Team pagina\'s uitgebreid met teamgeschiedenis, eerdere namen, volledige rijdersbezetting inclusief reservecoureurs en duidelijkere tijdlijnen.',
-          'De circuitpagina\'s zijn vernieuwd met een completer overzicht: lay-out afbeelding, direct zichtbare kerninformatie, afstand tot bocht 1, moeilijkheidsniveaus, rondereferenties en extra context.',
-          'Live sessieresultaten toegevoegd met uitgebreidere tabellen, bandensoorten, snelste ronde-markeringen, straffen en sticky headers die vooral op desktop prettiger werken.',
-          'Mogelijkheid toegevoegd om vanuit de circuitpagina direct Apple Maps of Google Maps te openen voor de locatie van het circuit.',
-          'De actuele seizoensdata, inhoudelijke volledigheid en algemene consistentie zijn verbeterd over circuits, coureurs, teams en sessieschermen.',
-        ],
-      },
-    ];
-
-    return Scaffold(
-      appBar: AppBar(title: Text('t.changelog'.tr())),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: changelog.length,
-        itemBuilder: (context, index) {
-          final entry = changelog[index];
-          final changes =
-              context.locale.languageCode == 'nl' || context.locale.languageCode == 'de'
-              ? entry['changes_nl']
-              : entry['changes_en'];
-          return Card(
-            margin: const EdgeInsets.only(bottom: 16),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '${'t.version'.tr()} ${entry['version']}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                          fontSize: 18,
-                        ),
-                      ),
-                      Text(
-                        entry['date'],
-                        style: TextStyle(
-                          color: isDark ? Colors.white54 : Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  ...changes.map<Widget>(
-                    (change) => Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            '• ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              change,
-                              style: TextStyle(
-                                color: isDark ? Colors.white70 : Colors.black87,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
       ),
     );
   }
@@ -21766,10 +22452,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Subscribes to locale (rebuild when app language changes).
+    final _ = Localizations.localeOf(context);
     final user = Supabase.instance.client.auth.currentUser;
+    final desktopShell = _isDesktopShellLayout(context);
+    final scheme = Theme.of(context).colorScheme;
+
     return Scaffold(
+      backgroundColor: desktopShell ? Colors.transparent : null,
       appBar: AppBar(
-        title: Text('t.profile'.tr()),
+        title: Text(context.l10n.profile),
+        backgroundColor: desktopShell ? Colors.transparent : null,
+        elevation: desktopShell ? 0 : null,
+        scrolledUnderElevation: desktopShell ? 0 : null,
+        foregroundColor: desktopShell ? scheme.onSurface : null,
         actions: _desktopAwareSettingsActions(context, widget.settingsMenu),
       ),
       body: user != null
@@ -21779,11 +22475,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24),
                   child: Consumer<ThemeController>(
-                    builder: (context, controller, _) {
+                    builder: (_, controller, _) {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _ProfileUserCard(email: user.email ?? user.phone ?? ''),
+                          const SizedBox(height: 24),
+                          const _ProfileLanguageCard(),
+                          const SizedBox(height: 24),
+                          const _ProfileAiStrategistPrefsCard(),
+                          const SizedBox(height: 24),
+                          const _ProfileCalendarPrefsCard(),
+                          const SizedBox(height: 24),
+                          const _ProfileLastPodiumPrefsCard(),
                           const SizedBox(height: 24),
                           Consumer<ProfileFavoritesNotifier>(
                             builder: (_, notifier, child) =>
@@ -21813,18 +22517,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             )
           : Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('t.login'.tr(), style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 16),
-                    FilledButton(
-                      onPressed: () => context.push(_loginPath()),
-                      child: Text('t.login'.tr()),
-                    ),
-                  ],
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: ProfileScreen._maxContentWidth),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Consumer<ThemeController>(
+                    builder: (_, controller, _) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            context.l10n.login,
+                            style: Theme.of(context).textTheme.titleMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          FilledButton(
+                            onPressed: () => context.push(_loginPath()),
+                            child: Text(context.l10n.login),
+                          ),
+                          const SizedBox(height: 24),
+                          const _ProfileLanguageCard(),
+                          const SizedBox(height: 24),
+                          _ProfileThemeModeCard(controller: controller),
+                          const SizedBox(height: 24),
+                          _ProfileBrandThemeCard(controller: controller),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -21854,18 +22575,18 @@ class _ProfileFavoritesCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(context.tr('t.favorite_team'), style: Theme.of(context).textTheme.titleMedium),
+            Text(context.l10n.favorite_team, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               initialValue: favorites.favoriteTeam != null && teamNames.contains(favorites.favoriteTeam)
                   ? favorites.favoriteTeam
                   : null,
               decoration: InputDecoration(
-                hintText: context.tr('t.select_favorite'),
+                hintText: context.l10n.select_favorite,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
               items: [
-                DropdownMenuItem<String>(value: null, child: Text(context.tr('t.select_favorite'))),
+                DropdownMenuItem<String>(value: null, child: Text(context.l10n.select_favorite)),
                 ...teamNames.map((t) => DropdownMenuItem(value: t, child: Text(t))),
               ],
               onChanged: (v) => onFavoritesChanged(ProfileFavorites(
@@ -21875,18 +22596,18 @@ class _ProfileFavoritesCard extends StatelessWidget {
               )),
             ),
             const SizedBox(height: 16),
-            Text(context.tr('t.favorite_driver'), style: Theme.of(context).textTheme.titleMedium),
+            Text(context.l10n.favorite_driver, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               initialValue: favorites.favoriteDriver != null && driverNames.contains(favorites.favoriteDriver)
                   ? favorites.favoriteDriver
                   : null,
               decoration: InputDecoration(
-                hintText: context.tr('t.select_favorite'),
+                hintText: context.l10n.select_favorite,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
               items: [
-                DropdownMenuItem<String>(value: null, child: Text(context.tr('t.select_favorite'))),
+                DropdownMenuItem<String>(value: null, child: Text(context.l10n.select_favorite)),
                 ...driverNames.map((d) => DropdownMenuItem(value: d, child: Text(d))),
               ],
               onChanged: (v) => onFavoritesChanged(ProfileFavorites(
@@ -21896,21 +22617,23 @@ class _ProfileFavoritesCard extends StatelessWidget {
               )),
             ),
             const SizedBox(height: 16),
-            Text(context.tr('t.favorite_circuit'), style: Theme.of(context).textTheme.titleMedium),
+            Text(context.l10n.favorite_circuit, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               initialValue: favorites.favoriteCircuit != null && circuitKeys.contains(favorites.favoriteCircuit)
                   ? favorites.favoriteCircuit
                   : null,
               decoration: InputDecoration(
-                hintText: context.tr('t.select_favorite'),
+                hintText: context.l10n.select_favorite,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
               items: [
-                DropdownMenuItem<String>(value: null, child: Text(context.tr('t.select_favorite'))),
+                DropdownMenuItem<String>(value: null, child: Text(context.l10n.select_favorite)),
                 ...circuitKeys.map((key) => DropdownMenuItem(
                   value: key,
-                  child: Text(context.tr('t.gp_$key')),
+                  child: Text(
+                    l10nGrandPrix(context.l10n, key),
+                  ),
                 )),
               ],
               onChanged: (v) => onFavoritesChanged(ProfileFavorites(
@@ -21957,6 +22680,248 @@ class _ProfileUserCard extends StatelessWidget {
   }
 }
 
+class _ProfileAiStrategistPrefsCard extends StatelessWidget {
+  const _ProfileAiStrategistPrefsCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AiStrategistPrefsNotifier>(
+      builder: (_, notifier, _) {
+        final p = notifier.value;
+        final disabled = p.cardDisabled;
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.ai_prefs_section_title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  context.l10n.ai_prefs_section_subtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                const SizedBox(height: 12),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(context.l10n.ai_prefs_disable_card),
+                  value: p.cardDisabled,
+                  onChanged: (v) => notifier.update(p.copyWith(cardDisabled: v)),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(context.l10n.ai_prefs_hide_teambattle),
+                  subtitle: Text(context.l10n.ai_prefs_hide_teambattle_hint),
+                  value: p.hideTeambattle,
+                  onChanged: disabled
+                      ? null
+                      : (v) => notifier.update(p.copyWith(hideTeambattle: v)),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(context.l10n.ai_prefs_hide_coach_corner),
+                  subtitle: Text(context.l10n.ai_prefs_hide_coach_corner_hint),
+                  value: p.hideCoachCorner,
+                  onChanged: disabled
+                      ? null
+                      : (v) => notifier.update(p.copyWith(hideCoachCorner: v)),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(context.l10n.ai_prefs_hide_team_vibe),
+                  subtitle: Text(context.l10n.ai_prefs_hide_team_vibe_hint),
+                  value: p.hideTeamVibe,
+                  onChanged: disabled
+                      ? null
+                      : (v) => notifier.update(p.copyWith(hideTeamVibe: v)),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ProfileLastPodiumPrefsCard extends StatelessWidget {
+  const _ProfileLastPodiumPrefsCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<LastPodiumPrefsNotifier>(
+      builder: (_, notifier, _) {
+        final p = notifier.value;
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.last_podium_prefs_section_title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  context.l10n.last_podium_prefs_section_subtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  context.l10n.last_podium_prefs_races_label,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 8),
+                SegmentedButton<int>(
+                  segments: const [
+                    ButtonSegment(value: 1, label: Text('1')),
+                    ButtonSegment(value: 2, label: Text('2')),
+                    ButtonSegment(value: 3, label: Text('3')),
+                  ],
+                  selected: {p.raceCount},
+                  onSelectionChanged: (next) {
+                    if (next.isEmpty) return;
+                    notifier.update(p.copyWith(raceCount: next.first));
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ProfileCalendarPrefsCard extends StatelessWidget {
+  const _ProfileCalendarPrefsCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<CalendarPrefsNotifier>(
+      builder: (_, notifier, _) {
+        final p = notifier.value;
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.calendar_prefs_section_title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  context.l10n.calendar_prefs_section_subtitle,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                const SizedBox(height: 12),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(context.l10n.calendar_prefs_hide_cancelled),
+                  subtitle:
+                      Text(context.l10n.calendar_prefs_hide_cancelled_hint),
+                  value: p.hideCancelledRaces,
+                  onChanged: (v) =>
+                      notifier.update(p.copyWith(hideCancelledRaces: v)),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ProfileLanguageCard extends StatefulWidget {
+  const _ProfileLanguageCard();
+
+  @override
+  State<_ProfileLanguageCard> createState() => _ProfileLanguageCardState();
+}
+
+class _ProfileLanguageCardState extends State<_ProfileLanguageCard> {
+  Locale _selectedLocale(List<Locale> supported) {
+    final current = Localizations.localeOf(context);
+    return supported.firstWhere(
+      (l) => l.languageCode == current.languageCode,
+      orElse: () => supported.first,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final labels = _f1LanguageDisplayNames(AppLocalizations.supportedLocales);
+    final supported = AppLocalizations.supportedLocales;
+    final value = _selectedLocale(supported);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  '🌐',
+                  style: TextStyle(
+                    fontSize: 22,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  context.l10n.language,
+                  style: theme.textTheme.titleMedium,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<Locale>(
+              value: value,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+              items: [
+                for (final loc in supported)
+                  DropdownMenuItem<Locale>(
+                    value: loc,
+                    child: Text(labels[loc] ?? loc.languageCode),
+                  ),
+              ],
+              onChanged: (loc) {
+                if (loc != null) {
+                  F1HubApp.setAppLocale(context, loc);
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ProfileThemeModeCard extends StatelessWidget {
   final ThemeController controller;
 
@@ -21971,15 +22936,15 @@ class _ProfileThemeModeCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              't.theme_mode'.tr(),
+              context.l10n.theme_mode,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),
             SegmentedButton<ThemeMode>(
               segments: [
-                ButtonSegment(value: ThemeMode.light, label: Text('t.theme_mode_light'.tr())),
-                ButtonSegment(value: ThemeMode.dark, label: Text('t.theme_mode_dark'.tr())),
-                ButtonSegment(value: ThemeMode.system, label: Text('t.theme_mode_system'.tr())),
+                ButtonSegment(value: ThemeMode.light, label: Text(context.l10n.theme_mode_light)),
+                ButtonSegment(value: ThemeMode.dark, label: Text(context.l10n.theme_mode_dark)),
+                ButtonSegment(value: ThemeMode.system, label: Text(context.l10n.theme_mode_system)),
               ],
               selected: {controller.themeMode},
               onSelectionChanged: (modes) => controller.setThemeMode(modes.first),
@@ -22053,12 +23018,12 @@ class _ProfileBrandThemeCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              't.team_theme'.tr(),
+              context.l10n.team_theme,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),
             LayoutBuilder(
-              builder: (context, constraints) {
+              builder: (layoutContext, constraints) {
                 const crossAxisCount = 3;
                 const spacing = 8.0;
                 final itemWidth = (constraints.maxWidth - (crossAxisCount - 1) * spacing) / crossAxisCount;
@@ -22071,7 +23036,7 @@ class _ProfileBrandThemeCard extends StatelessWidget {
                         width: itemWidth,
                         height: (itemWidth * 0.5).clamp(40.0, 56.0),
                         child: _buildTeamTile(
-                          context,
+                          layoutContext,
                           teamScheme: F1TeamSchemes.schemes[i],
                           index: i,
                           isSelected: controller.schemeIndex == i,
@@ -22099,7 +23064,7 @@ class _ProfileLogoutButton extends StatelessWidget {
     return OutlinedButton.icon(
       onPressed: onPressed,
       icon: const Icon(Icons.logout),
-      label: Text('t.logout'.tr()),
+      label: Text(context.l10n.logout),
       style: OutlinedButton.styleFrom(
         foregroundColor: Theme.of(context).colorScheme.error,
         side: BorderSide(color: Theme.of(context).colorScheme.error.withValues(alpha: 0.5)),
@@ -22116,10 +23081,10 @@ class PlaceholderSettingsScreen extends StatelessWidget {
 
 
     return Scaffold(
-      appBar: AppBar(title: Text('t.placeholder_page'.tr())),
+      appBar: AppBar(title: Text(context.l10n.placeholder_page)),
       body: Center(
         child: Text(
-          't.placeholder_page_empty'.tr(),
+          context.l10n.placeholder_page_empty,
           textAlign: TextAlign.center,
         ),
       ),
