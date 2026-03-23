@@ -68,6 +68,15 @@ class F1HubAppHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Phone: no grey title pill — keeps status-bar inset + spacing below.
+    if (!isDesktopLayout) {
+      final top = MediaQuery.paddingOf(context).top;
+      return Padding(
+        padding: EdgeInsets.only(top: top, bottom: 8),
+        child: const SizedBox.shrink(),
+      );
+    }
+
     final scheme = Theme.of(context).colorScheme;
     final f1Ui =
         Theme.of(context).extension<F1UiTheme>() ?? F1UiTheme.fallback();

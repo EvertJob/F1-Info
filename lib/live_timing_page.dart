@@ -939,7 +939,7 @@ class _LiveTimingPageState extends State<LiveTimingPage>
   DisplaySettingsController? _displaySettingsCtrl;
   WebSocketChannel? _channel;
   StreamSubscription? _subscription;
-  bool _useTestData = true; // Silverstone replay by default
+  final bool _useTestData = true; // Silverstone replay by default
   /// Driver ID -> { position, lastLapTime, gapToLeader, team, ... }
   Map<String, dynamic> _driverStorage = {};
   List<String> _sortedDriverIds = [];
@@ -951,7 +951,7 @@ class _LiveTimingPageState extends State<LiveTimingPage>
   double? _sessionFirstTsMs; // First timestamp in ms (for slider range)
   double? _sessionLastTsMs; // Last timestamp in ms (for slider range)
   /// Total race laps for leader line "LAP n/N" (default Silverstone GP).
-  int _raceTotalLaps = _kDefaultRaceTotalLaps;
+  final int _raceTotalLaps = _kDefaultRaceTotalLaps;
   /// Sector status: driverNumber -> {sectorIndex: SectorStatus}
   /// 2064 = purple (overall best), 2048 = green (personal best), else = yellow (slower)
   Map<int, Map<int, SectorStatus>> _sectorHighlights = {};
@@ -1070,7 +1070,7 @@ class _LiveTimingPageState extends State<LiveTimingPage>
     if (ctrl == null) return;
     if (Supabase.instance.client.auth.currentUser == null) return;
     if (_replayFrameCount <= 0) return;
-    var label = '${_sessionTypeLabel} ${_sessionPartLabel}'.trim();
+    var label = '$_sessionTypeLabel $_sessionPartLabel'.trim();
     if (label.isEmpty) {
       label = widget.resumeSessionLabelFromRoute?.trim() ?? '';
     }
@@ -1484,11 +1484,11 @@ class _LiveTimingPageState extends State<LiveTimingPage>
     }
     _timingAppDataGridSeeded = seededDriverCount >= 14;
 
-    final _trus = _driverStorage['63']?['TyreCompound']?.toString();
-    final _tper = _driverStorage['11']?['TyreCompound']?.toString();
-    debugPrint('[TYRE-TRACE] After _initializeGridFromAppData: 63=$_trus, 11=$_tper, '
+    final trus = _driverStorage['63']?['TyreCompound']?.toString();
+    final tper = _driverStorage['11']?['TyreCompound']?.toString();
+    debugPrint('[TYRE-TRACE] After _initializeGridFromAppData: 63=$trus, 11=$tper, '
         'seededCount=$seededDriverCount, seeded=$_timingAppDataGridSeeded, storage=${_driverStorage.length} drivers');
-    if (_trus != 'M' || _tper != 'H') {
+    if (trus != 'M' || tper != 'H') {
       debugPrint('[TYRE-TRACE]   63 Stints: ${_driverStorage['63']?['Stints']}');
       debugPrint('[TYRE-TRACE]   11 Stints: ${_driverStorage['11']?['Stints']}');
     }

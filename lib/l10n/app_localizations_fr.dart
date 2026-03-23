@@ -1500,6 +1500,42 @@ class AppLocalizationsFr extends AppLocalizations {
   String get news_title => 'Actus F1';
 
   @override
+  String get news_nav => 'Actus';
+
+  @override
+  String get news_empty => 'Aucun article pour le moment. Tirez pour actualiser.';
+
+  @override
+  String get news_settings_title => 'Flux d\'\'actualités';
+
+  @override
+  String get news_settings_subtitle => 'Ajoutez des URL RSS ou Atom. Elles sont chargées dans l\'\'onglet Actus (plus récent en premier).';
+
+  @override
+  String get news_settings_url_hint => 'https://exemple.fr/flux.xml';
+
+  @override
+  String get news_settings_add => 'Ajouter';
+
+  @override
+  String get news_settings_your_feeds => 'Vos flux';
+
+  @override
+  String get news_settings_no_feeds => 'Aucun flux pour l\'\'instant. Ajoutez une URL ci-dessus.';
+
+  @override
+  String get news_settings_invalid_url => 'Saisissez une URL http(s) valide.';
+
+  @override
+  String get news_settings_duplicate_url => 'Cette URL est déjà dans la liste.';
+
+  @override
+  String get news_settings_save_failed => 'Enregistrement impossible. Réessayez.';
+
+  @override
+  String get news_settings_stream_error => 'Impossible de s\'\'abonner aux mises à jour du profil.';
+
+  @override
   String get race_results_empty => 'Aucun résultat de course pour le moment.';
 
   @override

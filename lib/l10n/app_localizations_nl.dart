@@ -1500,6 +1500,42 @@ class AppLocalizationsNl extends AppLocalizations {
   String get news_title => 'F1 Nieuws';
 
   @override
+  String get news_nav => 'Nieuws';
+
+  @override
+  String get news_empty => 'Geen artikelen op dit moment. Trek om te vernieuwen.';
+
+  @override
+  String get news_settings_title => 'Nieuwsfeeds';
+
+  @override
+  String get news_settings_subtitle => 'Voeg RSS- of Atom-URL\'\'s toe. Ze worden op het tabblad Nieuws geladen (nieuwste eerst).';
+
+  @override
+  String get news_settings_url_hint => 'https://voorbeeld.nl/feed.xml';
+
+  @override
+  String get news_settings_add => 'Toevoegen';
+
+  @override
+  String get news_settings_your_feeds => 'Jouw feeds';
+
+  @override
+  String get news_settings_no_feeds => 'Nog geen feeds. Voeg hierboven een URL toe.';
+
+  @override
+  String get news_settings_invalid_url => 'Voer een geldige http(s)-URL in.';
+
+  @override
+  String get news_settings_duplicate_url => 'Deze URL staat al in je lijst.';
+
+  @override
+  String get news_settings_save_failed => 'Opslaan mislukt. Probeer opnieuw.';
+
+  @override
+  String get news_settings_stream_error => 'Kon profiel-updates niet ontvangen.';
+
+  @override
   String get race_results_empty => 'Nog geen race-resultaten beschikbaar.';
 
   @override

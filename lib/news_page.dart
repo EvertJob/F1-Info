@@ -1,66 +1,351 @@
+import 'dart:async' show unawaited;
+import 'dart:convert' show utf8;
+import 'dart:ui' as ui;
+
+import 'package:f1/browser_bridge.dart';
+import 'package:f1/news_feeds_service.dart';
+import 'package:f1/theme/f1_theme_tokens.dart';
+import 'package:f1/theme/f1_ui_theme.dart';
 import 'package:f1/utils/l10n_extension.dart';
+import 'package:f1/widgets/f1_module.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:xml/xml.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:rss_dart/domain/atom_feed.dart';
+import 'package:rss_dart/domain/atom_item.dart';
+import 'package:rss_dart/domain/rss_feed.dart';
+import 'package:rss_dart/domain/rss_item.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class NewsPage extends StatefulWidget {
+/// RSS/Atom parsing uses [rss_dart] (webfeed fork). `webfeed_plus` conflicts with
+/// this app package stack (`intl ^0.20`).
+bool _isDesktopShellLayout(BuildContext context) =>
+    MediaQuery.sizeOf(context).width >= 600;
+
+String _stripHtml(String raw) {
+  return raw
+      .replaceAll(RegExp(r'<[^>]*>'), ' ')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
+}
+
+DateTime? _parseFeedDate(String? raw) {
+  if (raw == null) return null;
+  final t = raw.trim();
+  if (t.isEmpty) return null;
+  try {
+    return parseHttpDate(t);
+  } catch (_) {
+    return DateTime.tryParse(t);
+  }
+}
+
+Uri _allOriginsUri(String feedUrl) {
+  final enc = Uri.encodeComponent(feedUrl);
+  // Avoid stale disk-cache 200s (e.g. old HTML/404 bodies) breaking the parser.
+  final cb = DateTime.now().millisecondsSinceEpoch;
+  return Uri.parse('https://api.allorigins.win/raw?url=$enc&nocache=$cb');
+}
+
+Uri _corsProxyIoUri(String feedUrl) {
+  return Uri.parse(
+    'https://corsproxy.io/?${Uri.encodeComponent(feedUrl)}',
+  );
+}
+
+bool _looksLikeFeedMarkup(String body) {
+  if (body.isEmpty) return false;
+  var s = body.trimLeft();
+  if (s.startsWith('\uFEFF')) s = s.substring(1).trimLeft();
+  final headLen = s.length > 800 ? 800 : s.length;
+  final head = s.substring(0, headLen).toLowerCase();
+  return head.contains('<rss') || head.contains('<feed');
+}
+
+bool _looksLikeHtmlDocument(String body) {
+  final lower = body.toLowerCase();
+  return lower.contains('<!doctype') ||
+      lower.contains('<html') ||
+      lower.contains('<head>');
+}
+
+String? _atomItemLink(AtomItem item) {
+  for (final l in item.links) {
+    final rel = l.rel;
+    if (rel == null || rel == 'alternate') {
+      final h = l.href?.trim();
+      if (h != null && h.isNotEmpty) return h;
+    }
+  }
+  for (final l in item.links) {
+    final h = l.href?.trim();
+    if (h != null && h.isNotEmpty) return h;
+  }
+  final id = item.id?.trim();
+  if (id != null && id.isNotEmpty && id.startsWith('http')) return id;
+  return null;
+}
+
+String? _atomItemAuthor(AtomItem item) {
+  if (item.authors.isEmpty) return null;
+  return item.authors.first.name?.trim();
+}
+
+List<NewsArticle> _articlesFromRssXml(String xml, {required String sourceUrl}) {
+  try {
+    final feed = RssFeed.parse(xml);
+    final host = Uri.tryParse(sourceUrl)?.host ?? '';
+    final out = <NewsArticle>[];
+    for (final RssItem item in feed.items) {
+      final title = item.title?.trim() ?? '';
+      var link = item.link?.trim() ?? '';
+      if (link.isEmpty) {
+        final g = item.guid?.trim() ?? '';
+        if (g.startsWith('http')) link = g;
+      }
+      if (title.isEmpty || link.isEmpty) continue;
+      final desc = _stripHtml(item.description ?? '');
+      final author = item.author?.trim().isNotEmpty == true
+          ? item.author!.trim()
+          : item.dc?.creator?.trim();
+      out.add(
+        NewsArticle(
+          title: title,
+          link: link,
+          description: desc,
+          author: author,
+          published: _parseFeedDate(item.pubDate),
+          sourceLabel: host,
+        ),
+      );
+    }
+    return out;
+  } catch (_) {
+    return _articlesFromAtomXml(xml, sourceUrl: sourceUrl);
+  }
+}
+
+List<NewsArticle> _articlesFromAtomXml(String xml, {required String sourceUrl}) {
+  try {
+    final feed = AtomFeed.parse(xml);
+    final host = Uri.tryParse(sourceUrl)?.host ?? '';
+    final out = <NewsArticle>[];
+    for (final AtomItem item in feed.items) {
+      final link = _atomItemLink(item);
+      final title = item.title?.trim() ?? '';
+      if (link == null || title.isEmpty) continue;
+      final desc = _stripHtml(
+        (item.summary ?? item.content ?? '').trim(),
+      );
+      final dateRaw = item.published ?? item.updated;
+      out.add(
+        NewsArticle(
+          title: title,
+          link: link,
+          description: desc,
+          author: _atomItemAuthor(item),
+          published: _parseFeedDate(dateRaw),
+          sourceLabel: host,
+        ),
+      );
+    }
+    return out;
+  } catch (_) {
+    return [];
+  }
+}
+
+Future<List<NewsArticle>> _fetchSingleFeed(String feedUrl) async {
+  const headers = {
+    'User-Agent': 'F1Hub/1.0 (+https://f1hub.app)',
+    'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*',
+  };
+
+  List<NewsArticle> parseBodyBytes(List<int> bytes) {
+    return _articlesFromRssXml(utf8.decode(bytes), sourceUrl: feedUrl);
+  }
+
+  try {
+    if (kIsWeb) {
+      final r1 = await http.get(_allOriginsUri(feedUrl), headers: headers);
+      if (r1.statusCode != 200) return [];
+
+      final body1 = utf8.decode(r1.bodyBytes);
+      var articles = parseBodyBytes(r1.bodyBytes);
+      if (articles.isNotEmpty) return articles;
+
+      // Cached or proxy HTML (404 page) — not RSS; try another CORS proxy.
+      final suspicious = !_looksLikeFeedMarkup(body1) || _looksLikeHtmlDocument(body1);
+      if (suspicious) {
+        final r2 = await http.get(_corsProxyIoUri(feedUrl), headers: headers);
+        if (r2.statusCode == 200) {
+          articles = parseBodyBytes(r2.bodyBytes);
+        }
+      }
+      return articles;
+    }
+
+    final r = await http.get(Uri.parse(feedUrl), headers: headers);
+    if (r.statusCode != 200) return [];
+    return parseBodyBytes(r.bodyBytes);
+  } catch (_) {
+    return [];
+  }
+}
+
+Future<List<NewsArticle>> _fetchAndMergeFeeds(List<String> urls) async {
+  if (urls.isEmpty) return [];
+  final results = await Future.wait(urls.map(_fetchSingleFeed));
+  final merged = <NewsArticle>[];
+  for (final batch in results) {
+    merged.addAll(batch);
+  }
+  final epoch = DateTime.fromMillisecondsSinceEpoch(0);
+  merged.sort((a, b) {
+    final da = a.published ?? epoch;
+    final db = b.published ?? epoch;
+    final c = db.compareTo(da);
+    if (c != 0) return c;
+    return a.title.compareTo(b.title);
+  });
+  return merged;
+}
+
+/// Public model for tests / reuse.
+@immutable
+class NewsArticle {
+  const NewsArticle({
+    required this.title,
+    required this.link,
+    required this.description,
+    this.author,
+    this.published,
+    this.sourceLabel = '',
+  });
+
+  final String title;
+  final String link;
+  final String description;
+  final String? author;
+  final DateTime? published;
+  final String sourceLabel;
+}
+
+class NewsPage extends StatelessWidget {
   const NewsPage({super.key});
 
   @override
-  State<NewsPage> createState() => _NewsPageState();
+  Widget build(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      return NewsFeedView(
+        feedUrls: List<String>.from(kDefaultNewsFeedUrls),
+      );
+    }
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: NewsFeedsService.instance.watchProfileFeeds(user.id),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            !snapshot.hasData) {
+          return const _NewsLoadingShell();
+        }
+        if (snapshot.hasError) {
+          return NewsFeedView(
+            feedUrls: List<String>.from(kDefaultNewsFeedUrls),
+            streamError: snapshot.error,
+          );
+        }
+        final rows = snapshot.data;
+        List<String> urls = List<String>.from(kDefaultNewsFeedUrls);
+        if (rows != null && rows.isNotEmpty) {
+          urls = NewsFeedsService.parseNewsFeeds(rows.first['news_feeds']);
+        }
+        return NewsFeedView(
+          key: ValueKey<String>(urls.join('|')),
+          feedUrls: urls,
+        );
+      },
+    );
+  }
 }
 
-class _NewsPageState extends State<NewsPage> {
-  List<_NewsItem> _items = [];
+class _NewsLoadingShell extends StatelessWidget {
+  const _NewsLoadingShell();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final desktopShell = _isDesktopShellLayout(context);
+    return Scaffold(
+      backgroundColor: desktopShell ? Colors.transparent : null,
+      appBar: AppBar(
+        title: Text(context.l10n.news_title),
+        backgroundColor: desktopShell ? Colors.transparent : null,
+        elevation: desktopShell ? 0 : null,
+        scrolledUnderElevation: desktopShell ? 0 : null,
+        foregroundColor: desktopShell ? scheme.onSurface : null,
+      ),
+      body: const Center(child: CircularProgressIndicator()),
+    );
+  }
+}
+
+class NewsFeedView extends StatefulWidget {
+  const NewsFeedView({
+    super.key,
+    required this.feedUrls,
+    this.streamError,
+  });
+
+  final List<String> feedUrls;
+  final Object? streamError;
+
+  @override
+  State<NewsFeedView> createState() => _NewsFeedViewState();
+}
+
+class _NewsFeedViewState extends State<NewsFeedView> {
+  List<NewsArticle> _items = [];
   bool _loading = true;
   String? _error;
 
   @override
   void initState() {
     super.initState();
-    _fetchNews();
+    unawaited(_load());
   }
 
-  Future<void> _fetchNews() async {
+  @override
+  void didUpdateWidget(covariant NewsFeedView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_sameUrlLists(oldWidget.feedUrls, widget.feedUrls)) {
+      unawaited(_load());
+    }
+  }
+
+  bool _sameUrlLists(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  Future<void> _load() async {
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
-      final feeds = [
-        'https://racingnews365.nl/feed/news.xml',
-        'https://www.formula1.com/en/latest/all.xml',
-      ];
-      final responses = await Future.wait(
-        feeds.map((url) => http.get(Uri.parse(url))),
-      );
-      final items = <_NewsItem>[];
-      for (final response in responses) {
-        if (response.statusCode == 200) {
-          final xml = XmlDocument.parse(response.body);
-          final rssItems = xml.findAllElements('item');
-          for (final item in rssItems) {
-            final title = item.getElement('title')?.text ?? '';
-            final link = item.getElement('link')?.text ?? '';
-            final pubDate = item.getElement('pubDate')?.text ?? '';
-            final description = item.getElement('description')?.text ?? '';
-            items.add(
-              _NewsItem(
-                title: title,
-                link: link,
-                pubDate: pubDate,
-                description: description,
-              ),
-            );
-          }
-        }
-      }
-      items.sort((a, b) => b.pubDate.compareTo(a.pubDate));
+      final items = await _fetchAndMergeFeeds(widget.feedUrls);
+      if (!mounted) return;
       setState(() {
         _items = items;
         _loading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _loading = false;
@@ -68,65 +353,239 @@ class _NewsPageState extends State<NewsPage> {
     }
   }
 
+  void _openArticle(String url) => openExternalUrl(url);
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final desktopShell = _isDesktopShellLayout(context);
+    final f1Ui = theme.extension<F1UiTheme>() ?? F1UiTheme.fallback();
+    final tokens = theme.extension<F1ThemeTokens>();
+    final panelStrong =
+        tokens?.panelStrong ?? scheme.surfaceContainerHighest;
+
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.news_title)),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-          ? Center(child: Text(context.l10n.news_load_error('$_error')))
-          : RefreshIndicator(
-              onRefresh: _fetchNews,
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: _items.length,
-                itemBuilder: (context, index) {
-                  final item = _items[index];
-                  return Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 2,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: ListTile(
-                      title: Text(
-                        item.title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                      subtitle: Text(
-                        item.pubDate,
-                        style: TextStyle(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      onTap: () {
-                        // Open link in browser
-                        // ...existing code...
-                      },
-                    ),
-                  );
-                },
+      backgroundColor: desktopShell ? Colors.transparent : null,
+      appBar: AppBar(
+        title: Text(context.l10n.news_title),
+        backgroundColor: desktopShell ? Colors.transparent : null,
+        elevation: desktopShell ? 0 : null,
+        scrolledUnderElevation: desktopShell ? 0 : null,
+        foregroundColor: desktopShell ? scheme.onSurface : null,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded),
+            tooltip:
+                MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
+            onPressed: _load,
+          ),
+        ],
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (widget.streamError != null)
+            Material(
+              color: scheme.errorContainer.withValues(alpha: 0.9),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                child: Text(
+                  context.l10n.news_load_error('${widget.streamError}'),
+                  style: TextStyle(
+                    color: scheme.onErrorContainer,
+                    fontSize: 13,
+                  ),
+                ),
               ),
             ),
+          Expanded(
+            child: _loading
+                ? const Center(child: CircularProgressIndicator())
+                : _error != null
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Text(
+                        context.l10n.news_load_error(_error!),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: scheme.error),
+                      ),
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: _load,
+                    child: _items.isEmpty
+                        ? ListView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.all(24),
+                            children: [
+                              SizedBox(
+                                height:
+                                    MediaQuery.sizeOf(context).height * 0.2,
+                              ),
+                              Text(
+                                context.l10n.news_empty,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          )
+                        : ListView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                            itemCount: _items.length,
+                            itemBuilder: (context, index) {
+                              final item = _items[index];
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: _NewsGlassArticleTile(
+                                  article: item,
+                                  f1Ui: f1Ui,
+                                  panelStrong: panelStrong,
+                                  isDark: theme.brightness == Brightness.dark,
+                                  onTap: () => _openArticle(item.link),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _NewsItem {
-  final String title;
-  final String link;
-  final String pubDate;
-  final String description;
-
-  _NewsItem({
-    required this.title,
-    required this.link,
-    required this.pubDate,
-    required this.description,
+class _NewsGlassArticleTile extends StatelessWidget {
+  const _NewsGlassArticleTile({
+    required this.article,
+    required this.f1Ui,
+    required this.panelStrong,
+    required this.isDark,
+    required this.onTap,
   });
+
+  final NewsArticle article;
+  final F1UiTheme f1Ui;
+  final Color panelStrong;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final radius = f1Ui.cardBorderRadius.clamp(12.0, 24.0);
+
+    final metaBits = <String>[
+      if (article.author != null && article.author!.isNotEmpty)
+        article.author!,
+      if (article.published != null)
+        MaterialLocalizations.of(context).formatShortDate(article.published!),
+      if (article.sourceLabel.isNotEmpty) article.sourceLabel,
+    ];
+
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          article.title,
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 14,
+            letterSpacing: 0.4,
+            height: 1.25,
+            color: scheme.onSurface,
+          ),
+        ),
+        if (metaBits.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            metaBits.join(' · '),
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.6,
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+        if (article.description.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            article.description,
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 13,
+              height: 1.35,
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ],
+    );
+
+    Widget tile({
+      required Color bg,
+      required List<BoxShadow>? shadow,
+    }) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(radius),
+          onTap: onTap,
+          child: F1Module(
+            fillWidth: true,
+            borderRadius: radius,
+            backgroundColor: bg,
+            showFadingBorder: true,
+            boxShadow: shadow,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+              child: content,
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (f1Ui.glassBlur <= 0) {
+      return tile(
+        bg: scheme.surface,
+        shadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      );
+    }
+
+    final glassFill = panelStrong.withValues(
+      alpha: isDark ? 0.42 : 0.55,
+    );
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(
+          sigmaX: f1Ui.glassBlur * 0.45,
+          sigmaY: f1Ui.glassBlur * 0.45,
+        ),
+        child: tile(
+          bg: glassFill,
+          shadow: f1Ui.moduleShadow,
+        ),
+      ),
+    );
+  }
 }

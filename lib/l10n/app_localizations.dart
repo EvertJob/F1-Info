@@ -2937,6 +2937,78 @@ abstract class AppLocalizations {
   /// **'F1 News'**
   String get news_title;
 
+  /// No description provided for @news_nav.
+  ///
+  /// In en, this message translates to:
+  /// **'News'**
+  String get news_nav;
+
+  /// No description provided for @news_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No articles right now. Pull to refresh.'**
+  String get news_empty;
+
+  /// No description provided for @news_settings_title.
+  ///
+  /// In en, this message translates to:
+  /// **'News feeds'**
+  String get news_settings_title;
+
+  /// No description provided for @news_settings_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add RSS or Atom URLs. They are loaded on the News tab (newest first).'**
+  String get news_settings_subtitle;
+
+  /// No description provided for @news_settings_url_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'https://example.com/feed.xml'**
+  String get news_settings_url_hint;
+
+  /// No description provided for @news_settings_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get news_settings_add;
+
+  /// No description provided for @news_settings_your_feeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Your feeds'**
+  String get news_settings_your_feeds;
+
+  /// No description provided for @news_settings_no_feeds.
+  ///
+  /// In en, this message translates to:
+  /// **'No feeds yet. Add a URL above.'**
+  String get news_settings_no_feeds;
+
+  /// No description provided for @news_settings_invalid_url.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid http(s) URL.'**
+  String get news_settings_invalid_url;
+
+  /// No description provided for @news_settings_duplicate_url.
+  ///
+  /// In en, this message translates to:
+  /// **'That URL is already in your list.'**
+  String get news_settings_duplicate_url;
+
+  /// No description provided for @news_settings_save_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save. Try again.'**
+  String get news_settings_save_failed;
+
+  /// No description provided for @news_settings_stream_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not subscribe to profile updates.'**
+  String get news_settings_stream_error;
+
   /// No description provided for @race_results_empty.
   ///
   /// In en, this message translates to:

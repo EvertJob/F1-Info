@@ -1,5 +1,6 @@
 /// Utilities for filtering and grouping driver names with case- and
 /// diacritic-insensitive comparison, while preserving originals for display.
+library;
 
 /// Comprehensive map of accented/Latin characters to ASCII equivalents.
 const _diacriticMap = {

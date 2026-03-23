@@ -43,6 +43,8 @@ import 'data/local/hive/hive_bootstrap.dart';
 import 'browser_bridge.dart' as browser_bridge;
 import 'open_meteo_api.dart';
 import 'changelog_page.dart';
+import 'news_page.dart';
+import 'widgets/news_settings.dart';
 import 'coach_corner_data.dart';
 part 'f1_data.dart';
 part 'widgets/my_paddock_widget.dart';
@@ -3115,6 +3117,7 @@ Driver? _getTeammate2026(Driver driver) {
 String _circuitsPath() => '/circuits';
 String _driversPath() => '/drivers';
 String _teamsPath() => '/teams';
+String _newsPath() => '/news';
 String _changelogPath() => '/profile/changelog';
 String _placeholderPagePath() => '/placeholder';
 String _loginPath() => '/login';
@@ -3634,6 +3637,14 @@ class _F1HubAppState extends State<F1HubApp> {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                path: _newsPath(),
+                builder: (context, state) => const NewsPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
                 path: _profilePath(),
                 builder: (context, state) =>
                     ProfileScreen(settingsMenu: _buildSettingsMenu(context)),
@@ -3708,7 +3719,7 @@ class _F1HubAppState extends State<F1HubApp> {
         return Stack(
           fit: StackFit.expand,
           children: [
-            if (child != null) child,
+            ?child,
             if (_showSplash)
               Positioned.fill(
                 child: IgnorePointer(
@@ -8175,12 +8186,17 @@ class MainNavigation extends StatelessWidget {
         label: Text(context.l10n.teams.toUpperCase()),
       ),
       NavigationRailDestination(
+        icon: _buildGlyphIcon('📰', size: 20),
+        selectedIcon: _buildGlyphIcon('📰', size: 20),
+        label: Text(context.l10n.news_nav.toUpperCase()),
+      ),
+      NavigationRailDestination(
         icon: _buildGlyphIcon('👤', size: 20),
         selectedIcon: _buildGlyphIcon('👤', size: 20),
         label: Text(context.l10n.profile.toUpperCase()),
       ),
     ];
-    final railDestinations = destinations.sublist(0, 3);
+    final railDestinations = destinations.sublist(0, 4);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -8222,7 +8238,7 @@ class MainNavigation extends StatelessWidget {
             children: [
               Expanded(
                 child: _F1NavRail(
-                  selectedIndex: navigationShell.currentIndex < 3
+                  selectedIndex: navigationShell.currentIndex < 4
                       ? navigationShell.currentIndex
                       : null,
                   extended: constraints.maxWidth >= 1320,
@@ -8390,6 +8406,10 @@ class MainNavigation extends StatelessWidget {
                                 BottomNavigationBarItem(
                                   icon: _buildGlyphIcon('👥', size: 20),
                                   label: context.l10n.teams.toUpperCase(),
+                                ),
+                                BottomNavigationBarItem(
+                                  icon: _buildGlyphIcon('📰', size: 20),
+                                  label: context.l10n.news_nav.toUpperCase(),
                                 ),
                                 BottomNavigationBarItem(
                                   icon: _buildGlyphIcon('👤', size: 20),
@@ -9056,14 +9076,19 @@ class _CircuitsViewState extends State<CircuitsView> {
     );
   }
 
-  Widget _buildDesktopCalendarGrid(BuildContext context) {
+  Widget _buildDesktopCalendarGrid(
+    BuildContext context, {
+    bool includeColumnHeader = true,
+  }) {
     final entries = _buildCalendarEntries(context);
     final rowGap = _calendarInterRowGap(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildDesktopCalendarHeader(context),
-        SizedBox(height: (rowGap * 0.65).clamp(6.0, 14.0)),
+        if (includeColumnHeader) ...[
+          _buildDesktopCalendarHeader(context),
+          SizedBox(height: (rowGap * 0.65).clamp(6.0, 14.0)),
+        ],
         for (var i = 0; i < entries.length; i++) ...[
           if (i > 0) SizedBox(height: rowGap),
           entries[i],
@@ -9470,7 +9495,7 @@ class _CircuitsViewState extends State<CircuitsView> {
     final isFavoriteCircuitMobile = favoritesMobile.favoriteCircuit != null &&
         race.name == favoritesMobile.favoriteCircuit;
 
-    Widget _buildMobileStatusWidget() {
+    Widget buildMobileStatusWidget() {
       final hasResults = _hasResultsForRace(race);
       final isToday = DateTime.now().year == race.date.year &&
           DateTime.now().month == race.date.month &&
@@ -10014,12 +10039,9 @@ class _CircuitsViewState extends State<CircuitsView> {
     return Scaffold(
       extendBodyBehindAppBar: false,
       backgroundColor: desktopShell ? Colors.transparent : null,
-      appBar: desktopShell
-          ? null
-          : AppBar(
-              title: Text(context.l10n.app_title),
-              automaticallyImplyLeading: false,
-            ),
+      // Mobile: no AppBar — shell [F1HubAppHeader] already reserves status-bar
+      // inset; a second bar duplicated “F1 Hub” / looked like a grey pill.
+      appBar: null,
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -10144,19 +10166,11 @@ class _CircuitsViewState extends State<CircuitsView> {
                             builder: (context, constraints) {
                               final isDesktop =
                                   constraints.maxWidth >= _desktopCircuitsBreakpoint;
-                              final grid = _buildDesktopCalendarGrid(context);
-                              if (isDesktop) {
-                                return grid;
-                              }
-                              return SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: SizedBox(
-                                  width: math.max(
-                                    _desktopCircuitsBreakpoint,
-                                    constraints.maxWidth,
-                                  ),
-                                  child: grid,
-                                ),
+                              // Mobile: no horizontal scroll — use full width; column
+                              // header matches desktop row layout only on wide screens.
+                              return _buildDesktopCalendarGrid(
+                                context,
+                                includeColumnHeader: isDesktop,
                               );
                             },
                           ),
@@ -22624,6 +22638,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 const _ProfileCalendarPrefsCard(),
                               ),
                               const SizedBox(height: 24),
+                              const NewsSettings(),
+                              const SizedBox(height: 24),
                               profileRow(
                                 const _ProfileAiStrategistPrefsCard(),
                                 const _ProfileLastPodiumPrefsCard(),
@@ -23210,7 +23226,7 @@ class _ProfileLanguageCardState extends State<_ProfileLanguageCard> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<Locale>(
-              value: value,
+              initialValue: value,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),

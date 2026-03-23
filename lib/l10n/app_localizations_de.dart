@@ -1500,6 +1500,42 @@ class AppLocalizationsDe extends AppLocalizations {
   String get news_title => 'F1 News';
 
   @override
+  String get news_nav => 'News';
+
+  @override
+  String get news_empty => 'Zurzeit keine Artikel. Zum Aktualisieren nach unten ziehen.';
+
+  @override
+  String get news_settings_title => 'News-Feeds';
+
+  @override
+  String get news_settings_subtitle => 'RSS- oder Atom-URLs hinzufügen. Sie werden im Tab News geladen (neueste zuerst).';
+
+  @override
+  String get news_settings_url_hint => 'https://beispiel.de/feed.xml';
+
+  @override
+  String get news_settings_add => 'Hinzufügen';
+
+  @override
+  String get news_settings_your_feeds => 'Deine Feeds';
+
+  @override
+  String get news_settings_no_feeds => 'Noch keine Feeds. Oben eine URL eintragen.';
+
+  @override
+  String get news_settings_invalid_url => 'Bitte eine gültige http(s)-URL eingeben.';
+
+  @override
+  String get news_settings_duplicate_url => 'Diese URL steht bereits in der Liste.';
+
+  @override
+  String get news_settings_save_failed => 'Speichern fehlgeschlagen. Bitte erneut versuchen.';
+
+  @override
+  String get news_settings_stream_error => 'Profil-Updates konnten nicht abonniert werden.';
+
+  @override
   String get race_results_empty => 'Noch keine Rennergebnisse verfügbar.';
 
   @override
