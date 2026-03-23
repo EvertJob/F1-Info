@@ -10,9 +10,9 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  sync_pu_elements:
+
+  sync_infringements:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -22,16 +22,12 @@ jobs:
         with:
           python-version: '3.10'
           cache: 'pip'
-          # We wijzen expliciet naar jouw bestand in de scripts map:
           cache-dependency-path: 'scripts/requirements-fia-sync.txt'
 
       - name: Install Dependencies
-        run: |
-          pip install -r scripts/requirements-fia-sync.txt
+        run: pip install -r scripts/requirements-fia-sync.txt
 
-      - name: Run FIA Scraper
+      - name: Run FIA Infringements Scraper
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          FIA_PU_DELETE_BEFORE_INSERT: "1"
-        # We voegen 'python -u' toe voor unbuffered logging, zodat we direct zien waar het misgaat
-        run: python -u scripts/sync_fia_data.py
+        run: python -u scripts/sync_fia_infringements.py
