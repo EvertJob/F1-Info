@@ -189,8 +189,8 @@ def find_infringement_pdf_links(html: str, base_url: str) -> list[InfringementLi
             continue
         text = " ".join(a.get_text(separator=" ", strip=True).split())
         title = (a.get("title") or "").strip()
-        blob = f"{text} {title}"
-        if not any(word in blob.lower() for word in ["infringement", "decision", "summons"]):
+        blob = f"{text} {title} {href}".lower()
+        if not any(word in blob for list_word in ["infringement", "decision", "summons"]):
             continue
 
         full_url = urljoin(base_url, href)
