@@ -22,8 +22,10 @@ from __future__ import annotations
 import io
 import logging
 import os
+import random
 import re
 import sys
+import time
 import traceback
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -54,10 +56,18 @@ DEFAULT_FIA_SEASON_URL = (
 )
 
 REQUEST_TIMEOUT = 60
-USER_AGENT = (
-    "Mozilla/5.0 (compatible; F1HubInfringement-Sync/1.0; "
-    "+https://github.com/EvertJob/F1-Info)"
+
+# Realistic desktop Chrome on Windows (reduces 403s vs bot-style / custom UA strings).
+BROWSER_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/131.0.0.0 Safari/537.36"
 )
+
+# Jitter (seconds): after listing page, between PDF downloads (anti rate-limit).
+DELAY_AFTER_LISTING_MIN = 1.2
+DELAY_AFTER_LISTING_MAX = 3.8
+DELAY_BETWEEN_PDFS_MIN = 0.7
+DELAY_BETWEEN_PDFS_MAX = 2.4
 
 # Listing: "Doc 58 - Infringement - ...Published on 14.03.26 09:30 CET"
 DOC_LISTING_RE = re.compile(
@@ -95,17 +105,68 @@ class InfringementRecord:
     reason: str | None
 
 
-def _http_session() -> requests.Session:
-    s = requests.Session()
-    s.headers.update({"User-Agent": USER_AGENT, "Accept-Language": "en-GB,en;q=0.9"})
-    return s
+def _configure_browser_session(sess: requests.Session) -> None:
+    """Browser-like defaults; Session keeps cookies across listing + PDF GETs."""
+    sess.headers.update(
+        {
+            "User-Agent": BROWSER_USER_AGENT,
+            "Accept": (
+                "text/html,application/xhtml+xml,application/xml;q=0.9,"
+                "image/avif,image/webp,image/apng,*/*;q=0.8"
+            ),
+            "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+            "Accept-Encoding": "gzip, deflate",
+            "DNT": "1",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Cache-Control": "max-age=0",
+        }
+    )
 
 
-def fetch_season_html(url: str) -> str:
-    with _http_session() as sess:
-        r = sess.get(url, timeout=REQUEST_TIMEOUT)
+def create_fia_session() -> requests.Session:
+    sess = requests.Session()
+    _configure_browser_session(sess)
+    return sess
+
+
+def warm_up_fia_session(sess: requests.Session) -> None:
+    """Optional first hit to fia.com to obtain cookies before the documents page."""
+    try:
+        r = sess.get("https://www.fia.com/", timeout=REQUEST_TIMEOUT, allow_redirects=True)
         r.raise_for_status()
+        time.sleep(random.uniform(0.4, 1.2))
+    except requests.RequestException as e:
+        log.warning("Session warm-up (homepage) failed: %s — continuing", e)
+
+
+def fetch_season_html(url: str, sess: requests.Session) -> str:
+    # After homepage warm-up, following fia.com URLs are same-site navigations.
+    sess.headers["Sec-Fetch-Site"] = "same-origin"
+    r = sess.get(url, timeout=REQUEST_TIMEOUT, allow_redirects=True)
+    r.raise_for_status()
     return r.text
+
+
+def download_pdf(url: str, sess: requests.Session) -> bytes:
+    r = sess.get(
+        url,
+        timeout=REQUEST_TIMEOUT,
+        allow_redirects=True,
+        headers={
+            "Accept": "application/pdf,application/octet-stream,*/*;q=0.8",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+        },
+    )
+    r.raise_for_status()
+    if not r.content.startswith(b"%PDF"):
+        raise ValueError(f"Not a PDF: {url!r}")
+    return r.content
 
 
 def _parse_published_cet(day: str, hm: str) -> datetime | None:
@@ -153,15 +214,6 @@ def find_infringement_pdf_links(html: str, base_url: str) -> list[InfringementLi
             by_url[full_url] = entry
 
     return sorted(by_url.values(), key=lambda x: (x.published_at or datetime.min, x.url))
-
-
-def download_pdf(url: str) -> bytes:
-    with _http_session() as sess:
-        r = sess.get(url, timeout=REQUEST_TIMEOUT)
-        r.raise_for_status()
-        if not r.content.startswith(b"%PDF"):
-            raise ValueError(f"Not a PDF: {url!r}")
-    return r.content
 
 
 def _collapse_ws(s: str) -> str:
@@ -664,12 +716,19 @@ def main() -> int:
         except ValueError:
             log.warning("Ignoring invalid FIA_INFRINGEMENT_MAX_PDFS=%r", max_pdfs_env)
 
+    http = create_fia_session()
+    warm_up_fia_session(http)
+
     log.info("Fetching %s", season_url)
     try:
-        html = fetch_season_html(season_url)
+        html = fetch_season_html(season_url, http)
     except requests.RequestException as e:
         log.error("Season page request failed: %s", e)
         return 1
+
+    pause = random.uniform(DELAY_AFTER_LISTING_MIN, DELAY_AFTER_LISTING_MAX)
+    log.info("Pausing %.2fs before PDF downloads", pause)
+    time.sleep(pause)
 
     base = f"{urlparse(season_url).scheme}://{urlparse(season_url).netloc}"
     links = find_infringement_pdf_links(html, base)
@@ -690,9 +749,12 @@ def main() -> int:
     ok = 0
     failed = 0
     try:
-        for link in links:
+        for i, link in enumerate(links):
             try:
-                pdf_bytes = download_pdf(link.url)
+                if i > 0:
+                    gap = random.uniform(DELAY_BETWEEN_PDFS_MIN, DELAY_BETWEEN_PDFS_MAX)
+                    time.sleep(gap)
+                pdf_bytes = download_pdf(link.url, http)
                 rec = parse_infringement_pdf(pdf_bytes, link)
                 upsert_record(conn, rec)
                 ok += 1
