@@ -527,67 +527,6 @@ class _RainAnimationState extends State<_RainAnimation>
   }
 }
 
-/// Settings gear icon with ScaleTransition and Team Primary color shift on hover/tap.
-class _AnimatedSettingsIcon extends StatefulWidget {
-  const _AnimatedSettingsIcon();
-
-  @override
-  State<_AnimatedSettingsIcon> createState() => _AnimatedSettingsIconState();
-}
-
-class _AnimatedSettingsIconState extends State<_AnimatedSettingsIcon>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scale;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 150),
-    );
-    _scale = Tween<double>(begin: 1.0, end: 1.15).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
-    return MouseRegion(
-      onEnter: (_) => _controller.forward(),
-      onExit: (_) => _controller.reverse(),
-      child: GestureDetector(
-        onTapDown: (_) => _controller.forward(),
-        onTapUp: (_) => _controller.reverse(),
-        onTapCancel: () => _controller.reverse(),
-        child: ScaleTransition(
-          scale: _scale,
-          alignment: Alignment.center,
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, _) {
-              final onSurface = Theme.of(context).colorScheme.onSurface;
-              final color = Color.lerp(onSurface, primary, _controller.value) ?? onSurface;
-              return DefaultTextStyle(
-                style: TextStyle(fontSize: 20, color: color),
-                child: _buildGlyphIcon('⚙', size: 20),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// Wraps a child with a subtle lift (scale 1.02) effect on tap/hover.
 class _LiftOnTap extends StatefulWidget {
   const _LiftOnTap({required this.child});
@@ -3418,11 +3357,6 @@ class _F1HubAppState extends State<F1HubApp> {
     onToggleTheme: () => context.read<ThemeController>().toggleBrightness(),
   );
 
-  Widget _buildCircuitsSettingsMenu(BuildContext context) => AppSettingsMenuButton(
-    onToggleTheme: () => context.read<ThemeController>().toggleBrightness(),
-    icon: const _AnimatedSettingsIcon(),
-  );
-
   late final GoRouter _router = GoRouter(
     initialLocation: _circuitsPath(),
     routes: [
@@ -3441,8 +3375,7 @@ class _F1HubAppState extends State<F1HubApp> {
             routes: [
               GoRoute(
                 path: _circuitsPath(),
-                builder: (context, state) =>
-                    CircuitsView(settingsMenu: _buildCircuitsSettingsMenu(context)),
+                builder: (context, state) => const CircuitsView(),
                 routes: [
                   GoRoute(
                     path: ':raceSlug',
@@ -3947,6 +3880,19 @@ Widget _detailOverviewSectionCard(
       ),
       child: child,
     ),
+  );
+}
+
+/// Profile settings blocks: same [F1Module] surface + fading primary border as detail/calendar.
+Widget _profileSectionCard(BuildContext context, {required Widget child}) {
+  final scheme = Theme.of(context).colorScheme;
+  return F1Module(
+    fillWidth: true,
+    padding: const EdgeInsets.all(20),
+    borderRadius: kF1ModuleRadius,
+    backgroundColor: scheme.surface,
+    showFadingBorder: true,
+    child: child,
   );
 }
 
@@ -8355,15 +8301,21 @@ List<Widget> _desktopAwareSettingsActions(
   BuildContext context,
   Widget settingsMenu,
 ) {
-  return _isDesktopShellLayout(context)
-      ? const <Widget>[]
-      : <Widget>[settingsMenu];
+  if (_isDesktopShellLayout(context)) {
+    return const <Widget>[];
+  }
+  final path = GoRouterState.of(context).uri.path;
+  final base = _profilePath();
+  final isProfileRoute = path == base || path.startsWith('$base/');
+  if (!isProfileRoute) {
+    return const <Widget>[];
+  }
+  return <Widget>[settingsMenu];
 }
 
 /// --- CIRCUITS VIEW (TAB 0 ROOT) ---
 class CircuitsView extends StatefulWidget {
-  final Widget settingsMenu;
-  const CircuitsView({required this.settingsMenu, super.key});
+  const CircuitsView({super.key});
   @override
   State<CircuitsView> createState() => _CircuitsViewState();
 }
@@ -8375,8 +8327,6 @@ class _CircuitsViewState extends State<CircuitsView> {
       return cachedResults != null && cachedResults.isNotEmpty;
     }
   static const double _desktopCircuitsBreakpoint = 1100;
-  /// Between this and [_desktopCircuitsBreakpoint]: show “Last podium” below the featured card (narrow 14″ / split view).
-  static const double _circuitsPodiumBelowBreakpoint = 960;
   String liveTemp = "--";
   int liveRain = 0;
   /// Display e.g. "18 km/h"; '--' when unknown.
@@ -8994,78 +8944,6 @@ class _CircuitsViewState extends State<CircuitsView> {
     } else {
       return chip(context.l10n.unknown, theme.colorScheme.outline.withValues(alpha: 0.10), theme.colorScheme.outline.withValues(alpha: 0.24), theme.colorScheme.outline);
     }
-  }
-
-  /// Mobile "Next Race" card: same surface treatment as desktop (no solid primary block).
-  Widget _buildUnifiedNextRaceBlock(
-    BuildContext context,
-    Race upcoming,
-    String timeStrNext,
-  ) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final isCancelled = upcoming.name == 'Bahrain Grand Prix' || upcoming.name == 'Saudi Arabian Grand Prix';
-    final isRainy = liveRain > 30;
-    final isCloudy = !isRainy && liveRain > 10;
-
-    return GestureDetector(
-      onTap: () => context.push(_racePath(upcoming)),
-      child: SafeArea(
-        top: true,
-        bottom: false,
-        left: false,
-        right: false,
-        child: F1Module(
-          fillWidth: true,
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-          borderRadius: 20,
-          backgroundColor: scheme.surface,
-          showFadingBorder: true,
-          boxShadow: [
-            BoxShadow(
-              color: scheme.shadow.withValues(alpha: 0.10),
-              blurRadius: 14,
-              offset: const Offset(0, 4),
-            ),
-          ],
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      context.l10n.app_title.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.2,
-                        color: scheme.onSurface,
-                      ),
-                    ),
-                  ),
-                  if (!_isDesktopShellLayout(context))
-                    DefaultTextStyle(
-                      style: TextStyle(color: scheme.onSurface, fontSize: 20),
-                      child: widget.settingsMenu,
-                    ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _buildNextRaceContent(
-                context,
-                upcoming,
-                timeStrNext,
-                isCancelled: isCancelled,
-                isRainy: isRainy,
-                isCloudy: isCloudy,
-                onBlueBackground: false,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _buildNextRaceContent(
@@ -9927,8 +9805,13 @@ class _CircuitsViewState extends State<CircuitsView> {
 
     return Scaffold(
       extendBodyBehindAppBar: false,
-      backgroundColor: Colors.transparent,
-      appBar: null,
+      backgroundColor: desktopShell ? Colors.transparent : null,
+      appBar: desktopShell
+          ? null
+          : AppBar(
+              title: Text(context.l10n.app_title),
+              automaticallyImplyLeading: false,
+            ),
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -9942,21 +9825,26 @@ class _CircuitsViewState extends State<CircuitsView> {
                 ),
               ),
             ),
-          RefreshIndicator(
-            onRefresh: _refreshCircuits,
-            child: SafeArea(
-              top: false,
-              child: ListView.separated(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.fromLTRB(
-                  16,
-                  desktopShell ? 16 : 0,
-                  16,
-                  16,
-                ),
-                separatorBuilder: (context, index) => const SizedBox(height: 16),
-                itemCount: 3,
-                itemBuilder: (context, index) {
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: _refreshCircuits,
+                  child: SafeArea(
+                    top: false,
+                    child: ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: EdgeInsets.fromLTRB(
+                        16,
+                        desktopShell ? 16 : 16,
+                        16,
+                        16,
+                      ),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 16),
+                      itemCount: 3,
+                      itemBuilder: (context, index) {
                   switch (index) {
                     case 0:
                       return LayoutBuilder(
@@ -9964,16 +9852,6 @@ class _CircuitsViewState extends State<CircuitsView> {
                           final w = constraints.maxWidth;
                           final isDesktop =
                               w >= _desktopCircuitsBreakpoint;
-                          final showPodiumCompact =
-                              w >= _circuitsPodiumBelowBreakpoint &&
-                              w < _desktopCircuitsBreakpoint;
-                          if (!isDesktop && !showPodiumCompact) {
-                            return _buildUnifiedNextRaceBlock(
-                              context,
-                              upcoming,
-                              timeStrNext,
-                            );
-                          }
                           final showPodiumSidebar =
                               _latestCompletedRace() != null;
                           final featured = _buildFeaturedRaceCard(
@@ -10051,18 +9929,20 @@ class _CircuitsViewState extends State<CircuitsView> {
                             builder: (context, constraints) {
                               final isDesktop =
                                   constraints.maxWidth >= _desktopCircuitsBreakpoint;
-                              if (!isDesktop) {
-                                final entries = _buildCalendarEntries(context);
-                                return ListView.separated(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: entries.length,
-                                  itemBuilder: (_, i) => _LiftOnTap(child: entries[i]),
-                                  separatorBuilder: (_, __) =>
-                                      _buildCalendarSeparator(),
-                                );
+                              final grid = _buildDesktopCalendarGrid(context);
+                              if (isDesktop) {
+                                return grid;
                               }
-                              return _buildDesktopCalendarGrid(context);
+                              return SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: SizedBox(
+                                  width: math.max(
+                                    _desktopCircuitsBreakpoint,
+                                    constraints.maxWidth,
+                                  ),
+                                  child: grid,
+                                ),
+                              );
                             },
                           ),
                         ],
@@ -10072,8 +9952,11 @@ class _CircuitsViewState extends State<CircuitsView> {
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
+    ),
+  ],
+),
     );
   }
 }
@@ -22418,7 +22301,8 @@ class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key, required this.settingsMenu});
 
   final Widget settingsMenu;
-  static const double _maxContentWidth = 600;
+  static const double _maxContentWidth = 1000;
+  static const double _twoColumnBreakpoint = 720;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -22472,80 +22356,139 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ? Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: ProfileScreen._maxContentWidth),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Consumer<ThemeController>(
-                    builder: (_, controller, _) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final twoCol =
+                        constraints.maxWidth >= ProfileScreen._twoColumnBreakpoint;
+                    Widget profileRow(Widget a, Widget b) {
+                      if (!twoCol) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            a,
+                            const SizedBox(height: 24),
+                            b,
+                          ],
+                        );
+                      }
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _ProfileUserCard(email: user.email ?? user.phone ?? ''),
-                          const SizedBox(height: 24),
-                          const _ProfileLanguageCard(),
-                          const SizedBox(height: 24),
-                          const _ProfileAiStrategistPrefsCard(),
-                          const SizedBox(height: 24),
-                          const _ProfileCalendarPrefsCard(),
-                          const SizedBox(height: 24),
-                          const _ProfileLastPodiumPrefsCard(),
-                          const SizedBox(height: 24),
-                          Consumer<ProfileFavoritesNotifier>(
-                            builder: (_, notifier, child) =>
-                                _ProfileFavoritesCard(
+                          Expanded(child: a),
+                          const SizedBox(width: 24),
+                          Expanded(child: b),
+                        ],
+                      );
+                    }
+
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: Consumer<ThemeController>(
+                        builder: (_, controller, _) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _ProfileUserCard(
+                                email: user.email ?? user.phone ?? '',
+                              ),
+                              const SizedBox(height: 24),
+                              profileRow(
+                                const _ProfileLanguageCard(),
+                                const _ProfileCalendarPrefsCard(),
+                              ),
+                              const SizedBox(height: 24),
+                              profileRow(
+                                const _ProfileAiStrategistPrefsCard(),
+                                const _ProfileLastPodiumPrefsCard(),
+                              ),
+                              const SizedBox(height: 24),
+                              Consumer<ProfileFavoritesNotifier>(
+                                builder: (_, notifier, child) =>
+                                    _ProfileFavoritesCard(
                                   teamNames: _teamNames,
                                   driverNames: _driverNames,
                                   favorites: notifier.value,
                                   onFavoritesChanged: _saveFavorites,
                                 ),
-                          ),
-                          const SizedBox(height: 24),
-                          _ProfileThemeModeCard(controller: controller),
-                          const SizedBox(height: 24),
-                          _ProfileBrandThemeCard(controller: controller),
-                          const SizedBox(height: 24),
-                          _ProfileLogoutButton(
-                            onPressed: () async {
-                              await Supabase.instance.client.auth.signOut();
-                              if (context.mounted) context.go(_circuitsPath());
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  ),
+                              ),
+                              const SizedBox(height: 24),
+                              profileRow(
+                                _ProfileThemeModeCard(controller: controller),
+                                _ProfileBrandThemeCard(controller: controller),
+                              ),
+                              const SizedBox(height: 24),
+                              _ProfileLogoutButton(
+                                onPressed: () async {
+                                  await Supabase.instance.client.auth.signOut();
+                                  if (context.mounted) {
+                                    context.go(_circuitsPath());
+                                  }
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    );
+                  },
                 ),
               ),
             )
           : Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: ProfileScreen._maxContentWidth),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Consumer<ThemeController>(
-                    builder: (_, controller, _) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            context.l10n.login,
-                            style: Theme.of(context).textTheme.titleMedium,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          FilledButton(
-                            onPressed: () => context.push(_loginPath()),
-                            child: Text(context.l10n.login),
-                          ),
-                          const SizedBox(height: 24),
-                          const _ProfileLanguageCard(),
-                          const SizedBox(height: 24),
-                          _ProfileThemeModeCard(controller: controller),
-                          const SizedBox(height: 24),
-                          _ProfileBrandThemeCard(controller: controller),
-                        ],
-                      );
-                    },
-                  ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final twoCol =
+                        constraints.maxWidth >= ProfileScreen._twoColumnBreakpoint;
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: Consumer<ThemeController>(
+                        builder: (_, controller, _) {
+                          final themeRow = twoCol
+                              ? Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Expanded(child: _ProfileLanguageCard()),
+                                    const SizedBox(width: 24),
+                                    Expanded(
+                                      child: _ProfileThemeModeCard(
+                                        controller: controller,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    const _ProfileLanguageCard(),
+                                    const SizedBox(height: 24),
+                                    _ProfileThemeModeCard(controller: controller),
+                                  ],
+                                );
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                context.l10n.login,
+                                style: Theme.of(context).textTheme.titleMedium,
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 16),
+                              FilledButton(
+                                onPressed: () => context.push(_loginPath()),
+                                child: Text(context.l10n.login),
+                              ),
+                              const SizedBox(height: 24),
+                              themeRow,
+                              const SizedBox(height: 24),
+                              _ProfileBrandThemeCard(controller: controller),
+                            ],
+                          );
+                        },
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -22569,10 +22512,9 @@ class _ProfileFavoritesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final circuitKeys = races.map((r) => r.name).toList();
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
+    return _profileSectionCard(
+      context,
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(context.l10n.favorite_team, style: Theme.of(context).textTheme.titleMedium),
@@ -22644,7 +22586,6 @@ class _ProfileFavoritesCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }
@@ -22656,10 +22597,9 @@ class _ProfileUserCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
+    return _profileSectionCard(
+      context,
+      child: Row(
           children: [
             CircleAvatar(
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
@@ -22675,7 +22615,6 @@ class _ProfileUserCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }
@@ -22689,10 +22628,9 @@ class _ProfileAiStrategistPrefsCard extends StatelessWidget {
       builder: (_, notifier, _) {
         final p = notifier.value;
         final disabled = p.cardDisabled;
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
+        return _profileSectionCard(
+          context,
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -22742,7 +22680,6 @@ class _ProfileAiStrategistPrefsCard extends StatelessWidget {
                 ),
               ],
             ),
-          ),
         );
       },
     );
@@ -22757,10 +22694,9 @@ class _ProfileLastPodiumPrefsCard extends StatelessWidget {
     return Consumer<LastPodiumPrefsNotifier>(
       builder: (_, notifier, _) {
         final p = notifier.value;
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
+        return _profileSectionCard(
+          context,
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -22794,7 +22730,6 @@ class _ProfileLastPodiumPrefsCard extends StatelessWidget {
                 ),
               ],
             ),
-          ),
         );
       },
     );
@@ -22809,10 +22744,9 @@ class _ProfileCalendarPrefsCard extends StatelessWidget {
     return Consumer<CalendarPrefsNotifier>(
       builder: (_, notifier, _) {
         final p = notifier.value;
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
+        return _profileSectionCard(
+          context,
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -22838,7 +22772,6 @@ class _ProfileCalendarPrefsCard extends StatelessWidget {
                 ),
               ],
             ),
-          ),
         );
       },
     );
@@ -22868,10 +22801,9 @@ class _ProfileLanguageCardState extends State<_ProfileLanguageCard> {
     final supported = AppLocalizations.supportedLocales;
     final value = _selectedLocale(supported);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
+    return _profileSectionCard(
+      context,
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -22917,7 +22849,6 @@ class _ProfileLanguageCardState extends State<_ProfileLanguageCard> {
             ),
           ],
         ),
-      ),
     );
   }
 }
@@ -22929,10 +22860,9 @@ class _ProfileThemeModeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
+    return _profileSectionCard(
+      context,
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -22951,7 +22881,6 @@ class _ProfileThemeModeCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }
@@ -23011,10 +22940,9 @@ class _ProfileBrandThemeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
+    return _profileSectionCard(
+      context,
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -23049,7 +22977,6 @@ class _ProfileBrandThemeCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }
