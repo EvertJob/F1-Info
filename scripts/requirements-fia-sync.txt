@@ -1,0 +1,5 @@
+# FIA PU elements sync (sync_fia_data.py)
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+pdfplumber>=0.11.0
+psycopg2-binary>=2.9.9
