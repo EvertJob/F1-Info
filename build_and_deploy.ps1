@@ -19,9 +19,22 @@ if ($versionLine) {
     Write-Host "Versie verhoogd naar $newVersion"
 }
 
+$deployVersion = (Get-Content $pubspec | Where-Object { $_ -match '^version:' }) -replace '^version:\s*', ''
+
 # 2. Builden — base-href "/" voor custom domain f1hub.app (GitHub Pages root).
-# Voor de oude project-URL username.github.io/F1-Info/ zou je apart met --base-href "/F1-Info/" moeten bouwen.
-flutter build web --base-href "/"
+# --pwa-strategy=none: geen flutter_service worker (mobiel cachet anders oude bundles dagenlang).
+# (Voor username.github.io/F1-Info/ zou je apart met --base-href "/F1-Info/" moeten bouwen.)
+flutter build web --base-href "/" --pwa-strategy=none
+
+# 2a. Cache-bust op bootstrap: dwing mobiele browsers om nieuwe flutter_bootstrap.js te halen
+$indexWeb = 'build/web/index.html'
+$html = Get-Content $indexWeb -Raw -Encoding utf8
+if ($html -match 'flutter_bootstrap\.js\?v=') {
+  $html = $html -replace 'flutter_bootstrap\.js\?v=[^"]+', "flutter_bootstrap.js?v=$deployVersion"
+} else {
+  $html = $html -replace 'src="flutter_bootstrap\.js"', "src=`"flutter_bootstrap.js?v=$deployVersion`""
+}
+[System.IO.File]::WriteAllText((Resolve-Path $indexWeb), $html, [System.Text.UTF8Encoding]::new($false))
 
 # 2b. CNAME voor custom domain (f1hub.app) - moet in root van gh-pages staan
 if (Test-Path CNAME) {
@@ -34,13 +47,15 @@ Get-ChildItem -Path build\web -Force | ForEach-Object {
   Copy-Item $_.FullName -Destination . -Recurse -Force
 }
 
-# 3. Pushen naar gh-pages (build/web inhoud naar root voor GitHub Pages)
+# 3. Committen (build/web + gesynchroniseerde root-bestanden voor GitHub Pages)
 git add -f build/web
-$commitMsg = "Auto build: versie verhoogd naar $newVersion"
+git add index.html main.dart.js flutter_bootstrap.js flutter.js manifest.json version.json favicon.png .last_build_id CNAME assets canvaskit icons 2>$null
+if (Test-Path flutter_service_worker.js) { git add flutter_service_worker.js }
+$commitMsg = "Auto build: web $deployVersion (PWA off, cache bust)"
 git commit -m $commitMsg
 
-# Subtree push: build/web inhoud komt in root van gh-pages branch
-$subtreeRef = (git subtree split --prefix build/web).ToString().Trim()
-git push origin "${subtreeRef}:gh-pages" --force
+# Volledige branch pushen (gebruik: git push origin gh-pages). Subtree alleen als je die workflow wilt.
+# git subtree split vereist aparte workflow; uitgeschakeld om conflicten met volledige repo-push te voorkomen.
+git push origin gh-pages
 
 Write-Host "Build en deploy voltooid."
