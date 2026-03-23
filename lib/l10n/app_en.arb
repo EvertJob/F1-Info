@@ -288,6 +288,38 @@
   "calendar_prefs_section_subtitle": "Customize the circuits calendar.",
   "calendar_prefs_hide_cancelled": "Hide placeholder races",
   "calendar_prefs_hide_cancelled_hint": "Hide cancelled or placeholder races not on the real calendar.",
+  "display_prefs_section_title": "Display preferences",
+  "display_prefs_section_subtitle": "Choose how the app looks and moves. When signed in, these sync to your account.",
+  "display_prefs_ui_mode": "Interface style",
+  "display_prefs_mode_standard": "Standard",
+  "display_prefs_mode_standard_hint": "Glass blur and soft shadows.",
+  "display_prefs_mode_simple": "Simple",
+  "display_prefs_mode_simple_hint": "Flat surfaces and stronger contrast.",
+  "display_prefs_compact": "Compact mode",
+  "display_prefs_compact_hint": "Tighter spacing and smaller cards.",
+  "display_prefs_motion_reduced": "Reduced motion",
+  "display_prefs_motion_reduced_hint": "Less animation, blur, and theme transitions.",
+  "display_prefs_saving": "Saving…",
+  "my_paddock_title": "My Paddock",
+  "my_paddock_session_unknown": "Live timing",
+  "my_paddock_resume_subtitle": "Resume: {session} — frame {lap}",
+  "@my_paddock_resume_subtitle": {
+    "placeholders": {
+      "session": {"type": "String"},
+      "lap": {"type": "String"}
+    }
+  },
+  "my_paddock_favorite_drivers": "Favorite drivers",
+  "my_paddock_favorite_teams": "Favorite teams",
+  "my_paddock_last_race": "Last race",
+  "my_paddock_last_race_summary": "{date} · {podium}",
+  "@my_paddock_last_race_summary": {
+    "placeholders": {
+      "date": {"type": "String"},
+      "podium": {"type": "String"}
+    }
+  },
+  "my_paddock_points_suffix": "pts",
   "changelog": "Changelog",
   "characteristics": "CIRCUIT CHARACTERISTICS",
   "chart_no_data": "No chart data is available for this season.",

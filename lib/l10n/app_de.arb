@@ -288,6 +288,38 @@
   "calendar_prefs_section_subtitle": "Streckenkalender anpassen.",
   "calendar_prefs_hide_cancelled": "Platzhalter-Rennen ausblenden",
   "calendar_prefs_hide_cancelled_hint": "Abgesagte oder Platzhalter-Rennen ausblenden, die nicht im echten Kalender stehen.",
+  "display_prefs_section_title": "Anzeige",
+  "display_prefs_section_subtitle": "Aussehen und Animationen. Angemeldet werden die Einstellungen mit dem Konto synchronisiert.",
+  "display_prefs_ui_mode": "Oberflächenstil",
+  "display_prefs_mode_standard": "Standard",
+  "display_prefs_mode_standard_hint": "Glas-Unschärfe und weiche Schatten.",
+  "display_prefs_mode_simple": "Einfach",
+  "display_prefs_mode_simple_hint": "Flache Flächen und stärkerer Kontrast.",
+  "display_prefs_compact": "Kompakter Modus",
+  "display_prefs_compact_hint": "Engerer Abstand und kleinere Karten.",
+  "display_prefs_motion_reduced": "Reduzierte Bewegung",
+  "display_prefs_motion_reduced_hint": "Weniger Animation, Unschärfe und Themenübergänge.",
+  "display_prefs_saving": "Speichern…",
+  "my_paddock_title": "Meine Box",
+  "my_paddock_session_unknown": "Live-Timing",
+  "my_paddock_resume_subtitle": "Fortsetzen: {session} — Frame {lap}",
+  "@my_paddock_resume_subtitle": {
+    "placeholders": {
+      "session": {"type": "String"},
+      "lap": {"type": "String"}
+    }
+  },
+  "my_paddock_favorite_drivers": "Lieblingsfahrer",
+  "my_paddock_favorite_teams": "Lieblingsteams",
+  "my_paddock_last_race": "Letztes Rennen",
+  "my_paddock_last_race_summary": "{date} · {podium}",
+  "@my_paddock_last_race_summary": {
+    "placeholders": {
+      "date": {"type": "String"},
+      "podium": {"type": "String"}
+    }
+  },
+  "my_paddock_points_suffix": "Pkt.",
   "changelog": "Changelog",
   "characteristics": "STRECKENMERKMALE",
   "chart_no_data": "Für diese Saison sind keine Diagrammdaten verfügbar.",

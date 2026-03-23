@@ -288,6 +288,38 @@
   "calendar_prefs_section_subtitle": "Pas de circuits-kalender aan.",
   "calendar_prefs_hide_cancelled": "Placeholder-races verbergen",
   "calendar_prefs_hide_cancelled_hint": "Verberg geannuleerde of placeholder-races die niet op de echte kalender staan.",
+  "display_prefs_section_title": "Weergave",
+  "display_prefs_section_subtitle": "Uiterlijk en animaties. Ingelogd worden ze met je account gesynchroniseerd.",
+  "display_prefs_ui_mode": "Interfacestijl",
+  "display_prefs_mode_standard": "Standaard",
+  "display_prefs_mode_standard_hint": "Glasachtige vervaging en zachte schaduwen.",
+  "display_prefs_mode_simple": "Eenvoudig",
+  "display_prefs_mode_simple_hint": "Vlakke vlakken en sterker contrast.",
+  "display_prefs_compact": "Compacte modus",
+  "display_prefs_compact_hint": "Strakkere marges en kleinere kaarten.",
+  "display_prefs_motion_reduced": "Minder beweging",
+  "display_prefs_motion_reduced_hint": "Minder animatie, vervaging en thema-overgangen.",
+  "display_prefs_saving": "Opslaan…",
+  "my_paddock_title": "Mijn paddock",
+  "my_paddock_session_unknown": "Live timing",
+  "my_paddock_resume_subtitle": "Hervatten: {session} — frame {lap}",
+  "@my_paddock_resume_subtitle": {
+    "placeholders": {
+      "session": {"type": "String"},
+      "lap": {"type": "String"}
+    }
+  },
+  "my_paddock_favorite_drivers": "Favoriete coureurs",
+  "my_paddock_favorite_teams": "Favoriete teams",
+  "my_paddock_last_race": "Laatste race",
+  "my_paddock_last_race_summary": "{date} · {podium}",
+  "@my_paddock_last_race_summary": {
+    "placeholders": {
+      "date": {"type": "String"},
+      "podium": {"type": "String"}
+    }
+  },
+  "my_paddock_points_suffix": "pnt",
   "changelog": "Changelog",
   "characteristics": "CIRCUIT KENMERKEN",
   "chart_no_data": "Geen grafiekdata beschikbaar voor dit seizoen.",

@@ -321,6 +321,70 @@ class AppLocalizationsFr extends AppLocalizations {
   String get calendar_prefs_hide_cancelled_hint => 'Masquer les courses annulées ou placeholder absentes du calendrier réel.';
 
   @override
+  String get display_prefs_section_title => 'Affichage';
+
+  @override
+  String get display_prefs_section_subtitle => 'Apparence et animations. Connecté, les réglages se synchronisent avec votre compte.';
+
+  @override
+  String get display_prefs_ui_mode => 'Style d’interface';
+
+  @override
+  String get display_prefs_mode_standard => 'Standard';
+
+  @override
+  String get display_prefs_mode_standard_hint => 'Flou type verre et ombres douces.';
+
+  @override
+  String get display_prefs_mode_simple => 'Simple';
+
+  @override
+  String get display_prefs_mode_simple_hint => 'Surfaces plates et contraste renforcé.';
+
+  @override
+  String get display_prefs_compact => 'Mode compact';
+
+  @override
+  String get display_prefs_compact_hint => 'Espacement réduit et cartes plus petites.';
+
+  @override
+  String get display_prefs_motion_reduced => 'Mouvement réduit';
+
+  @override
+  String get display_prefs_motion_reduced_hint => 'Moins d’animations, de flou et de transitions de thème.';
+
+  @override
+  String get display_prefs_saving => 'Enregistrement…';
+
+  @override
+  String get my_paddock_title => 'Mon paddock';
+
+  @override
+  String get my_paddock_session_unknown => 'Live timing';
+
+  @override
+  String my_paddock_resume_subtitle(String session, String lap) {
+    return 'Reprendre : $session — image $lap';
+  }
+
+  @override
+  String get my_paddock_favorite_drivers => 'Pilotes favoris';
+
+  @override
+  String get my_paddock_favorite_teams => 'Écuries favorites';
+
+  @override
+  String get my_paddock_last_race => 'Dernière course';
+
+  @override
+  String my_paddock_last_race_summary(String date, String podium) {
+    return '$date · $podium';
+  }
+
+  @override
+  String get my_paddock_points_suffix => 'pts';
+
+  @override
   String get changelog => 'Changelog';
 
   @override

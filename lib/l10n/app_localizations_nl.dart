@@ -321,6 +321,70 @@ class AppLocalizationsNl extends AppLocalizations {
   String get calendar_prefs_hide_cancelled_hint => 'Verberg geannuleerde of placeholder-races die niet op de echte kalender staan.';
 
   @override
+  String get display_prefs_section_title => 'Weergave';
+
+  @override
+  String get display_prefs_section_subtitle => 'Uiterlijk en animaties. Ingelogd worden ze met je account gesynchroniseerd.';
+
+  @override
+  String get display_prefs_ui_mode => 'Interfacestijl';
+
+  @override
+  String get display_prefs_mode_standard => 'Standaard';
+
+  @override
+  String get display_prefs_mode_standard_hint => 'Glasachtige vervaging en zachte schaduwen.';
+
+  @override
+  String get display_prefs_mode_simple => 'Eenvoudig';
+
+  @override
+  String get display_prefs_mode_simple_hint => 'Vlakke vlakken en sterker contrast.';
+
+  @override
+  String get display_prefs_compact => 'Compacte modus';
+
+  @override
+  String get display_prefs_compact_hint => 'Strakkere marges en kleinere kaarten.';
+
+  @override
+  String get display_prefs_motion_reduced => 'Minder beweging';
+
+  @override
+  String get display_prefs_motion_reduced_hint => 'Minder animatie, vervaging en thema-overgangen.';
+
+  @override
+  String get display_prefs_saving => 'Opslaan…';
+
+  @override
+  String get my_paddock_title => 'Mijn paddock';
+
+  @override
+  String get my_paddock_session_unknown => 'Live timing';
+
+  @override
+  String my_paddock_resume_subtitle(String session, String lap) {
+    return 'Hervatten: $session — frame $lap';
+  }
+
+  @override
+  String get my_paddock_favorite_drivers => 'Favoriete coureurs';
+
+  @override
+  String get my_paddock_favorite_teams => 'Favoriete teams';
+
+  @override
+  String get my_paddock_last_race => 'Laatste race';
+
+  @override
+  String my_paddock_last_race_summary(String date, String podium) {
+    return '$date · $podium';
+  }
+
+  @override
+  String get my_paddock_points_suffix => 'pnt';
+
+  @override
   String get changelog => 'Changelog';
 
   @override

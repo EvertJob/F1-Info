@@ -21,6 +21,7 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'theme/f1_team_schemes.dart';
 import 'theme/f1_theme_tokens.dart';
 import 'theme/theme_controller.dart';
+import 'widgets/f1_hub_app_header.dart';
 import 'widgets/f1_module.dart';
 import 'theme/theme_service.dart';
 import 'profile_favorites_service.dart';
@@ -28,6 +29,10 @@ import 'ai_strategist_prefs_service.dart';
 import 'calendar_prefs_service.dart';
 import 'last_podium_prefs_service.dart';
 import 'detail_expansion_prefs_service.dart';
+import 'display_settings.dart';
+import 'display_settings_controller.dart';
+import 'web_url_strategy.dart';
+import 'theme/f1_ui_theme.dart';
 import 'utils/driver_name_utils.dart';
 import 'package:f1/utils/l10n_extension.dart';
 import 'utils/l10n_lookups.dart';
@@ -40,6 +45,7 @@ import 'open_meteo_api.dart';
 import 'changelog_page.dart';
 import 'coach_corner_data.dart';
 part 'f1_data.dart';
+part 'widgets/my_paddock_widget.dart';
 
 // Normalizes driver names for lookup (diacritics, special chars, etc.)
 String _normalizeDriverLookupName(String value) {
@@ -3020,9 +3026,24 @@ String? _sessionNameFromSlug(String slug) {
   return null;
 }
 
+/// Friendly slugs that map to the canonical [_raceSlug] value (English short
+/// slug from the GP name, e.g. Japanese GP → `japanese`).
+const Map<String, String> _raceSlugAliases = <String, String>{
+  'grand-prix-of-japan': 'japanese',
+  'japanse': 'japanese', // Dutch adjective; canonical slug stays `japanese`
+};
+
 Race? _findRaceBySlug(String slug) {
+  if (slug.isEmpty) return null;
+  final resolved = _raceSlugAliases[slug] ?? slug;
   for (final race in races) {
-    if (_raceSlug(race) == slug) {
+    if (_raceSlug(race) == resolved || _raceSlug(race) == slug) {
+      return race;
+    }
+  }
+  // e.g. `japanese-grand-prix` while canonical short slug is `japanese`
+  for (final race in races) {
+    if (_slugify(race.name) == resolved || _slugify(race.name) == slug) {
       return race;
     }
   }
@@ -3099,12 +3120,14 @@ String _placeholderPagePath() => '/placeholder';
 String _loginPath() => '/login';
 String _livePath() => '/live';
 String _profilePath() => '/profile';
+String _myPaddockPath() => '/my-paddock';
 
 const String _kGithubHelpIssuesUrl =
     'https://github.com/EvertJob/F1-Info/issues/new/choose';
 
 String _racePath(Race race) => '${_circuitsPath()}/${_raceSlug(race)}';
-String _weekendHubPath(Race race) => '${_racePath(race)}/weekend';
+/// Short shareable path (`/#/weekendhub/...`); also registered on the circuits shell branch.
+String _weekendHubPath(Race race) => '/weekendhub/${_raceSlug(race)}';
 String _raceResultsPath(Race race) => '${_racePath(race)}/results';
 String _fullscreenRaceResultsPath(Race race) =>
     '${_raceResultsPath(race)}/fullscreen';
@@ -3119,6 +3142,9 @@ String _teamComparePath(Team team1, Team team2) =>
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  configureF1WebUrlStrategy();
+  // Web: sync the URL bar with imperative navigation (push/pop), e.g. drivers list → detail.
+  GoRouter.optionURLReflectsImperativeAPIs = true;
   await Supabase.initialize(
     url: 'https://aeekchoaetlksooyylsv.supabase.co',
     anonKey: 'sb_publishable_38F48DBpJ7cWwVo-2yZjhA_rE6wE9uz',
@@ -3157,6 +3183,11 @@ void main() async {
         ),
         ChangeNotifierProvider<DetailExpansionPrefsNotifier>(
           create: (_) => DetailExpansionPrefsNotifier(),
+        ),
+        ChangeNotifierProvider<DisplaySettingsController>(
+          create: (context) => DisplaySettingsController(
+            context.read<DetailExpansionPrefsNotifier>(),
+          ),
         ),
       ],
       child: const F1HubApp(),
@@ -3464,6 +3495,25 @@ class _F1HubAppState extends State<F1HubApp> {
                   ),
                 ],
               ),
+            GoRoute(
+              path: '/weekendhub/:raceSlug',
+              redirect: (context, state) {
+                final slug = state.pathParameters['raceSlug'] ?? '';
+                return _findRaceBySlug(slug) == null ? _circuitsPath() : null;
+              },
+              builder: (context, state) {
+                final race = _findRaceBySlug(
+                  state.pathParameters['raceSlug']!,
+                )!;
+                return WeekendHubScreen(race: race);
+              },
+            ),
+            GoRoute(
+              path: _myPaddockPath(),
+              builder: (context, state) => MyPaddockScreen(
+                settingsMenu: _buildSettingsMenu(context),
+              ),
+            ),
             ],
           ),
           StatefulShellBranch(
@@ -3606,7 +3656,15 @@ class _F1HubAppState extends State<F1HubApp> {
       ),
       GoRoute(
         path: _livePath(),
-        builder: (context, state) => const LiveTimingPage(),
+        builder: (context, state) {
+          final frame = int.tryParse(state.uri.queryParameters['frame'] ?? '');
+          final initial = frame != null && frame > 0 ? frame : null;
+          final session = state.uri.queryParameters['session'];
+          return LiveTimingPage(
+            initialReplayFrame: initial,
+            resumeSessionLabelFromRoute: session,
+          );
+        },
       ),
       GoRoute(
         path: _placeholderPagePath(),
@@ -3618,17 +3676,25 @@ class _F1HubAppState extends State<F1HubApp> {
   @override
   Widget build(BuildContext context) {
     final themeController = context.watch<ThemeController>();
-    final primaryColor = Theme.of(context).brightness == Brightness.dark
-        ? themeController.darkTheme.colorScheme.primary
-        : themeController.lightTheme.colorScheme.primary;
+    final displaySettings = context.watch<DisplaySettingsController>();
+    final f1Ui = F1UiTheme.fromSettings(displaySettings.settings);
+    final lightTheme = themeWithF1Ui(themeController.lightTheme, f1Ui);
+    final darkTheme = themeWithF1Ui(themeController.darkTheme, f1Ui);
+    final primaryColor = themeController.resolvedIsDark
+        ? darkTheme.colorScheme.primary
+        : lightTheme.colorScheme.primary;
     return MaterialApp.router(
       title: 'F1 Hub',
       debugShowCheckedModeBanner: false,
       routerConfig: _router,
-      theme: themeController.lightTheme,
-      darkTheme: themeController.darkTheme,
-      themeAnimationCurve: Curves.easeInOutCubic,
-      themeAnimationDuration: const Duration(milliseconds: 320),
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeAnimationCurve: f1Ui.useInstantTransitions
+          ? Curves.linear
+          : Curves.easeInOutCubic,
+      themeAnimationDuration: f1Ui.useInstantTransitions
+          ? Duration.zero
+          : const Duration(milliseconds: 320),
       themeMode: themeController.themeMode,
       locale: _locale,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -8120,6 +8186,11 @@ class MainNavigation extends StatelessWidget {
       builder: (context, constraints) {
         final isDesktop = constraints.maxWidth >= _desktopShellBreakpoint;
         final scheme = Theme.of(context).colorScheme;
+        final f1Ui = Theme.of(context).extension<F1UiTheme>() ?? F1UiTheme.fallback();
+        final tokens = Theme.of(context).extension<F1ThemeTokens>();
+        final panelStrong = tokens?.panelStrong ?? scheme.surfaceContainerHighest;
+        final outlineColor =
+            tokens?.outline.withValues(alpha: 0.7) ?? Colors.grey.withValues(alpha: 0.7);
         // Ambient behind rail + content; tuned for visible but calm team-colored depth.
         final ambientGlow = scheme.primary.withValues(alpha: 0.10);
         final shellBase = Color.lerp(
@@ -8127,6 +8198,57 @@ class MainNavigation extends StatelessWidget {
           scheme.primary,
           0.04,
         )!;
+        final railRadius = BorderRadius.circular(f1Ui.cardBorderRadius);
+        final railPanelFill = f1Ui.glassBlur > 0
+            ? panelStrong.withValues(
+                alpha: Theme.of(context).brightness == Brightness.dark ? 0.42 : 0.55,
+              )
+            : panelStrong;
+
+        Widget railPanel = Container(
+          margin: const EdgeInsets.fromLTRB(4, 16, 0, 16),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
+          decoration: BoxDecoration(
+            color: railPanelFill,
+            borderRadius: railRadius,
+            border: Border.all(
+              color: outlineColor,
+              width: 1.2,
+            ),
+            boxShadow: f1Ui.moduleShadow,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Expanded(
+                child: _F1NavRail(
+                  selectedIndex: navigationShell.currentIndex < 3
+                      ? navigationShell.currentIndex
+                      : null,
+                  extended: constraints.maxWidth >= 1320,
+                  onDestinationSelected: (i) =>
+                      navigationShell.goBranch(i, initialLocation: true),
+                  destinations: railDestinations,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const RailAccountMenuButton(),
+            ],
+          ),
+        );
+
+        if (f1Ui.glassBlur > 0) {
+          railPanel = ClipRRect(
+            borderRadius: railRadius,
+            child: BackdropFilter(
+              filter: ui.ImageFilter.blur(
+                sigmaX: f1Ui.glassBlur,
+                sigmaY: f1Ui.glassBlur,
+              ),
+              child: railPanel,
+            ),
+          );
+        }
 
         return Scaffold(
           body: Stack(
@@ -8149,59 +8271,50 @@ class MainNavigation extends StatelessWidget {
                         children: [
                           Padding(
                             padding: const EdgeInsets.fromLTRB(16, 16, 0, 16),
-                            child: Container(
-                              margin: const EdgeInsets.fromLTRB(4, 16, 0, 16),
-                              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).extension<F1ThemeTokens>()?.panelStrong,
-                                borderRadius: BorderRadius.circular(22),
-                                border: Border.all(
-                                color: Theme.of(context).extension<F1ThemeTokens>()?.outline.withValues(alpha: 0.7) ?? Colors.grey.withValues(alpha: 0.7),
-                                  width: 1.2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                  color: Colors.black.withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.18 : 0.08),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  Expanded(
-                                    child: _F1NavRail(
-                                      selectedIndex:
-                                          navigationShell.currentIndex < 3
-                                              ? navigationShell.currentIndex
-                                              : null,
-                                      extended: constraints.maxWidth >= 1320,
-                                      onDestinationSelected: (i) =>
-                                          navigationShell.goBranch(i, initialLocation: true),
-                                      destinations: railDestinations,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  const RailAccountMenuButton(),
-                                ],
-                              ),
-                            ),
+                            child: railPanel,
                           ),
                           const SizedBox(width: 32),
                           Expanded(
-                            child: ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(20),
-                                bottomLeft: Radius.circular(20),
-                              ),
-                              child: navigationShell,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Padding(
+                                  padding: f1HubShellHorizontalPadding(context),
+                                  child: F1HubAppHeader(isDesktopLayout: true),
+                                ),
+                                Expanded(
+                                  child: ClipRRect(
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(20),
+                                      bottomLeft: Radius.circular(20),
+                                    ),
+                                    child: Padding(
+                                      padding: f1HubShellHorizontalPadding(context),
+                                      child: navigationShell,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     )
-                  : navigationShell,
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Padding(
+                          padding: f1HubShellHorizontalPadding(context),
+                          child: const F1HubAppHeader(isDesktopLayout: false),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: f1HubShellHorizontalPadding(context),
+                            child: navigationShell,
+                          ),
+                        ),
+                      ],
+                    ),
             ],
           ),
           floatingActionButton: navigationShell.currentIndex == 0
@@ -8213,81 +8326,98 @@ class MainNavigation extends StatelessWidget {
                 ),
           bottomNavigationBar: isDesktop
               ? null
-              : Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
+              : () {
+                  final barRadius = BorderRadius.vertical(
+                    top: Radius.circular(f1Ui.cardBorderRadius),
+                  );
+                  final barFill = f1Ui.glassBlur > 0
+                      ? scheme.surface.withValues(
+                          alpha: Theme.of(context).brightness == Brightness.dark
+                              ? 0.42
+                              : 0.88,
+                        )
+                      : scheme.surface;
+
+                  Widget mobileBar = Container(
+                    decoration: BoxDecoration(
+                      color: barFill,
+                      borderRadius: barRadius,
+                      boxShadow: f1Ui.moduleShadow,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.06),
-                        blurRadius: 8,
-                        offset: const Offset(0, -2),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          height: 3,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                              colors: [
-                                Theme.of(context).colorScheme.primary,
-                                Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                    child: ClipRRect(
+                      borderRadius: barRadius,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            height: 3,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                                colors: [
+                                  scheme.primary,
+                                  scheme.primary.withValues(alpha: 0.5),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Theme(
+                            data: Theme.of(context).copyWith(
+                              bottomNavigationBarTheme: BottomNavigationBarThemeData(
+                                backgroundColor: Colors.transparent,
+                                selectedItemColor: scheme.primary,
+                                unselectedItemColor: scheme.onSurfaceVariant,
+                              ),
+                            ),
+                            child: BottomNavigationBar(
+                              currentIndex: navigationShell.currentIndex,
+                              type: BottomNavigationBarType.fixed,
+                              elevation: 0,
+                              backgroundColor: Colors.transparent,
+                              onTap: (i) {
+                                navigationShell.goBranch(i, initialLocation: true);
+                              },
+                              items: <BottomNavigationBarItem>[
+                                BottomNavigationBarItem(
+                                  icon: _buildGlyphIcon('🏁', size: 20),
+                                  label: context.l10n.circuits.toUpperCase(),
+                                ),
+                                BottomNavigationBarItem(
+                                  icon: _buildGlyphIcon('👤', size: 20),
+                                  label: context.l10n.drivers.toUpperCase(),
+                                ),
+                                BottomNavigationBarItem(
+                                  icon: _buildGlyphIcon('👥', size: 20),
+                                  label: context.l10n.teams.toUpperCase(),
+                                ),
+                                BottomNavigationBarItem(
+                                  icon: _buildGlyphIcon('👤', size: 20),
+                                  label: context.l10n.profile.toUpperCase(),
+                                ),
                               ],
                             ),
                           ),
-                        ),
-                        Theme(
-                          data: Theme.of(context).copyWith(
-                            bottomNavigationBarTheme: BottomNavigationBarThemeData(
-                              backgroundColor: Theme.of(context).colorScheme.surface,
-                              selectedItemColor: Theme.of(context).colorScheme.primary,
-                              unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          child: BottomNavigationBar(
-                            currentIndex: navigationShell.currentIndex,
-                            type: BottomNavigationBarType.fixed,
-                            elevation: 0,
-                            onTap: (i) {
-                              navigationShell.goBranch(i, initialLocation: true);
-                            },
-                            items: <BottomNavigationBarItem>[
-                              BottomNavigationBarItem(
-                                icon: _buildGlyphIcon('🏁', size: 20),
-                                label: context.l10n.circuits.toUpperCase(),
-                              ),
-                              BottomNavigationBarItem(
-                                icon: _buildGlyphIcon('👤', size: 20),
-                                label: context.l10n.drivers.toUpperCase(),
-                              ),
-                              BottomNavigationBarItem(
-                                icon: _buildGlyphIcon('👥', size: 20),
-                                label: context.l10n.teams.toUpperCase(),
-                              ),
-                              BottomNavigationBarItem(
-                                icon: _buildGlyphIcon('👤', size: 20),
-                                label: context.l10n.profile.toUpperCase(),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ),
+                  );
+
+                  if (f1Ui.glassBlur > 0) {
+                    mobileBar = ClipRRect(
+                      borderRadius: barRadius,
+                      child: BackdropFilter(
+                        filter: ui.ImageFilter.blur(
+                          sigmaX: f1Ui.glassBlur,
+                          sigmaY: f1Ui.glassBlur,
+                        ),
+                        child: mobileBar,
+                      ),
+                    );
+                  }
+
+                  return mobileBar;
+                }(),
         );
       },
     );
@@ -8311,6 +8441,78 @@ List<Widget> _desktopAwareSettingsActions(
     return const <Widget>[];
   }
   return <Widget>[settingsMenu];
+}
+
+/// Logged-in quick-access hub at [`_myPaddockPath`] (web: `/#/my-paddock`).
+class MyPaddockScreen extends StatelessWidget {
+  const MyPaddockScreen({super.key, required this.settingsMenu});
+
+  final Widget settingsMenu;
+
+  @override
+  Widget build(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+    final desktopShell = _isDesktopShellLayout(context);
+    final scheme = Theme.of(context).colorScheme;
+
+    return Scaffold(
+      backgroundColor: desktopShell ? Colors.transparent : null,
+      appBar: AppBar(
+        title: Text(context.l10n.my_paddock_title),
+        backgroundColor: desktopShell ? Colors.transparent : null,
+        elevation: desktopShell ? 0 : null,
+        scrolledUnderElevation: desktopShell ? 0 : null,
+        foregroundColor: desktopShell ? scheme.onSurface : null,
+        actions: _desktopAwareSettingsActions(context, settingsMenu),
+      ),
+      body: user != null
+          ? SafeArea(
+              top: false,
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 900),
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+                    children: const [MyPaddockWidget()],
+                  ),
+                ),
+              ),
+            )
+          : Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _profileSectionCard(
+                    context,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          context.l10n.my_paddock_title,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                            color: scheme.onSurface,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 20),
+                        FilledButton(
+                          onPressed: () => context.push(_loginPath()),
+                          child: Text(context.l10n.login),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+    );
+  }
 }
 
 /// --- CIRCUITS VIEW (TAB 0 ROOT) ---
@@ -8667,9 +8869,14 @@ class _CircuitsViewState extends State<CircuitsView> {
     return entries;
   }
 
-  /// Vertical gap between consecutive calendar cards.
-  Widget _buildCalendarSeparator() {
-    return const SizedBox(height: 16);
+  /// Vertical gap between calendar rows (races and summer-break banner), tied to [F1UiTheme.cardPadding].
+  double _calendarInterRowGap(BuildContext context) {
+    final ui = Theme.of(context).extension<F1UiTheme>() ?? F1UiTheme.fallback();
+    return ui.cardPadding.top.clamp(8.0, 22.0);
+  }
+
+  Widget _buildCalendarSeparator(BuildContext context) {
+    return SizedBox(height: _calendarInterRowGap(context));
   }
 
   /// Returns calendar entries interleaved with separators.
@@ -8681,7 +8888,7 @@ class _CircuitsViewState extends State<CircuitsView> {
     for (var i = 0; i < entries.length; i++) {
       result.add(entries[i]);
       if (i < entries.length - 1) {
-        result.add(_buildCalendarSeparator());
+        result.add(_buildCalendarSeparator(context));
       }
     }
     return result;
@@ -8851,13 +9058,14 @@ class _CircuitsViewState extends State<CircuitsView> {
 
   Widget _buildDesktopCalendarGrid(BuildContext context) {
     final entries = _buildCalendarEntries(context);
+    final rowGap = _calendarInterRowGap(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildDesktopCalendarHeader(context),
-        const SizedBox(height: 8),
+        SizedBox(height: (rowGap * 0.65).clamp(6.0, 14.0)),
         for (var i = 0; i < entries.length; i++) ...[
-          if (i > 0) const SizedBox(height: 12),
+          if (i > 0) SizedBox(height: rowGap),
           entries[i],
         ],
       ],
@@ -9841,8 +10049,9 @@ class _CircuitsViewState extends State<CircuitsView> {
                         16,
                         16,
                       ),
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: 16),
+                      separatorBuilder: (context, index) => SizedBox(
+                        height: _calendarInterRowGap(context),
+                      ),
                       itemCount: 3,
                       itemBuilder: (context, index) {
                   switch (index) {
@@ -9865,7 +10074,13 @@ class _CircuitsViewState extends State<CircuitsView> {
                               children: [
                                 Expanded(
                                   flex: 5,
-                                  child: featured,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      featured,
+                                    ],
+                                  ),
                                 ),
                                 if (showPodiumSidebar) ...[
                                   const SizedBox(width: 16),
@@ -22391,6 +22606,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               _ProfileUserCard(
                                 email: user.email ?? user.phone ?? '',
                               ),
+                              const SizedBox(height: 16),
+                              ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                leading: const Icon(Icons.dashboard_customize_outlined),
+                                title: Text(context.l10n.my_paddock_title),
+                                trailing: const Icon(Icons.chevron_right),
+                                onTap: () => context.push(_myPaddockPath()),
+                              ),
+                              const SizedBox(height: 24),
+                              _ProfileDisplayPrefsCard(
+                                shellTwoColumn: twoCol,
+                              ),
                               const SizedBox(height: 24),
                               profileRow(
                                 const _ProfileLanguageCard(),
@@ -22480,6 +22707,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 child: Text(context.l10n.login),
                               ),
                               const SizedBox(height: 24),
+                              _ProfileDisplayPrefsCard(
+                                shellTwoColumn: twoCol,
+                              ),
+                              const SizedBox(height: 24),
                               themeRow,
                               const SizedBox(height: 24),
                               _ProfileBrandThemeCard(controller: controller),
@@ -22492,6 +22723,161 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
             ),
+    );
+  }
+}
+
+class _ProfileDisplayPrefsCard extends StatelessWidget {
+  const _ProfileDisplayPrefsCard({required this.shellTwoColumn});
+
+  /// Matches [ProfileScreen] shell layout: when true, this card is full width
+  /// and can place mode + toggles in one row on wide viewports.
+  final bool shellTwoColumn;
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<DisplaySettingsController>(
+      builder: (context, ctrl, _) {
+        final s = ctrl.settings;
+        final saving = ctrl.isPersistingDisplaySettings;
+        final scheme = Theme.of(context).colorScheme;
+
+        Future<void> persist(DisplaySettings next) =>
+            ctrl.updateSettings(next);
+
+        Widget togglesColumn() => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(context.l10n.display_prefs_compact),
+                  subtitle: Text(context.l10n.display_prefs_compact_hint),
+                  value: s.compact,
+                  onChanged: saving
+                      ? null
+                      : (v) => unawaited(persist(s.copyWith(compact: v))),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(context.l10n.display_prefs_motion_reduced),
+                  subtitle: Text(context.l10n.display_prefs_motion_reduced_hint),
+                  value: s.motionReduced,
+                  onChanged: saving
+                      ? null
+                      : (v) =>
+                          unawaited(persist(s.copyWith(motionReduced: v))),
+                ),
+              ],
+            );
+
+        final modeSection = Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              context.l10n.display_prefs_ui_mode,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              s.uiMode == UiMode.standard
+                  ? context.l10n.display_prefs_mode_standard_hint
+                  : context.l10n.display_prefs_mode_simple_hint,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            SegmentedButton<UiMode>(
+              segments: [
+                ButtonSegment<UiMode>(
+                  value: UiMode.standard,
+                  label: Text(context.l10n.display_prefs_mode_standard),
+                  icon: const Icon(Icons.blur_on_outlined, size: 18),
+                ),
+                ButtonSegment<UiMode>(
+                  value: UiMode.simple,
+                  label: Text(context.l10n.display_prefs_mode_simple),
+                  icon: const Icon(Icons.layers_outlined, size: 18),
+                ),
+              ],
+              selected: {s.uiMode},
+              onSelectionChanged: saving
+                  ? null
+                  : (next) {
+                      if (next.isEmpty) return;
+                      unawaited(persist(s.copyWith(uiMode: next.first)));
+                    },
+            ),
+          ],
+        );
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final wide =
+                shellTwoColumn && constraints.maxWidth >= 520;
+            return _profileSectionCard(
+              context,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (saving)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: const LinearProgressIndicator(minHeight: 3),
+                      ),
+                    ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          context.l10n.display_prefs_section_title,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
+                      if (saving)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8, top: 2),
+                          child: Text(
+                            context.l10n.display_prefs_saving,
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(color: scheme.onSurfaceVariant),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    context.l10n.display_prefs_section_subtitle,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                  ),
+                  const SizedBox(height: 20),
+                  if (wide)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(flex: 5, child: modeSection),
+                        const SizedBox(width: 24),
+                        Expanded(flex: 4, child: togglesColumn()),
+                      ],
+                    )
+                  else ...[
+                    modeSection,
+                    const SizedBox(height: 20),
+                    togglesColumn(),
+                  ],
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

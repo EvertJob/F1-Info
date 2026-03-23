@@ -2,11 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:archive/archive.dart';
+import 'package:f1/display_settings_controller.dart';
 import 'package:f1/l10n/app_localizations.dart';
 import 'package:f1/utils/l10n_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -916,7 +918,17 @@ const Map<int, String> _driverAbbrev = {
 
 /// Protected Live Timing page. Requires auth; redirects to login if not logged in.
 class LiveTimingPage extends StatefulWidget {
-  const LiveTimingPage({super.key});
+  const LiveTimingPage({
+    super.key,
+    this.initialReplayFrame,
+    this.resumeSessionLabelFromRoute,
+  });
+
+  /// When set (>0), WebSocket connects with `start_offset` at this frame (resume).
+  final int? initialReplayFrame;
+
+  /// Optional label from deep link (`?session=`) for display / saved progress.
+  final String? resumeSessionLabelFromRoute;
 
   @override
   State<LiveTimingPage> createState() => _LiveTimingPageState();
@@ -924,6 +936,7 @@ class LiveTimingPage extends StatefulWidget {
 
 class _LiveTimingPageState extends State<LiveTimingPage>
     with TickerProviderStateMixin {
+  DisplaySettingsController? _displaySettingsCtrl;
   WebSocketChannel? _channel;
   StreamSubscription? _subscription;
   bool _useTestData = true; // Silverstone replay by default
@@ -1025,6 +1038,10 @@ class _LiveTimingPageState extends State<LiveTimingPage>
   @override
   void initState() {
     super.initState();
+    final start = widget.initialReplayFrame;
+    if (start != null && start > 0) {
+      _replayFrameCount = start;
+    }
     _livePulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -1038,7 +1055,36 @@ class _LiveTimingPageState extends State<LiveTimingPage>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _displaySettingsCtrl = context.read<DisplaySettingsController>();
     _checkAuthAndConnect();
+  }
+
+  @override
+  void deactivate() {
+    _persistLiveProgressToProfile();
+    super.deactivate();
+  }
+
+  void _persistLiveProgressToProfile() {
+    final ctrl = _displaySettingsCtrl;
+    if (ctrl == null) return;
+    if (Supabase.instance.client.auth.currentUser == null) return;
+    if (_replayFrameCount <= 0) return;
+    var label = '${_sessionTypeLabel} ${_sessionPartLabel}'.trim();
+    if (label.isEmpty) {
+      label = widget.resumeSessionLabelFromRoute?.trim() ?? '';
+    }
+    if (label.isEmpty) label = 'Live timing';
+    unawaited(
+      ctrl.updateSettings(
+        ctrl.settings.copyWith(
+          liveTimingLastFrame: _replayFrameCount,
+          liveTimingLastTimestampIso:
+              DateTime.now().toUtc().toIso8601String(),
+          liveTimingSessionLabel: label,
+        ),
+      ),
+    );
   }
 
   Future<void> _checkAuthAndConnect() async {
@@ -1047,7 +1093,7 @@ class _LiveTimingPageState extends State<LiveTimingPage>
       if (mounted) context.go('/login');
       return;
     }
-    _connect(resetReplayOffset: true);
+    _connect(resetReplayOffset: _replayFrameCount <= 0);
   }
 
   String _wsUrl() {

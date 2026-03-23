@@ -321,6 +321,70 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calendar_prefs_hide_cancelled_hint => 'Hide cancelled or placeholder races not on the real calendar.';
 
   @override
+  String get display_prefs_section_title => 'Display preferences';
+
+  @override
+  String get display_prefs_section_subtitle => 'Choose how the app looks and moves. When signed in, these sync to your account.';
+
+  @override
+  String get display_prefs_ui_mode => 'Interface style';
+
+  @override
+  String get display_prefs_mode_standard => 'Standard';
+
+  @override
+  String get display_prefs_mode_standard_hint => 'Glass blur and soft shadows.';
+
+  @override
+  String get display_prefs_mode_simple => 'Simple';
+
+  @override
+  String get display_prefs_mode_simple_hint => 'Flat surfaces and stronger contrast.';
+
+  @override
+  String get display_prefs_compact => 'Compact mode';
+
+  @override
+  String get display_prefs_compact_hint => 'Tighter spacing and smaller cards.';
+
+  @override
+  String get display_prefs_motion_reduced => 'Reduced motion';
+
+  @override
+  String get display_prefs_motion_reduced_hint => 'Less animation, blur, and theme transitions.';
+
+  @override
+  String get display_prefs_saving => 'Saving…';
+
+  @override
+  String get my_paddock_title => 'My Paddock';
+
+  @override
+  String get my_paddock_session_unknown => 'Live timing';
+
+  @override
+  String my_paddock_resume_subtitle(String session, String lap) {
+    return 'Resume: $session — frame $lap';
+  }
+
+  @override
+  String get my_paddock_favorite_drivers => 'Favorite drivers';
+
+  @override
+  String get my_paddock_favorite_teams => 'Favorite teams';
+
+  @override
+  String get my_paddock_last_race => 'Last race';
+
+  @override
+  String my_paddock_last_race_summary(String date, String podium) {
+    return '$date · $podium';
+  }
+
+  @override
+  String get my_paddock_points_suffix => 'pts';
+
+  @override
   String get changelog => 'Changelog';
 
   @override

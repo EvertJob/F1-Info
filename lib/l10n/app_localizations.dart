@@ -639,6 +639,126 @@ abstract class AppLocalizations {
   /// **'Hide cancelled or placeholder races not on the real calendar.'**
   String get calendar_prefs_hide_cancelled_hint;
 
+  /// No description provided for @display_prefs_section_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Display preferences'**
+  String get display_prefs_section_title;
+
+  /// No description provided for @display_prefs_section_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose how the app looks and moves. When signed in, these sync to your account.'**
+  String get display_prefs_section_subtitle;
+
+  /// No description provided for @display_prefs_ui_mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Interface style'**
+  String get display_prefs_ui_mode;
+
+  /// No description provided for @display_prefs_mode_standard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get display_prefs_mode_standard;
+
+  /// No description provided for @display_prefs_mode_standard_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Glass blur and soft shadows.'**
+  String get display_prefs_mode_standard_hint;
+
+  /// No description provided for @display_prefs_mode_simple.
+  ///
+  /// In en, this message translates to:
+  /// **'Simple'**
+  String get display_prefs_mode_simple;
+
+  /// No description provided for @display_prefs_mode_simple_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Flat surfaces and stronger contrast.'**
+  String get display_prefs_mode_simple_hint;
+
+  /// No description provided for @display_prefs_compact.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact mode'**
+  String get display_prefs_compact;
+
+  /// No description provided for @display_prefs_compact_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tighter spacing and smaller cards.'**
+  String get display_prefs_compact_hint;
+
+  /// No description provided for @display_prefs_motion_reduced.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduced motion'**
+  String get display_prefs_motion_reduced;
+
+  /// No description provided for @display_prefs_motion_reduced_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Less animation, blur, and theme transitions.'**
+  String get display_prefs_motion_reduced_hint;
+
+  /// No description provided for @display_prefs_saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get display_prefs_saving;
+
+  /// No description provided for @my_paddock_title.
+  ///
+  /// In en, this message translates to:
+  /// **'My Paddock'**
+  String get my_paddock_title;
+
+  /// No description provided for @my_paddock_session_unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Live timing'**
+  String get my_paddock_session_unknown;
+
+  /// No description provided for @my_paddock_resume_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume: {session} — frame {lap}'**
+  String my_paddock_resume_subtitle(String session, String lap);
+
+  /// No description provided for @my_paddock_favorite_drivers.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite drivers'**
+  String get my_paddock_favorite_drivers;
+
+  /// No description provided for @my_paddock_favorite_teams.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite teams'**
+  String get my_paddock_favorite_teams;
+
+  /// No description provided for @my_paddock_last_race.
+  ///
+  /// In en, this message translates to:
+  /// **'Last race'**
+  String get my_paddock_last_race;
+
+  /// No description provided for @my_paddock_last_race_summary.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · {podium}'**
+  String my_paddock_last_race_summary(String date, String podium);
+
+  /// No description provided for @my_paddock_points_suffix.
+  ///
+  /// In en, this message translates to:
+  /// **'pts'**
+  String get my_paddock_points_suffix;
+
   /// No description provided for @changelog.
   ///
   /// In en, this message translates to:

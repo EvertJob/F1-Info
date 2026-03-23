@@ -13,6 +13,7 @@ import 'package:f1/data/local/hive/hive_boxes.dart';
 import 'package:f1/data/local/models/race_result.dart';
 import 'package:f1/data/local/models/race_results_cache.dart';
 import 'package:f1/detail_expansion_prefs_service.dart';
+import 'package:f1/display_settings_controller.dart';
 import 'package:f1/last_podium_prefs_service.dart';
 import 'package:f1/main.dart';
 import 'package:f1/profile_favorites_service.dart';
@@ -67,6 +68,11 @@ void main() {
           ),
           ChangeNotifierProvider<DetailExpansionPrefsNotifier>(
             create: (_) => DetailExpansionPrefsNotifier(),
+          ),
+          ChangeNotifierProvider<DisplaySettingsController>(
+            create: (context) => DisplaySettingsController(
+              context.read<DetailExpansionPrefsNotifier>(),
+            ),
           ),
         ],
         child: const F1HubApp(),

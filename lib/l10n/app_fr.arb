@@ -288,6 +288,38 @@
   "calendar_prefs_section_subtitle": "Personnalisez le calendrier des circuits.",
   "calendar_prefs_hide_cancelled": "Masquer les courses placeholder",
   "calendar_prefs_hide_cancelled_hint": "Masquer les courses annulées ou placeholder absentes du calendrier réel.",
+  "display_prefs_section_title": "Affichage",
+  "display_prefs_section_subtitle": "Apparence et animations. Connecté, les réglages se synchronisent avec votre compte.",
+  "display_prefs_ui_mode": "Style d’interface",
+  "display_prefs_mode_standard": "Standard",
+  "display_prefs_mode_standard_hint": "Flou type verre et ombres douces.",
+  "display_prefs_mode_simple": "Simple",
+  "display_prefs_mode_simple_hint": "Surfaces plates et contraste renforcé.",
+  "display_prefs_compact": "Mode compact",
+  "display_prefs_compact_hint": "Espacement réduit et cartes plus petites.",
+  "display_prefs_motion_reduced": "Mouvement réduit",
+  "display_prefs_motion_reduced_hint": "Moins d’animations, de flou et de transitions de thème.",
+  "display_prefs_saving": "Enregistrement…",
+  "my_paddock_title": "Mon paddock",
+  "my_paddock_session_unknown": "Live timing",
+  "my_paddock_resume_subtitle": "Reprendre : {session} — image {lap}",
+  "@my_paddock_resume_subtitle": {
+    "placeholders": {
+      "session": {"type": "String"},
+      "lap": {"type": "String"}
+    }
+  },
+  "my_paddock_favorite_drivers": "Pilotes favoris",
+  "my_paddock_favorite_teams": "Écuries favorites",
+  "my_paddock_last_race": "Dernière course",
+  "my_paddock_last_race_summary": "{date} · {podium}",
+  "@my_paddock_last_race_summary": {
+    "placeholders": {
+      "date": {"type": "String"},
+      "podium": {"type": "String"}
+    }
+  },
+  "my_paddock_points_suffix": "pts",
   "changelog": "Changelog",
   "characteristics": "CARACTÉRISTIQUES DU CIRCUIT",
   "chart_no_data": "Aucune donnée de graphique disponible pour cette saison.",
