@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <!-- Eerst oude service workers + Cache Storage legen (mobiel houdt anders oude main.dart.js vast). -->
   <script>
     (function () {
       if ('serviceWorker' in navigator) {
@@ -15,6 +16,7 @@
       }
     })();
   </script>
+  <!-- Dynamische base href: / voor f1hub.app (custom domain), /F1-Info/ voor GitHub Pages project site -->
   <script>
     (function(){
       var path = window.location.pathname;
@@ -26,41 +28,38 @@
   </script>
   <base href="/">
 
+  <!-- Anti-cache meta tags -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  
-  <title>F1 Hub</title>
-  <meta name="title" content="F1 Hub">
-  <meta name="description" content="F1 Hub — Real-time F1 Dashboard met live timing, kalenders, resultaten en standen.">
+  <meta name="description" content="F1 Hub — calendars, results, standings, and live timing.">
   <meta name="theme-color" content="#E10600">
 
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://f1hub.app/">
-  <meta property="og:title" content="F1 Hub">
-  <meta property="og:description" content="Real-time F1 Dashboard met live timing en adaptive UI.">
-  <meta property="og:image" content="https://f1hub.app/assets/images/f1_hub_logo_launcher.png">
-
-  <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="https://f1hub.app/">
-  <meta property="twitter:title" content="F1 Hub">
-  <meta property="twitter:description" content="Beleef F1 als een pro met ons adaptive live dashboard.">
-  <meta property="twitter:image" content="https://f1hub.app/assets/images/f1_hub_logo_launcher.png">
-
+  <!-- iOS meta tags & icons (paths relative to web/; match manifest.json) -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="F1 Hub">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
+  <!-- Favicon (regenerated with flutter_launcher_icons) -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
+  <title>F1 Hub</title>
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  <!--
+    You can customize the "flutter_bootstrap.js" script.
+    This is useful to provide a custom configuration to the Flutter loader
+    or to give the user feedback during the initialization process.
+
+    For more details:
+    * https://docs.flutter.dev/platform-integration/web/initialization
+  -->
   <script src="flutter_bootstrap.js?v=1.0.1+16" async></script>
 </body>
 </html>
