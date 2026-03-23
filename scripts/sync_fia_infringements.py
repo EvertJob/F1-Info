@@ -185,12 +185,16 @@ def find_infringement_pdf_links(html: str, base_url: str) -> list[InfringementLi
         href = a["href"].strip()
         if not href.lower().endswith(".pdf"):
             continue
-        if "decision-document" not in href.lower():
-            continue
+        
+        # BELANGRIJK: We kijken nu ook in de HREF (URL) zelf naar keywords
         text = " ".join(a.get_text(separator=" ", strip=True).split())
         title = (a.get("title") or "").strip()
+        
+        # De 'blob' bevat nu ook de URL (href)
         blob = f"{text} {title} {href}".lower()
-        if not any(word in blob for list_word in ["infringement", "decision", "summons"]):
+        
+        # Verruimde zoekterm: pakt nu ook Doc 60 en Australië PDF's
+        if not any(word in blob for word in ["infringement", "decision", "summons", "stewards"]):
             continue
 
         full_url = urljoin(base_url, href)
@@ -207,11 +211,7 @@ def find_infringement_pdf_links(html: str, base_url: str) -> list[InfringementLi
             listing_title=combined[:2000],
             published_at=pub,
         )
-        prev = by_url.get(full_url)
-        if prev is None or (pub or datetime.min.replace(tzinfo=timezone.utc)) >= (
-            prev.published_at or datetime.min.replace(tzinfo=timezone.utc)
-        ):
-            by_url[full_url] = entry
+        by_url[full_url] = entry
 
     return sorted(by_url.values(), key=lambda x: (x.published_at or datetime.min, x.url))
 
