@@ -1,6 +1,6 @@
 name: f1
 description: "F1 Hub: A cross-platform Formula 1 dashboard with high-fidelity UI parity, live timing integration, and adaptive display modes."
-version: 1.0.2+20
+version: 1.0.2+21
 publish_to: 'none'
 
 # Metadata voor pub.dev (ook al staat publish_to op none, dit is best practice)
@@ -68,6 +68,7 @@ dependencies:
   flutter_map: ^8.2.2
   latlong2: ^0.9.1
   flutter_map_animations: ^0.9.0
+  syncfusion_flutter_charts: ^33.1.45
   
 
 dev_dependencies:
