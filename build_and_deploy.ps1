@@ -59,7 +59,7 @@ Get-ChildItem -Path build\web -Force | ForEach-Object {
 
 # 3. Committen (build/web + gesynchroniseerde root-bestanden voor GitHub Pages)
 git add -f build/web
-git add index.html main.dart.js flutter_bootstrap.js flutter.js manifest.json version.json favicon.png .last_build_id CNAME assets canvaskit icons 2>$null
+git add pubspec.yaml index.html main.dart.js flutter_bootstrap.js flutter.js manifest.json version.json favicon.png .last_build_id CNAME assets canvaskit icons 2>$null
 if (Test-Path flutter_service_worker.js) { git add flutter_service_worker.js }
 $commitMsg = "Auto build: web $deployVersion (PWA off, cache bust)"
 git commit -m $commitMsg
