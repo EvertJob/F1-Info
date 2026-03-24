@@ -1,4 +1,4 @@
-import 'dart:async' show unawaited;
+import 'dart:async' show TimeoutException, unawaited;
 import 'dart:convert' show utf8;
 import 'dart:ui' as ui;
 
@@ -14,6 +14,8 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:rss_dart/domain/atom_feed.dart';
 import 'package:rss_dart/domain/atom_item.dart';
+import 'package:rss_dart/domain/rss1_feed.dart';
+import 'package:rss_dart/domain/rss1_item.dart';
 import 'package:rss_dart/domain/rss_feed.dart';
 import 'package:rss_dart/domain/rss_item.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -22,6 +24,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// this app package stack (`intl ^0.20`).
 bool _isDesktopShellLayout(BuildContext context) =>
     MediaQuery.sizeOf(context).width >= 600;
+
+/// Many RSS hosts block non-browser user agents; proxies also behave better with this.
+const String _kRssBrowserUserAgent =
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
+
+const Duration _kFeedFetchTimeout = Duration(seconds: 28);
 
 String _stripHtml(String raw) {
   return raw
@@ -152,13 +160,56 @@ List<NewsArticle> _articlesFromAtomXml(String xml, {required String sourceUrl}) 
     }
     return out;
   } catch (_) {
+    return _articlesFromRss1Xml(xml, sourceUrl: sourceUrl);
+  }
+}
+
+List<NewsArticle> _articlesFromRss1Xml(String xml, {required String sourceUrl}) {
+  try {
+    final feed = Rss1Feed.parse(xml);
+    final host = Uri.tryParse(sourceUrl)?.host ?? '';
+    final out = <NewsArticle>[];
+    for (final Rss1Item item in feed.items) {
+      final title = item.title?.trim() ?? '';
+      var link = item.link?.trim() ?? '';
+      if (title.isEmpty || link.isEmpty) continue;
+      final desc = _stripHtml(item.description ?? '');
+      final author = item.dc?.creator?.trim();
+      out.add(
+        NewsArticle(
+          title: title,
+          link: link,
+          description: desc,
+          author: author,
+          published: _parseFeedDate(item.dc?.date),
+          sourceLabel: host,
+        ),
+      );
+    }
+    return out;
+  } catch (_) {
     return [];
   }
 }
 
-Future<List<NewsArticle>> _fetchSingleFeed(String feedUrl) async {
-  const headers = {
-    'User-Agent': 'F1Hub/1.0 (+https://f1hub.app)',
+Future<http.Response?> _httpGetFeed(Uri uri, Map<String, String> headers) async {
+  try {
+    return await http
+        .get(uri, headers: headers)
+        .timeout(
+          _kFeedFetchTimeout,
+          onTimeout: () => throw TimeoutException('RSS fetch', _kFeedFetchTimeout),
+        );
+  } on TimeoutException {
+    return null;
+  } catch (_) {
+    return null;
+  }
+}
+
+Future<FeedResult> _fetchSingleFeed(String feedUrl) async {
+  final headers = {
+    'User-Agent': _kRssBrowserUserAgent,
     'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*',
   };
 
@@ -168,51 +219,94 @@ Future<List<NewsArticle>> _fetchSingleFeed(String feedUrl) async {
 
   try {
     if (kIsWeb) {
-      final r1 = await http.get(_allOriginsUri(feedUrl), headers: headers);
-      if (r1.statusCode != 200) return [];
-
-      final body1 = utf8.decode(r1.bodyBytes);
-      var articles = parseBodyBytes(r1.bodyBytes);
-      if (articles.isNotEmpty) return articles;
-
-      // Cached or proxy HTML (404 page) — not RSS; try another CORS proxy.
-      final suspicious = !_looksLikeFeedMarkup(body1) || _looksLikeHtmlDocument(body1);
-      if (suspicious) {
-        final r2 = await http.get(_corsProxyIoUri(feedUrl), headers: headers);
-        if (r2.statusCode == 200) {
-          articles = parseBodyBytes(r2.bodyBytes);
-        }
+      // At most two HTTP calls per feed: corsproxy first, allorigins only if the first
+      // response is missing, non-200, or clearly not feed XML (HTML error page, etc.).
+      List<NewsArticle> tryParse(http.Response? r) {
+        if (r == null || r.statusCode != 200) return [];
+        return parseBodyBytes(r.bodyBytes);
       }
-      return articles;
+
+      bool bodySuggestsRetryOtherProxy(List<int> bytes) {
+        final s = utf8.decode(bytes);
+        return !_looksLikeFeedMarkup(s) || _looksLikeHtmlDocument(s);
+      }
+
+      final rCors = await _httpGetFeed(_corsProxyIoUri(feedUrl), headers);
+      var articles = tryParse(rCors);
+      if (articles.isNotEmpty) {
+        return FeedResult(feedUrl: feedUrl, articles: articles);
+      }
+
+      final tryAllOrigins = rCors == null ||
+          rCors.statusCode != 200 ||
+          bodySuggestsRetryOtherProxy(rCors.bodyBytes);
+      if (!tryAllOrigins) {
+        return FeedResult(feedUrl: feedUrl, articles: articles);
+      }
+
+      final rAo = await _httpGetFeed(_allOriginsUri(feedUrl), headers);
+      articles = tryParse(rAo);
+      return FeedResult(feedUrl: feedUrl, articles: articles);
     }
 
-    final r = await http.get(Uri.parse(feedUrl), headers: headers);
-    if (r.statusCode != 200) return [];
-    return parseBodyBytes(r.bodyBytes);
+    final r = await _httpGetFeed(Uri.parse(feedUrl), headers);
+    if (r == null || r.statusCode != 200) {
+      return FeedResult(feedUrl: feedUrl, articles: const []);
+    }
+    return FeedResult(
+      feedUrl: feedUrl,
+      articles: parseBodyBytes(r.bodyBytes),
+    );
   } catch (_) {
-    return [];
+    return FeedResult(feedUrl: feedUrl, articles: const []);
   }
 }
 
-Future<List<NewsArticle>> _fetchAndMergeFeeds(List<String> urls) async {
+String _feedSectionHeading(String feedUrl) {
+  final u = Uri.tryParse(feedUrl);
+  if (u != null && u.hasAuthority) {
+    var host = u.host;
+    if (host.startsWith('www.')) {
+      host = host.substring(4);
+    }
+    if (host.isNotEmpty) return host;
+  }
+  return feedUrl;
+}
+
+int _compareArticlesByDateDesc(NewsArticle a, NewsArticle b) {
+  final epoch = DateTime.fromMillisecondsSinceEpoch(0);
+  final da = a.published ?? epoch;
+  final db = b.published ?? epoch;
+  final c = db.compareTo(da);
+  if (c != 0) return c;
+  return a.title.compareTo(b.title);
+}
+
+Future<List<FeedResult>> _fetchAllFeedsOrdered(List<String> urls) async {
   if (urls.isEmpty) return [];
   final results = await Future.wait(urls.map(_fetchSingleFeed));
-  final merged = <NewsArticle>[];
-  for (final batch in results) {
-    merged.addAll(batch);
-  }
-  final epoch = DateTime.fromMillisecondsSinceEpoch(0);
-  merged.sort((a, b) {
-    final da = a.published ?? epoch;
-    final db = b.published ?? epoch;
-    final c = db.compareTo(da);
-    if (c != 0) return c;
-    return a.title.compareTo(b.title);
-  });
-  return merged;
+  return results
+      .map((fr) {
+        final sorted = List<NewsArticle>.from(fr.articles)
+          ..sort(_compareArticlesByDateDesc);
+        return FeedResult(feedUrl: fr.feedUrl, articles: sorted);
+      })
+      .toList(growable: false);
 }
 
 /// Public model for tests / reuse.
+@immutable
+class FeedResult {
+  const FeedResult({
+    required this.feedUrl,
+    required this.articles,
+  });
+
+  final String feedUrl;
+  final List<NewsArticle> articles;
+}
+
 @immutable
 class NewsArticle {
   const NewsArticle({
@@ -306,7 +400,7 @@ class NewsFeedView extends StatefulWidget {
 }
 
 class _NewsFeedViewState extends State<NewsFeedView> {
-  List<NewsArticle> _items = [];
+  List<FeedResult> _sections = [];
   bool _loading = true;
   String? _error;
 
@@ -338,10 +432,10 @@ class _NewsFeedViewState extends State<NewsFeedView> {
       _error = null;
     });
     try {
-      final items = await _fetchAndMergeFeeds(widget.feedUrls);
+      final sections = await _fetchAllFeedsOrdered(widget.feedUrls);
       if (!mounted) return;
       setState(() {
-        _items = items;
+        _sections = sections;
         _loading = false;
       });
     } catch (e) {
@@ -418,7 +512,7 @@ class _NewsFeedViewState extends State<NewsFeedView> {
                   )
                 : RefreshIndicator(
                     onRefresh: _load,
-                    child: _items.isEmpty
+                    child: widget.feedUrls.isEmpty
                         ? ListView(
                             physics: const AlwaysScrollableScrollPhysics(),
                             padding: const EdgeInsets.all(24),
@@ -436,23 +530,102 @@ class _NewsFeedViewState extends State<NewsFeedView> {
                               ),
                             ],
                           )
-                        : ListView.builder(
+                        : CustomScrollView(
                             physics: const AlwaysScrollableScrollPhysics(),
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                            itemCount: _items.length,
-                            itemBuilder: (context, index) {
-                              final item = _items[index];
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: _NewsGlassArticleTile(
-                                  article: item,
-                                  f1Ui: f1Ui,
-                                  panelStrong: panelStrong,
-                                  isDark: theme.brightness == Brightness.dark,
-                                  onTap: () => _openArticle(item.link),
+                            slivers: [
+                              for (final section in _sections) ...[
+                                SliverToBoxAdapter(
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      16,
+                                      16,
+                                      8,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          _feedSectionHeading(section.feedUrl),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 13,
+                                            letterSpacing: 0.8,
+                                            color: scheme.primary,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          section.feedUrl,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: scheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                              );
-                            },
+                                if (section.articles.isEmpty)
+                                  SliverToBoxAdapter(
+                                    child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        16,
+                                        0,
+                                        16,
+                                        20,
+                                      ),
+                                      child: Text(
+                                        context.l10n.news_feed_section_empty,
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          height: 1.35,
+                                          color: scheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  SliverPadding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      0,
+                                      16,
+                                      8,
+                                    ),
+                                    sliver: SliverList(
+                                      delegate:
+                                          SliverChildBuilderDelegate(
+                                        (context, index) {
+                                          final item =
+                                              section.articles[index];
+                                          return Padding(
+                                            padding: const EdgeInsets.only(
+                                              bottom: 12,
+                                            ),
+                                            child: _NewsGlassArticleTile(
+                                              article: item,
+                                              f1Ui: f1Ui,
+                                              panelStrong: panelStrong,
+                                              isDark: theme.brightness ==
+                                                  Brightness.dark,
+                                              onTap: () =>
+                                                  _openArticle(item.link),
+                                            ),
+                                          );
+                                        },
+                                        childCount: section.articles.length,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                              const SliverPadding(
+                                padding: EdgeInsets.only(bottom: 16),
+                              ),
+                            ],
                           ),
                   ),
           ),

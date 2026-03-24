@@ -785,6 +785,7 @@
   "news_title": "F1 Nieuws",
   "news_nav": "Nieuws",
   "news_empty": "Geen artikelen op dit moment. Trek om te vernieuwen.",
+  "news_feed_section_empty": "Geen artikelen uit deze feed.",
   "news_settings_title": "Nieuwsfeeds",
   "news_settings_subtitle": "Voeg RSS- of Atom-URL''s toe. Ze worden op het tabblad Nieuws geladen (nieuwste eerst).",
   "news_settings_url_hint": "https://voorbeeld.nl/feed.xml",
@@ -795,6 +796,17 @@
   "news_settings_duplicate_url": "Deze URL staat al in je lijst.",
   "news_settings_save_failed": "Opslaan mislukt. Probeer opnieuw.",
   "news_settings_stream_error": "Kon profiel-updates niet ontvangen.",
+  "news_settings_drag_to_reorder": "Sleep om de volgorde van feeds te wijzigen",
+  "orbit_nav": "Orbit",
+  "orbit_circuit_list": "Circuits",
+  "orbit_load_error": "Kaartgegevens laden mislukt: {error}",
+  "@orbit_load_error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "race_results_empty": "Nog geen race-resultaten beschikbaar.",
   "secure_page_authorized": "Je bent geautoriseerd!",
   "secure_page_title": "Beveiligde pagina",

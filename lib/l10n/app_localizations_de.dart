@@ -1506,6 +1506,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get news_empty => 'Zurzeit keine Artikel. Zum Aktualisieren nach unten ziehen.';
 
   @override
+  String get news_feed_section_empty => 'Keine Artikel aus diesem Feed.';
+
+  @override
   String get news_settings_title => 'News-Feeds';
 
   @override
@@ -1534,6 +1537,20 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get news_settings_stream_error => 'Profil-Updates konnten nicht abonniert werden.';
+
+  @override
+  String get news_settings_drag_to_reorder => 'Ziehen, um die Feed-Reihenfolge zu ändern';
+
+  @override
+  String get orbit_nav => 'Orbit';
+
+  @override
+  String get orbit_circuit_list => 'Strecken';
+
+  @override
+  String orbit_load_error(String error) {
+    return 'Kartendaten konnten nicht geladen werden: $error';
+  }
 
   @override
   String get race_results_empty => 'Noch keine Rennergebnisse verfügbar.';

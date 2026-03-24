@@ -785,6 +785,7 @@
   "news_title": "F1 News",
   "news_nav": "News",
   "news_empty": "Zurzeit keine Artikel. Zum Aktualisieren nach unten ziehen.",
+  "news_feed_section_empty": "Keine Artikel aus diesem Feed.",
   "news_settings_title": "News-Feeds",
   "news_settings_subtitle": "RSS- oder Atom-URLs hinzufügen. Sie werden im Tab News geladen (neueste zuerst).",
   "news_settings_url_hint": "https://beispiel.de/feed.xml",
@@ -795,6 +796,17 @@
   "news_settings_duplicate_url": "Diese URL steht bereits in der Liste.",
   "news_settings_save_failed": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
   "news_settings_stream_error": "Profil-Updates konnten nicht abonniert werden.",
+  "news_settings_drag_to_reorder": "Ziehen, um die Feed-Reihenfolge zu ändern",
+  "orbit_nav": "Orbit",
+  "orbit_circuit_list": "Strecken",
+  "orbit_load_error": "Kartendaten konnten nicht geladen werden: {error}",
+  "@orbit_load_error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "race_results_empty": "Noch keine Rennergebnisse verfügbar.",
   "secure_page_authorized": "Sie sind berechtigt!",
   "secure_page_title": "Geschützte Seite",

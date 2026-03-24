@@ -1506,6 +1506,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get news_empty => 'No articles right now. Pull to refresh.';
 
   @override
+  String get news_feed_section_empty => 'No articles from this feed.';
+
+  @override
   String get news_settings_title => 'News feeds';
 
   @override
@@ -1534,6 +1537,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get news_settings_stream_error => 'Could not subscribe to profile updates.';
+
+  @override
+  String get news_settings_drag_to_reorder => 'Drag to change feed order';
+
+  @override
+  String get orbit_nav => 'Orbit';
+
+  @override
+  String get orbit_circuit_list => 'Circuits';
+
+  @override
+  String orbit_load_error(String error) {
+    return 'Could not load map data: $error';
+  }
 
   @override
   String get race_results_empty => 'No race results available yet.';

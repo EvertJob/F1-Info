@@ -1506,6 +1506,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get news_empty => 'Aucun article pour le moment. Tirez pour actualiser.';
 
   @override
+  String get news_feed_section_empty => 'Aucun article pour ce flux.';
+
+  @override
   String get news_settings_title => 'Flux d\'\'actualités';
 
   @override
@@ -1534,6 +1537,20 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get news_settings_stream_error => 'Impossible de s\'\'abonner aux mises à jour du profil.';
+
+  @override
+  String get news_settings_drag_to_reorder => 'Glisser pour modifier l\'\'ordre des flux';
+
+  @override
+  String get orbit_nav => 'Orbit';
+
+  @override
+  String get orbit_circuit_list => 'Circuits';
+
+  @override
+  String orbit_load_error(String error) {
+    return 'Impossible de charger la carte : $error';
+  }
 
   @override
   String get race_results_empty => 'Aucun résultat de course pour le moment.';

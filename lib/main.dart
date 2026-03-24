@@ -44,6 +44,7 @@ import 'browser_bridge.dart' as browser_bridge;
 import 'open_meteo_api.dart';
 import 'changelog_page.dart';
 import 'news_page.dart';
+import 'orbit/orbit_page.dart';
 import 'widgets/news_settings.dart';
 import 'coach_corner_data.dart';
 part 'f1_data.dart';
@@ -3118,6 +3119,7 @@ String _circuitsPath() => '/circuits';
 String _driversPath() => '/drivers';
 String _teamsPath() => '/teams';
 String _newsPath() => '/news';
+String _orbitPath() => '/orbit';
 String _changelogPath() => '/profile/changelog';
 String _placeholderPagePath() => '/placeholder';
 String _loginPath() => '/login';
@@ -3639,6 +3641,14 @@ class _F1HubAppState extends State<F1HubApp> {
               GoRoute(
                 path: _newsPath(),
                 builder: (context, state) => const NewsPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: _orbitPath(),
+                builder: (context, state) => const OrbitPage(),
               ),
             ],
           ),
@@ -8191,12 +8201,17 @@ class MainNavigation extends StatelessWidget {
         label: Text(context.l10n.news_nav.toUpperCase()),
       ),
       NavigationRailDestination(
+        icon: _buildGlyphIcon('🌍', size: 20),
+        selectedIcon: _buildGlyphIcon('🌍', size: 20),
+        label: Text(context.l10n.orbit_nav.toUpperCase()),
+      ),
+      NavigationRailDestination(
         icon: _buildGlyphIcon('👤', size: 20),
         selectedIcon: _buildGlyphIcon('👤', size: 20),
         label: Text(context.l10n.profile.toUpperCase()),
       ),
     ];
-    final railDestinations = destinations.sublist(0, 4);
+    final railDestinations = destinations.sublist(0, 5);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -8238,7 +8253,7 @@ class MainNavigation extends StatelessWidget {
             children: [
               Expanded(
                 child: _F1NavRail(
-                  selectedIndex: navigationShell.currentIndex < 4
+                  selectedIndex: navigationShell.currentIndex < 5
                       ? navigationShell.currentIndex
                       : null,
                   extended: constraints.maxWidth >= 1320,
@@ -8410,6 +8425,10 @@ class MainNavigation extends StatelessWidget {
                                 BottomNavigationBarItem(
                                   icon: _buildGlyphIcon('📰', size: 20),
                                   label: context.l10n.news_nav.toUpperCase(),
+                                ),
+                                BottomNavigationBarItem(
+                                  icon: _buildGlyphIcon('🌍', size: 20),
+                                  label: context.l10n.orbit_nav.toUpperCase(),
                                 ),
                                 BottomNavigationBarItem(
                                   icon: _buildGlyphIcon('👤', size: 20),

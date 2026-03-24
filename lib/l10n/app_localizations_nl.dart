@@ -1506,6 +1506,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get news_empty => 'Geen artikelen op dit moment. Trek om te vernieuwen.';
 
   @override
+  String get news_feed_section_empty => 'Geen artikelen uit deze feed.';
+
+  @override
   String get news_settings_title => 'Nieuwsfeeds';
 
   @override
@@ -1534,6 +1537,20 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get news_settings_stream_error => 'Kon profiel-updates niet ontvangen.';
+
+  @override
+  String get news_settings_drag_to_reorder => 'Sleep om de volgorde van feeds te wijzigen';
+
+  @override
+  String get orbit_nav => 'Orbit';
+
+  @override
+  String get orbit_circuit_list => 'Circuits';
+
+  @override
+  String orbit_load_error(String error) {
+    return 'Kaartgegevens laden mislukt: $error';
+  }
 
   @override
   String get race_results_empty => 'Nog geen race-resultaten beschikbaar.';

@@ -1,6 +1,7 @@
 import 'package:f1/news_feeds_service.dart';
 import 'package:f1/utils/l10n_extension.dart';
 import 'package:f1/widgets/f1_module.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -16,6 +17,14 @@ class _NewsSettingsState extends State<NewsSettings> {
   final TextEditingController _urlController = TextEditingController();
   String? _inlineError;
   bool _busy = false;
+
+  /// Optimistic order while ReorderableListView animates / before the profile stream catches up.
+  List<String>? _pendingFeedOrder;
+
+  /// Invalidates delayed reorder upserts when the user drops again before the delay elapses.
+  int _reorderSaveGeneration = 0;
+
+  static const Duration _kReorderPersistDelay = Duration(milliseconds: 420);
 
   @override
   void dispose() {
@@ -43,10 +52,14 @@ class _NewsSettingsState extends State<NewsSettings> {
       setState(() => _inlineError = context.l10n.news_settings_duplicate_url);
       return;
     }
+    _reorderSaveGeneration++;
     setState(() => _busy = true);
     try {
       await NewsFeedsService.instance.upsertFeeds([...current, url]);
-      if (mounted) _urlController.clear();
+      if (mounted) {
+        _urlController.clear();
+        setState(() => _pendingFeedOrder = [...current, url]);
+      }
     } catch (_) {
       if (mounted) {
         setState(() => _inlineError = context.l10n.news_settings_save_failed);
@@ -58,10 +71,12 @@ class _NewsSettingsState extends State<NewsSettings> {
 
   Future<void> _removeAt(List<String> current, int index) async {
     if (index < 0 || index >= current.length) return;
+    _reorderSaveGeneration++;
     setState(() => _busy = true);
     try {
       final next = List<String>.from(current)..removeAt(index);
       await NewsFeedsService.instance.upsertFeeds(next);
+      if (mounted) setState(() => _pendingFeedOrder = next);
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -71,6 +86,42 @@ class _NewsSettingsState extends State<NewsSettings> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  void _onReorderFeeds(List<String> current, int oldIndex, int newIndex) {
+    if (_busy) return;
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    if (oldIndex == newIndex) return;
+    final next = List<String>.from(current);
+    final item = next.removeAt(oldIndex);
+    next.insert(newIndex, item);
+
+    // Update data this frame so items do not snap back; avoid upsert until the
+    // reorder animation finishes (stream refresh mid-drag triggers framework asserts).
+    setState(() => _pendingFeedOrder = next);
+
+    final saveGen = ++_reorderSaveGeneration;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future<void>.delayed(_kReorderPersistDelay, () async {
+        if (!mounted || saveGen != _reorderSaveGeneration) return;
+        if (_busy) return;
+        setState(() => _busy = true);
+        try {
+          await NewsFeedsService.instance.upsertFeeds(next);
+        } catch (_) {
+          if (mounted) {
+            setState(() => _pendingFeedOrder = null);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(context.l10n.news_settings_save_failed)),
+            );
+          }
+        } finally {
+          if (mounted) setState(() => _busy = false);
+        }
+      });
+    });
   }
 
   @override
@@ -106,7 +157,18 @@ class _NewsSettingsState extends State<NewsSettings> {
               ),
             );
           }
-          final feeds = NewsFeedsService.parseNewsFeeds(rows.first['news_feeds']);
+          final streamFeeds = NewsFeedsService.parseNewsFeeds(
+            rows.first['news_feeds'],
+          );
+          if (_pendingFeedOrder != null &&
+              listEquals(streamFeeds, _pendingFeedOrder)) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                setState(() => _pendingFeedOrder = null);
+              }
+            });
+          }
+          final feeds = _pendingFeedOrder ?? streamFeeds;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -118,9 +180,9 @@ class _NewsSettingsState extends State<NewsSettings> {
               const SizedBox(height: 6),
               Text(
                 context.l10n.news_settings_subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
               ),
               const SizedBox(height: 16),
               Row(
@@ -168,36 +230,78 @@ class _NewsSettingsState extends State<NewsSettings> {
                   ),
                 )
               else
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: feeds.length,
-                  separatorBuilder: (context, _) =>
-                      const SizedBox(height: 6),
-                  itemBuilder: (context, i) {
-                    final url = feeds[i];
-                    return Material(
-                      color: scheme.surfaceContainerHighest.withValues(
-                        alpha: 0.65,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      child: ListTile(
-                        dense: true,
-                        title: Text(
-                          url,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 13),
+                IgnorePointer(
+                  ignoring: _busy,
+                  child: ReorderableListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    buildDefaultDragHandles: false,
+                    itemCount: feeds.length,
+                    onReorder: (oldIndex, newIndex) =>
+                        _onReorderFeeds(feeds, oldIndex, newIndex),
+                    itemBuilder: (context, i) {
+                      final url = feeds[i];
+                      return Padding(
+                        key: ValueKey(url),
+                        padding: EdgeInsets.only(
+                          bottom: i < feeds.length - 1 ? 6 : 0,
                         ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.close_rounded),
-                          tooltip: MaterialLocalizations.of(context)
-                              .deleteButtonTooltip,
-                          onPressed: _busy ? null : () => _removeAt(feeds, i),
+                        child: Material(
+                          color: scheme.surfaceContainerHighest.withValues(
+                            alpha: 0.65,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          child: ListTile(
+                            dense: true,
+                            title: Text(
+                              url,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Avoid [Tooltip] here: it registers overlay/inherited
+                                // dependents that break when the row is reparented during drag.
+                                Semantics(
+                                  label: context
+                                      .l10n
+                                      .news_settings_drag_to_reorder,
+                                  child: MouseRegion(
+                                    cursor: SystemMouseCursors.grab,
+                                    child: ReorderableDragStartListener(
+                                      index: i,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 4,
+                                          vertical: 8,
+                                        ),
+                                        child: Icon(
+                                          Icons.drag_handle_rounded,
+                                          size: 22,
+                                          color: scheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.close_rounded),
+                                  tooltip: MaterialLocalizations.of(
+                                    context,
+                                  ).deleteButtonTooltip,
+                                  onPressed: _busy
+                                      ? null
+                                      : () => _removeAt(feeds, i),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
             ],
           );

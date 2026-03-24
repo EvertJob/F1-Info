@@ -785,6 +785,7 @@
   "news_title": "Actus F1",
   "news_nav": "Actus",
   "news_empty": "Aucun article pour le moment. Tirez pour actualiser.",
+  "news_feed_section_empty": "Aucun article pour ce flux.",
   "news_settings_title": "Flux d''actualités",
   "news_settings_subtitle": "Ajoutez des URL RSS ou Atom. Elles sont chargées dans l''onglet Actus (plus récent en premier).",
   "news_settings_url_hint": "https://exemple.fr/flux.xml",
@@ -795,6 +796,17 @@
   "news_settings_duplicate_url": "Cette URL est déjà dans la liste.",
   "news_settings_save_failed": "Enregistrement impossible. Réessayez.",
   "news_settings_stream_error": "Impossible de s''abonner aux mises à jour du profil.",
+  "news_settings_drag_to_reorder": "Glisser pour modifier l''ordre des flux",
+  "orbit_nav": "Orbit",
+  "orbit_circuit_list": "Circuits",
+  "orbit_load_error": "Impossible de charger la carte : {error}",
+  "@orbit_load_error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "race_results_empty": "Aucun résultat de course pour le moment.",
   "secure_page_authorized": "Vous êtes autorisé !",
   "secure_page_title": "Page sécurisée",

@@ -2949,6 +2949,12 @@ abstract class AppLocalizations {
   /// **'No articles right now. Pull to refresh.'**
   String get news_empty;
 
+  /// No description provided for @news_feed_section_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No articles from this feed.'**
+  String get news_feed_section_empty;
+
   /// No description provided for @news_settings_title.
   ///
   /// In en, this message translates to:
@@ -3008,6 +3014,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not subscribe to profile updates.'**
   String get news_settings_stream_error;
+
+  /// No description provided for @news_settings_drag_to_reorder.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to change feed order'**
+  String get news_settings_drag_to_reorder;
+
+  /// No description provided for @orbit_nav.
+  ///
+  /// In en, this message translates to:
+  /// **'Orbit'**
+  String get orbit_nav;
+
+  /// No description provided for @orbit_circuit_list.
+  ///
+  /// In en, this message translates to:
+  /// **'Circuits'**
+  String get orbit_circuit_list;
+
+  /// No description provided for @orbit_load_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load map data: {error}'**
+  String orbit_load_error(String error);
 
   /// No description provided for @race_results_empty.
   ///
