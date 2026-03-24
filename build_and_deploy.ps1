@@ -26,7 +26,17 @@ $deployVersion = (Get-Content $pubspec | Where-Object { $_ -match '^version:' })
 # (Voor username.github.io/F1-Info/ zou je apart met --base-href "/F1-Info/" moeten bouwen.)
 flutter build web --base-href "/" --pwa-strategy=none
 
-# 2a. Cache-bust op bootstrap: dwing mobiele browsers om nieuwe flutter_bootstrap.js te halen
+# 2a. Cache-bust op de echte app-bundle: alleen ?v= op index/bootstrap is niet genoeg —
+# de loader injecteert anders plain "main.dart.js" en CDN/browser blijven oude JS serveren.
+$fbWeb = 'build/web/flutter_bootstrap.js'
+$fbRaw = Get-Content $fbWeb -Raw -Encoding utf8
+# Idempotent: ook als er al een oude ?v= in de bundle stond (tweede deploy-run zonder clean).
+$fbRaw = $fbRaw -replace '"mainJsPath":"main\.dart\.js(\?[^"]*)?"', (
+  '"mainJsPath":"main.dart.js?v=' + $deployVersion + '"'
+)
+[System.IO.File]::WriteAllText((Resolve-Path $fbWeb), $fbRaw, [System.Text.UTF8Encoding]::new($false))
+
+# 2b. Cache-bust op bootstrap: nieuwe flutter_bootstrap.js ophalen
 $indexWeb = 'build/web/index.html'
 $html = Get-Content $indexWeb -Raw -Encoding utf8
 if ($html -match 'flutter_bootstrap\.js\?v=') {
@@ -36,12 +46,12 @@ if ($html -match 'flutter_bootstrap\.js\?v=') {
 }
 [System.IO.File]::WriteAllText((Resolve-Path $indexWeb), $html, [System.Text.UTF8Encoding]::new($false))
 
-# 2b. CNAME voor custom domain (f1hub.app) - moet in root van gh-pages staan
+# 2c. CNAME voor custom domain (f1hub.app) - moet in root van gh-pages staan
 if (Test-Path CNAME) {
   Copy-Item CNAME build/web/CNAME
 }
 
-# 2c. Zelfde build naar repo-root kopiëren: GitHub Pages serveert de branch-root
+# 2d. Zelfde build naar repo-root kopiëren: GitHub Pages serveert de branch-root
 # (index.html, main.dart.js, assets/, …), niet de map build/web/.
 Get-ChildItem -Path build\web -Force | ForEach-Object {
   Copy-Item $_.FullName -Destination . -Recurse -Force
