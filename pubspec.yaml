@@ -1,6 +1,6 @@
 name: f1
 description: "F1 Hub: A cross-platform Formula 1 dashboard with high-fidelity UI parity, live timing integration, and adaptive display modes."
-version: 1.0.2+23
+version: 1.0.2+24
 publish_to: 'none'
 
 # Metadata voor pub.dev (ook al staat publish_to op none, dit is best practice)
