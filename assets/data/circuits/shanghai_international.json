@@ -1,0 +1,131 @@
+﻿{
+    "circuit_id":  "shanghai_international",
+    "name":  "Shanghai International Circuit",
+    "location":  "Shanghai, China",
+    "categories":  [
+                       {
+                           "category_id":  "live_ambient_status",
+                           "label_l10n":  "cat_ambient_stats",
+                           "icon":  "cloud_sun",
+                           "data_points":  {
+                                               "temperature_c":  19,
+                                               "rain_chance_pct":  25,
+                                               "air_pressure_hpa":  1016,
+                                               "track_evolution_pct":  8,
+                                               "sun_angle_start":  "31_deg_south",
+                                               "elevation_sea_level_m":  5,
+                                               "max_elevation_change_m":  7.4,
+                                               "tyre_physics":  {
+                                                                    "asphalt_grip_score":  8,
+                                                                    "lateral_stress_score":  9
+                                                                },
+                                               "tyre_working_window_c":  110,
+                                               "wind_sensitivity_sector":  "S3",
+                                               "safety_car_window_laps":  "L12-L18",
+                                               "local_time_zone":  {
+                                                                       "zone_name":  "CST",
+                                                                       "utc_offset":  "UTC+8"
+                                                                   }
+                                           }
+                       },
+                       {
+                           "category_id":  "track_geometry",
+                           "label_l10n":  "cat_track_specs",
+                           "icon":  "straighten",
+                           "data_points":  {
+                                               "length_m":  5451,
+                                               "laps":  56,
+                                               "distance_to_t1_m":  380,
+                                               "on_calendar_since":  2004,
+                                               "contract_until":  2028,
+                                               "track_type_l10n":  "type_permanent_circuit",
+                                               "direction_l10n":  "dir_clockwise",
+                                               "sector_splits_m":  {
+                                                                       "s1":  1650,
+                                                                       "s3":  1981,
+                                                                       "s2":  1820
+                                                                   },
+                                               "circuit_director":  "Sun Lanjun",
+                                               "circuit_owner":  "Shanghai Juss Sports Group",
+                                               "race_day_capacity":  "200,000",
+                                               "latitude":  31.3389,
+                                               "longitude":  121.219
+                                           }
+                       },
+                       {
+                           "category_id":  "aero_power_2026",
+                           "label_l10n":  "cat_tech_2026",
+                           "icon":  "bolt_aero",
+                           "data_points":  {
+                                               "z_mode_usage_pct":  52,
+                                               "x_mode_usage_pct":  48,
+                                               "straight_mode_zones":  3,
+                                               "manual_override_points":  2,
+                                               "override_impact_score":  9.2,
+                                               "electrical_ratio_pct":  50,
+                                               "harvest_difficulty_l10n":  "diff_medium",
+                                               "recovery_points":  16,
+                                               "energy_flow_strategy":  {
+                                                                            "harvesting_zones":  "T1, T11, T14",
+                                                                            "deployment_focus":  "Sector 3"
+                                                                        },
+                                               "manual_override_energy_cost_kj":  145,
+                                               "z_mode_activation_delay_ms":  140,
+                                               "engine_derating_risk_pct":  25,
+                                               "brake_cooling_requirement_score":  8
+                                           }
+                       },
+                       {
+                           "category_id":  "performance_risk",
+                           "label_l10n":  "cat_risks_stats",
+                           "icon":  "warning_speed",
+                           "data_points":  {
+                                               "top_speed_kmh":  348,
+                                               "max_g_force":  4.5,
+                                               "avg_g_force":  2.4,
+                                               "safety_car_prob_pct":  35,
+                                               "vsc_prob_pct":  40,
+                                               "red_flag_prob_pct":  10,
+                                               "t1_accident_risk_pct":  30,
+                                               "pit_exit_delta_s":  23.1,
+                                               "overtaking_delta_s":  0.8,
+                                               "undercut_potential_score":  8,
+                                               "circuit_difficulty_l10n":  "diff_high",
+                                               "overtaking_difficulty_l10n":  "diff_easy"
+                                           }
+                       },
+                       {
+                           "category_id":  "historical_era",
+                           "label_l10n":  "cat_history_comparison",
+                           "icon":  "history_timer",
+                           "data_points":  {
+                                               "avg_time_2024_2025":  "1:32.050",
+                                               "est_time_2026":  "1:33.400",
+                                               "era_delta_s":  "+1.350",
+                                               "top_speed_delta_kmh":  14,
+                                               "pitstop_record_detail":  {
+                                                                             "team":  "Red Bull Racing",
+                                                                             "driver":  "Max Verstappen",
+                                                                             "year":  2024,
+                                                                             "time_s":  1.9
+                                                                         },
+                                               "lap_record_detail":  {
+                                                                         "time":  "1:32.221",
+                                                                         "engine":  "Honda RBPT",
+                                                                         "driver":  "Max Verstappen",
+                                                                         "year":  2024,
+                                                                         "team":  "Red Bull Racing"
+                                                                     }
+                                           }
+                       }
+                   ],
+    "characteristics":  {
+                            "key_features_l10n":  [
+                                                      "feature_long_back_straight",
+                                                      "feature_snail_corner_t1",
+                                                      "feature_high_front_tyre_wear",
+                                                      "feature_technical_sector_2"
+                                                  ],
+                            "full_throttle_pct":  56
+                        }
+}

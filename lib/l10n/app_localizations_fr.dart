@@ -286,6 +286,195 @@ class AppLocalizationsFr extends AppLocalizations {
   String get best_lap => 'Meilleur tour';
 
   @override
+  String get best_tyre_combination => 'Meilleure combinaison de pneus';
+
+  @override
+  String get cfield_air_pressure_hpa => 'Pression atmosphérique';
+
+  @override
+  String get cfield_asphalt_grip_score => 'Score d’adhérence asphaltique';
+
+  @override
+  String get cfield_avg_g_force => 'G-force moyenne';
+
+  @override
+  String get cfield_avg_time_2024_2025 => 'Temps au tour moyen (2024–25)';
+
+  @override
+  String get cfield_brake_cooling_requirement_score => 'Exigence refroidissement freins';
+
+  @override
+  String get cfield_circuit_director => 'Directeur de circuit';
+
+  @override
+  String get cfield_circuit_owner => 'Propriétaire du circuit';
+
+  @override
+  String get cfield_contract_until => 'Contrat jusqu’à';
+
+  @override
+  String get cfield_deployment_focus => 'Focus déploiement énergie';
+
+  @override
+  String get cfield_direction => 'Sens de course';
+
+  @override
+  String get cfield_distance_to_t1 => 'Distance jusqu’au virage 1';
+
+  @override
+  String get cfield_electrical_ratio => 'Part électrique';
+
+  @override
+  String get cfield_energy_flow_strategy => 'Stratégie de flux énergétique';
+
+  @override
+  String get cfield_engine_derating_risk => 'Risque de dérating moteur';
+
+  @override
+  String get cfield_era_delta => 'Écart entre ères';
+
+  @override
+  String get cfield_est_time_2026 => 'Temps au tour estimé (2026)';
+
+  @override
+  String get cfield_elevation_sea_level => 'Altitude (niveau de la mer)';
+
+  @override
+  String get cfield_harvest_difficulty => 'Difficulté de récupération';
+
+  @override
+  String get cfield_harvesting_zones => 'Zones de récupération';
+
+  @override
+  String get cfield_latitude => 'Latitude';
+
+  @override
+  String get cfield_local_time_zone => 'Fuseau horaire local';
+
+  @override
+  String get cfield_longitude => 'Longitude';
+
+  @override
+  String get cfield_lap_record_detail => 'Record du tour';
+
+  @override
+  String get cfield_laps => 'Tours';
+
+  @override
+  String get cfield_lateral_stress_score => 'Score contrainte latérale';
+
+  @override
+  String get cfield_length => 'Longueur';
+
+  @override
+  String get cfield_manual_override_energy_cost => 'Coût énergétique override manuel';
+
+  @override
+  String get cfield_manual_override_points => 'Points d’override manuel';
+
+  @override
+  String get cfield_max_elevation_change => 'Dénivelé maximal';
+
+  @override
+  String get cfield_max_g_force => 'G-force max.';
+
+  @override
+  String get cfield_override_impact_score => 'Score d’impact override';
+
+  @override
+  String get cfield_on_calendar_since => 'Au calendrier depuis';
+
+  @override
+  String get cfield_overtaking_delta => 'Delta de dépassement';
+
+  @override
+  String get cfield_pit_exit_delta => 'Delta sortie stands';
+
+  @override
+  String get cfield_pitstop_record_detail => 'Record arrêt au stand';
+
+  @override
+  String get cfield_race_day_capacity => 'Capacité jour de course';
+
+  @override
+  String get cfield_rain_chance => 'Risque de pluie';
+
+  @override
+  String get cfield_recovery_points => 'Points de recovery';
+
+  @override
+  String get cfield_red_flag_prob => 'Probabilité drapeau rouge';
+
+  @override
+  String get cfield_s1 => 'Secteur 1';
+
+  @override
+  String get cfield_s2 => 'Secteur 2';
+
+  @override
+  String get cfield_s3 => 'Secteur 3';
+
+  @override
+  String get cfield_safety_car_prob => 'Probabilité Safety Car';
+
+  @override
+  String get cfield_safety_car_window_laps => 'Fenêtre Safety Car (tours)';
+
+  @override
+  String get cfield_straight_mode_zones => 'Zones Straight Mode';
+
+  @override
+  String get cfield_sun_angle_start => 'Angle du soleil au départ';
+
+  @override
+  String get cfield_t1_accident_risk => 'Risque d’accident au virage 1';
+
+  @override
+  String get cfield_temperature_c => 'Température';
+
+  @override
+  String get cfield_top_speed => 'Vitesse de pointe';
+
+  @override
+  String get cfield_top_speed_delta => 'Écart vitesse de pointe';
+
+  @override
+  String get cfield_track_evolution => 'Évolution de la piste';
+
+  @override
+  String get cfield_track_type => 'Type de circuit';
+
+  @override
+  String get cfield_tyre_physics => 'Physique des pneus';
+
+  @override
+  String get cfield_tyre_working_window_c => 'Fenêtre de fonctionnement pneus';
+
+  @override
+  String get cfield_undercut_potential_score => 'Potentiel d’undercut';
+
+  @override
+  String get cfield_utc_offset => 'Décalage UTC';
+
+  @override
+  String get cfield_vsc_prob => 'Probabilité VSC';
+
+  @override
+  String get cfield_wind_sensitivity_sector => 'Sensibilité au vent (secteur)';
+
+  @override
+  String get cfield_x_mode_usage => 'Utilisation mode X';
+
+  @override
+  String get cfield_z_mode_activation_delay => 'Délai d’activation mode Z';
+
+  @override
+  String get cfield_z_mode_usage => 'Utilisation mode Z';
+
+  @override
+  String get cfield_zone_name => 'Nom du fuseau horaire';
+
+  @override
   String get birth_place => 'Lieu de naissance';
 
   @override
@@ -319,6 +508,21 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get calendar_prefs_hide_cancelled_hint => 'Masquer les courses annulées ou placeholder absentes du calendrier réel.';
+
+  @override
+  String get cat_ambient_stats => 'Conditions ambiantes';
+
+  @override
+  String get cat_history_comparison => 'Comparaison d’époques';
+
+  @override
+  String get cat_risks_stats => 'Performance et risques';
+
+  @override
+  String get cat_tech_2026 => 'Technique et aéro 2026';
+
+  @override
+  String get cat_track_specs => 'Géométrie du tracé';
 
   @override
   String get display_prefs_section_title => 'Affichage';
@@ -401,6 +605,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get circuit_difficulty => 'Difficulté du circuit';
+
+  @override
+  String get circuit_difficulty_l10n => 'Difficulté du circuit';
 
   @override
   String get circuit_info => 'Infos circuit';
@@ -520,6 +727,33 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dc_wins => 'Titres pilotes';
 
   @override
+  String get diff_easy => 'Très facile';
+
+  @override
+  String get diff_extreme => 'Extrême';
+
+  @override
+  String get diff_hard => 'Difficile';
+
+  @override
+  String get diff_high => 'Élevé';
+
+  @override
+  String get diff_low => 'Faible';
+
+  @override
+  String get diff_medium => 'Moyen';
+
+  @override
+  String get dir_clockwise => 'Dans le sens horaire';
+
+  @override
+  String get dir_counter_clockwise => 'Dans le sens antihoraire';
+
+  @override
+  String get dir_figure_eight => 'Tracé en huit';
+
+  @override
   String get distance_to_turn1 => 'Distance jusqu’au virage 1';
 
   @override
@@ -584,6 +818,288 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get favorite_team => 'Équipe favorite';
+
+  @override
+  String get feature_130r_high_speed => 'Le gauche rapide emblématique du 130R';
+
+  @override
+  String get feature_90_degree_corners => 'Enchaînement de virages à 90° (circuit urbain)';
+
+  @override
+  String get feature_abrasive_asphalt => 'Asphalte très abrasive';
+
+  @override
+  String get feature_aggressive_kerbs => 'Risque de vibreurs agressifs type saucisse';
+
+  @override
+  String get feature_aero_efficiency_test => 'Test ultime d’efficacité aérodynamique';
+
+  @override
+  String get feature_banked_corners_t3_t14 => 'Virages relevés uniques (T3 et T14)';
+
+  @override
+  String get feature_battery_drain_kemmel => 'Forte décharge batterie (ligne droite du Kemmel)';
+
+  @override
+  String get feature_blind_corners => 'Apex dangereux sans visibilité';
+
+  @override
+  String get feature_bumpy_city_roads => 'Surface urbaine très irrégulière';
+
+  @override
+  String get feature_bumpy_surface => 'Piste bosselée';
+
+  @override
+  String get feature_bumpy_surface_subsidence => 'Bosselures dues à l’affaissement du sol';
+
+  @override
+  String get feature_castle_section_tight => 'Section château ultra-étroite';
+
+  @override
+  String get feature_cold_tire_struggle => 'Difficulté à maintenir la température des pneus';
+
+  @override
+  String get feature_curb_riding_chicane => 'Appui agressif sur les vibreurs de chicane';
+
+  @override
+  String get feature_degner_curves => 'Virages Degner exigeants';
+
+  @override
+  String get feature_dusty_surface => 'Conditions poussiéreuses en début de week-end';
+
+  @override
+  String get feature_eau_rouge_raidillon => 'Le mythique Eau Rouge-Raidillon';
+
+  @override
+  String get feature_esses_section_flow => 'Enchaînement rapide et rythmé type esses';
+
+  @override
+  String get feature_extreme_altitude => 'Altitude extrême (2200 m+)';
+
+  @override
+  String get feature_extreme_humidity => 'Humidité équatoriale étouffante';
+
+  @override
+  String get feature_extreme_low_drag => 'Configuration aéro très appui faible';
+
+  @override
+  String get feature_fastest_street_track => 'Circuit urbain le plus rapide du calendrier';
+
+  @override
+  String get feature_figure_eight_layout => 'Tracé en huit unique';
+
+  @override
+  String get feature_glittering_night_race => 'Toile de fond nocturne étincelante';
+
+  @override
+  String get feature_groundhog_risk => 'Risque d’animaux (marmottes) sur la piste';
+
+  @override
+  String get feature_heavy_braking => 'Freinages très exigeants';
+
+  @override
+  String get feature_heavy_braking_variante => 'Freinage brutal avant les chicanes';
+
+  @override
+  String get feature_heavy_braking_zones => 'Zones de freinage sévères vers les chicanes';
+
+  @override
+  String get feature_heavy_traction_points => 'Zones de traction critiques en sortie de virage lent';
+
+  @override
+  String get feature_high_altitude_cooling => 'Refroidissement du groupe propulseur en altitude';
+
+  @override
+  String get feature_high_altitude_impact => 'Impact aéro notable lié à l’altitude';
+
+  @override
+  String get feature_high_downforce_focus => 'Priorité maximale à l’appui aérodynamique';
+
+  @override
+  String get feature_high_front_tyre_wear => 'Forte dégradation des pneus avant';
+
+  @override
+  String get feature_high_humidity => 'Humidité ambiante élevée';
+
+  @override
+  String get feature_high_kerb_usage => 'Utilisation agressive des vibreurs';
+
+  @override
+  String get feature_high_lateral_load => 'Charges latérales intenses';
+
+  @override
+  String get feature_high_speed_corners => 'Enchaînement de virages très rapides';
+
+  @override
+  String get feature_high_speed_flow => 'Flux continu à haute vitesse';
+
+  @override
+  String get feature_high_stamina_required => 'Forte exigence physique pour le pilote';
+
+  @override
+  String get feature_high_wind_sensitivity => 'Sensibilité extrême au vent de travers';
+
+  @override
+  String get feature_hotel_underpass => 'Passage unique sous l’hôtel Yas';
+
+  @override
+  String get feature_iconic_tunnel => 'Tunnel du port à haute vitesse';
+
+  @override
+  String get feature_legendary_esses => 'Esses mythiques en \'\'S\'\'';
+
+  @override
+  String get feature_long_back_straight => 'Très longue ligne droite au fond du circuit';
+
+  @override
+  String get feature_long_main_straight => 'Longue pleine charge jusqu’au virage 1';
+
+  @override
+  String get feature_longest_run_to_t1 => 'Plus longue distance du départ au virage 1';
+
+  @override
+  String get feature_longest_straight => '2,2 km à plein gaz';
+
+  @override
+  String get feature_longest_track => 'Circuit le plus long du calendrier';
+
+  @override
+  String get feature_low_grip_asphalt => 'Surface semi-permanente à faible adhérence';
+
+  @override
+  String get feature_maggotts_becketts_flow => 'Flux Maggotts-Becketts-Chapel';
+
+  @override
+  String get feature_micro_climates => 'Plusieurs microclimats sur le tracé';
+
+  @override
+  String get feature_monaco_without_walls => 'Flow technique façon \'\'Monaco\'\'';
+
+  @override
+  String get feature_multi_surface_grip => 'Adhérence variable selon les surfaces';
+
+  @override
+  String get feature_multiple_overtaking_lines => 'Piste large avec plusieurs trajectoires';
+
+  @override
+  String get feature_narrow_passing_zones => 'Zones de dépassement étroites';
+
+  @override
+  String get feature_narrow_track_width => 'Largeur historique étroite';
+
+  @override
+  String get feature_new_straight_section => 'Secteur 3 haute vitesse révisé';
+
+  @override
+  String get feature_old_school_track => 'Tracé classique \'\'old-school\'\'';
+
+  @override
+  String get feature_physical_exhaustion => 'Épuisement physique extrême';
+
+  @override
+  String get feature_physical_heat_stress => 'Stress thermique sévère';
+
+  @override
+  String get feature_precision_steering => 'Précision de direction au millimètre';
+
+  @override
+  String get feature_rollercoaster_ride => 'Sensation de montagnes russes à haute vitesse';
+
+  @override
+  String get feature_sand_on_track => 'Risque de sable emporté par le vent';
+
+  @override
+  String get feature_sand_wind_impact => 'Sable désertique et buffeting du vent';
+
+  @override
+  String get feature_sea_breeze_sand => 'Brise marine et risque de sable';
+
+  @override
+  String get feature_senna_s_curves => 'Le complexe mythique \'\'Senna S\'\'';
+
+  @override
+  String get feature_short_lap_time => 'Durée de tour extrêmement courte';
+
+  @override
+  String get feature_snail_corner_t1 => 'Virage 1 technique \'\'escargot\'\'';
+
+  @override
+  String get feature_stadium_atmosphere => 'Ambiance de stade iconique';
+
+  @override
+  String get feature_stadium_section => 'Section emblématique du stade Foro Sol';
+
+  @override
+  String get feature_steep_uphill_braking => 'Zones de freinage en forte montée';
+
+  @override
+  String get feature_steep_uphill_t1 => 'Montée extrême jusqu’au virage 1';
+
+  @override
+  String get feature_street_circuit => 'Surface de rue temporaire';
+
+  @override
+  String get feature_straight_mode_5_zones => '5 zones Straight Mode';
+
+  @override
+  String get feature_sunset_to_night => 'Transition crépuscule vers la nuit';
+
+  @override
+  String get feature_sweeping_corners => 'Grands virages rapides en balayage';
+
+  @override
+  String get feature_technical_chicane => 'Placement précis des chicanes';
+
+  @override
+  String get feature_technical_final_sector => 'Dernier secteur serré et technique';
+
+  @override
+  String get feature_technical_flow => 'Enchaînement rythmique continu';
+
+  @override
+  String get feature_technical_sector_2 => 'Secteur médian technique';
+
+  @override
+  String get feature_temple_of_speed => 'Le mythique \'\'temple de la vitesse\'\'';
+
+  @override
+  String get feature_the_strip_straight => 'L’immense ligne droite du Las Vegas Strip';
+
+  @override
+  String get feature_thin_air_cooling => 'Défis de refroidissement dans l’air raréfié';
+
+  @override
+  String get feature_tight_hairpin => 'Épingle la plus serrée';
+
+  @override
+  String get feature_tire_killer => 'Forte charge latérale sur les pneus';
+
+  @override
+  String get feature_track_limits_chaos => 'Risque élevé de pénalités track limits';
+
+  @override
+  String get feature_traction_limited => 'Sorties en traction limitée';
+
+  @override
+  String get feature_unpredictable_weather => 'Météo très changeante';
+
+  @override
+  String get feature_unpredictable_weather_interlagos => 'Micro-orages soudains (Interlagos)';
+
+  @override
+  String get feature_uphill_start_finish => 'Ligne droite départ-arrivée en montée';
+
+  @override
+  String get feature_variable_grip => 'Niveaux d’adhérence variables';
+
+  @override
+  String get feature_wall_of_champions => 'Le dangereux \'\'Mur des Champions\'\'';
+
+  @override
+  String get feature_zero_margin_error => 'Aucune marge d’erreur';
+
+  @override
+  String get feature_zero_overtaking_space => 'Espace de dépassement extrêmement limité';
 
   @override
   String get finish => 'Arrivée';
@@ -890,6 +1406,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get overtaking_difficulty => 'Difficulté de dépassement';
 
   @override
+  String get overtaking_difficulty_l10n => 'Difficulté de dépassement';
+
+  @override
   String get partner => 'Partenaire';
 
   @override
@@ -1048,6 +1567,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rainfall => 'Précipitations';
 
   @override
+  String get recommended_strategy_l10n => 'Stratégie';
+
+  @override
   String get red_flag => 'Probabilité drapeau rouge';
 
   @override
@@ -1180,6 +1702,78 @@ class AppLocalizationsFr extends AppLocalizations {
   String get summer_break_subtitle => 'La pause estivale se situe entre la Hongrie et les Pays-Bas.';
 
   @override
+  String get sun_0_deg_night_race => 'Conditions de nuit (éclairage artificiel)';
+
+  @override
+  String get sun_5_deg_twilight => 'Crépuscule (projecteurs allumés)';
+
+  @override
+  String get sun_8_deg_horizon_dip => 'Près de l’horizon (éblouissement extrême)';
+
+  @override
+  String get sun_10_deg_harbor_reflection => 'Soleil très bas (réflexion sur l’eau)';
+
+  @override
+  String get sun_12_deg_mountain_occlusion => 'Soleil bas (ombres des montagnes)';
+
+  @override
+  String get sun_14_deg_stadium_shadows => 'Soleil bas (ombres des tribunes)';
+
+  @override
+  String get sun_15_deg_sunset_blind => 'Soleil bas (risque d’éblouissement élevé)';
+
+  @override
+  String get sun_18_deg_paddock_glare => 'Soleil bas (réflexions des bâtiments)';
+
+  @override
+  String get sun_20_deg_desert_haze => 'Soleil bas (poussière et brume, éblouissement)';
+
+  @override
+  String get sun_22_deg_coastal_mist => 'Soleil bas (diffusion par brume côtière)';
+
+  @override
+  String get sun_25_deg_morning_glow => 'Soleil du petit matin';
+
+  @override
+  String get sun_28_deg_dunes_glare => 'Soleil bas (éblouissement des dunes)';
+
+  @override
+  String get sun_30_deg_low_winter_sun => 'Soleil d’hiver bas sur l’horizon';
+
+  @override
+  String get sun_32_deg_urban_canyon => 'Soleil moyen (ombres des tours)';
+
+  @override
+  String get sun_35_deg_forest_shadows => 'Soleil moyen (ombres intermittentes)';
+
+  @override
+  String get sun_40_deg_cloudy_diffuse => 'Lumière diffuse (ciel couvert)';
+
+  @override
+  String get sun_45_deg_mid_afternoon => 'Soleil de milieu d’après-midi';
+
+  @override
+  String get sun_50_deg_clear_sky => 'Après-midi ensoleillée claire';
+
+  @override
+  String get sun_55_deg_bright_oval => 'Forte luminosité (zone dégagée)';
+
+  @override
+  String get sun_60_deg_standard_day => 'Lumière du jour standard';
+
+  @override
+  String get sun_65_deg_high_noon => 'Soleil haut (midi)';
+
+  @override
+  String get sun_70_deg_equatorial_high => 'Ensoleillement intense';
+
+  @override
+  String get sun_75_deg_tropical_peak => 'Soleil tropical extrême';
+
+  @override
+  String get sun_85_deg_zenith => 'Soleil au zénith (pas d’ombres)';
+
+  @override
   String get team_facts_title => 'Le saviez-vous ?';
 
   @override
@@ -1291,6 +1885,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get turn1_accident => 'Probabilité d’accident virage 1';
 
   @override
+  String get type_hybrid_street => 'Circuit urbain hybride';
+
+  @override
+  String get type_permanent_circuit => 'Circuit permanent';
+
+  @override
+  String get type_street_circuit => 'Circuit urbain';
+
+  @override
   String get tyre => 'Pneu';
 
   @override
@@ -1386,7 +1989,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get calendar_race_status_ongoing => 'En cours';
 
   @override
+  String get circuit_go_home => 'Retour à l’accueil';
+
+  @override
+  String get circuit_not_found_message => 'Aucune donnée circuit n’est disponible pour cette adresse. Vérifiez le lien ou choisissez un circuit dans le calendrier.';
+
+  @override
+  String get circuit_not_found_title => 'Circuit introuvable';
+
+  @override
   String get circuit_open_in_maps => 'Ouvrir dans Plans';
+
+  @override
+  String get circuit_stat_full_throttle => 'Plein gaz';
 
   @override
   String live_timing_air_temp_abbr(String temp) {
@@ -1551,6 +2166,24 @@ class AppLocalizationsFr extends AppLocalizations {
   String orbit_load_error(String error) {
     return 'Impossible de charger la carte : $error';
   }
+
+  @override
+  String get orbit_track_standard => 'Standard';
+
+  @override
+  String get orbit_track_technical => 'Technique';
+
+  @override
+  String get orbit_elevation_profile => 'Profil d\'altitude';
+
+  @override
+  String get orbit_stat_lap_distance => 'Longueur du tour';
+
+  @override
+  String get orbit_stat_max_elevation => 'Dénivelé max.';
+
+  @override
+  String get orbit_stat_banked_turns => 'Virages relevés';
 
   @override
   String get race_results_empty => 'Aucun résultat de course pour le moment.';

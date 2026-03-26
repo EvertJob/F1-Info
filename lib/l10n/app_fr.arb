@@ -59,6 +59,7 @@
     }
   },
   "ai_example_prompt": "Essayez par exemple : \"Fetch latest results\", \"Show next weekend\", \"Show driver standings\", \"Open driver Charles Leclerc\" ou \"Show latest penalties\".",
+  "ai_fab_label": "IA",
   "ai_form_no_cache": "Pas encore de courses récentes en cache pour {driver}.",
   "@ai_form_no_cache": {
     "placeholders": {
@@ -170,6 +171,15 @@
   "ai_open_team_profile": "Ouvrir profil équipe",
   "ai_open_team_standings": "Ouvrir classement constructeurs",
   "ai_open_weekend_hub": "Ouvrir le hub du week-end",
+  "ai_prefs_disable_card": "Désactiver la carte Stratège IA",
+  "ai_prefs_hide_coach_corner": "Masquer Coach''s Corner",
+  "ai_prefs_hide_coach_corner_hint": "Masquer les conseils d''entraînement lorsque la carte est visible.",
+  "ai_prefs_hide_team_vibe": "Masquer Team Vibe",
+  "ai_prefs_hide_team_vibe_hint": "Masquer le sentiment lorsque la carte est visible.",
+  "ai_prefs_hide_teambattle": "Masquer la bataille entre coéquipiers",
+  "ai_prefs_hide_teambattle_hint": "Masquer la comparaison des coéquipiers lorsque la carte est visible.",
+  "ai_prefs_section_subtitle": "Personnalisez la carte Stratège IA sur l''écran d''accueil.",
+  "ai_prefs_section_title": "Stratège IA",
   "ai_qualifying_duel": "Duel qualifications",
   "ai_race_engineer": "Ingénieur de course IA",
   "ai_rain_chance_label": "Risque de pluie",
@@ -180,15 +190,6 @@
   "ai_sentiment_mercedes_positive": "Ambiance équipe : Le moral monte chez Mercedes après la pénalité Hamilton.",
   "ai_strategist_tap_hint": "Appuyez pour poser des questions...",
   "ai_strategist_title": "Stratège IA",
-  "ai_prefs_section_title": "Stratège IA",
-  "ai_prefs_section_subtitle": "Personnalisez la carte Stratège IA sur l''écran d''accueil.",
-  "ai_prefs_disable_card": "Désactiver la carte Stratège IA",
-  "ai_prefs_hide_teambattle": "Masquer la bataille entre coéquipiers",
-  "ai_prefs_hide_teambattle_hint": "Masquer la comparaison des coéquipiers lorsque la carte est visible.",
-  "ai_prefs_hide_coach_corner": "Masquer Coach''s Corner",
-  "ai_prefs_hide_coach_corner_hint": "Masquer les conseils d''entraînement lorsque la carte est visible.",
-  "ai_prefs_hide_team_vibe": "Masquer Team Vibe",
-  "ai_prefs_hide_team_vibe_hint": "Masquer le sentiment lorsque la carte est visible.",
   "ai_supported_commands": "Commandes prises en charge : Fetch latest results, Show next weekend, Compare name1 vs name2, Show form [driver], Show driver standings, Show team standings, Open driver [name], Open team [name], Show drivers chart, Show latest penalties, Show latest race control.",
   "ai_team_compare_ready": "Comparaison des équipes prête pour {left} et {right}.",
   "@ai_team_compare_ready": {
@@ -263,6 +264,14 @@
   "air_temperature": "Température de l’air",
   "all_scopes": "Tous les scopes",
   "app_title": "F1 Hub",
+  "auth_error_message": "{message}",
+  "@auth_error_message": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
   "average_speed": "Vitesse moyenne",
   "avg_finish": "Arrivée moy.",
   "avg_finish_l5": "Arrivée moy. (L5)",
@@ -270,8 +279,78 @@
   "avg_lap": "Tour moyen",
   "best_combination": "Meilleure combinaison",
   "best_lap": "Meilleur tour",
+  "best_tyre_combination": "Meilleure combinaison de pneus",
+  "cfield_air_pressure_hpa": "Pression atmosphérique",
+  "cfield_asphalt_grip_score": "Score d’adhérence asphaltique",
+  "cfield_avg_g_force": "G-force moyenne",
+  "cfield_avg_time_2024_2025": "Temps au tour moyen (2024–25)",
+  "cfield_brake_cooling_requirement_score": "Exigence refroidissement freins",
+  "cfield_circuit_director": "Directeur de circuit",
+  "cfield_circuit_owner": "Propriétaire du circuit",
+  "cfield_contract_until": "Contrat jusqu’à",
+  "cfield_deployment_focus": "Focus déploiement énergie",
+  "cfield_direction": "Sens de course",
+  "cfield_distance_to_t1": "Distance jusqu’au virage 1",
+  "cfield_electrical_ratio": "Part électrique",
+  "cfield_energy_flow_strategy": "Stratégie de flux énergétique",
+  "cfield_engine_derating_risk": "Risque de dérating moteur",
+  "cfield_era_delta": "Écart entre ères",
+  "cfield_est_time_2026": "Temps au tour estimé (2026)",
+  "cfield_elevation_sea_level": "Altitude (niveau de la mer)",
+  "cfield_harvest_difficulty": "Difficulté de récupération",
+  "cfield_harvesting_zones": "Zones de récupération",
+  "cfield_latitude": "Latitude",
+  "cfield_local_time_zone": "Fuseau horaire local",
+  "cfield_longitude": "Longitude",
+  "cfield_lap_record_detail": "Record du tour",
+  "cfield_laps": "Tours",
+  "cfield_lateral_stress_score": "Score contrainte latérale",
+  "cfield_length": "Longueur",
+  "cfield_manual_override_energy_cost": "Coût énergétique override manuel",
+  "cfield_manual_override_points": "Points d’override manuel",
+  "cfield_max_elevation_change": "Dénivelé maximal",
+  "cfield_max_g_force": "G-force max.",
+  "cfield_override_impact_score": "Score d’impact override",
+  "cfield_on_calendar_since": "Au calendrier depuis",
+  "cfield_overtaking_delta": "Delta de dépassement",
+  "cfield_pit_exit_delta": "Delta sortie stands",
+  "cfield_pitstop_record_detail": "Record arrêt au stand",
+  "cfield_race_day_capacity": "Capacité jour de course",
+  "cfield_rain_chance": "Risque de pluie",
+  "cfield_recovery_points": "Points de recovery",
+  "cfield_red_flag_prob": "Probabilité drapeau rouge",
+  "cfield_s1": "Secteur 1",
+  "cfield_s2": "Secteur 2",
+  "cfield_s3": "Secteur 3",
+  "cfield_safety_car_prob": "Probabilité Safety Car",
+  "cfield_safety_car_window_laps": "Fenêtre Safety Car (tours)",
+  "cfield_straight_mode_zones": "Zones Straight Mode",
+  "cfield_sun_angle_start": "Angle du soleil au départ",
+  "cfield_t1_accident_risk": "Risque d’accident au virage 1",
+  "cfield_temperature_c": "Température",
+  "cfield_top_speed": "Vitesse de pointe",
+  "cfield_top_speed_delta": "Écart vitesse de pointe",
+  "cfield_track_evolution": "Évolution de la piste",
+  "cfield_track_type": "Type de circuit",
+  "cfield_tyre_physics": "Physique des pneus",
+  "cfield_tyre_working_window_c": "Fenêtre de fonctionnement pneus",
+  "cfield_undercut_potential_score": "Potentiel d’undercut",
+  "cfield_utc_offset": "Décalage UTC",
+  "cfield_vsc_prob": "Probabilité VSC",
+  "cfield_wind_sensitivity_sector": "Sensibilité au vent (secteur)",
+  "cfield_x_mode_usage": "Utilisation mode X",
+  "cfield_z_mode_activation_delay": "Délai d’activation mode Z",
+  "cfield_z_mode_usage": "Utilisation mode Z",
+  "cfield_zone_name": "Nom du fuseau horaire",
   "birth_place": "Lieu de naissance",
   "cache_cleared": "Cache vidé avec succès !",
+  "calendar_prefs_hide_cancelled": "Masquer les courses placeholder",
+  "calendar_prefs_hide_cancelled_hint": "Masquer les courses annulées ou placeholder absentes du calendrier réel.",
+  "calendar_prefs_section_subtitle": "Personnalisez le calendrier des circuits.",
+  "calendar_prefs_section_title": "Calendrier",
+  "calendar_race_status_cancelled": "Annulé",
+  "calendar_race_status_ended": "Terminé",
+  "calendar_race_status_ongoing": "En cours",
   "car_label": "Voiture {number}",
   "@car_label": {
     "placeholders": {
@@ -281,53 +360,28 @@
     }
   },
   "career_stats": "Statistiques de carrière",
+  "cat_ambient_stats": "Conditions ambiantes",
+  "cat_history_comparison": "Comparaison d’époques",
+  "cat_risks_stats": "Performance et risques",
+  "cat_tech_2026": "Technique et aéro 2026",
+  "cat_track_specs": "Géométrie du tracé",
   "cc_wins": "Titres constructeurs",
   "championship_progression": "Évolution du championnat",
   "championships": "Titres",
-  "calendar_prefs_section_title": "Calendrier",
-  "calendar_prefs_section_subtitle": "Personnalisez le calendrier des circuits.",
-  "calendar_prefs_hide_cancelled": "Masquer les courses placeholder",
-  "calendar_prefs_hide_cancelled_hint": "Masquer les courses annulées ou placeholder absentes du calendrier réel.",
-  "display_prefs_section_title": "Affichage",
-  "display_prefs_section_subtitle": "Apparence et animations. Connecté, les réglages se synchronisent avec votre compte.",
-  "display_prefs_ui_mode": "Style d’interface",
-  "display_prefs_mode_standard": "Standard",
-  "display_prefs_mode_standard_hint": "Flou type verre et ombres douces.",
-  "display_prefs_mode_simple": "Simple",
-  "display_prefs_mode_simple_hint": "Surfaces plates et contraste renforcé.",
-  "display_prefs_compact": "Mode compact",
-  "display_prefs_compact_hint": "Espacement réduit et cartes plus petites.",
-  "display_prefs_motion_reduced": "Mouvement réduit",
-  "display_prefs_motion_reduced_hint": "Moins d’animations, de flou et de transitions de thème.",
-  "display_prefs_saving": "Enregistrement…",
-  "my_paddock_title": "Mon paddock",
-  "my_paddock_session_unknown": "Live timing",
-  "my_paddock_resume_subtitle": "Reprendre : {session} — image {lap}",
-  "@my_paddock_resume_subtitle": {
-    "placeholders": {
-      "session": {"type": "String"},
-      "lap": {"type": "String"}
-    }
-  },
-  "my_paddock_favorite_drivers": "Pilotes favoris",
-  "my_paddock_favorite_teams": "Écuries favorites",
-  "my_paddock_last_race": "Dernière course",
-  "my_paddock_last_race_summary": "{date} · {podium}",
-  "@my_paddock_last_race_summary": {
-    "placeholders": {
-      "date": {"type": "String"},
-      "podium": {"type": "String"}
-    }
-  },
-  "my_paddock_points_suffix": "pts",
   "changelog": "Changelog",
   "characteristics": "CARACTÉRISTIQUES DU CIRCUIT",
   "chart_no_data": "Aucune donnée de graphique disponible pour cette saison.",
   "children": "Enfants",
   "circuit": "Circuit",
   "circuit_difficulty": "Difficulté du circuit",
+  "circuit_difficulty_l10n": "Difficulté du circuit",
+  "circuit_go_home": "Retour à l’accueil",
   "circuit_info": "Infos circuit",
   "circuit_layout": "Plan du circuit",
+  "circuit_not_found_message": "Aucune donnée circuit n’est disponible pour cette adresse. Vérifiez le lien ou choisissez un circuit dans le calendrier.",
+  "circuit_not_found_title": "Circuit introuvable",
+  "circuit_open_in_maps": "Ouvrir dans Plans",
+  "circuit_stat_full_throttle": "Plein gaz",
   "circuits": "Circuits",
   "city": "Ville",
   "clear_cache": "Vider le cache",
@@ -365,6 +419,27 @@
   "day": "jour",
   "days": "jours",
   "dc_wins": "Titres pilotes",
+  "diff_easy": "Très facile",
+  "diff_extreme": "Extrême",
+  "diff_hard": "Difficile",
+  "diff_high": "Élevé",
+  "diff_low": "Faible",
+  "diff_medium": "Moyen",
+  "dir_clockwise": "Dans le sens horaire",
+  "dir_counter_clockwise": "Dans le sens antihoraire",
+  "dir_figure_eight": "Tracé en huit",
+  "display_prefs_compact": "Mode compact",
+  "display_prefs_compact_hint": "Espacement réduit et cartes plus petites.",
+  "display_prefs_mode_simple": "Simple",
+  "display_prefs_mode_simple_hint": "Surfaces plates et contraste renforcé.",
+  "display_prefs_mode_standard": "Standard",
+  "display_prefs_mode_standard_hint": "Flou type verre et ombres douces.",
+  "display_prefs_motion_reduced": "Mouvement réduit",
+  "display_prefs_motion_reduced_hint": "Moins d’animations, de flou et de transitions de thème.",
+  "display_prefs_saving": "Enregistrement…",
+  "display_prefs_section_subtitle": "Apparence et animations. Connecté, les réglages se synchronisent avec votre compte.",
+  "display_prefs_section_title": "Affichage",
+  "display_prefs_ui_mode": "Style d’interface",
   "distance_to_turn1": "Distance jusqu’au virage 1",
   "dnf": "Abandons (DNF)",
   "dnf_percentage": "Abandons %",
@@ -387,6 +462,100 @@
   "favorite_circuit": "Circuit favori",
   "favorite_driver": "Pilote favori",
   "favorite_team": "Équipe favorite",
+  "feature_130r_high_speed": "Le gauche rapide emblématique du 130R",
+  "feature_90_degree_corners": "Enchaînement de virages à 90° (circuit urbain)",
+  "feature_abrasive_asphalt": "Asphalte très abrasive",
+  "feature_aero_efficiency_test": "Test ultime d’efficacité aérodynamique",
+  "feature_aggressive_kerbs": "Risque de vibreurs agressifs type saucisse",
+  "feature_banked_corners_t3_t14": "Virages relevés uniques (T3 et T14)",
+  "feature_battery_drain_kemmel": "Forte décharge batterie (ligne droite du Kemmel)",
+  "feature_blind_corners": "Apex dangereux sans visibilité",
+  "feature_bumpy_city_roads": "Surface urbaine très irrégulière",
+  "feature_bumpy_surface": "Piste bosselée",
+  "feature_bumpy_surface_subsidence": "Bosselures dues à l’affaissement du sol",
+  "feature_castle_section_tight": "Section château ultra-étroite",
+  "feature_cold_tire_struggle": "Difficulté à maintenir la température des pneus",
+  "feature_curb_riding_chicane": "Appui agressif sur les vibreurs de chicane",
+  "feature_degner_curves": "Virages Degner exigeants",
+  "feature_dusty_surface": "Conditions poussiéreuses en début de week-end",
+  "feature_eau_rouge_raidillon": "Le mythique Eau Rouge-Raidillon",
+  "feature_esses_section_flow": "Enchaînement rapide et rythmé type esses",
+  "feature_extreme_altitude": "Altitude extrême (2200 m+)",
+  "feature_extreme_humidity": "Humidité équatoriale étouffante",
+  "feature_extreme_low_drag": "Configuration aéro très appui faible",
+  "feature_fastest_street_track": "Circuit urbain le plus rapide du calendrier",
+  "feature_figure_eight_layout": "Tracé en huit unique",
+  "feature_glittering_night_race": "Toile de fond nocturne étincelante",
+  "feature_groundhog_risk": "Risque d’animaux (marmottes) sur la piste",
+  "feature_heavy_braking": "Freinages très exigeants",
+  "feature_heavy_braking_variante": "Freinage brutal avant les chicanes",
+  "feature_heavy_braking_zones": "Zones de freinage sévères vers les chicanes",
+  "feature_heavy_traction_points": "Zones de traction critiques en sortie de virage lent",
+  "feature_high_altitude_cooling": "Refroidissement du groupe propulseur en altitude",
+  "feature_high_altitude_impact": "Impact aéro notable lié à l’altitude",
+  "feature_high_downforce_focus": "Priorité maximale à l’appui aérodynamique",
+  "feature_high_front_tyre_wear": "Forte dégradation des pneus avant",
+  "feature_high_humidity": "Humidité ambiante élevée",
+  "feature_high_kerb_usage": "Utilisation agressive des vibreurs",
+  "feature_high_lateral_load": "Charges latérales intenses",
+  "feature_high_speed_corners": "Enchaînement de virages très rapides",
+  "feature_high_speed_flow": "Flux continu à haute vitesse",
+  "feature_high_stamina_required": "Forte exigence physique pour le pilote",
+  "feature_high_wind_sensitivity": "Sensibilité extrême au vent de travers",
+  "feature_hotel_underpass": "Passage unique sous l’hôtel Yas",
+  "feature_iconic_tunnel": "Tunnel du port à haute vitesse",
+  "feature_legendary_esses": "Esses mythiques en ''S''",
+  "feature_long_back_straight": "Très longue ligne droite au fond du circuit",
+  "feature_long_main_straight": "Longue pleine charge jusqu’au virage 1",
+  "feature_longest_run_to_t1": "Plus longue distance du départ au virage 1",
+  "feature_longest_straight": "2,2 km à plein gaz",
+  "feature_longest_track": "Circuit le plus long du calendrier",
+  "feature_low_grip_asphalt": "Surface semi-permanente à faible adhérence",
+  "feature_maggotts_becketts_flow": "Flux Maggotts-Becketts-Chapel",
+  "feature_micro_climates": "Plusieurs microclimats sur le tracé",
+  "feature_monaco_without_walls": "Flow technique façon ''Monaco''",
+  "feature_multi_surface_grip": "Adhérence variable selon les surfaces",
+  "feature_multiple_overtaking_lines": "Piste large avec plusieurs trajectoires",
+  "feature_narrow_passing_zones": "Zones de dépassement étroites",
+  "feature_narrow_track_width": "Largeur historique étroite",
+  "feature_new_straight_section": "Secteur 3 haute vitesse révisé",
+  "feature_old_school_track": "Tracé classique ''old-school''",
+  "feature_physical_exhaustion": "Épuisement physique extrême",
+  "feature_physical_heat_stress": "Stress thermique sévère",
+  "feature_precision_steering": "Précision de direction au millimètre",
+  "feature_rollercoaster_ride": "Sensation de montagnes russes à haute vitesse",
+  "feature_sand_on_track": "Risque de sable emporté par le vent",
+  "feature_sand_wind_impact": "Sable désertique et buffeting du vent",
+  "feature_sea_breeze_sand": "Brise marine et risque de sable",
+  "feature_senna_s_curves": "Le complexe mythique ''Senna S''",
+  "feature_short_lap_time": "Durée de tour extrêmement courte",
+  "feature_snail_corner_t1": "Virage 1 technique ''escargot''",
+  "feature_stadium_atmosphere": "Ambiance de stade iconique",
+  "feature_stadium_section": "Section emblématique du stade Foro Sol",
+  "feature_steep_uphill_braking": "Zones de freinage en forte montée",
+  "feature_steep_uphill_t1": "Montée extrême jusqu’au virage 1",
+  "feature_straight_mode_5_zones": "5 zones Straight Mode",
+  "feature_street_circuit": "Surface de rue temporaire",
+  "feature_sunset_to_night": "Transition crépuscule vers la nuit",
+  "feature_sweeping_corners": "Grands virages rapides en balayage",
+  "feature_technical_chicane": "Placement précis des chicanes",
+  "feature_technical_final_sector": "Dernier secteur serré et technique",
+  "feature_technical_flow": "Enchaînement rythmique continu",
+  "feature_technical_sector_2": "Secteur médian technique",
+  "feature_temple_of_speed": "Le mythique ''temple de la vitesse''",
+  "feature_the_strip_straight": "L’immense ligne droite du Las Vegas Strip",
+  "feature_thin_air_cooling": "Défis de refroidissement dans l’air raréfié",
+  "feature_tight_hairpin": "Épingle la plus serrée",
+  "feature_tire_killer": "Forte charge latérale sur les pneus",
+  "feature_track_limits_chaos": "Risque élevé de pénalités track limits",
+  "feature_traction_limited": "Sorties en traction limitée",
+  "feature_unpredictable_weather": "Météo très changeante",
+  "feature_unpredictable_weather_interlagos": "Micro-orages soudains (Interlagos)",
+  "feature_uphill_start_finish": "Ligne droite départ-arrivée en montée",
+  "feature_variable_grip": "Niveaux d’adhérence variables",
+  "feature_wall_of_champions": "Le dangereux ''Mur des Champions''",
+  "feature_zero_margin_error": "Aucune marge d’erreur",
+  "feature_zero_overtaking_space": "Espace de dépassement extrêmement limité",
   "finish": "Arrivée",
   "fp1": "Essais libres 1",
   "fp2": "Essais libres 2",
@@ -444,9 +613,9 @@
   "laps": "Tours",
   "laps_led": "Tours en tête",
   "last_5_points": "Points des 5 derniers",
-  "last_podium_prefs_section_title": "Dernier podium",
-  "last_podium_prefs_section_subtitle": "Combien de courses récentes afficher sur les cartes circuit.",
   "last_podium_prefs_races_label": "Nombre de courses",
+  "last_podium_prefs_section_subtitle": "Combien de courses récentes afficher sur les cartes circuit.",
+  "last_podium_prefs_section_title": "Dernier podium",
   "last_winner": "Vainqueur de l’an dernier",
   "length": "Longueur",
   "level_1": "Très facile",
@@ -466,7 +635,68 @@
   "live_leaderboard": "Classement",
   "live_switch_test": "Passer aux données de test",
   "live_teammate_battle": "Duel équipiers",
+  "live_timing_air_temp_abbr": "A {temp}",
+  "@live_timing_air_temp_abbr": {
+    "placeholders": {
+      "temp": {
+        "type": "String"
+      }
+    }
+  },
+  "live_timing_banner_green": "GREEN",
+  "live_timing_banner_red_flag": "DRAPEAU ROUGE",
+  "live_timing_banner_safety_car": "SAFETY CAR",
+  "live_timing_banner_vsc_deployed": "VSC DÉPLOYÉ",
+  "live_timing_banner_vsc_ending": "FIN DE VSC",
+  "live_timing_banner_yellow_flag": "DRAPEAU JAUNE",
+  "live_timing_chip_red_flag": "DRAPEAU ROUGE",
+  "live_timing_chip_safety_car": "SAFETY CAR",
+  "live_timing_chip_vsc": "VSC",
+  "live_timing_chip_vsc_end": "FIN VSC",
+  "live_timing_chip_yellow": "JAUNE",
+  "live_timing_data_source": "Source : {source}",
+  "@live_timing_data_source": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "live_timing_demo_session_title": "Silverstone 2024",
+  "live_timing_driver_out": "OUT",
+  "live_timing_driver_pit": "PIT",
+  "live_timing_header_driver": "PILOTE",
+  "live_timing_header_gain": "GAIN",
+  "live_timing_header_int_gap": "INT / GAP",
+  "live_timing_header_pos": "POS",
+  "live_timing_header_s1": "S1",
+  "live_timing_header_s2": "S2",
+  "live_timing_header_s3": "S3",
+  "live_timing_header_tyre": "PNEU",
+  "live_timing_hub_timestamp_tooltip": "Horodatage du dernier message (flux)",
+  "live_timing_lap_of_total": "Tour {current} / {total}",
+  "@live_timing_lap_of_total": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "live_timing_session_pre_start": "PRE-START",
+  "live_timing_session_starting_grid": "GRILLE DE DÉPART",
+  "live_timing_status_green": "GREEN",
   "live_timing_title": "Live Timing",
+  "live_timing_track_temp_abbr": "T {temp}",
+  "@live_timing_track_temp_abbr": {
+    "placeholders": {
+      "temp": {
+        "type": "String"
+      }
+    }
+  },
   "live_waiting": "En attente des données live...",
   "loading": "Chargement",
   "logged_in": "Vous êtes connecté",
@@ -475,7 +705,46 @@
   "manager": "Manager",
   "max_g_force": "G max",
   "medium_tire": "Medium",
+  "metric_label_value": "{label} : {value}",
+  "@metric_label_value": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "minutes": "minutes",
+  "my_paddock_favorite_drivers": "Pilotes favoris",
+  "my_paddock_favorite_teams": "Écuries favorites",
+  "my_paddock_last_race": "Dernière course",
+  "my_paddock_last_race_summary": "{date} · {podium}",
+  "@my_paddock_last_race_summary": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "podium": {
+        "type": "String"
+      }
+    }
+  },
+  "my_paddock_points_suffix": "pts",
+  "my_paddock_resume_subtitle": "Reprendre : {session} — image {lap}",
+  "@my_paddock_resume_subtitle": {
+    "placeholders": {
+      "session": {
+        "type": "String"
+      },
+      "lap": {
+        "type": "String"
+      }
+    }
+  },
+  "my_paddock_session_unknown": "Live timing",
+  "my_paddock_title": "Mon paddock",
   "name": "Nom",
   "nat_argentine": "Argentin",
   "nat_australian": "Australien",
@@ -494,13 +763,53 @@
   "nat_spanish": "Espagnol",
   "nat_thai": "Thaïlandais",
   "nationality": "Nationalité",
+  "news_empty": "Aucun article pour le moment. Tirez pour actualiser.",
+  "news_feed_section_empty": "Aucun article pour ce flux.",
+  "news_load_error": "Impossible de charger les actualités : {error}",
+  "@news_load_error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "news_nav": "Actus",
+  "news_settings_add": "Ajouter",
+  "news_settings_drag_to_reorder": "Glisser pour modifier l''ordre des flux",
+  "news_settings_duplicate_url": "Cette URL est déjà dans la liste.",
+  "news_settings_invalid_url": "Saisissez une URL http(s) valide.",
+  "news_settings_no_feeds": "Aucun flux pour l''instant. Ajoutez une URL ci-dessus.",
+  "news_settings_save_failed": "Enregistrement impossible. Réessayez.",
+  "news_settings_stream_error": "Impossible de s''abonner aux mises à jour du profil.",
+  "news_settings_subtitle": "Ajoutez des URL RSS ou Atom. Elles sont chargées dans l''onglet Actus (plus récent en premier).",
+  "news_settings_title": "Flux d''actualités",
+  "news_settings_url_hint": "https://exemple.fr/flux.xml",
+  "news_settings_your_feeds": "Vos flux",
+  "news_title": "Actus F1",
   "next_race": "Prochaine course",
   "no_data_yet": "Données non disponibles ou API en attente de mise à jour",
   "no_finish_data": "Aucune donnée d’arrivée",
   "no_race_results_available": "Aucun résultat de course disponible pour le moment.",
   "one_two": "Arrivées 1-2",
+  "orbit_circuit_list": "Circuits",
+  "orbit_elevation_profile": "Profil d'altitude",
+  "orbit_load_error": "Impossible de charger la carte : {error}",
+  "@orbit_load_error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "orbit_nav": "Orbit",
+  "orbit_stat_banked_turns": "Virages relevés",
+  "orbit_stat_lap_distance": "Longueur du tour",
+  "orbit_stat_max_elevation": "Dénivelé max.",
+  "orbit_track_standard": "Standard",
+  "orbit_track_technical": "Technique",
   "overtakes": "Dépassements",
   "overtaking_difficulty": "Difficulté de dépassement",
+  "overtaking_difficulty_l10n": "Difficulté de dépassement",
   "partner": "Partenaire",
   "penalties": "Pénalités",
   "penalties_empty": "Aucune pénalité trouvée dans le cache du week-end.",
@@ -559,10 +868,12 @@
   "race_control_relation_served_later": "Effectuée plus tard",
   "race_control_relation_served_penalty": "Pénalité effectuée",
   "race_control_search_hint": "Rechercher par message, drapeau, catégorie, tour ou pilote",
+  "race_results_empty": "Aucun résultat de course pour le moment.",
   "race_stats": "Statistiques de course",
   "rain": "Pluie",
   "rain_chance": "Risque de pluie",
   "rainfall": "Précipitations",
+  "recommended_strategy_l10n": "Stratégie",
   "red_flag": "Probabilité drapeau rouge",
   "reserve_driver": "Pilote de réserve",
   "result": "Résultat",
@@ -573,6 +884,8 @@
   "round_short": "M",
   "scope": "Portée",
   "season_2026": "Saison 2026",
+  "secure_page_authorized": "Vous êtes autorisé !",
+  "secure_page_title": "Page sécurisée",
   "select_drivers_to_compare": "Sélectionner 2 pilotes",
   "select_favorite": "Sélectionner...",
   "select_teams_to_compare": "Sélectionner 2 équipes",
@@ -626,6 +939,41 @@
   "strategy_3_stops": "3 arrêts",
   "summer_break": "Pause estivale",
   "summer_break_subtitle": "La pause estivale se situe entre la Hongrie et les Pays-Bas.",
+  "sun_0_deg_night_race": "Conditions de nuit (éclairage artificiel)",
+  "sun_10_deg_harbor_reflection": "Soleil très bas (réflexion sur l’eau)",
+  "sun_12_deg_mountain_occlusion": "Soleil bas (ombres des montagnes)",
+  "sun_14_deg_stadium_shadows": "Soleil bas (ombres des tribunes)",
+  "sun_15_deg_sunset_blind": "Soleil bas (risque d’éblouissement élevé)",
+  "sun_18_deg_paddock_glare": "Soleil bas (réflexions des bâtiments)",
+  "sun_20_deg_desert_haze": "Soleil bas (poussière et brume, éblouissement)",
+  "sun_22_deg_coastal_mist": "Soleil bas (diffusion par brume côtière)",
+  "sun_25_deg_morning_glow": "Soleil du petit matin",
+  "sun_28_deg_dunes_glare": "Soleil bas (éblouissement des dunes)",
+  "sun_30_deg_low_winter_sun": "Soleil d’hiver bas sur l’horizon",
+  "sun_32_deg_urban_canyon": "Soleil moyen (ombres des tours)",
+  "sun_35_deg_forest_shadows": "Soleil moyen (ombres intermittentes)",
+  "sun_40_deg_cloudy_diffuse": "Lumière diffuse (ciel couvert)",
+  "sun_45_deg_mid_afternoon": "Soleil de milieu d’après-midi",
+  "sun_5_deg_twilight": "Crépuscule (projecteurs allumés)",
+  "sun_50_deg_clear_sky": "Après-midi ensoleillée claire",
+  "sun_55_deg_bright_oval": "Forte luminosité (zone dégagée)",
+  "sun_60_deg_standard_day": "Lumière du jour standard",
+  "sun_65_deg_high_noon": "Soleil haut (midi)",
+  "sun_70_deg_equatorial_high": "Ensoleillement intense",
+  "sun_75_deg_tropical_peak": "Soleil tropical extrême",
+  "sun_8_deg_horizon_dip": "Près de l’horizon (éblouissement extrême)",
+  "sun_85_deg_zenith": "Soleil au zénith (pas d’ombres)",
+  "team_comparison_title": "{team1} vs {team2}",
+  "@team_comparison_title": {
+    "placeholders": {
+      "team1": {
+        "type": "String"
+      },
+      "team2": {
+        "type": "String"
+      }
+    }
+  },
   "team_facts_title": "Le saviez-vous ?",
   "team_history": "Historique de l’équipe",
   "team_principal": "Directeur d’équipe",
@@ -663,9 +1011,14 @@
   "track_playback_unknown_sample": "Échantillon inconnu",
   "track_temperature": "Température de la piste",
   "turn1_accident": "Probabilité d’accident virage 1",
+  "type_hybrid_street": "Circuit urbain hybride",
+  "type_permanent_circuit": "Circuit permanent",
+  "type_street_circuit": "Circuit urbain",
   "tyre": "Pneu",
   "tyres": "Pneus",
   "tyres_strategy": "PNEUS & STRATÉGIE",
+  "unauthorized_page_message": "Vous n’êtes pas autorisé à afficher cette page.",
+  "unauthorized_page_title": "Non autorisé",
   "unknown": "Inconnu",
   "unknown_sample": "Inconnu",
   "unknown_time": "Heure inconnue",
@@ -688,139 +1041,5 @@
   "win_rate": "Taux de victoire %",
   "wind": "Vent",
   "wind_speed": "Vitesse du vent",
-  "wins": "Victoires",
-  "ai_fab_label": "IA",
-  "auth_error_message": "{message}",
-  "@auth_error_message": {
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
-  "calendar_race_status_cancelled": "Annulé",
-  "calendar_race_status_ended": "Terminé",
-  "calendar_race_status_ongoing": "En cours",
-  "circuit_open_in_maps": "Ouvrir dans Plans",
-  "live_timing_air_temp_abbr": "A {temp}",
-  "@live_timing_air_temp_abbr": {
-    "placeholders": {
-      "temp": {
-        "type": "String"
-      }
-    }
-  },
-  "live_timing_banner_green": "GREEN",
-  "live_timing_banner_red_flag": "DRAPEAU ROUGE",
-  "live_timing_banner_safety_car": "SAFETY CAR",
-  "live_timing_banner_vsc_deployed": "VSC DÉPLOYÉ",
-  "live_timing_banner_vsc_ending": "FIN DE VSC",
-  "live_timing_banner_yellow_flag": "DRAPEAU JAUNE",
-  "live_timing_chip_red_flag": "DRAPEAU ROUGE",
-  "live_timing_chip_safety_car": "SAFETY CAR",
-  "live_timing_chip_vsc": "VSC",
-  "live_timing_chip_vsc_end": "FIN VSC",
-  "live_timing_chip_yellow": "JAUNE",
-  "live_timing_data_source": "Source : {source}",
-  "@live_timing_data_source": {
-    "placeholders": {
-      "source": {
-        "type": "String"
-      }
-    }
-  },
-  "live_timing_demo_session_title": "Silverstone 2024",
-  "live_timing_driver_out": "OUT",
-  "live_timing_driver_pit": "PIT",
-  "live_timing_header_driver": "PILOTE",
-  "live_timing_header_gain": "GAIN",
-  "live_timing_header_int_gap": "INT / GAP",
-  "live_timing_header_pos": "POS",
-  "live_timing_header_s1": "S1",
-  "live_timing_header_s2": "S2",
-  "live_timing_header_s3": "S3",
-  "live_timing_header_tyre": "PNEU",
-  "live_timing_hub_timestamp_tooltip": "Horodatage du dernier message (flux)",
-  "live_timing_lap_of_total": "Tour {current} / {total}",
-  "@live_timing_lap_of_total": {
-    "placeholders": {
-      "current": {
-        "type": "String"
-      },
-      "total": {
-        "type": "String"
-      }
-    }
-  },
-  "live_timing_session_pre_start": "PRE-START",
-  "live_timing_session_starting_grid": "GRILLE DE DÉPART",
-  "live_timing_status_green": "GREEN",
-  "live_timing_track_temp_abbr": "T {temp}",
-  "@live_timing_track_temp_abbr": {
-    "placeholders": {
-      "temp": {
-        "type": "String"
-      }
-    }
-  },
-  "metric_label_value": "{label} : {value}",
-  "@metric_label_value": {
-    "placeholders": {
-      "label": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "news_load_error": "Impossible de charger les actualités : {error}",
-  "@news_load_error": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "news_title": "Actus F1",
-  "news_nav": "Actus",
-  "news_empty": "Aucun article pour le moment. Tirez pour actualiser.",
-  "news_feed_section_empty": "Aucun article pour ce flux.",
-  "news_settings_title": "Flux d''actualités",
-  "news_settings_subtitle": "Ajoutez des URL RSS ou Atom. Elles sont chargées dans l''onglet Actus (plus récent en premier).",
-  "news_settings_url_hint": "https://exemple.fr/flux.xml",
-  "news_settings_add": "Ajouter",
-  "news_settings_your_feeds": "Vos flux",
-  "news_settings_no_feeds": "Aucun flux pour l''instant. Ajoutez une URL ci-dessus.",
-  "news_settings_invalid_url": "Saisissez une URL http(s) valide.",
-  "news_settings_duplicate_url": "Cette URL est déjà dans la liste.",
-  "news_settings_save_failed": "Enregistrement impossible. Réessayez.",
-  "news_settings_stream_error": "Impossible de s''abonner aux mises à jour du profil.",
-  "news_settings_drag_to_reorder": "Glisser pour modifier l''ordre des flux",
-  "orbit_nav": "Orbit",
-  "orbit_circuit_list": "Circuits",
-  "orbit_load_error": "Impossible de charger la carte : {error}",
-  "@orbit_load_error": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "race_results_empty": "Aucun résultat de course pour le moment.",
-  "secure_page_authorized": "Vous êtes autorisé !",
-  "secure_page_title": "Page sécurisée",
-  "team_comparison_title": "{team1} vs {team2}",
-  "@team_comparison_title": {
-    "placeholders": {
-      "team1": {
-        "type": "String"
-      },
-      "team2": {
-        "type": "String"
-      }
-    }
-  },
-  "unauthorized_page_message": "Vous n’êtes pas autorisé à afficher cette page.",
-  "unauthorized_page_title": "Non autorisé"
+  "wins": "Victoires"
 }

@@ -59,6 +59,7 @@
     }
   },
   "ai_example_prompt": "Probeer bijvoorbeeld: \"Fetch latest results\", \"Show next weekend\", \"Show driver standings\", \"Open driver Charles Leclerc\" of \"Show latest penalties\".",
+  "ai_fab_label": "AI",
   "ai_form_no_cache": "Nog geen gecachte recente races voor {driver}.",
   "@ai_form_no_cache": {
     "placeholders": {
@@ -170,6 +171,15 @@
   "ai_open_team_profile": "Open teamprofiel",
   "ai_open_team_standings": "Open constructor standings",
   "ai_open_weekend_hub": "Open weekend hub",
+  "ai_prefs_disable_card": "AI Strategist-kaart uitschakelen",
+  "ai_prefs_hide_coach_corner": "Coach''s Corner verbergen",
+  "ai_prefs_hide_coach_corner_hint": "Verberg coachtips als de kaart zichtbaar is.",
+  "ai_prefs_hide_team_vibe": "Team Vibe verbergen",
+  "ai_prefs_hide_team_vibe_hint": "Verberg sentiment als de kaart zichtbaar is.",
+  "ai_prefs_hide_teambattle": "Teammate Battle verbergen",
+  "ai_prefs_hide_teambattle_hint": "Verberg de teamgenoot-vergelijking als de kaart zichtbaar is.",
+  "ai_prefs_section_subtitle": "Pas de AI Strategist-kaart op het startscherm aan.",
+  "ai_prefs_section_title": "AI Strategist",
   "ai_qualifying_duel": "Kwalificatie-duel",
   "ai_race_engineer": "AI Race Engineer",
   "ai_rain_chance_label": "Regenkans",
@@ -180,15 +190,6 @@
   "ai_sentiment_mercedes_positive": "Team Vibe: Spanning stijgt bij Mercedes na gridstraf Hamilton.",
   "ai_strategist_tap_hint": "Tik om vragen te stellen...",
   "ai_strategist_title": "AI Strategist",
-  "ai_prefs_section_title": "AI Strategist",
-  "ai_prefs_section_subtitle": "Pas de AI Strategist-kaart op het startscherm aan.",
-  "ai_prefs_disable_card": "AI Strategist-kaart uitschakelen",
-  "ai_prefs_hide_teambattle": "Teammate Battle verbergen",
-  "ai_prefs_hide_teambattle_hint": "Verberg de teamgenoot-vergelijking als de kaart zichtbaar is.",
-  "ai_prefs_hide_coach_corner": "Coach''s Corner verbergen",
-  "ai_prefs_hide_coach_corner_hint": "Verberg coachtips als de kaart zichtbaar is.",
-  "ai_prefs_hide_team_vibe": "Team Vibe verbergen",
-  "ai_prefs_hide_team_vibe_hint": "Verberg sentiment als de kaart zichtbaar is.",
   "ai_supported_commands": "Ondersteunde commando''s: Fetch latest results, Show next weekend, Compare naam1 vs naam2, Show form [driver], Show driver standings, Show team standings, Open driver [naam], Open team [naam], Show drivers chart, Show latest penalties, Show latest race control.",
   "ai_team_compare_ready": "Team comparison klaar voor {left} en {right}.",
   "@ai_team_compare_ready": {
@@ -263,6 +264,14 @@
   "air_temperature": "Luchttemperatuur",
   "all_scopes": "Alle scopes",
   "app_title": "F1 Hub",
+  "auth_error_message": "{message}",
+  "@auth_error_message": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
   "average_speed": "Gemiddelde snelheid",
   "avg_finish": "Gem. finish",
   "avg_finish_l5": "Gem. finish (L5)",
@@ -270,8 +279,78 @@
   "avg_lap": "Gemiddelde ronde",
   "best_combination": "Beste combinatie",
   "best_lap": "Beste ronde",
+  "best_tyre_combination": "Beste bandencombinatie",
+  "cfield_air_pressure_hpa": "Luchtdruk",
+  "cfield_asphalt_grip_score": "Gripscore asfalt",
+  "cfield_avg_g_force": "Gemiddelde G-kracht",
+  "cfield_avg_time_2024_2025": "Gemiddelde rondetijd (2024–25)",
+  "cfield_brake_cooling_requirement_score": "Score remkoeling",
+  "cfield_circuit_director": "Circuitdirecteur",
+  "cfield_circuit_owner": "Circuiteigenaar",
+  "cfield_contract_until": "Contract tot",
+  "cfield_deployment_focus": "Focus inzet energie",
+  "cfield_direction": "Richting",
+  "cfield_distance_to_t1": "Afstand tot bocht 1",
+  "cfield_electrical_ratio": "Elektrisch aandeel",
+  "cfield_energy_flow_strategy": "Energiestrategie",
+  "cfield_engine_derating_risk": "Risico motor-derating",
+  "cfield_era_delta": "Verschil tussen era''s",
+  "cfield_est_time_2026": "Geschatte rondetijd (2026)",
+  "cfield_elevation_sea_level": "Hoogte (zee­niveau)",
+  "cfield_harvest_difficulty": "Moeilijkheid terugwinnen",
+  "cfield_harvesting_zones": "Terugwinzones",
+  "cfield_latitude": "Breedtegraad",
+  "cfield_local_time_zone": "Lokale tijdzone",
+  "cfield_longitude": "Lengtegraad",
+  "cfield_lap_record_detail": "Ronderecord",
+  "cfield_laps": "Ronden",
+  "cfield_lateral_stress_score": "Laterale stressscore",
+  "cfield_length": "Lengte",
+  "cfield_manual_override_energy_cost": "Energiekosten handmatige override",
+  "cfield_manual_override_points": "Handmatige override-punten",
+  "cfield_max_elevation_change": "Max. hoogteverschil",
+  "cfield_max_g_force": "Max. G-kracht",
+  "cfield_override_impact_score": "Impactscore override",
+  "cfield_on_calendar_since": "Op kalender sinds",
+  "cfield_overtaking_delta": "Inhaaldelta",
+  "cfield_pit_exit_delta": "Delta pituit",
+  "cfield_pitstop_record_detail": "Pitstoprecord",
+  "cfield_race_day_capacity": "Capaciteit racedag",
+  "cfield_rain_chance": "Regenkans",
+  "cfield_recovery_points": "Recovery-punten",
+  "cfield_red_flag_prob": "Kans rode vlag",
+  "cfield_s1": "Sector 1",
+  "cfield_s2": "Sector 2",
+  "cfield_s3": "Sector 3",
+  "cfield_safety_car_prob": "Kans safety car",
+  "cfield_safety_car_window_laps": "Safetycar-venster (rondes)",
+  "cfield_straight_mode_zones": "Straight Mode-zones",
+  "cfield_sun_angle_start": "Zonnestand bij start",
+  "cfield_t1_accident_risk": "Crashrisico bocht 1",
+  "cfield_temperature_c": "Temperatuur",
+  "cfield_top_speed": "Topsnelheid",
+  "cfield_top_speed_delta": "Delta topsnelheid",
+  "cfield_track_evolution": "Baanevolutie",
+  "cfield_track_type": "Baantype",
+  "cfield_tyre_physics": "Bandenfysica",
+  "cfield_tyre_working_window_c": "Werkvenster banden",
+  "cfield_undercut_potential_score": "Undercut-potentieel",
+  "cfield_utc_offset": "UTC-offset",
+  "cfield_vsc_prob": "Kans VSC",
+  "cfield_wind_sensitivity_sector": "Windgevoeligheid (sector)",
+  "cfield_x_mode_usage": "X-modus gebruik",
+  "cfield_z_mode_activation_delay": "Activeringsvertraging Z-modus",
+  "cfield_z_mode_usage": "Z-modus gebruik",
+  "cfield_zone_name": "Naam tijdzone",
   "birth_place": "Geboorteplaats",
   "cache_cleared": "Cache succesvol geleegd!",
+  "calendar_prefs_hide_cancelled": "Placeholder-races verbergen",
+  "calendar_prefs_hide_cancelled_hint": "Verberg geannuleerde of placeholder-races die niet op de echte kalender staan.",
+  "calendar_prefs_section_subtitle": "Pas de circuits-kalender aan.",
+  "calendar_prefs_section_title": "Kalender",
+  "calendar_race_status_cancelled": "Geannuleerd",
+  "calendar_race_status_ended": "Beëindigd",
+  "calendar_race_status_ongoing": "Bezig",
   "car_label": "Auto {number}",
   "@car_label": {
     "placeholders": {
@@ -281,53 +360,28 @@
     }
   },
   "career_stats": "Carrière statistieken",
+  "cat_ambient_stats": "Omgevingsomstandigheden",
+  "cat_history_comparison": "Eravergelijking",
+  "cat_risks_stats": "Prestatie en risico",
+  "cat_tech_2026": "Tech en aero 2026",
+  "cat_track_specs": "Baangeometrie",
   "cc_wins": "Constructeurstitels",
   "championship_progression": "Kampioenschapsverloop",
   "championships": "Wereldtitels",
-  "calendar_prefs_section_title": "Kalender",
-  "calendar_prefs_section_subtitle": "Pas de circuits-kalender aan.",
-  "calendar_prefs_hide_cancelled": "Placeholder-races verbergen",
-  "calendar_prefs_hide_cancelled_hint": "Verberg geannuleerde of placeholder-races die niet op de echte kalender staan.",
-  "display_prefs_section_title": "Weergave",
-  "display_prefs_section_subtitle": "Uiterlijk en animaties. Ingelogd worden ze met je account gesynchroniseerd.",
-  "display_prefs_ui_mode": "Interfacestijl",
-  "display_prefs_mode_standard": "Standaard",
-  "display_prefs_mode_standard_hint": "Glasachtige vervaging en zachte schaduwen.",
-  "display_prefs_mode_simple": "Eenvoudig",
-  "display_prefs_mode_simple_hint": "Vlakke vlakken en sterker contrast.",
-  "display_prefs_compact": "Compacte modus",
-  "display_prefs_compact_hint": "Strakkere marges en kleinere kaarten.",
-  "display_prefs_motion_reduced": "Minder beweging",
-  "display_prefs_motion_reduced_hint": "Minder animatie, vervaging en thema-overgangen.",
-  "display_prefs_saving": "Opslaan…",
-  "my_paddock_title": "Mijn paddock",
-  "my_paddock_session_unknown": "Live timing",
-  "my_paddock_resume_subtitle": "Hervatten: {session} — frame {lap}",
-  "@my_paddock_resume_subtitle": {
-    "placeholders": {
-      "session": {"type": "String"},
-      "lap": {"type": "String"}
-    }
-  },
-  "my_paddock_favorite_drivers": "Favoriete coureurs",
-  "my_paddock_favorite_teams": "Favoriete teams",
-  "my_paddock_last_race": "Laatste race",
-  "my_paddock_last_race_summary": "{date} · {podium}",
-  "@my_paddock_last_race_summary": {
-    "placeholders": {
-      "date": {"type": "String"},
-      "podium": {"type": "String"}
-    }
-  },
-  "my_paddock_points_suffix": "pnt",
   "changelog": "Changelog",
   "characteristics": "CIRCUIT KENMERKEN",
   "chart_no_data": "Geen grafiekdata beschikbaar voor dit seizoen.",
   "children": "Kinderen",
   "circuit": "Circuit",
   "circuit_difficulty": "Circuit moeilijkheid",
+  "circuit_difficulty_l10n": "Moeilijkheidsgraad circuit",
+  "circuit_go_home": "Terug naar home",
   "circuit_info": "Circuit info",
   "circuit_layout": "Circuit lay-out",
+  "circuit_not_found_message": "Er zijn geen circuitgegevens voor dit adres. Controleer de link of kies een race in de kalender.",
+  "circuit_not_found_title": "Circuit niet gevonden",
+  "circuit_open_in_maps": "Openen in Maps",
+  "circuit_stat_full_throttle": "Vol gas",
   "circuits": "Circuits",
   "city": "Stad",
   "clear_cache": "Cache legen",
@@ -365,6 +419,27 @@
   "day": "dag",
   "days": "dagen",
   "dc_wins": "Coureurstitels",
+  "diff_easy": "Zeer eenvoudig",
+  "diff_extreme": "Extreem",
+  "diff_hard": "Moeilijk",
+  "diff_high": "Hoog",
+  "diff_low": "Laag",
+  "diff_medium": "Gemiddeld",
+  "dir_clockwise": "Met de klok mee",
+  "dir_counter_clockwise": "Tegen de klok in",
+  "dir_figure_eight": "Achtbaanlayout",
+  "display_prefs_compact": "Compacte modus",
+  "display_prefs_compact_hint": "Strakkere marges en kleinere kaarten.",
+  "display_prefs_mode_simple": "Eenvoudig",
+  "display_prefs_mode_simple_hint": "Vlakke vlakken en sterker contrast.",
+  "display_prefs_mode_standard": "Standaard",
+  "display_prefs_mode_standard_hint": "Glasachtige vervaging en zachte schaduwen.",
+  "display_prefs_motion_reduced": "Minder beweging",
+  "display_prefs_motion_reduced_hint": "Minder animatie, vervaging en thema-overgangen.",
+  "display_prefs_saving": "Opslaan…",
+  "display_prefs_section_subtitle": "Uiterlijk en animaties. Ingelogd worden ze met je account gesynchroniseerd.",
+  "display_prefs_section_title": "Weergave",
+  "display_prefs_ui_mode": "Interfacestijl",
   "distance_to_turn1": "Afstand tot bocht 1",
   "dnf": "Uitvalbeurten (DNF)",
   "dnf_percentage": "Uitval %",
@@ -387,6 +462,100 @@
   "favorite_circuit": "Favoriete circuit",
   "favorite_driver": "Favoriete coureur",
   "favorite_team": "Favoriete team",
+  "feature_130r_high_speed": "Iconische 130R hoge snelheid naar links",
+  "feature_90_degree_corners": "Opeenvolgende 90°-bochten op stratencircuit",
+  "feature_abrasive_asphalt": "Sterk abrasief asfalt",
+  "feature_aero_efficiency_test": "Ultieme test aerodynamisch rendement",
+  "feature_aggressive_kerbs": "Risico op agressieve worstelbanden",
+  "feature_banked_corners_t3_t14": "Unieke hellende bochten (T3 en T14)",
+  "feature_battery_drain_kemmel": "Hoog batterijverbruik (Kemmel Straight)",
+  "feature_blind_corners": "Gevaarlijke blinde apexen",
+  "feature_bumpy_city_roads": "Sterk onregelmatig stadswegdek",
+  "feature_bumpy_surface": "Hobbelig baanoppervlak",
+  "feature_bumpy_surface_subsidence": "Oneffenheden door bodembeweging",
+  "feature_castle_section_tight": "Ultranauwe kasteelsectie",
+  "feature_cold_tire_struggle": "Moeite bandentemperatuur vast te houden",
+  "feature_curb_riding_chicane": "Agressief chicane-curb-riding",
+  "feature_degner_curves": "Precieze Degner-bochten",
+  "feature_dusty_surface": "Stoffige omstandigheden aan het begin van het weekend",
+  "feature_eau_rouge_raidillon": "Legendarische Eau Rouge-Raidillon",
+  "feature_esses_section_flow": "Hoge snelheid, ritmische S-bochten",
+  "feature_extreme_altitude": "Extreme hoogte (2200 m+)",
+  "feature_extreme_humidity": "Drukkende equatoriale luchtvochtigheid",
+  "feature_extreme_low_drag": "Extreme low-drag-aero-setup",
+  "feature_fastest_street_track": "Snelste stratencircuit op de kalender",
+  "feature_figure_eight_layout": "Unieke achtvormige layout",
+  "feature_glittering_night_race": "Fonkelende nachtrace-achtergrond",
+  "feature_groundhog_risk": "Risico op wild (groundhogs) op de baan",
+  "feature_heavy_braking": "Zware remeisen",
+  "feature_heavy_braking_variante": "Hard remmen naar chicanes",
+  "feature_heavy_braking_zones": "Harde remzones naar chicanes",
+  "feature_heavy_traction_points": "Kritieke tractiezones na lage snelheid",
+  "feature_high_altitude_cooling": "Koeling van de power unit op grote hoogte",
+  "feature_high_altitude_impact": "Duidelijk aerodynamisch effect door hoogte",
+  "feature_high_downforce_focus": "Maximale prioriteit aan downforce",
+  "feature_high_front_tyre_wear": "Hoge degradatie voorbanden",
+  "feature_high_humidity": "Hoge omgevingsvochtigheid",
+  "feature_high_kerb_usage": "Agressief gebruik van kerbs",
+  "feature_high_lateral_load": "Intense laterale g-belasting",
+  "feature_high_speed_corners": "Ultrasnelle bochtencombinaties",
+  "feature_high_speed_flow": "Doorlopende flow op hoge snelheid",
+  "feature_high_stamina_required": "Hoge fysieke belasting voor de coureur",
+  "feature_high_wind_sensitivity": "Extreme gevoeligheid voor zijwind",
+  "feature_hotel_underpass": "Unieke onderdoorgang onder het Yas Hotel",
+  "feature_iconic_tunnel": "Hoge snelheid door de haventunnel",
+  "feature_legendary_esses": "Legendarische ''S''-bochten",
+  "feature_long_back_straight": "Extreem lange rechte op het achterveld",
+  "feature_long_main_straight": "Lange drag naar bocht 1",
+  "feature_longest_run_to_t1": "Langste run van start naar bocht 1",
+  "feature_longest_straight": "2,2 km volgas op het rechte stuk",
+  "feature_longest_track": "Langste circuit op de kalender",
+  "feature_low_grip_asphalt": "Laag grip half-permanent oppervlak",
+  "feature_maggotts_becketts_flow": "Maggotts-Becketts-Chapel-flow",
+  "feature_micro_climates": "Meerdere microklimaten op het circuit",
+  "feature_monaco_without_walls": "Technische ''Monaco-achtige'' flow",
+  "feature_multi_surface_grip": "Wisselend grip op meerdere oppervlakken",
+  "feature_multiple_overtaking_lines": "Breed circuit met meerdere lijnen",
+  "feature_narrow_passing_zones": "Smalle inhalingszones",
+  "feature_narrow_track_width": "Smalle historische baanbreedte",
+  "feature_new_straight_section": "Hernieuwde hoge-snelheidssector 3",
+  "feature_old_school_track": "Klassieke ''old-school''-layout",
+  "feature_physical_exhaustion": "Extreme fysieke uitputting voor de coureur",
+  "feature_physical_heat_stress": "Zware warmtebelasting",
+  "feature_precision_steering": "Stuurwerk op millimeterprecisie",
+  "feature_rollercoaster_ride": "Achtbaangevoel op hoge snelheid",
+  "feature_sand_on_track": "Risico op windgeblazen zand",
+  "feature_sand_wind_impact": "Woestijnzand en windbuffeting",
+  "feature_sea_breeze_sand": "Zeewind en risico op zand op de baan",
+  "feature_senna_s_curves": "Legendarisch ''Senna S''-complex",
+  "feature_short_lap_time": "Extreem korte rondetijd",
+  "feature_snail_corner_t1": "Technische ''slak''-bocht 1",
+  "feature_stadium_atmosphere": "Iconische stadionsfeer",
+  "feature_stadium_section": "Iconische Foro Sol-stadionsectie",
+  "feature_steep_uphill_braking": "Steil oplopende remzones",
+  "feature_steep_uphill_t1": "Extreme klim naar bocht 1",
+  "feature_straight_mode_5_zones": "5 Straight Mode-zones",
+  "feature_street_circuit": "Tijdelijk stratencircuitoppervlak",
+  "feature_sunset_to_night": "Overgang schemering naar nacht",
+  "feature_sweeping_corners": "Snelle, ruim genomen sweepers",
+  "feature_technical_chicane": "Precieze chicaneplaatsing",
+  "feature_technical_final_sector": "Strakke, technische slotsector",
+  "feature_technical_flow": "Doorlopende ritmische bochtenflow",
+  "feature_technical_sector_2": "Technische middensector",
+  "feature_temple_of_speed": "Iconische ''Tempel der Snelheid''",
+  "feature_the_strip_straight": "Het enorme rechte stuk op de Las Vegas Strip",
+  "feature_thin_air_cooling": "Koelingsuitdagingen door ijle lucht",
+  "feature_tight_hairpin": "Strakste haarspeldbocht ter wereld",
+  "feature_tire_killer": "Hoge laterale bandenbelasting",
+  "feature_track_limits_chaos": "Hoog risico op straf voor track limits",
+  "feature_traction_limited": "Tractiegelimiteerde uitacceleratie",
+  "feature_unpredictable_weather": "Sterk wisselvallig weer",
+  "feature_unpredictable_weather_interlagos": "Plotselinge microbuien (Interlagos)",
+  "feature_uphill_start_finish": "Steil oplopende start-finishrechte",
+  "feature_variable_grip": "Wisselende gripniveaus",
+  "feature_wall_of_champions": "Gevaarlijke ''Wall of Champions''",
+  "feature_zero_margin_error": "Nul marge voor fouten",
+  "feature_zero_overtaking_space": "Extreem beperkte ruimte om in te halen",
   "finish": "Finish",
   "fp1": "Vrije training 1",
   "fp2": "Vrije training 2",
@@ -444,9 +613,9 @@
   "laps": "Rondes",
   "laps_led": "Rondes aan de leiding",
   "last_5_points": "Punten laatste 5",
-  "last_podium_prefs_section_title": "Laatste podium",
-  "last_podium_prefs_section_subtitle": "Hoeveel recente races op circuitkaarten tonen.",
   "last_podium_prefs_races_label": "Aantal races",
+  "last_podium_prefs_section_subtitle": "Hoeveel recente races op circuitkaarten tonen.",
+  "last_podium_prefs_section_title": "Laatste podium",
   "last_winner": "Winnaar vorig jaar",
   "length": "Lengte",
   "level_1": "Zeer makkelijk",
@@ -466,7 +635,68 @@
   "live_leaderboard": "Klassement",
   "live_switch_test": "Schakel naar testdata",
   "live_teammate_battle": "Teamgenoten-duel",
+  "live_timing_air_temp_abbr": "A {temp}",
+  "@live_timing_air_temp_abbr": {
+    "placeholders": {
+      "temp": {
+        "type": "String"
+      }
+    }
+  },
+  "live_timing_banner_green": "GREEN",
+  "live_timing_banner_red_flag": "RODE VLAG",
+  "live_timing_banner_safety_car": "SAFETY CAR",
+  "live_timing_banner_vsc_deployed": "VSC INGEZET",
+  "live_timing_banner_vsc_ending": "VSC EINDIGT",
+  "live_timing_banner_yellow_flag": "GELE VLAG",
+  "live_timing_chip_red_flag": "RODE VLAG",
+  "live_timing_chip_safety_car": "SAFETY CAR",
+  "live_timing_chip_vsc": "VSC",
+  "live_timing_chip_vsc_end": "VSC EINDE",
+  "live_timing_chip_yellow": "GEEL",
+  "live_timing_data_source": "Bron: {source}",
+  "@live_timing_data_source": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "live_timing_demo_session_title": "Silverstone 2024",
+  "live_timing_driver_out": "OUT",
+  "live_timing_driver_pit": "PIT",
+  "live_timing_header_driver": "DRIVER",
+  "live_timing_header_gain": "WINST",
+  "live_timing_header_int_gap": "INT / GAP",
+  "live_timing_header_pos": "POS",
+  "live_timing_header_s1": "S1",
+  "live_timing_header_s2": "S2",
+  "live_timing_header_s3": "S3",
+  "live_timing_header_tyre": "BAND",
+  "live_timing_hub_timestamp_tooltip": "Tijdstempel laatste bericht (stream)",
+  "live_timing_lap_of_total": "Ronde {current} / {total}",
+  "@live_timing_lap_of_total": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "live_timing_session_pre_start": "PRE-START",
+  "live_timing_session_starting_grid": "STARTGRID",
+  "live_timing_status_green": "GREEN",
   "live_timing_title": "Live Timing",
+  "live_timing_track_temp_abbr": "T {temp}",
+  "@live_timing_track_temp_abbr": {
+    "placeholders": {
+      "temp": {
+        "type": "String"
+      }
+    }
+  },
   "live_waiting": "Wachten op live data...",
   "loading": "Laden",
   "logged_in": "Je bent ingelogd",
@@ -475,7 +705,46 @@
   "manager": "Manager",
   "max_g_force": "Max G-kracht",
   "medium_tire": "Medium",
+  "metric_label_value": "{label}: {value}",
+  "@metric_label_value": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "minutes": "minuten",
+  "my_paddock_favorite_drivers": "Favoriete coureurs",
+  "my_paddock_favorite_teams": "Favoriete teams",
+  "my_paddock_last_race": "Laatste race",
+  "my_paddock_last_race_summary": "{date} · {podium}",
+  "@my_paddock_last_race_summary": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "podium": {
+        "type": "String"
+      }
+    }
+  },
+  "my_paddock_points_suffix": "pnt",
+  "my_paddock_resume_subtitle": "Hervatten: {session} — frame {lap}",
+  "@my_paddock_resume_subtitle": {
+    "placeholders": {
+      "session": {
+        "type": "String"
+      },
+      "lap": {
+        "type": "String"
+      }
+    }
+  },
+  "my_paddock_session_unknown": "Live timing",
+  "my_paddock_title": "Mijn paddock",
   "name": "Naam",
   "nat_argentine": "Argentijns",
   "nat_australian": "Australisch",
@@ -494,13 +763,53 @@
   "nat_spanish": "Spaans",
   "nat_thai": "Thais",
   "nationality": "Nationaliteit",
+  "news_empty": "Geen artikelen op dit moment. Trek om te vernieuwen.",
+  "news_feed_section_empty": "Geen artikelen uit deze feed.",
+  "news_load_error": "Kon nieuws niet laden: {error}",
+  "@news_load_error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "news_nav": "Nieuws",
+  "news_settings_add": "Toevoegen",
+  "news_settings_drag_to_reorder": "Sleep om de volgorde van feeds te wijzigen",
+  "news_settings_duplicate_url": "Deze URL staat al in je lijst.",
+  "news_settings_invalid_url": "Voer een geldige http(s)-URL in.",
+  "news_settings_no_feeds": "Nog geen feeds. Voeg hierboven een URL toe.",
+  "news_settings_save_failed": "Opslaan mislukt. Probeer opnieuw.",
+  "news_settings_stream_error": "Kon profiel-updates niet ontvangen.",
+  "news_settings_subtitle": "Voeg RSS- of Atom-URL''s toe. Ze worden op het tabblad Nieuws geladen (nieuwste eerst).",
+  "news_settings_title": "Nieuwsfeeds",
+  "news_settings_url_hint": "https://voorbeeld.nl/feed.xml",
+  "news_settings_your_feeds": "Jouw feeds",
+  "news_title": "F1 Nieuws",
   "next_race": "Volgende race",
   "no_data_yet": "Data nog niet beschikbaar of API is nog niet geüpdatet",
   "no_finish_data": "Geen finishdata",
   "no_race_results_available": "Nog geen race-uitslag beschikbaar.",
   "one_two": "1-2 finishes",
+  "orbit_circuit_list": "Circuits",
+  "orbit_elevation_profile": "Hoogteprofiel",
+  "orbit_load_error": "Kaartgegevens laden mislukt: {error}",
+  "@orbit_load_error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "orbit_nav": "Orbit",
+  "orbit_stat_banked_turns": "Hellende bochten",
+  "orbit_stat_lap_distance": "Rondelengte",
+  "orbit_stat_max_elevation": "Max. hoogteverschil",
+  "orbit_track_standard": "Standaard",
+  "orbit_track_technical": "Technisch",
   "overtakes": "Inhaalacties",
   "overtaking_difficulty": "Inhaal moeilijkheid",
+  "overtaking_difficulty_l10n": "Moeilijkheidsgraad inhalen",
   "partner": "Partner",
   "penalties": "Penalties",
   "penalties_empty": "Geen penalties gevonden in de huidige weekendcache.",
@@ -559,10 +868,12 @@
   "race_control_relation_served_later": "Later uitgevoerd",
   "race_control_relation_served_penalty": "Uitgevoerde straf",
   "race_control_search_hint": "Zoek op bericht, vlag, categorie, ronde of coureur",
+  "race_results_empty": "Nog geen race-resultaten beschikbaar.",
   "race_stats": "Race statistieken",
   "rain": "Regen",
   "rain_chance": "Regenkans",
   "rainfall": "Neerslag",
+  "recommended_strategy_l10n": "Strategie",
   "red_flag": "Kans op rode vlag",
   "reserve_driver": "Reservecoureur",
   "result": "Resultaat",
@@ -573,6 +884,8 @@
   "round_short": "R",
   "scope": "Scope",
   "season_2026": "2026 Seizoen",
+  "secure_page_authorized": "Je bent geautoriseerd!",
+  "secure_page_title": "Beveiligde pagina",
   "select_drivers_to_compare": "Selecteer 2 coureurs",
   "select_favorite": "Selecteer...",
   "select_teams_to_compare": "Selecteer 2 teams",
@@ -626,6 +939,41 @@
   "strategy_3_stops": "3 stops",
   "summer_break": "Zomerstop",
   "summer_break_subtitle": "Tussen Hongarije en Nederland ligt de zomerstop.",
+  "sun_0_deg_night_race": "Nacht (kunstlicht)",
+  "sun_10_deg_harbor_reflection": "Zeer lage zon (reflectie op water)",
+  "sun_12_deg_mountain_occlusion": "Lage zon (bergschaduw)",
+  "sun_14_deg_stadium_shadows": "Lage zon (schaduw van tribunes)",
+  "sun_15_deg_sunset_blind": "Lage zon (hoog verblindingsrisico)",
+  "sun_18_deg_paddock_glare": "Lage zon (reflectie van gebouwen)",
+  "sun_20_deg_desert_haze": "Lage zon (stof en nevel, verblinding)",
+  "sun_22_deg_coastal_mist": "Lage zon (zeemist, diffuus licht)",
+  "sun_25_deg_morning_glow": "Vroege ochtendzon",
+  "sun_28_deg_dunes_glare": "Lage zon (reflectie duinen)",
+  "sun_30_deg_low_winter_sun": "Lage winterzon",
+  "sun_32_deg_urban_canyon": "Matige zon (schaduw skyline)",
+  "sun_35_deg_forest_shadows": "Matige zon (wisselende schaduw)",
+  "sun_40_deg_cloudy_diffuse": "Diffuus licht (bewolkt)",
+  "sun_45_deg_mid_afternoon": "Middagzon",
+  "sun_5_deg_twilight": "Schemering (schijnwerpers aan)",
+  "sun_50_deg_clear_sky": "Heldere namiddagzon",
+  "sun_55_deg_bright_oval": "Hoge helderheid (open terrein)",
+  "sun_60_deg_standard_day": "Normaal daglicht",
+  "sun_65_deg_high_noon": "Hoge zon (middag)",
+  "sun_70_deg_equatorial_high": "Zon met hoge intensiteit",
+  "sun_75_deg_tropical_peak": "Extreme tropische zon",
+  "sun_8_deg_horizon_dip": "Dicht bij horizon (extreme verblinding)",
+  "sun_85_deg_zenith": "Zon in het zenith (geen schaduw)",
+  "team_comparison_title": "{team1} vs {team2}",
+  "@team_comparison_title": {
+    "placeholders": {
+      "team1": {
+        "type": "String"
+      },
+      "team2": {
+        "type": "String"
+      }
+    }
+  },
   "team_facts_title": "Wist je dat?",
   "team_history": "Teamgeschiedenis",
   "team_principal": "Teambaas",
@@ -663,9 +1011,14 @@
   "track_playback_unknown_sample": "Onbekend sample",
   "track_temperature": "Baantemperatuur",
   "turn1_accident": "Kans crash bocht 1",
+  "type_hybrid_street": "Hybride stratencircuit",
+  "type_permanent_circuit": "Permanent racecircuit",
+  "type_street_circuit": "Stratencircuit",
   "tyre": "Band",
   "tyres": "Banden",
   "tyres_strategy": "BANDEN & STRATEGIE",
+  "unauthorized_page_message": "Je hebt geen toestemming om deze pagina te bekijken.",
+  "unauthorized_page_title": "Niet geautoriseerd",
   "unknown": "Onbekend",
   "unknown_sample": "Onbekend",
   "unknown_time": "Onbekende tijd",
@@ -688,139 +1041,5 @@
   "win_rate": "Winrate %",
   "wind": "Wind",
   "wind_speed": "Windsnelheid",
-  "wins": "Overwinningen",
-  "ai_fab_label": "AI",
-  "auth_error_message": "{message}",
-  "@auth_error_message": {
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
-  "calendar_race_status_cancelled": "Geannuleerd",
-  "calendar_race_status_ended": "Beëindigd",
-  "calendar_race_status_ongoing": "Bezig",
-  "circuit_open_in_maps": "Openen in Maps",
-  "live_timing_air_temp_abbr": "A {temp}",
-  "@live_timing_air_temp_abbr": {
-    "placeholders": {
-      "temp": {
-        "type": "String"
-      }
-    }
-  },
-  "live_timing_banner_green": "GREEN",
-  "live_timing_banner_red_flag": "RODE VLAG",
-  "live_timing_banner_safety_car": "SAFETY CAR",
-  "live_timing_banner_vsc_deployed": "VSC INGEZET",
-  "live_timing_banner_vsc_ending": "VSC EINDIGT",
-  "live_timing_banner_yellow_flag": "GELE VLAG",
-  "live_timing_chip_red_flag": "RODE VLAG",
-  "live_timing_chip_safety_car": "SAFETY CAR",
-  "live_timing_chip_vsc": "VSC",
-  "live_timing_chip_vsc_end": "VSC EINDE",
-  "live_timing_chip_yellow": "GEEL",
-  "live_timing_data_source": "Bron: {source}",
-  "@live_timing_data_source": {
-    "placeholders": {
-      "source": {
-        "type": "String"
-      }
-    }
-  },
-  "live_timing_demo_session_title": "Silverstone 2024",
-  "live_timing_driver_out": "OUT",
-  "live_timing_driver_pit": "PIT",
-  "live_timing_header_driver": "DRIVER",
-  "live_timing_header_gain": "WINST",
-  "live_timing_header_int_gap": "INT / GAP",
-  "live_timing_header_pos": "POS",
-  "live_timing_header_s1": "S1",
-  "live_timing_header_s2": "S2",
-  "live_timing_header_s3": "S3",
-  "live_timing_header_tyre": "BAND",
-  "live_timing_hub_timestamp_tooltip": "Tijdstempel laatste bericht (stream)",
-  "live_timing_lap_of_total": "Ronde {current} / {total}",
-  "@live_timing_lap_of_total": {
-    "placeholders": {
-      "current": {
-        "type": "String"
-      },
-      "total": {
-        "type": "String"
-      }
-    }
-  },
-  "live_timing_session_pre_start": "PRE-START",
-  "live_timing_session_starting_grid": "STARTGRID",
-  "live_timing_status_green": "GREEN",
-  "live_timing_track_temp_abbr": "T {temp}",
-  "@live_timing_track_temp_abbr": {
-    "placeholders": {
-      "temp": {
-        "type": "String"
-      }
-    }
-  },
-  "metric_label_value": "{label}: {value}",
-  "@metric_label_value": {
-    "placeholders": {
-      "label": {
-        "type": "String"
-      },
-      "value": {
-        "type": "String"
-      }
-    }
-  },
-  "news_load_error": "Kon nieuws niet laden: {error}",
-  "@news_load_error": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "news_title": "F1 Nieuws",
-  "news_nav": "Nieuws",
-  "news_empty": "Geen artikelen op dit moment. Trek om te vernieuwen.",
-  "news_feed_section_empty": "Geen artikelen uit deze feed.",
-  "news_settings_title": "Nieuwsfeeds",
-  "news_settings_subtitle": "Voeg RSS- of Atom-URL''s toe. Ze worden op het tabblad Nieuws geladen (nieuwste eerst).",
-  "news_settings_url_hint": "https://voorbeeld.nl/feed.xml",
-  "news_settings_add": "Toevoegen",
-  "news_settings_your_feeds": "Jouw feeds",
-  "news_settings_no_feeds": "Nog geen feeds. Voeg hierboven een URL toe.",
-  "news_settings_invalid_url": "Voer een geldige http(s)-URL in.",
-  "news_settings_duplicate_url": "Deze URL staat al in je lijst.",
-  "news_settings_save_failed": "Opslaan mislukt. Probeer opnieuw.",
-  "news_settings_stream_error": "Kon profiel-updates niet ontvangen.",
-  "news_settings_drag_to_reorder": "Sleep om de volgorde van feeds te wijzigen",
-  "orbit_nav": "Orbit",
-  "orbit_circuit_list": "Circuits",
-  "orbit_load_error": "Kaartgegevens laden mislukt: {error}",
-  "@orbit_load_error": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "race_results_empty": "Nog geen race-resultaten beschikbaar.",
-  "secure_page_authorized": "Je bent geautoriseerd!",
-  "secure_page_title": "Beveiligde pagina",
-  "team_comparison_title": "{team1} vs {team2}",
-  "@team_comparison_title": {
-    "placeholders": {
-      "team1": {
-        "type": "String"
-      },
-      "team2": {
-        "type": "String"
-      }
-    }
-  },
-  "unauthorized_page_message": "Je hebt geen toestemming om deze pagina te bekijken.",
-  "unauthorized_page_title": "Niet geautoriseerd"
+  "wins": "Overwinningen"
 }

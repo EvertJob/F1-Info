@@ -286,6 +286,195 @@ class AppLocalizationsNl extends AppLocalizations {
   String get best_lap => 'Beste ronde';
 
   @override
+  String get best_tyre_combination => 'Beste bandencombinatie';
+
+  @override
+  String get cfield_air_pressure_hpa => 'Luchtdruk';
+
+  @override
+  String get cfield_asphalt_grip_score => 'Gripscore asfalt';
+
+  @override
+  String get cfield_avg_g_force => 'Gemiddelde G-kracht';
+
+  @override
+  String get cfield_avg_time_2024_2025 => 'Gemiddelde rondetijd (2024–25)';
+
+  @override
+  String get cfield_brake_cooling_requirement_score => 'Score remkoeling';
+
+  @override
+  String get cfield_circuit_director => 'Circuitdirecteur';
+
+  @override
+  String get cfield_circuit_owner => 'Circuiteigenaar';
+
+  @override
+  String get cfield_contract_until => 'Contract tot';
+
+  @override
+  String get cfield_deployment_focus => 'Focus inzet energie';
+
+  @override
+  String get cfield_direction => 'Richting';
+
+  @override
+  String get cfield_distance_to_t1 => 'Afstand tot bocht 1';
+
+  @override
+  String get cfield_electrical_ratio => 'Elektrisch aandeel';
+
+  @override
+  String get cfield_energy_flow_strategy => 'Energiestrategie';
+
+  @override
+  String get cfield_engine_derating_risk => 'Risico motor-derating';
+
+  @override
+  String get cfield_era_delta => 'Verschil tussen era\'\'s';
+
+  @override
+  String get cfield_est_time_2026 => 'Geschatte rondetijd (2026)';
+
+  @override
+  String get cfield_elevation_sea_level => 'Hoogte (zee­niveau)';
+
+  @override
+  String get cfield_harvest_difficulty => 'Moeilijkheid terugwinnen';
+
+  @override
+  String get cfield_harvesting_zones => 'Terugwinzones';
+
+  @override
+  String get cfield_latitude => 'Breedtegraad';
+
+  @override
+  String get cfield_local_time_zone => 'Lokale tijdzone';
+
+  @override
+  String get cfield_longitude => 'Lengtegraad';
+
+  @override
+  String get cfield_lap_record_detail => 'Ronderecord';
+
+  @override
+  String get cfield_laps => 'Ronden';
+
+  @override
+  String get cfield_lateral_stress_score => 'Laterale stressscore';
+
+  @override
+  String get cfield_length => 'Lengte';
+
+  @override
+  String get cfield_manual_override_energy_cost => 'Energiekosten handmatige override';
+
+  @override
+  String get cfield_manual_override_points => 'Handmatige override-punten';
+
+  @override
+  String get cfield_max_elevation_change => 'Max. hoogteverschil';
+
+  @override
+  String get cfield_max_g_force => 'Max. G-kracht';
+
+  @override
+  String get cfield_override_impact_score => 'Impactscore override';
+
+  @override
+  String get cfield_on_calendar_since => 'Op kalender sinds';
+
+  @override
+  String get cfield_overtaking_delta => 'Inhaaldelta';
+
+  @override
+  String get cfield_pit_exit_delta => 'Delta pituit';
+
+  @override
+  String get cfield_pitstop_record_detail => 'Pitstoprecord';
+
+  @override
+  String get cfield_race_day_capacity => 'Capaciteit racedag';
+
+  @override
+  String get cfield_rain_chance => 'Regenkans';
+
+  @override
+  String get cfield_recovery_points => 'Recovery-punten';
+
+  @override
+  String get cfield_red_flag_prob => 'Kans rode vlag';
+
+  @override
+  String get cfield_s1 => 'Sector 1';
+
+  @override
+  String get cfield_s2 => 'Sector 2';
+
+  @override
+  String get cfield_s3 => 'Sector 3';
+
+  @override
+  String get cfield_safety_car_prob => 'Kans safety car';
+
+  @override
+  String get cfield_safety_car_window_laps => 'Safetycar-venster (rondes)';
+
+  @override
+  String get cfield_straight_mode_zones => 'Straight Mode-zones';
+
+  @override
+  String get cfield_sun_angle_start => 'Zonnestand bij start';
+
+  @override
+  String get cfield_t1_accident_risk => 'Crashrisico bocht 1';
+
+  @override
+  String get cfield_temperature_c => 'Temperatuur';
+
+  @override
+  String get cfield_top_speed => 'Topsnelheid';
+
+  @override
+  String get cfield_top_speed_delta => 'Delta topsnelheid';
+
+  @override
+  String get cfield_track_evolution => 'Baanevolutie';
+
+  @override
+  String get cfield_track_type => 'Baantype';
+
+  @override
+  String get cfield_tyre_physics => 'Bandenfysica';
+
+  @override
+  String get cfield_tyre_working_window_c => 'Werkvenster banden';
+
+  @override
+  String get cfield_undercut_potential_score => 'Undercut-potentieel';
+
+  @override
+  String get cfield_utc_offset => 'UTC-offset';
+
+  @override
+  String get cfield_vsc_prob => 'Kans VSC';
+
+  @override
+  String get cfield_wind_sensitivity_sector => 'Windgevoeligheid (sector)';
+
+  @override
+  String get cfield_x_mode_usage => 'X-modus gebruik';
+
+  @override
+  String get cfield_z_mode_activation_delay => 'Activeringsvertraging Z-modus';
+
+  @override
+  String get cfield_z_mode_usage => 'Z-modus gebruik';
+
+  @override
+  String get cfield_zone_name => 'Naam tijdzone';
+
+  @override
   String get birth_place => 'Geboorteplaats';
 
   @override
@@ -319,6 +508,21 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get calendar_prefs_hide_cancelled_hint => 'Verberg geannuleerde of placeholder-races die niet op de echte kalender staan.';
+
+  @override
+  String get cat_ambient_stats => 'Omgevingsomstandigheden';
+
+  @override
+  String get cat_history_comparison => 'Eravergelijking';
+
+  @override
+  String get cat_risks_stats => 'Prestatie en risico';
+
+  @override
+  String get cat_tech_2026 => 'Tech en aero 2026';
+
+  @override
+  String get cat_track_specs => 'Baangeometrie';
 
   @override
   String get display_prefs_section_title => 'Weergave';
@@ -401,6 +605,9 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get circuit_difficulty => 'Circuit moeilijkheid';
+
+  @override
+  String get circuit_difficulty_l10n => 'Moeilijkheidsgraad circuit';
 
   @override
   String get circuit_info => 'Circuit info';
@@ -520,6 +727,33 @@ class AppLocalizationsNl extends AppLocalizations {
   String get dc_wins => 'Coureurstitels';
 
   @override
+  String get diff_easy => 'Zeer eenvoudig';
+
+  @override
+  String get diff_extreme => 'Extreem';
+
+  @override
+  String get diff_hard => 'Moeilijk';
+
+  @override
+  String get diff_high => 'Hoog';
+
+  @override
+  String get diff_low => 'Laag';
+
+  @override
+  String get diff_medium => 'Gemiddeld';
+
+  @override
+  String get dir_clockwise => 'Met de klok mee';
+
+  @override
+  String get dir_counter_clockwise => 'Tegen de klok in';
+
+  @override
+  String get dir_figure_eight => 'Achtbaanlayout';
+
+  @override
   String get distance_to_turn1 => 'Afstand tot bocht 1';
 
   @override
@@ -584,6 +818,288 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get favorite_team => 'Favoriete team';
+
+  @override
+  String get feature_130r_high_speed => 'Iconische 130R hoge snelheid naar links';
+
+  @override
+  String get feature_90_degree_corners => 'Opeenvolgende 90°-bochten op stratencircuit';
+
+  @override
+  String get feature_abrasive_asphalt => 'Sterk abrasief asfalt';
+
+  @override
+  String get feature_aggressive_kerbs => 'Risico op agressieve worstelbanden';
+
+  @override
+  String get feature_aero_efficiency_test => 'Ultieme test aerodynamisch rendement';
+
+  @override
+  String get feature_banked_corners_t3_t14 => 'Unieke hellende bochten (T3 en T14)';
+
+  @override
+  String get feature_battery_drain_kemmel => 'Hoog batterijverbruik (Kemmel Straight)';
+
+  @override
+  String get feature_blind_corners => 'Gevaarlijke blinde apexen';
+
+  @override
+  String get feature_bumpy_city_roads => 'Sterk onregelmatig stadswegdek';
+
+  @override
+  String get feature_bumpy_surface => 'Hobbelig baanoppervlak';
+
+  @override
+  String get feature_bumpy_surface_subsidence => 'Oneffenheden door bodembeweging';
+
+  @override
+  String get feature_castle_section_tight => 'Ultranauwe kasteelsectie';
+
+  @override
+  String get feature_cold_tire_struggle => 'Moeite bandentemperatuur vast te houden';
+
+  @override
+  String get feature_curb_riding_chicane => 'Agressief chicane-curb-riding';
+
+  @override
+  String get feature_degner_curves => 'Precieze Degner-bochten';
+
+  @override
+  String get feature_dusty_surface => 'Stoffige omstandigheden aan het begin van het weekend';
+
+  @override
+  String get feature_eau_rouge_raidillon => 'Legendarische Eau Rouge-Raidillon';
+
+  @override
+  String get feature_esses_section_flow => 'Hoge snelheid, ritmische S-bochten';
+
+  @override
+  String get feature_extreme_altitude => 'Extreme hoogte (2200 m+)';
+
+  @override
+  String get feature_extreme_humidity => 'Drukkende equatoriale luchtvochtigheid';
+
+  @override
+  String get feature_extreme_low_drag => 'Extreme low-drag-aero-setup';
+
+  @override
+  String get feature_fastest_street_track => 'Snelste stratencircuit op de kalender';
+
+  @override
+  String get feature_figure_eight_layout => 'Unieke achtvormige layout';
+
+  @override
+  String get feature_glittering_night_race => 'Fonkelende nachtrace-achtergrond';
+
+  @override
+  String get feature_groundhog_risk => 'Risico op wild (groundhogs) op de baan';
+
+  @override
+  String get feature_heavy_braking => 'Zware remeisen';
+
+  @override
+  String get feature_heavy_braking_variante => 'Hard remmen naar chicanes';
+
+  @override
+  String get feature_heavy_braking_zones => 'Harde remzones naar chicanes';
+
+  @override
+  String get feature_heavy_traction_points => 'Kritieke tractiezones na lage snelheid';
+
+  @override
+  String get feature_high_altitude_cooling => 'Koeling van de power unit op grote hoogte';
+
+  @override
+  String get feature_high_altitude_impact => 'Duidelijk aerodynamisch effect door hoogte';
+
+  @override
+  String get feature_high_downforce_focus => 'Maximale prioriteit aan downforce';
+
+  @override
+  String get feature_high_front_tyre_wear => 'Hoge degradatie voorbanden';
+
+  @override
+  String get feature_high_humidity => 'Hoge omgevingsvochtigheid';
+
+  @override
+  String get feature_high_kerb_usage => 'Agressief gebruik van kerbs';
+
+  @override
+  String get feature_high_lateral_load => 'Intense laterale g-belasting';
+
+  @override
+  String get feature_high_speed_corners => 'Ultrasnelle bochtencombinaties';
+
+  @override
+  String get feature_high_speed_flow => 'Doorlopende flow op hoge snelheid';
+
+  @override
+  String get feature_high_stamina_required => 'Hoge fysieke belasting voor de coureur';
+
+  @override
+  String get feature_high_wind_sensitivity => 'Extreme gevoeligheid voor zijwind';
+
+  @override
+  String get feature_hotel_underpass => 'Unieke onderdoorgang onder het Yas Hotel';
+
+  @override
+  String get feature_iconic_tunnel => 'Hoge snelheid door de haventunnel';
+
+  @override
+  String get feature_legendary_esses => 'Legendarische \'\'S\'\'-bochten';
+
+  @override
+  String get feature_long_back_straight => 'Extreem lange rechte op het achterveld';
+
+  @override
+  String get feature_long_main_straight => 'Lange drag naar bocht 1';
+
+  @override
+  String get feature_longest_run_to_t1 => 'Langste run van start naar bocht 1';
+
+  @override
+  String get feature_longest_straight => '2,2 km volgas op het rechte stuk';
+
+  @override
+  String get feature_longest_track => 'Langste circuit op de kalender';
+
+  @override
+  String get feature_low_grip_asphalt => 'Laag grip half-permanent oppervlak';
+
+  @override
+  String get feature_maggotts_becketts_flow => 'Maggotts-Becketts-Chapel-flow';
+
+  @override
+  String get feature_micro_climates => 'Meerdere microklimaten op het circuit';
+
+  @override
+  String get feature_monaco_without_walls => 'Technische \'\'Monaco-achtige\'\' flow';
+
+  @override
+  String get feature_multi_surface_grip => 'Wisselend grip op meerdere oppervlakken';
+
+  @override
+  String get feature_multiple_overtaking_lines => 'Breed circuit met meerdere lijnen';
+
+  @override
+  String get feature_narrow_passing_zones => 'Smalle inhalingszones';
+
+  @override
+  String get feature_narrow_track_width => 'Smalle historische baanbreedte';
+
+  @override
+  String get feature_new_straight_section => 'Hernieuwde hoge-snelheidssector 3';
+
+  @override
+  String get feature_old_school_track => 'Klassieke \'\'old-school\'\'-layout';
+
+  @override
+  String get feature_physical_exhaustion => 'Extreme fysieke uitputting voor de coureur';
+
+  @override
+  String get feature_physical_heat_stress => 'Zware warmtebelasting';
+
+  @override
+  String get feature_precision_steering => 'Stuurwerk op millimeterprecisie';
+
+  @override
+  String get feature_rollercoaster_ride => 'Achtbaangevoel op hoge snelheid';
+
+  @override
+  String get feature_sand_on_track => 'Risico op windgeblazen zand';
+
+  @override
+  String get feature_sand_wind_impact => 'Woestijnzand en windbuffeting';
+
+  @override
+  String get feature_sea_breeze_sand => 'Zeewind en risico op zand op de baan';
+
+  @override
+  String get feature_senna_s_curves => 'Legendarisch \'\'Senna S\'\'-complex';
+
+  @override
+  String get feature_short_lap_time => 'Extreem korte rondetijd';
+
+  @override
+  String get feature_snail_corner_t1 => 'Technische \'\'slak\'\'-bocht 1';
+
+  @override
+  String get feature_stadium_atmosphere => 'Iconische stadionsfeer';
+
+  @override
+  String get feature_stadium_section => 'Iconische Foro Sol-stadionsectie';
+
+  @override
+  String get feature_steep_uphill_braking => 'Steil oplopende remzones';
+
+  @override
+  String get feature_steep_uphill_t1 => 'Extreme klim naar bocht 1';
+
+  @override
+  String get feature_street_circuit => 'Tijdelijk stratencircuitoppervlak';
+
+  @override
+  String get feature_straight_mode_5_zones => '5 Straight Mode-zones';
+
+  @override
+  String get feature_sunset_to_night => 'Overgang schemering naar nacht';
+
+  @override
+  String get feature_sweeping_corners => 'Snelle, ruim genomen sweepers';
+
+  @override
+  String get feature_technical_chicane => 'Precieze chicaneplaatsing';
+
+  @override
+  String get feature_technical_final_sector => 'Strakke, technische slotsector';
+
+  @override
+  String get feature_technical_flow => 'Doorlopende ritmische bochtenflow';
+
+  @override
+  String get feature_technical_sector_2 => 'Technische middensector';
+
+  @override
+  String get feature_temple_of_speed => 'Iconische \'\'Tempel der Snelheid\'\'';
+
+  @override
+  String get feature_the_strip_straight => 'Het enorme rechte stuk op de Las Vegas Strip';
+
+  @override
+  String get feature_thin_air_cooling => 'Koelingsuitdagingen door ijle lucht';
+
+  @override
+  String get feature_tight_hairpin => 'Strakste haarspeldbocht ter wereld';
+
+  @override
+  String get feature_tire_killer => 'Hoge laterale bandenbelasting';
+
+  @override
+  String get feature_track_limits_chaos => 'Hoog risico op straf voor track limits';
+
+  @override
+  String get feature_traction_limited => 'Tractiegelimiteerde uitacceleratie';
+
+  @override
+  String get feature_unpredictable_weather => 'Sterk wisselvallig weer';
+
+  @override
+  String get feature_unpredictable_weather_interlagos => 'Plotselinge microbuien (Interlagos)';
+
+  @override
+  String get feature_uphill_start_finish => 'Steil oplopende start-finishrechte';
+
+  @override
+  String get feature_variable_grip => 'Wisselende gripniveaus';
+
+  @override
+  String get feature_wall_of_champions => 'Gevaarlijke \'\'Wall of Champions\'\'';
+
+  @override
+  String get feature_zero_margin_error => 'Nul marge voor fouten';
+
+  @override
+  String get feature_zero_overtaking_space => 'Extreem beperkte ruimte om in te halen';
 
   @override
   String get finish => 'Finish';
@@ -890,6 +1406,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get overtaking_difficulty => 'Inhaal moeilijkheid';
 
   @override
+  String get overtaking_difficulty_l10n => 'Moeilijkheidsgraad inhalen';
+
+  @override
   String get partner => 'Partner';
 
   @override
@@ -1048,6 +1567,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get rainfall => 'Neerslag';
 
   @override
+  String get recommended_strategy_l10n => 'Strategie';
+
+  @override
   String get red_flag => 'Kans op rode vlag';
 
   @override
@@ -1180,6 +1702,78 @@ class AppLocalizationsNl extends AppLocalizations {
   String get summer_break_subtitle => 'Tussen Hongarije en Nederland ligt de zomerstop.';
 
   @override
+  String get sun_0_deg_night_race => 'Nacht (kunstlicht)';
+
+  @override
+  String get sun_5_deg_twilight => 'Schemering (schijnwerpers aan)';
+
+  @override
+  String get sun_8_deg_horizon_dip => 'Dicht bij horizon (extreme verblinding)';
+
+  @override
+  String get sun_10_deg_harbor_reflection => 'Zeer lage zon (reflectie op water)';
+
+  @override
+  String get sun_12_deg_mountain_occlusion => 'Lage zon (bergschaduw)';
+
+  @override
+  String get sun_14_deg_stadium_shadows => 'Lage zon (schaduw van tribunes)';
+
+  @override
+  String get sun_15_deg_sunset_blind => 'Lage zon (hoog verblindingsrisico)';
+
+  @override
+  String get sun_18_deg_paddock_glare => 'Lage zon (reflectie van gebouwen)';
+
+  @override
+  String get sun_20_deg_desert_haze => 'Lage zon (stof en nevel, verblinding)';
+
+  @override
+  String get sun_22_deg_coastal_mist => 'Lage zon (zeemist, diffuus licht)';
+
+  @override
+  String get sun_25_deg_morning_glow => 'Vroege ochtendzon';
+
+  @override
+  String get sun_28_deg_dunes_glare => 'Lage zon (reflectie duinen)';
+
+  @override
+  String get sun_30_deg_low_winter_sun => 'Lage winterzon';
+
+  @override
+  String get sun_32_deg_urban_canyon => 'Matige zon (schaduw skyline)';
+
+  @override
+  String get sun_35_deg_forest_shadows => 'Matige zon (wisselende schaduw)';
+
+  @override
+  String get sun_40_deg_cloudy_diffuse => 'Diffuus licht (bewolkt)';
+
+  @override
+  String get sun_45_deg_mid_afternoon => 'Middagzon';
+
+  @override
+  String get sun_50_deg_clear_sky => 'Heldere namiddagzon';
+
+  @override
+  String get sun_55_deg_bright_oval => 'Hoge helderheid (open terrein)';
+
+  @override
+  String get sun_60_deg_standard_day => 'Normaal daglicht';
+
+  @override
+  String get sun_65_deg_high_noon => 'Hoge zon (middag)';
+
+  @override
+  String get sun_70_deg_equatorial_high => 'Zon met hoge intensiteit';
+
+  @override
+  String get sun_75_deg_tropical_peak => 'Extreme tropische zon';
+
+  @override
+  String get sun_85_deg_zenith => 'Zon in het zenith (geen schaduw)';
+
+  @override
   String get team_facts_title => 'Wist je dat?';
 
   @override
@@ -1291,6 +1885,15 @@ class AppLocalizationsNl extends AppLocalizations {
   String get turn1_accident => 'Kans crash bocht 1';
 
   @override
+  String get type_hybrid_street => 'Hybride stratencircuit';
+
+  @override
+  String get type_permanent_circuit => 'Permanent racecircuit';
+
+  @override
+  String get type_street_circuit => 'Stratencircuit';
+
+  @override
   String get tyre => 'Band';
 
   @override
@@ -1386,7 +1989,19 @@ class AppLocalizationsNl extends AppLocalizations {
   String get calendar_race_status_ongoing => 'Bezig';
 
   @override
+  String get circuit_go_home => 'Terug naar home';
+
+  @override
+  String get circuit_not_found_message => 'Er zijn geen circuitgegevens voor dit adres. Controleer de link of kies een race in de kalender.';
+
+  @override
+  String get circuit_not_found_title => 'Circuit niet gevonden';
+
+  @override
   String get circuit_open_in_maps => 'Openen in Maps';
+
+  @override
+  String get circuit_stat_full_throttle => 'Vol gas';
 
   @override
   String live_timing_air_temp_abbr(String temp) {
@@ -1551,6 +2166,24 @@ class AppLocalizationsNl extends AppLocalizations {
   String orbit_load_error(String error) {
     return 'Kaartgegevens laden mislukt: $error';
   }
+
+  @override
+  String get orbit_track_standard => 'Standaard';
+
+  @override
+  String get orbit_track_technical => 'Technisch';
+
+  @override
+  String get orbit_elevation_profile => 'Hoogteprofiel';
+
+  @override
+  String get orbit_stat_lap_distance => 'Rondelengte';
+
+  @override
+  String get orbit_stat_max_elevation => 'Max. hoogteverschil';
+
+  @override
+  String get orbit_stat_banked_turns => 'Hellende bochten';
 
   @override
   String get race_results_empty => 'Nog geen race-resultaten beschikbaar.';

@@ -50,3 +50,6 @@ app.*.map.json
 !.dev.vars.example
 .env*
 !.env.example
+
+# Local runbook (not for GitHub)
+what to run.ttx

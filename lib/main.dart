@@ -44,7 +44,9 @@ import 'browser_bridge.dart' as browser_bridge;
 import 'open_meteo_api.dart';
 import 'changelog_page.dart';
 import 'news_page.dart';
+import 'circuit_detail/circuit_page.dart';
 import 'orbit/orbit_page.dart';
+import 'orbit/orbit_paths.dart';
 import 'widgets/news_settings.dart';
 import 'coach_corner_data.dart';
 part 'f1_data.dart';
@@ -3119,7 +3121,7 @@ String _circuitsPath() => '/circuits';
 String _driversPath() => '/drivers';
 String _teamsPath() => '/teams';
 String _newsPath() => '/news';
-String _orbitPath() => '/orbit';
+String _orbitPath() => kOrbitGoPath;
 String _changelogPath() => '/profile/changelog';
 String _placeholderPagePath() => '/placeholder';
 String _loginPath() => '/login';
@@ -3133,6 +3135,17 @@ const String _kGithubHelpIssuesUrl =
 String _racePath(Race race) => '${_circuitsPath()}/${_raceSlug(race)}';
 /// Short shareable path (`/#/weekendhub/...`); also registered on the circuits shell branch.
 String _weekendHubPath(Race race) => '/weekendhub/${_raceSlug(race)}';
+
+/// Nested paths like `/circuits/:slug/weekend` require a real [Race]; otherwise send to JSON circuit page or calendar.
+String? _circuitsRaceChildRedirect(String? slug) {
+  if (slug == null || slug.isEmpty) {
+    return _circuitsPath();
+  }
+  if (_findRaceBySlug(slug) != null) {
+    return null;
+  }
+  return '${_circuitsPath()}/$slug';
+}
 String _raceResultsPath(Race race) => '${_racePath(race)}/results';
 String _fullscreenRaceResultsPath(Race race) =>
     '${_raceResultsPath(race)}/fullscreen';
@@ -3415,26 +3428,32 @@ class _F1HubAppState extends State<F1HubApp> {
                 routes: [
                   GoRoute(
                     path: ':raceSlug',
-                    redirect: (context, state) =>
-                        _findRaceBySlug(
-                              state.pathParameters['raceSlug'] ?? '',
-                            ) ==
-                            null
-                        ? _circuitsPath()
-                        : null,
+                    redirect: (context, state) {
+                      final slug = state.pathParameters['raceSlug'] ?? '';
+                      if (slug.isEmpty) {
+                        return _circuitsPath();
+                      }
+                      return null;
+                    },
                     builder: (context, state) {
-                      final race = _findRaceBySlug(
-                        state.pathParameters['raceSlug']!,
-                      )!;
-                      return CircuitDetailScreen(
-                        race: race,
-                        heroTag: _raceFlagHeroTag(race, source: 'route'),
-                        settingsMenu: _buildSettingsMenu(context),
-                      );
+                      final slug =
+                          state.pathParameters['raceSlug']?.trim() ?? '';
+                      final race = _findRaceBySlug(slug);
+                      if (race != null) {
+                        return CircuitDetailScreen(
+                          race: race,
+                          heroTag: _raceFlagHeroTag(race, source: 'route'),
+                          settingsMenu: _buildSettingsMenu(context),
+                        );
+                      }
+                      return CircuitPage(circuitAssetId: slug);
                     },
                     routes: [
                       GoRoute(
                         path: 'weekend',
+                        redirect: (context, state) => _circuitsRaceChildRedirect(
+                          state.pathParameters['raceSlug'],
+                        ),
                         builder: (context, state) {
                           final race = _findRaceBySlug(
                             state.pathParameters['raceSlug']!,
@@ -3444,6 +3463,9 @@ class _F1HubAppState extends State<F1HubApp> {
                       ),
                       GoRoute(
                         path: 'results',
+                        redirect: (context, state) => _circuitsRaceChildRedirect(
+                          state.pathParameters['raceSlug'],
+                        ),
                         builder: (context, state) {
                           final race = _findRaceBySlug(
                             state.pathParameters['raceSlug']!,
@@ -3468,9 +3490,12 @@ class _F1HubAppState extends State<F1HubApp> {
                       GoRoute(
                         path: 'session/:sessionSlug',
                         redirect: (context, state) {
-                          final race = _findRaceBySlug(
-                            state.pathParameters['raceSlug'] ?? '',
-                          );
+                          final slug = state.pathParameters['raceSlug'];
+                          final childRedirect = _circuitsRaceChildRedirect(slug);
+                          if (childRedirect != null) {
+                            return childRedirect;
+                          }
+                          final race = _findRaceBySlug(slug ?? '');
                           final sessionName = _sessionNameFromSlug(
                             state.pathParameters['sessionSlug'] ?? '',
                           );
@@ -3648,7 +3673,34 @@ class _F1HubAppState extends State<F1HubApp> {
             routes: [
               GoRoute(
                 path: _orbitPath(),
-                builder: (context, state) => const OrbitPage(),
+                builder: (context, state) => const OrbitPage(
+                  key: ValueKey<String>('orbit-globe'),
+                ),
+                routes: [
+                  GoRoute(
+                    path: ':circuitSlug',
+                    builder: (context, state) {
+                      final slug = state.pathParameters['circuitSlug']!;
+                      return OrbitPage(
+                        key: ValueKey<String>('orbit-circuit-$slug'),
+                        initialCircuitSlug: slug,
+                      );
+                    },
+                    routes: [
+                      GoRoute(
+                        path: 'technical',
+                        builder: (context, state) {
+                          final slug = state.pathParameters['circuitSlug']!;
+                          return OrbitPage(
+                            key: ValueKey<String>('orbit-circuit-$slug'),
+                            initialCircuitSlug: slug,
+                            initialTechnical: true,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
@@ -8167,15 +8219,6 @@ class MainNavigation extends StatelessWidget {
 
   const MainNavigation({required this.navigationShell, super.key});
 
-  Future<void> _openAiAssistant(BuildContext context) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (_) => const AIAssistantSheet(),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
 
@@ -8348,13 +8391,6 @@ class MainNavigation extends StatelessWidget {
                     ),
             ],
           ),
-          floatingActionButton: navigationShell.currentIndex == 0
-              ? null
-              : FloatingActionButton.extended(
-                  onPressed: () => _openAiAssistant(context),
-                  icon: _buildGlyphIcon('🤖', size: 18),
-                  label: Text(context.l10n.ai_fab_label),
-                ),
           bottomNavigationBar: isDesktop
               ? null
               : () {

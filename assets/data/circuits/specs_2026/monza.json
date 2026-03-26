@@ -1,0 +1,202 @@
+{
+  "meta": {
+    "path": "/data/circuits/monza.json",
+    "season": 2026,
+    "regulation_notes": "DRS terminology removed; use Straight Mode (Z-mode) and Manual Override Mode (MOM). Active Aero 2026. Electrical/ICE power split 50/50 for stated energy metrics."
+  },
+  "circuit_id": "monza",
+  "name": "Autodromo Nazionale Monza",
+  "location": "Monza, Italy",
+  "circuit_info": {
+    "length_m": 5793,
+    "laps": 53,
+    "distance_to_turn_1_m": 640,
+    "on_calendar_since": 1950,
+    "contract_until": 2025,
+    "circuit_difficulty": {
+      "l10n_key": "circuit.difficulty.low",
+      "strings": {
+        "en": "Low",
+        "nl": "Laag"
+      }
+    },
+    "overtaking_difficulty": {
+      "l10n_key": "circuit.overtaking.medium",
+      "strings": {
+        "en": "Medium",
+        "nl": "Gemiddeld"
+      }
+    },
+    "track_type": {
+      "l10n_key": "circuit.track_type.monza",
+      "strings": {
+        "en": "Permanent road course",
+        "nl": "Permanent road course"
+      }
+    },
+    "direction": {
+      "l10n_key": "circuit.direction.clockwise",
+      "strings": {
+        "en": "Clockwise",
+        "nl": "Clockwise"
+      }
+    }
+  },
+  "weather_forecast": {
+    "temperature_c": 26,
+    "rain_chance_pct": 10,
+    "wind_speed_kmh": 5,
+    "humidity_pct": 45,
+    "air_pressure_hpa": 1015
+  },
+  "risks_and_incidents": {
+    "red_flag_chance_pct": 10,
+    "vsc_chance_pct": 15,
+    "accident_chance_pct": 20,
+    "turn_1_accident_chance_pct": 40,
+    "safety_car_probability_pct": 47
+  },
+  "lap_and_speed_stats": {
+    "fastest_lap_record": {
+      "time": "1:21.046",
+      "driver": "Rubens Barrichello",
+      "year": 2004
+    },
+    "slowest_lap_historical": {
+      "time": "1:25.000",
+      "driver": "Logan Sargeant",
+      "year": 2023
+    },
+    "average_lap_time": "1:23.000",
+    "top_speed_kmh": 360,
+    "average_speed_kmh": 260,
+    "max_g_force": 3.8,
+    "avg_g_force": 1.9
+  },
+  "tyres_and_strategy": {
+    "tire_wear": {
+      "l10n_key": "tyre.wear.low",
+      "strings": {
+        "en": "Low",
+        "nl": "Low"
+      }
+    },
+    "strategy_typical": {
+      "l10n_key": "strategy.monza.typical",
+      "strings": {
+        "en": "1 stop",
+        "nl": "1 stop"
+      }
+    },
+    "best_combination": {
+      "l10n_key": "strategy.monza.combo",
+      "strings": {
+        "en": "Medium -> Hard",
+        "nl": "Medium -> Hard"
+      }
+    },
+    "fastest_pitstop_record": {
+      "time_s": 2.1,
+      "team": "Ferrari",
+      "year": 2022
+    },
+    "braking_intensity": {
+      "l10n_key": "tyre.braking.monza",
+      "strings": {
+        "en": "Low",
+        "nl": "Low"
+      }
+    },
+    "harvesting_difficulty": {
+      "l10n_key": "energy.harvest.monza",
+      "strings": {
+        "en": "Low",
+        "nl": "Low"
+      }
+    }
+  },
+  "aerodynamics_2026": {
+    "x_mode_usage_pct": 32,
+    "z_mode_usage_pct": 68,
+    "manual_override_impact_score": 7.0,
+    "straight_mode_zones": 6,
+    "manual_override_activation_points": 3,
+    "active_aero_transitions_per_lap": 20
+  },
+  "energy_management": {
+    "electrical_power_ratio_pct": 50,
+    "ice_power_ratio_pct": 50,
+    "mgu_k_recovery_points": {
+      "l10n_key": "energy.mguk.monza",
+      "strings": {
+        "en": "Low (few heavy stops)",
+        "nl": "Low (few heavy stops)"
+      }
+    },
+    "primary_deployment_sectors": [
+      {
+        "l10n_key": "energy.deploy.monza.0",
+        "strings": {
+          "en": "Main straight",
+          "nl": "Main straight"
+        }
+      },
+      {
+        "l10n_key": "energy.deploy.monza.1",
+        "strings": {
+          "en": "Curva Grande",
+          "nl": "Curva Grande"
+        }
+      }
+    ]
+  },
+  "ambient_conditions": {
+    "track_evolution_factor_pct": 8,
+    "sun_angle_at_race_start": {
+      "l10n_key": "ambient.sun.monza",
+      "strings": {
+        "en": "52 degrees (West)",
+        "nl": "52 degrees (West)"
+      }
+    },
+    "visibility_risk_sectors": [
+      "Turn 1",
+      "Ascari"
+    ],
+    "elevation_above_sea_level_m": 180,
+    "max_elevation_change_m": 25.0
+  },
+  "era_comparison": {
+    "avg_lap_time_2024_2025_qual_reference": "1:20.400",
+    "est_lap_time_2026": "1:19.520",
+    "delta_seconds": "-0.880",
+    "top_speed_increase_kmh": 15,
+    "methodology_note": {
+      "l10n_key": "era.methodology.2026",
+      "strings": {
+        "en": "Estimated from 2024/2025 qualifying reference; adjusted for -30 kg mass and active aero top-speed gain (indicative, not official).",
+        "nl": "Geschat t.o.v. kwalificatie 2024/2025; correctie voor -30 kg en active aero topsnelheid (indicatief)."
+      }
+    }
+  },
+  "historical_success_rate": {
+    "most_reliable_engine_supplier": "Ferrari",
+    "team_podium_percentage_last_5_years": {
+      "Ferrari": 60,
+      "Red Bull Racing": 40,
+      "McLaren": 30
+    }
+  },
+  "circuit_characteristics": {
+    "key_points": [
+      {
+        "l10n_key": "circuits.monza.key_point_0",
+        "strings": {
+          "en": "Temple of Speed: maximum Straight Mode duty",
+          "nl": "Temple of Speed: maximale Straight Mode-belasting"
+        }
+      }
+    ],
+    "full_throttle_pct": 78
+  }
+}

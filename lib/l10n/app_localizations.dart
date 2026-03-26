@@ -573,6 +573,384 @@ abstract class AppLocalizations {
   /// **'Best lap'**
   String get best_lap;
 
+  /// No description provided for @best_tyre_combination.
+  ///
+  /// In en, this message translates to:
+  /// **'Best Combination'**
+  String get best_tyre_combination;
+
+  /// No description provided for @cfield_air_pressure_hpa.
+  ///
+  /// In en, this message translates to:
+  /// **'Air pressure'**
+  String get cfield_air_pressure_hpa;
+
+  /// No description provided for @cfield_asphalt_grip_score.
+  ///
+  /// In en, this message translates to:
+  /// **'Asphalt grip score'**
+  String get cfield_asphalt_grip_score;
+
+  /// No description provided for @cfield_avg_g_force.
+  ///
+  /// In en, this message translates to:
+  /// **'Average G-force'**
+  String get cfield_avg_g_force;
+
+  /// No description provided for @cfield_avg_time_2024_2025.
+  ///
+  /// In en, this message translates to:
+  /// **'Average lap time (2024–25)'**
+  String get cfield_avg_time_2024_2025;
+
+  /// No description provided for @cfield_brake_cooling_requirement_score.
+  ///
+  /// In en, this message translates to:
+  /// **'Brake cooling requirement'**
+  String get cfield_brake_cooling_requirement_score;
+
+  /// No description provided for @cfield_circuit_director.
+  ///
+  /// In en, this message translates to:
+  /// **'Circuit director'**
+  String get cfield_circuit_director;
+
+  /// No description provided for @cfield_circuit_owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Circuit owner'**
+  String get cfield_circuit_owner;
+
+  /// No description provided for @cfield_contract_until.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract until'**
+  String get cfield_contract_until;
+
+  /// No description provided for @cfield_deployment_focus.
+  ///
+  /// In en, this message translates to:
+  /// **'Deployment focus'**
+  String get cfield_deployment_focus;
+
+  /// No description provided for @cfield_direction.
+  ///
+  /// In en, this message translates to:
+  /// **'Direction'**
+  String get cfield_direction;
+
+  /// No description provided for @cfield_distance_to_t1.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance to Turn 1'**
+  String get cfield_distance_to_t1;
+
+  /// No description provided for @cfield_electrical_ratio.
+  ///
+  /// In en, this message translates to:
+  /// **'Electrical ratio'**
+  String get cfield_electrical_ratio;
+
+  /// No description provided for @cfield_energy_flow_strategy.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy flow strategy'**
+  String get cfield_energy_flow_strategy;
+
+  /// No description provided for @cfield_engine_derating_risk.
+  ///
+  /// In en, this message translates to:
+  /// **'Engine derating risk'**
+  String get cfield_engine_derating_risk;
+
+  /// No description provided for @cfield_era_delta.
+  ///
+  /// In en, this message translates to:
+  /// **'Era delta'**
+  String get cfield_era_delta;
+
+  /// No description provided for @cfield_est_time_2026.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated lap time (2026)'**
+  String get cfield_est_time_2026;
+
+  /// No description provided for @cfield_elevation_sea_level.
+  ///
+  /// In en, this message translates to:
+  /// **'Elevation (sea level)'**
+  String get cfield_elevation_sea_level;
+
+  /// No description provided for @cfield_harvest_difficulty.
+  ///
+  /// In en, this message translates to:
+  /// **'Harvest difficulty'**
+  String get cfield_harvest_difficulty;
+
+  /// No description provided for @cfield_harvesting_zones.
+  ///
+  /// In en, this message translates to:
+  /// **'Harvesting zones'**
+  String get cfield_harvesting_zones;
+
+  /// No description provided for @cfield_latitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Latitude'**
+  String get cfield_latitude;
+
+  /// No description provided for @cfield_local_time_zone.
+  ///
+  /// In en, this message translates to:
+  /// **'Local time zone'**
+  String get cfield_local_time_zone;
+
+  /// No description provided for @cfield_longitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Longitude'**
+  String get cfield_longitude;
+
+  /// No description provided for @cfield_lap_record_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'Lap record'**
+  String get cfield_lap_record_detail;
+
+  /// No description provided for @cfield_laps.
+  ///
+  /// In en, this message translates to:
+  /// **'Laps'**
+  String get cfield_laps;
+
+  /// No description provided for @cfield_lateral_stress_score.
+  ///
+  /// In en, this message translates to:
+  /// **'Lateral stress score'**
+  String get cfield_lateral_stress_score;
+
+  /// No description provided for @cfield_length.
+  ///
+  /// In en, this message translates to:
+  /// **'Length'**
+  String get cfield_length;
+
+  /// No description provided for @cfield_manual_override_energy_cost.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual override energy cost'**
+  String get cfield_manual_override_energy_cost;
+
+  /// No description provided for @cfield_manual_override_points.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual override points'**
+  String get cfield_manual_override_points;
+
+  /// No description provided for @cfield_max_elevation_change.
+  ///
+  /// In en, this message translates to:
+  /// **'Max elevation change'**
+  String get cfield_max_elevation_change;
+
+  /// No description provided for @cfield_max_g_force.
+  ///
+  /// In en, this message translates to:
+  /// **'Max G-force'**
+  String get cfield_max_g_force;
+
+  /// No description provided for @cfield_override_impact_score.
+  ///
+  /// In en, this message translates to:
+  /// **'Override impact score'**
+  String get cfield_override_impact_score;
+
+  /// No description provided for @cfield_on_calendar_since.
+  ///
+  /// In en, this message translates to:
+  /// **'On calendar since'**
+  String get cfield_on_calendar_since;
+
+  /// No description provided for @cfield_overtaking_delta.
+  ///
+  /// In en, this message translates to:
+  /// **'Overtaking delta'**
+  String get cfield_overtaking_delta;
+
+  /// No description provided for @cfield_pit_exit_delta.
+  ///
+  /// In en, this message translates to:
+  /// **'Pit exit delta'**
+  String get cfield_pit_exit_delta;
+
+  /// No description provided for @cfield_pitstop_record_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'Pit stop record'**
+  String get cfield_pitstop_record_detail;
+
+  /// No description provided for @cfield_race_day_capacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Race day capacity'**
+  String get cfield_race_day_capacity;
+
+  /// No description provided for @cfield_rain_chance.
+  ///
+  /// In en, this message translates to:
+  /// **'Rain chance'**
+  String get cfield_rain_chance;
+
+  /// No description provided for @cfield_recovery_points.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery points'**
+  String get cfield_recovery_points;
+
+  /// No description provided for @cfield_red_flag_prob.
+  ///
+  /// In en, this message translates to:
+  /// **'Red flag probability'**
+  String get cfield_red_flag_prob;
+
+  /// No description provided for @cfield_s1.
+  ///
+  /// In en, this message translates to:
+  /// **'Sector 1'**
+  String get cfield_s1;
+
+  /// No description provided for @cfield_s2.
+  ///
+  /// In en, this message translates to:
+  /// **'Sector 2'**
+  String get cfield_s2;
+
+  /// No description provided for @cfield_s3.
+  ///
+  /// In en, this message translates to:
+  /// **'Sector 3'**
+  String get cfield_s3;
+
+  /// No description provided for @cfield_safety_car_prob.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety Car probability'**
+  String get cfield_safety_car_prob;
+
+  /// No description provided for @cfield_safety_car_window_laps.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety Car window (laps)'**
+  String get cfield_safety_car_window_laps;
+
+  /// No description provided for @cfield_straight_mode_zones.
+  ///
+  /// In en, this message translates to:
+  /// **'Straight Mode zones'**
+  String get cfield_straight_mode_zones;
+
+  /// No description provided for @cfield_sun_angle_start.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun angle at start'**
+  String get cfield_sun_angle_start;
+
+  /// No description provided for @cfield_t1_accident_risk.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn 1 accident risk'**
+  String get cfield_t1_accident_risk;
+
+  /// No description provided for @cfield_temperature_c.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature'**
+  String get cfield_temperature_c;
+
+  /// No description provided for @cfield_top_speed.
+  ///
+  /// In en, this message translates to:
+  /// **'Top speed'**
+  String get cfield_top_speed;
+
+  /// No description provided for @cfield_top_speed_delta.
+  ///
+  /// In en, this message translates to:
+  /// **'Top speed delta'**
+  String get cfield_top_speed_delta;
+
+  /// No description provided for @cfield_track_evolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Track evolution'**
+  String get cfield_track_evolution;
+
+  /// No description provided for @cfield_track_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Track type'**
+  String get cfield_track_type;
+
+  /// No description provided for @cfield_tyre_physics.
+  ///
+  /// In en, this message translates to:
+  /// **'Tyre physics'**
+  String get cfield_tyre_physics;
+
+  /// No description provided for @cfield_tyre_working_window_c.
+  ///
+  /// In en, this message translates to:
+  /// **'Tyre working window'**
+  String get cfield_tyre_working_window_c;
+
+  /// No description provided for @cfield_undercut_potential_score.
+  ///
+  /// In en, this message translates to:
+  /// **'Undercut potential'**
+  String get cfield_undercut_potential_score;
+
+  /// No description provided for @cfield_utc_offset.
+  ///
+  /// In en, this message translates to:
+  /// **'UTC offset'**
+  String get cfield_utc_offset;
+
+  /// No description provided for @cfield_vsc_prob.
+  ///
+  /// In en, this message translates to:
+  /// **'VSC probability'**
+  String get cfield_vsc_prob;
+
+  /// No description provided for @cfield_wind_sensitivity_sector.
+  ///
+  /// In en, this message translates to:
+  /// **'Wind sensitivity (sector)'**
+  String get cfield_wind_sensitivity_sector;
+
+  /// No description provided for @cfield_x_mode_usage.
+  ///
+  /// In en, this message translates to:
+  /// **'X mode usage'**
+  String get cfield_x_mode_usage;
+
+  /// No description provided for @cfield_z_mode_activation_delay.
+  ///
+  /// In en, this message translates to:
+  /// **'Z mode activation delay'**
+  String get cfield_z_mode_activation_delay;
+
+  /// No description provided for @cfield_z_mode_usage.
+  ///
+  /// In en, this message translates to:
+  /// **'Z mode usage'**
+  String get cfield_z_mode_usage;
+
+  /// No description provided for @cfield_zone_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Time zone name'**
+  String get cfield_zone_name;
+
   /// No description provided for @birth_place.
   ///
   /// In en, this message translates to:
@@ -638,6 +1016,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hide cancelled or placeholder races not on the real calendar.'**
   String get calendar_prefs_hide_cancelled_hint;
+
+  /// No description provided for @cat_ambient_stats.
+  ///
+  /// In en, this message translates to:
+  /// **'Ambient Conditions'**
+  String get cat_ambient_stats;
+
+  /// No description provided for @cat_history_comparison.
+  ///
+  /// In en, this message translates to:
+  /// **'Era Comparison'**
+  String get cat_history_comparison;
+
+  /// No description provided for @cat_risks_stats.
+  ///
+  /// In en, this message translates to:
+  /// **'Performance & Risk'**
+  String get cat_risks_stats;
+
+  /// No description provided for @cat_tech_2026.
+  ///
+  /// In en, this message translates to:
+  /// **'2026 Tech & Aero'**
+  String get cat_tech_2026;
+
+  /// No description provided for @cat_track_specs.
+  ///
+  /// In en, this message translates to:
+  /// **'Track Geometry'**
+  String get cat_track_specs;
 
   /// No description provided for @display_prefs_section_title.
   ///
@@ -794,6 +1202,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Circuit Difficulty'**
   String get circuit_difficulty;
+
+  /// No description provided for @circuit_difficulty_l10n.
+  ///
+  /// In en, this message translates to:
+  /// **'Circuit Difficulty'**
+  String get circuit_difficulty_l10n;
 
   /// No description provided for @circuit_info.
   ///
@@ -1029,6 +1443,60 @@ abstract class AppLocalizations {
   /// **'Drivers Titles'**
   String get dc_wins;
 
+  /// No description provided for @diff_easy.
+  ///
+  /// In en, this message translates to:
+  /// **'Very Easy'**
+  String get diff_easy;
+
+  /// No description provided for @diff_extreme.
+  ///
+  /// In en, this message translates to:
+  /// **'Extreme'**
+  String get diff_extreme;
+
+  /// No description provided for @diff_hard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard'**
+  String get diff_hard;
+
+  /// No description provided for @diff_high.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get diff_high;
+
+  /// No description provided for @diff_low.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get diff_low;
+
+  /// No description provided for @diff_medium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get diff_medium;
+
+  /// No description provided for @dir_clockwise.
+  ///
+  /// In en, this message translates to:
+  /// **'Clockwise'**
+  String get dir_clockwise;
+
+  /// No description provided for @dir_counter_clockwise.
+  ///
+  /// In en, this message translates to:
+  /// **'Counter-Clockwise'**
+  String get dir_counter_clockwise;
+
+  /// No description provided for @dir_figure_eight.
+  ///
+  /// In en, this message translates to:
+  /// **'Figure-Eight'**
+  String get dir_figure_eight;
+
   /// No description provided for @distance_to_turn1.
   ///
   /// In en, this message translates to:
@@ -1160,6 +1628,570 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Favorite Team'**
   String get favorite_team;
+
+  /// No description provided for @feature_130r_high_speed.
+  ///
+  /// In en, this message translates to:
+  /// **'Iconic 130R High-Speed Left'**
+  String get feature_130r_high_speed;
+
+  /// No description provided for @feature_90_degree_corners.
+  ///
+  /// In en, this message translates to:
+  /// **'Sequential 90-Degree Street Turns'**
+  String get feature_90_degree_corners;
+
+  /// No description provided for @feature_abrasive_asphalt.
+  ///
+  /// In en, this message translates to:
+  /// **'Highly Abrasive Asphalt'**
+  String get feature_abrasive_asphalt;
+
+  /// No description provided for @feature_aggressive_kerbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Aggressive Sausage Kerb Risk'**
+  String get feature_aggressive_kerbs;
+
+  /// No description provided for @feature_aero_efficiency_test.
+  ///
+  /// In en, this message translates to:
+  /// **'Ultimate Aero Efficiency Test'**
+  String get feature_aero_efficiency_test;
+
+  /// No description provided for @feature_banked_corners_t3_t14.
+  ///
+  /// In en, this message translates to:
+  /// **'Unique Banked Corners (T3 & T14)'**
+  String get feature_banked_corners_t3_t14;
+
+  /// No description provided for @feature_battery_drain_kemmel.
+  ///
+  /// In en, this message translates to:
+  /// **'High Battery Drain (Kemmel Straight)'**
+  String get feature_battery_drain_kemmel;
+
+  /// No description provided for @feature_blind_corners.
+  ///
+  /// In en, this message translates to:
+  /// **'Dangerous Blind Apexes'**
+  String get feature_blind_corners;
+
+  /// No description provided for @feature_bumpy_city_roads.
+  ///
+  /// In en, this message translates to:
+  /// **'Highly Irregular City Road Surface'**
+  String get feature_bumpy_city_roads;
+
+  /// No description provided for @feature_bumpy_surface.
+  ///
+  /// In en, this message translates to:
+  /// **'Bumpy Track Surface'**
+  String get feature_bumpy_surface;
+
+  /// No description provided for @feature_bumpy_surface_subsidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Surface Bumps due to Subsidence'**
+  String get feature_bumpy_surface_subsidence;
+
+  /// No description provided for @feature_castle_section_tight.
+  ///
+  /// In en, this message translates to:
+  /// **'Ultra-Tight Castle Section'**
+  String get feature_castle_section_tight;
+
+  /// No description provided for @feature_cold_tire_struggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Difficulty Retaining Tire Heat'**
+  String get feature_cold_tire_struggle;
+
+  /// No description provided for @feature_curb_riding_chicane.
+  ///
+  /// In en, this message translates to:
+  /// **'Aggressive Chicane Curb Riding'**
+  String get feature_curb_riding_chicane;
+
+  /// No description provided for @feature_degner_curves.
+  ///
+  /// In en, this message translates to:
+  /// **'Precise Degner Curves'**
+  String get feature_degner_curves;
+
+  /// No description provided for @feature_dusty_surface.
+  ///
+  /// In en, this message translates to:
+  /// **'Initially Dusty Surface Conditions'**
+  String get feature_dusty_surface;
+
+  /// No description provided for @feature_eau_rouge_raidillon.
+  ///
+  /// In en, this message translates to:
+  /// **'Legendary Eau Rouge-Raidillon'**
+  String get feature_eau_rouge_raidillon;
+
+  /// No description provided for @feature_esses_section_flow.
+  ///
+  /// In en, this message translates to:
+  /// **'High-Speed Rhythmic Esses'**
+  String get feature_esses_section_flow;
+
+  /// No description provided for @feature_extreme_altitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Extreme Altitude (2,200m+)'**
+  String get feature_extreme_altitude;
+
+  /// No description provided for @feature_extreme_humidity.
+  ///
+  /// In en, this message translates to:
+  /// **'Oppressive Equatorial Humidity'**
+  String get feature_extreme_humidity;
+
+  /// No description provided for @feature_extreme_low_drag.
+  ///
+  /// In en, this message translates to:
+  /// **'Extreme Low-Drag Aero Setup'**
+  String get feature_extreme_low_drag;
+
+  /// No description provided for @feature_fastest_street_track.
+  ///
+  /// In en, this message translates to:
+  /// **'Fastest Street Track on Calendar'**
+  String get feature_fastest_street_track;
+
+  /// No description provided for @feature_figure_eight_layout.
+  ///
+  /// In en, this message translates to:
+  /// **'Unique Figure-Eight Layout'**
+  String get feature_figure_eight_layout;
+
+  /// No description provided for @feature_glittering_night_race.
+  ///
+  /// In en, this message translates to:
+  /// **'Glittering Night-Time Backdrop'**
+  String get feature_glittering_night_race;
+
+  /// No description provided for @feature_groundhog_risk.
+  ///
+  /// In en, this message translates to:
+  /// **'Local Wildlife (Groundhog) Risk'**
+  String get feature_groundhog_risk;
+
+  /// No description provided for @feature_heavy_braking.
+  ///
+  /// In en, this message translates to:
+  /// **'Severe Braking Demands'**
+  String get feature_heavy_braking;
+
+  /// No description provided for @feature_heavy_braking_variante.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard Braking into Chicanes'**
+  String get feature_heavy_braking_variante;
+
+  /// No description provided for @feature_heavy_braking_zones.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard Braking into Chicanes'**
+  String get feature_heavy_braking_zones;
+
+  /// No description provided for @feature_heavy_traction_points.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical Low-Speed Traction Zones'**
+  String get feature_heavy_traction_points;
+
+  /// No description provided for @feature_high_altitude_cooling.
+  ///
+  /// In en, this message translates to:
+  /// **'High Altitude Power Unit Cooling'**
+  String get feature_high_altitude_cooling;
+
+  /// No description provided for @feature_high_altitude_impact.
+  ///
+  /// In en, this message translates to:
+  /// **'Significant Altitude Aero Impact'**
+  String get feature_high_altitude_impact;
+
+  /// No description provided for @feature_high_downforce_focus.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum Downforce Priority'**
+  String get feature_high_downforce_focus;
+
+  /// No description provided for @feature_high_front_tyre_wear.
+  ///
+  /// In en, this message translates to:
+  /// **'High Front Tyre Degradation'**
+  String get feature_high_front_tyre_wear;
+
+  /// No description provided for @feature_high_humidity.
+  ///
+  /// In en, this message translates to:
+  /// **'High Ambient Humidity'**
+  String get feature_high_humidity;
+
+  /// No description provided for @feature_high_kerb_usage.
+  ///
+  /// In en, this message translates to:
+  /// **'Aggressive Kerb Riding'**
+  String get feature_high_kerb_usage;
+
+  /// No description provided for @feature_high_lateral_load.
+  ///
+  /// In en, this message translates to:
+  /// **'Intense Lateral G-Force Loads'**
+  String get feature_high_lateral_load;
+
+  /// No description provided for @feature_high_speed_corners.
+  ///
+  /// In en, this message translates to:
+  /// **'Ultra High-Speed Cornering'**
+  String get feature_high_speed_corners;
+
+  /// No description provided for @feature_high_speed_flow.
+  ///
+  /// In en, this message translates to:
+  /// **'Continuous High-Speed Corner Flow'**
+  String get feature_high_speed_flow;
+
+  /// No description provided for @feature_high_stamina_required.
+  ///
+  /// In en, this message translates to:
+  /// **'High Driver Stamina Required'**
+  String get feature_high_stamina_required;
+
+  /// No description provided for @feature_high_wind_sensitivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Extreme Crosswind Sensitivity'**
+  String get feature_high_wind_sensitivity;
+
+  /// No description provided for @feature_hotel_underpass.
+  ///
+  /// In en, this message translates to:
+  /// **'Unique Yas Hotel Underpass'**
+  String get feature_hotel_underpass;
+
+  /// No description provided for @feature_iconic_tunnel.
+  ///
+  /// In en, this message translates to:
+  /// **'High-Speed Harbor Tunnel'**
+  String get feature_iconic_tunnel;
+
+  /// No description provided for @feature_legendary_esses.
+  ///
+  /// In en, this message translates to:
+  /// **'Legendary \'\'S\'\' Curves'**
+  String get feature_legendary_esses;
+
+  /// No description provided for @feature_long_back_straight.
+  ///
+  /// In en, this message translates to:
+  /// **'Extremely Long Back Straight'**
+  String get feature_long_back_straight;
+
+  /// No description provided for @feature_long_main_straight.
+  ///
+  /// In en, this message translates to:
+  /// **'Long Drag to Turn 1'**
+  String get feature_long_main_straight;
+
+  /// No description provided for @feature_longest_run_to_t1.
+  ///
+  /// In en, this message translates to:
+  /// **'Longest Run from Start to Turn 1'**
+  String get feature_longest_run_to_t1;
+
+  /// No description provided for @feature_longest_straight.
+  ///
+  /// In en, this message translates to:
+  /// **'Flat-Out 2.2km Full Throttle Section'**
+  String get feature_longest_straight;
+
+  /// No description provided for @feature_longest_track.
+  ///
+  /// In en, this message translates to:
+  /// **'Longest Track on the Calendar'**
+  String get feature_longest_track;
+
+  /// No description provided for @feature_low_grip_asphalt.
+  ///
+  /// In en, this message translates to:
+  /// **'Low-Grip Semi-Permanent Surface'**
+  String get feature_low_grip_asphalt;
+
+  /// No description provided for @feature_maggotts_becketts_flow.
+  ///
+  /// In en, this message translates to:
+  /// **'Maggotts-Becketts-Chapel Flow'**
+  String get feature_maggotts_becketts_flow;
+
+  /// No description provided for @feature_micro_climates.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple Track Micro-Climates'**
+  String get feature_micro_climates;
+
+  /// No description provided for @feature_monaco_without_walls.
+  ///
+  /// In en, this message translates to:
+  /// **'Technical \'\'Monaco-Style\'\' Flow'**
+  String get feature_monaco_without_walls;
+
+  /// No description provided for @feature_multi_surface_grip.
+  ///
+  /// In en, this message translates to:
+  /// **'Varying Multi-Surface Grip'**
+  String get feature_multi_surface_grip;
+
+  /// No description provided for @feature_multiple_overtaking_lines.
+  ///
+  /// In en, this message translates to:
+  /// **'Wide Track with Multiple Lines'**
+  String get feature_multiple_overtaking_lines;
+
+  /// No description provided for @feature_narrow_passing_zones.
+  ///
+  /// In en, this message translates to:
+  /// **'Narrow Overtaking Opportunities'**
+  String get feature_narrow_passing_zones;
+
+  /// No description provided for @feature_narrow_track_width.
+  ///
+  /// In en, this message translates to:
+  /// **'Narrow Historic Track Width'**
+  String get feature_narrow_track_width;
+
+  /// No description provided for @feature_new_straight_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Revised High-Speed Sector 3'**
+  String get feature_new_straight_section;
+
+  /// No description provided for @feature_old_school_track.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic \'\'Old-School\'\' Layout'**
+  String get feature_old_school_track;
+
+  /// No description provided for @feature_physical_exhaustion.
+  ///
+  /// In en, this message translates to:
+  /// **'Extreme Driver Physical Exhaustion'**
+  String get feature_physical_exhaustion;
+
+  /// No description provided for @feature_physical_heat_stress.
+  ///
+  /// In en, this message translates to:
+  /// **'Severe Physical Heat Stress'**
+  String get feature_physical_heat_stress;
+
+  /// No description provided for @feature_precision_steering.
+  ///
+  /// In en, this message translates to:
+  /// **'Millimeter-Precision Steering'**
+  String get feature_precision_steering;
+
+  /// No description provided for @feature_rollercoaster_ride.
+  ///
+  /// In en, this message translates to:
+  /// **'High-Speed \'\'Rollercoaster\'\' Feel'**
+  String get feature_rollercoaster_ride;
+
+  /// No description provided for @feature_sand_on_track.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk of Wind-Blown Sand'**
+  String get feature_sand_on_track;
+
+  /// No description provided for @feature_sand_wind_impact.
+  ///
+  /// In en, this message translates to:
+  /// **'Desert Sand and Wind Buffeting'**
+  String get feature_sand_wind_impact;
+
+  /// No description provided for @feature_sea_breeze_sand.
+  ///
+  /// In en, this message translates to:
+  /// **'Onshore Sea Breeze & Sand Risk'**
+  String get feature_sea_breeze_sand;
+
+  /// No description provided for @feature_senna_s_curves.
+  ///
+  /// In en, this message translates to:
+  /// **'Legendary \'\'Senna S\'\' Complex'**
+  String get feature_senna_s_curves;
+
+  /// No description provided for @feature_short_lap_time.
+  ///
+  /// In en, this message translates to:
+  /// **'Extremely Short Lap Duration'**
+  String get feature_short_lap_time;
+
+  /// No description provided for @feature_snail_corner_t1.
+  ///
+  /// In en, this message translates to:
+  /// **'Technical \'\'Snail\'\' Turn 1'**
+  String get feature_snail_corner_t1;
+
+  /// No description provided for @feature_stadium_atmosphere.
+  ///
+  /// In en, this message translates to:
+  /// **'Iconic Stadium Atmosphere'**
+  String get feature_stadium_atmosphere;
+
+  /// No description provided for @feature_stadium_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Iconic Foro Sol Stadium Section'**
+  String get feature_stadium_section;
+
+  /// No description provided for @feature_steep_uphill_braking.
+  ///
+  /// In en, this message translates to:
+  /// **'Aggressive Uphill Braking Zones'**
+  String get feature_steep_uphill_braking;
+
+  /// No description provided for @feature_steep_uphill_t1.
+  ///
+  /// In en, this message translates to:
+  /// **'Extreme Uphill Run to Turn 1'**
+  String get feature_steep_uphill_t1;
+
+  /// No description provided for @feature_street_circuit.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary Street Surface'**
+  String get feature_street_circuit;
+
+  /// No description provided for @feature_straight_mode_5_zones.
+  ///
+  /// In en, this message translates to:
+  /// **'5 Straight Mode Zones'**
+  String get feature_straight_mode_5_zones;
+
+  /// No description provided for @feature_sunset_to_night.
+  ///
+  /// In en, this message translates to:
+  /// **'Day-to-Night Sunset Transition'**
+  String get feature_sunset_to_night;
+
+  /// No description provided for @feature_sweeping_corners.
+  ///
+  /// In en, this message translates to:
+  /// **'High-Speed Sweeping Corners'**
+  String get feature_sweeping_corners;
+
+  /// No description provided for @feature_technical_chicane.
+  ///
+  /// In en, this message translates to:
+  /// **'Precision Chicane Placement'**
+  String get feature_technical_chicane;
+
+  /// No description provided for @feature_technical_final_sector.
+  ///
+  /// In en, this message translates to:
+  /// **'Tight & Technical Final Sector'**
+  String get feature_technical_final_sector;
+
+  /// No description provided for @feature_technical_flow.
+  ///
+  /// In en, this message translates to:
+  /// **'Continuous Rhythmic Corner Flow'**
+  String get feature_technical_flow;
+
+  /// No description provided for @feature_technical_sector_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Technical Mid-Sector Flow'**
+  String get feature_technical_sector_2;
+
+  /// No description provided for @feature_temple_of_speed.
+  ///
+  /// In en, this message translates to:
+  /// **'The Iconic \'\'Temple of Speed\'\''**
+  String get feature_temple_of_speed;
+
+  /// No description provided for @feature_the_strip_straight.
+  ///
+  /// In en, this message translates to:
+  /// **'The Massive Las Vegas Strip Straight'**
+  String get feature_the_strip_straight;
+
+  /// No description provided for @feature_thin_air_cooling.
+  ///
+  /// In en, this message translates to:
+  /// **'Thin Air Cooling Challenges'**
+  String get feature_thin_air_cooling;
+
+  /// No description provided for @feature_tight_hairpin.
+  ///
+  /// In en, this message translates to:
+  /// **'World\'\'s Tightest Hairpin'**
+  String get feature_tight_hairpin;
+
+  /// No description provided for @feature_tire_killer.
+  ///
+  /// In en, this message translates to:
+  /// **'High Lateral Tire Load'**
+  String get feature_tire_killer;
+
+  /// No description provided for @feature_track_limits_chaos.
+  ///
+  /// In en, this message translates to:
+  /// **'High Risk of Track Limit Penalties'**
+  String get feature_track_limits_chaos;
+
+  /// No description provided for @feature_traction_limited.
+  ///
+  /// In en, this message translates to:
+  /// **'Traction-Limited Exits'**
+  String get feature_traction_limited;
+
+  /// No description provided for @feature_unpredictable_weather.
+  ///
+  /// In en, this message translates to:
+  /// **'Highly Unpredictable Weather'**
+  String get feature_unpredictable_weather;
+
+  /// No description provided for @feature_unpredictable_weather_interlagos.
+  ///
+  /// In en, this message translates to:
+  /// **'Sudden Interlagos Micro-Storms'**
+  String get feature_unpredictable_weather_interlagos;
+
+  /// No description provided for @feature_uphill_start_finish.
+  ///
+  /// In en, this message translates to:
+  /// **'Uphill Steep Start-Finish Straight'**
+  String get feature_uphill_start_finish;
+
+  /// No description provided for @feature_variable_grip.
+  ///
+  /// In en, this message translates to:
+  /// **'Variable Grip Levels'**
+  String get feature_variable_grip;
+
+  /// No description provided for @feature_wall_of_champions.
+  ///
+  /// In en, this message translates to:
+  /// **'Dangerous \'\'Wall of Champions\'\''**
+  String get feature_wall_of_champions;
+
+  /// No description provided for @feature_zero_margin_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Zero Margin for Error'**
+  String get feature_zero_margin_error;
+
+  /// No description provided for @feature_zero_overtaking_space.
+  ///
+  /// In en, this message translates to:
+  /// **'Extremely Limited Passing Space'**
+  String get feature_zero_overtaking_space;
 
   /// No description provided for @finish.
   ///
@@ -1761,6 +2793,12 @@ abstract class AppLocalizations {
   /// **'Overtaking Difficulty'**
   String get overtaking_difficulty;
 
+  /// No description provided for @overtaking_difficulty_l10n.
+  ///
+  /// In en, this message translates to:
+  /// **'Overtaking Difficulty'**
+  String get overtaking_difficulty_l10n;
+
   /// No description provided for @partner.
   ///
   /// In en, this message translates to:
@@ -2073,6 +3111,12 @@ abstract class AppLocalizations {
   /// **'Rainfall'**
   String get rainfall;
 
+  /// No description provided for @recommended_strategy_l10n.
+  ///
+  /// In en, this message translates to:
+  /// **'Strategy'**
+  String get recommended_strategy_l10n;
+
   /// No description provided for @red_flag.
   ///
   /// In en, this message translates to:
@@ -2325,6 +3369,150 @@ abstract class AppLocalizations {
   /// **'The summer break sits between Hungary and the Netherlands.'**
   String get summer_break_subtitle;
 
+  /// No description provided for @sun_0_deg_night_race.
+  ///
+  /// In en, this message translates to:
+  /// **'Night Conditions (Artificial Light)'**
+  String get sun_0_deg_night_race;
+
+  /// No description provided for @sun_5_deg_twilight.
+  ///
+  /// In en, this message translates to:
+  /// **'Twilight (Floodlights Active)'**
+  String get sun_5_deg_twilight;
+
+  /// No description provided for @sun_8_deg_horizon_dip.
+  ///
+  /// In en, this message translates to:
+  /// **'Near Horizon (Extreme Glare)'**
+  String get sun_8_deg_horizon_dip;
+
+  /// No description provided for @sun_10_deg_harbor_reflection.
+  ///
+  /// In en, this message translates to:
+  /// **'Very Low Sun (Water Reflection)'**
+  String get sun_10_deg_harbor_reflection;
+
+  /// No description provided for @sun_12_deg_mountain_occlusion.
+  ///
+  /// In en, this message translates to:
+  /// **'Low Sun (Mountain Shadows)'**
+  String get sun_12_deg_mountain_occlusion;
+
+  /// No description provided for @sun_14_deg_stadium_shadows.
+  ///
+  /// In en, this message translates to:
+  /// **'Low Sun (Grandstand Shadows)'**
+  String get sun_14_deg_stadium_shadows;
+
+  /// No description provided for @sun_15_deg_sunset_blind.
+  ///
+  /// In en, this message translates to:
+  /// **'Low Sun (High Blindness Risk)'**
+  String get sun_15_deg_sunset_blind;
+
+  /// No description provided for @sun_18_deg_paddock_glare.
+  ///
+  /// In en, this message translates to:
+  /// **'Low Sun (Building Reflections)'**
+  String get sun_18_deg_paddock_glare;
+
+  /// No description provided for @sun_20_deg_desert_haze.
+  ///
+  /// In en, this message translates to:
+  /// **'Low Sun (Dust & Haze Glare)'**
+  String get sun_20_deg_desert_haze;
+
+  /// No description provided for @sun_22_deg_coastal_mist.
+  ///
+  /// In en, this message translates to:
+  /// **'Low Sun (Sea Mist Diffusion)'**
+  String get sun_22_deg_coastal_mist;
+
+  /// No description provided for @sun_25_deg_morning_glow.
+  ///
+  /// In en, this message translates to:
+  /// **'Early Morning Sun'**
+  String get sun_25_deg_morning_glow;
+
+  /// No description provided for @sun_28_deg_dunes_glare.
+  ///
+  /// In en, this message translates to:
+  /// **'Low Sun (Dunes Glare)'**
+  String get sun_28_deg_dunes_glare;
+
+  /// No description provided for @sun_30_deg_low_winter_sun.
+  ///
+  /// In en, this message translates to:
+  /// **'Low Winter Sun'**
+  String get sun_30_deg_low_winter_sun;
+
+  /// No description provided for @sun_32_deg_urban_canyon.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium Sun (Skyline Shadows)'**
+  String get sun_32_deg_urban_canyon;
+
+  /// No description provided for @sun_35_deg_forest_shadows.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium Sun (Intermittent Shadows)'**
+  String get sun_35_deg_forest_shadows;
+
+  /// No description provided for @sun_40_deg_cloudy_diffuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Diffuse Light (Overcast)'**
+  String get sun_40_deg_cloudy_diffuse;
+
+  /// No description provided for @sun_45_deg_mid_afternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Mid-Day Sun'**
+  String get sun_45_deg_mid_afternoon;
+
+  /// No description provided for @sun_50_deg_clear_sky.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Afternoon Sun'**
+  String get sun_50_deg_clear_sky;
+
+  /// No description provided for @sun_55_deg_bright_oval.
+  ///
+  /// In en, this message translates to:
+  /// **'High Brightness (Open Area)'**
+  String get sun_55_deg_bright_oval;
+
+  /// No description provided for @sun_60_deg_standard_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard Daylight'**
+  String get sun_60_deg_standard_day;
+
+  /// No description provided for @sun_65_deg_high_noon.
+  ///
+  /// In en, this message translates to:
+  /// **'High Sun (Noon)'**
+  String get sun_65_deg_high_noon;
+
+  /// No description provided for @sun_70_deg_equatorial_high.
+  ///
+  /// In en, this message translates to:
+  /// **'High Intensity Sun'**
+  String get sun_70_deg_equatorial_high;
+
+  /// No description provided for @sun_75_deg_tropical_peak.
+  ///
+  /// In en, this message translates to:
+  /// **'Extreme Tropical Sun'**
+  String get sun_75_deg_tropical_peak;
+
+  /// No description provided for @sun_85_deg_zenith.
+  ///
+  /// In en, this message translates to:
+  /// **'Overhead Sun (No Shadows)'**
+  String get sun_85_deg_zenith;
+
   /// No description provided for @team_facts_title.
   ///
   /// In en, this message translates to:
@@ -2547,6 +3735,24 @@ abstract class AppLocalizations {
   /// **'Turn 1 Accident Chance'**
   String get turn1_accident;
 
+  /// No description provided for @type_hybrid_street.
+  ///
+  /// In en, this message translates to:
+  /// **'Hybrid Street Circuit'**
+  String get type_hybrid_street;
+
+  /// No description provided for @type_permanent_circuit.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanent Racing Circuit'**
+  String get type_permanent_circuit;
+
+  /// No description provided for @type_street_circuit.
+  ///
+  /// In en, this message translates to:
+  /// **'Street Circuit'**
+  String get type_street_circuit;
+
   /// No description provided for @tyre.
   ///
   /// In en, this message translates to:
@@ -2733,11 +3939,35 @@ abstract class AppLocalizations {
   /// **'Ongoing'**
   String get calendar_race_status_ongoing;
 
+  /// No description provided for @circuit_go_home.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to home'**
+  String get circuit_go_home;
+
+  /// No description provided for @circuit_not_found_message.
+  ///
+  /// In en, this message translates to:
+  /// **'No circuit data is available for this address. Check the link or pick a circuit from the calendar.'**
+  String get circuit_not_found_message;
+
+  /// No description provided for @circuit_not_found_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Circuit not found'**
+  String get circuit_not_found_title;
+
   /// No description provided for @circuit_open_in_maps.
   ///
   /// In en, this message translates to:
   /// **'Open in Maps'**
   String get circuit_open_in_maps;
+
+  /// No description provided for @circuit_stat_full_throttle.
+  ///
+  /// In en, this message translates to:
+  /// **'Full throttle'**
+  String get circuit_stat_full_throttle;
 
   /// No description provided for @live_timing_air_temp_abbr.
   ///
@@ -3038,6 +4268,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not load map data: {error}'**
   String orbit_load_error(String error);
+
+  /// No description provided for @orbit_track_standard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get orbit_track_standard;
+
+  /// No description provided for @orbit_track_technical.
+  ///
+  /// In en, this message translates to:
+  /// **'Technical'**
+  String get orbit_track_technical;
+
+  /// No description provided for @orbit_elevation_profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Elevation profile'**
+  String get orbit_elevation_profile;
+
+  /// No description provided for @orbit_stat_lap_distance.
+  ///
+  /// In en, this message translates to:
+  /// **'Lap distance'**
+  String get orbit_stat_lap_distance;
+
+  /// No description provided for @orbit_stat_max_elevation.
+  ///
+  /// In en, this message translates to:
+  /// **'Max elevation change'**
+  String get orbit_stat_max_elevation;
+
+  /// No description provided for @orbit_stat_banked_turns.
+  ///
+  /// In en, this message translates to:
+  /// **'Banked turns'**
+  String get orbit_stat_banked_turns;
 
   /// No description provided for @race_results_empty.
   ///
