@@ -46,13 +46,20 @@ Get-ChildItem -Path build\web -Force | ForEach-Object {
   Copy-Item $_.FullName -Destination . -Recurse -Force
 }
 
-git add -f build/web
-git add pubspec.yaml index.html main.dart.js flutter_bootstrap.js flutter.js manifest.json version.json favicon.png .last_build_id CNAME assets canvaskit icons 2>$null
-if (Test-Path flutter_service_worker.js) { git add flutter_service_worker.js }
+# Git schrijft LF/CRLF-waarschuwingen naar stderr; met $ErrorActionPreference = 'Stop' breekt dat de run.
+$prevEap = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+try {
+  git add -f build/web
+  git add pubspec.yaml index.html main.dart.js flutter_bootstrap.js flutter.js manifest.json version.json favicon.png .last_build_id CNAME assets canvaskit icons 2>$null
+  if (Test-Path flutter_service_worker.js) { git add flutter_service_worker.js }
 
-$commitMsg = "Web deploy: $deployVersion (cache bust, geen versie-bump)"
-git commit -m $commitMsg
+  $commitMsg = "Web deploy: $deployVersion (cache bust, geen versie-bump)"
+  git commit -m $commitMsg
 
-git push origin gh-pages
+  git push origin gh-pages
+} finally {
+  $ErrorActionPreference = $prevEap
+}
 
 Write-Host "Klaar. Controleer Network: main.dart.js?v=$deployVersion"

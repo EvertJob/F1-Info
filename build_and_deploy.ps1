@@ -58,14 +58,18 @@ Get-ChildItem -Path build\web -Force | ForEach-Object {
 }
 
 # 3. Committen (build/web + gesynchroniseerde root-bestanden voor GitHub Pages)
-git add -f build/web
-git add pubspec.yaml index.html main.dart.js flutter_bootstrap.js flutter.js manifest.json version.json favicon.png .last_build_id CNAME assets canvaskit icons 2>$null
-if (Test-Path flutter_service_worker.js) { git add flutter_service_worker.js }
-$commitMsg = "Auto build: web $deployVersion (PWA off, cache bust)"
-git commit -m $commitMsg
-
-# Volledige branch pushen (gebruik: git push origin gh-pages). Subtree alleen als je die workflow wilt.
-# git subtree split vereist aparte workflow; uitgeschakeld om conflicten met volledige repo-push te voorkomen.
-git push origin gh-pages
+# Git LF-waarschuwingen op stderr mogen niet breken bij $ErrorActionPreference = 'Stop'.
+$prevEap = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+try {
+  git add -f build/web
+  git add pubspec.yaml index.html main.dart.js flutter_bootstrap.js flutter.js manifest.json version.json favicon.png .last_build_id CNAME assets canvaskit icons 2>$null
+  if (Test-Path flutter_service_worker.js) { git add flutter_service_worker.js }
+  $commitMsg = "Auto build: web $deployVersion (PWA off, cache bust)"
+  git commit -m $commitMsg
+  git push origin gh-pages
+} finally {
+  $ErrorActionPreference = $prevEap
+}
 
 Write-Host "Build en deploy voltooid."
