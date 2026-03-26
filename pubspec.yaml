@@ -100,8 +100,9 @@ flutter:
 
   assets:
     - assets/data/f1-locations-2026.json
-    - assets/data/circuits/nl-1948-details.geojson
     - assets/data/circuits/
+    # Submap staat niet automatisch in de bundle; nodig voor *.geojson op web.
+    - assets/data/circuits/geojson/
     - assets/data/circuits/specs_2026/
     - data/results/
     - data/results/drivers/
