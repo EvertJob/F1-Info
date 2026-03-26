@@ -1,0 +1,202 @@
+{
+  "meta": {
+    "path": "/data/circuits/yas_marina.json",
+    "season": 2026,
+    "regulation_notes": "DRS terminology removed; use Straight Mode (Z-mode) and Manual Override Mode (MOM). Active Aero 2026. Electrical/ICE power split 50/50 for stated energy metrics."
+  },
+  "circuit_id": "yas_marina",
+  "name": "Yas Marina Circuit",
+  "location": "Abu Dhabi, UAE",
+  "circuit_info": {
+    "length_m": 5281,
+    "laps": 58,
+    "distance_to_turn_1_m": 300,
+    "on_calendar_since": 2009,
+    "contract_until": 2030,
+    "circuit_difficulty": {
+      "l10n_key": "circuit.difficulty.medium",
+      "strings": {
+        "en": "Medium",
+        "nl": "Gemiddeld"
+      }
+    },
+    "overtaking_difficulty": {
+      "l10n_key": "circuit.overtaking.medium",
+      "strings": {
+        "en": "Medium",
+        "nl": "Gemiddeld"
+      }
+    },
+    "track_type": {
+      "l10n_key": "circuit.track_type.yas_marina",
+      "strings": {
+        "en": "Permanent road course",
+        "nl": "Permanent road course"
+      }
+    },
+    "direction": {
+      "l10n_key": "circuit.direction.clockwise",
+      "strings": {
+        "en": "Clockwise",
+        "nl": "Clockwise"
+      }
+    }
+  },
+  "weather_forecast": {
+    "temperature_c": 26,
+    "rain_chance_pct": 0,
+    "wind_speed_kmh": 12,
+    "humidity_pct": 50,
+    "air_pressure_hpa": 1015
+  },
+  "risks_and_incidents": {
+    "red_flag_chance_pct": 5,
+    "vsc_chance_pct": 10,
+    "accident_chance_pct": 10,
+    "turn_1_accident_chance_pct": 15,
+    "safety_car_probability_pct": 32
+  },
+  "lap_and_speed_stats": {
+    "fastest_lap_record": {
+      "time": "1:26.103",
+      "driver": "Max Verstappen",
+      "year": 2021
+    },
+    "slowest_lap_historical": {
+      "time": "1:30.000",
+      "driver": "Nikita Mazepin",
+      "year": 2021
+    },
+    "average_lap_time": "1:28.000",
+    "top_speed_kmh": 335,
+    "average_speed_kmh": 215,
+    "max_g_force": 4.5,
+    "avg_g_force": 2.3
+  },
+  "tyres_and_strategy": {
+    "tire_wear": {
+      "l10n_key": "tyre.wear.medium",
+      "strings": {
+        "en": "Medium",
+        "nl": "Medium"
+      }
+    },
+    "strategy_typical": {
+      "l10n_key": "strategy.yas_marina.typical",
+      "strings": {
+        "en": "1 stop",
+        "nl": "1 stop"
+      }
+    },
+    "best_combination": {
+      "l10n_key": "strategy.yas_marina.combo",
+      "strings": {
+        "en": "Medium -> Hard",
+        "nl": "Medium -> Hard"
+      }
+    },
+    "fastest_pitstop_record": {
+      "time_s": 2.1,
+      "team": "Red Bull Racing",
+      "year": 2023
+    },
+    "braking_intensity": {
+      "l10n_key": "tyre.braking.yas_marina",
+      "strings": {
+        "en": "Medium",
+        "nl": "Medium"
+      }
+    },
+    "harvesting_difficulty": {
+      "l10n_key": "energy.harvest.yas_marina",
+      "strings": {
+        "en": "Medium",
+        "nl": "Medium"
+      }
+    }
+  },
+  "aerodynamics_2026": {
+    "x_mode_usage_pct": 44,
+    "z_mode_usage_pct": 56,
+    "manual_override_impact_score": 7.8,
+    "straight_mode_zones": 5,
+    "manual_override_activation_points": 3,
+    "active_aero_transitions_per_lap": 24
+  },
+  "energy_management": {
+    "electrical_power_ratio_pct": 50,
+    "ice_power_ratio_pct": 50,
+    "mgu_k_recovery_points": {
+      "l10n_key": "energy.mguk.yas_marina",
+      "strings": {
+        "en": "Medium",
+        "nl": "Medium"
+      }
+    },
+    "primary_deployment_sectors": [
+      {
+        "l10n_key": "energy.deploy.yas_marina.0",
+        "strings": {
+          "en": "Main straight",
+          "nl": "Main straight"
+        }
+      },
+      {
+        "l10n_key": "energy.deploy.yas_marina.1",
+        "strings": {
+          "en": "Hotel section",
+          "nl": "Hotel section"
+        }
+      }
+    ]
+  },
+  "ambient_conditions": {
+    "track_evolution_factor_pct": 11,
+    "sun_angle_at_race_start": {
+      "l10n_key": "ambient.sun.yas_marina",
+      "strings": {
+        "en": "15 degrees (South-West)",
+        "nl": "15 degrees (South-West)"
+      }
+    },
+    "visibility_risk_sectors": [
+      "Marina section",
+      "Turn 9"
+    ],
+    "elevation_above_sea_level_m": 2,
+    "max_elevation_change_m": 10.0
+  },
+  "era_comparison": {
+    "avg_lap_time_2024_2025_qual_reference": "1:24.200",
+    "est_lap_time_2026": "1:23.350",
+    "delta_seconds": "-0.850",
+    "top_speed_increase_kmh": 11,
+    "methodology_note": {
+      "l10n_key": "era.methodology.2026",
+      "strings": {
+        "en": "Estimated from 2024/2025 qualifying reference; adjusted for -30 kg mass and active aero top-speed gain (indicative, not official).",
+        "nl": "Geschat t.o.v. kwalificatie 2024/2025; correctie voor -30 kg en active aero topsnelheid (indicatief)."
+      }
+    }
+  },
+  "historical_success_rate": {
+    "most_reliable_engine_supplier": "Honda RBPT",
+    "team_podium_percentage_last_5_years": {
+      "Red Bull Racing": 60,
+      "Ferrari": 35,
+      "Mercedes": 30
+    }
+  },
+  "circuit_characteristics": {
+    "key_points": [
+      {
+        "l10n_key": "circuits.yas_marina.key_point_0",
+        "strings": {
+          "en": "Twilight finale; traction exits in sector 3",
+          "nl": "Schemerfinale; tractie-exits in sector 3"
+        }
+      }
+    ],
+    "full_throttle_pct": 65
+  }
+}

@@ -1,0 +1,223 @@
+{
+  "meta": {
+    "path": "/data/circuits/shanghai.json",
+    "season": 2026,
+    "regulation_notes": "DRS terminology removed; use Straight Mode (Z-mode) and Manual Override Mode (MOM). Active Aero 2026. Electrical/ICE power split 50/50 for stated energy metrics."
+  },
+  "circuit_id": "shanghai",
+  "name": "Shanghai International Circuit",
+  "location": "Shanghai, China",
+  "circuit_info": {
+    "length_m": 5451,
+    "laps": 56,
+    "distance_to_turn_1_m": 380,
+    "on_calendar_since": 2004,
+    "contract_until": 2027,
+    "circuit_difficulty": {
+      "l10n_key": "circuit.difficulty.high",
+      "strings": {
+        "en": "High",
+        "nl": "Hoog"
+      }
+    },
+    "overtaking_difficulty": {
+      "l10n_key": "circuit.overtaking.medium",
+      "strings": {
+        "en": "Medium",
+        "nl": "Gemiddeld"
+      }
+    },
+    "track_type": {
+      "l10n_key": "circuit.track_type.shanghai",
+      "strings": {
+        "en": "Permanent road course",
+        "nl": "Permanent road course"
+      }
+    },
+    "direction": {
+      "l10n_key": "circuit.direction.clockwise",
+      "strings": {
+        "en": "Clockwise",
+        "nl": "Clockwise"
+      }
+    }
+  },
+  "weather_forecast": {
+    "temperature_c": 17,
+    "rain_chance_pct": 25,
+    "wind_speed_kmh": 12,
+    "humidity_pct": 50,
+    "air_pressure_hpa": 1013
+  },
+  "risks_and_incidents": {
+    "red_flag_chance_pct": 7,
+    "vsc_chance_pct": 10,
+    "accident_chance_pct": 14,
+    "turn_1_accident_chance_pct": 8,
+    "safety_car_probability_pct": 36
+  },
+  "lap_and_speed_stats": {
+    "fastest_lap_record": {
+      "time": "1:32.238",
+      "driver": "Michael Schumacher",
+      "year": 2004
+    },
+    "slowest_lap_historical": {
+      "time": "1:45.000",
+      "driver": "Marcus Ericsson",
+      "year": 2018
+    },
+    "average_lap_time": "1:35.000",
+    "top_speed_kmh": 340,
+    "average_speed_kmh": 210,
+    "max_g_force": 4.5,
+    "avg_g_force": 2.4
+  },
+  "tyres_and_strategy": {
+    "tire_wear": {
+      "l10n_key": "tyre.wear.medium",
+      "strings": {
+        "en": "Medium",
+        "nl": "Medium"
+      }
+    },
+    "strategy_typical": {
+      "l10n_key": "strategy.shanghai.typical",
+      "strings": {
+        "en": "1 stop",
+        "nl": "1 stop"
+      }
+    },
+    "best_combination": {
+      "l10n_key": "strategy.shanghai.combo",
+      "strings": {
+        "en": "Medium -> Hard",
+        "nl": "Medium -> Hard"
+      }
+    },
+    "fastest_pitstop_record": {
+      "time_s": 2.2,
+      "team": "Williams",
+      "year": 2019
+    },
+    "braking_intensity": {
+      "l10n_key": "tyre.braking.shanghai",
+      "strings": {
+        "en": "Medium",
+        "nl": "Medium"
+      }
+    },
+    "harvesting_difficulty": {
+      "l10n_key": "energy.harvest.shanghai",
+      "strings": {
+        "en": "Medium",
+        "nl": "Medium"
+      }
+    }
+  },
+  "aerodynamics_2026": {
+    "x_mode_usage_pct": 48,
+    "z_mode_usage_pct": 52,
+    "manual_override_impact_score": 7.8,
+    "straight_mode_zones": 4,
+    "manual_override_activation_points": 3,
+    "active_aero_transitions_per_lap": 22
+  },
+  "energy_management": {
+    "electrical_power_ratio_pct": 50,
+    "ice_power_ratio_pct": 50,
+    "mgu_k_recovery_points": {
+      "l10n_key": "energy.mguk.shanghai",
+      "strings": {
+        "en": "Medium (12 braking zones)",
+        "nl": "Medium (12 braking zones)"
+      }
+    },
+    "primary_deployment_sectors": [
+      {
+        "l10n_key": "energy.deploy.shanghai.0",
+        "strings": {
+          "en": "Back straight",
+          "nl": "Back straight"
+        }
+      },
+      {
+        "l10n_key": "energy.deploy.shanghai.1",
+        "strings": {
+          "en": "Pit straight",
+          "nl": "Pit straight"
+        }
+      },
+      {
+        "l10n_key": "energy.deploy.shanghai.2",
+        "strings": {
+          "en": "Sector 3",
+          "nl": "Sector 3"
+        }
+      }
+    ]
+  },
+  "ambient_conditions": {
+    "track_evolution_factor_pct": 10,
+    "sun_angle_at_race_start": {
+      "l10n_key": "ambient.sun.shanghai",
+      "strings": {
+        "en": "38 degrees (South-West)",
+        "nl": "38 degrees (South-West)"
+      }
+    },
+    "visibility_risk_sectors": [
+      "Turn 1",
+      "Turn 6"
+    ],
+    "elevation_above_sea_level_m": 15,
+    "max_elevation_change_m": 12.0
+  },
+  "era_comparison": {
+    "avg_lap_time_2024_2025_qual_reference": "1:33.800",
+    "est_lap_time_2026": "1:33.050",
+    "delta_seconds": "-0.750",
+    "top_speed_increase_kmh": 10,
+    "methodology_note": {
+      "l10n_key": "era.methodology.2026",
+      "strings": {
+        "en": "Estimated from 2024/2025 qualifying reference; adjusted for -30 kg mass and active aero top-speed gain (indicative, not official).",
+        "nl": "Geschat t.o.v. kwalificatie 2024/2025; correctie voor -30 kg en active aero topsnelheid (indicatief)."
+      }
+    }
+  },
+  "historical_success_rate": {
+    "most_reliable_engine_supplier": "Mercedes-AMG",
+    "team_podium_percentage_last_5_years": {
+      "Ferrari": 50,
+      "Red Bull Racing": 50,
+      "McLaren": 35
+    }
+  },
+  "circuit_characteristics": {
+    "key_points": [
+      {
+        "l10n_key": "circuits.shanghai.key_point_0",
+        "strings": {
+          "en": "Long back straight: high Z-mode / Straight Mode duty cycle",
+          "nl": "Lang recht stuk: hoge Z-mode / Straight Mode-belasting"
+        }
+      },
+      {
+        "l10n_key": "circuits.shanghai.key_point_1",
+        "strings": {
+          "en": "Snail complex rewards precise MOM timing",
+          "nl": "Slakkenhuis-complex beloont precieze MOM-timing"
+        }
+      },
+      {
+        "l10n_key": "circuits.shanghai.key_point_2",
+        "strings": {
+          "en": "Front-left tyre stress; rain probability elevated",
+          "nl": "Linksvoor bandstress; verhoogde regenkans"
+        }
+      }
+    ],
+    "full_throttle_pct": 62
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "season": 2026,
+  "round": 3,
+  "raceName": "Unknown",
+  "source": "OpenF1 weather",
+  "availableSessions": [
+    "Practice 1",
+    "Practice 2",
+    "Practice 3",
+    "Qualifying",
+    "Race"
+  ],
+  "sessions": {
+    "Practice 1": {
+      "sessionKey": 11246,
+      "sampleCount": 0,
+      "lapCount": 0,
+      "lapTimeline": [],
+      "samples": []
+    },
+    "Practice 2": {
+      "sessionKey": 11247,
+      "sampleCount": 0,
+      "lapCount": 0,
+      "lapTimeline": [],
+      "samples": []
+    },
+    "Practice 3": {
+      "sessionKey": 11248,
+      "sampleCount": 0,
+      "lapCount": 0,
+      "lapTimeline": [],
+      "samples": []
+    },
+    "Qualifying": {
+      "sessionKey": 11249,
+      "sampleCount": 0,
+      "lapCount": 0,
+      "lapTimeline": [],
+      "samples": []
+    },
+    "Race": {
+      "sessionKey": 11253,
+      "sampleCount": 0,
+      "lapCount": 0,
+      "lapTimeline": [],
+      "samples": []
+    }
+  }
+}

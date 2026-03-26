@@ -1,0 +1,202 @@
+{
+  "meta": {
+    "path": "/data/circuits/mexico_city.json",
+    "season": 2026,
+    "regulation_notes": "DRS terminology removed; use Straight Mode (Z-mode) and Manual Override Mode (MOM). Active Aero 2026. Electrical/ICE power split 50/50 for stated energy metrics."
+  },
+  "circuit_id": "mexico_city",
+  "name": "Autodromo Hermanos Rodriguez",
+  "location": "Mexico City, Mexico",
+  "circuit_info": {
+    "length_m": 4304,
+    "laps": 71,
+    "distance_to_turn_1_m": 810,
+    "on_calendar_since": 1962,
+    "contract_until": 2025,
+    "circuit_difficulty": {
+      "l10n_key": "circuit.difficulty.medium",
+      "strings": {
+        "en": "Medium",
+        "nl": "Gemiddeld"
+      }
+    },
+    "overtaking_difficulty": {
+      "l10n_key": "circuit.overtaking.medium",
+      "strings": {
+        "en": "Medium",
+        "nl": "Gemiddeld"
+      }
+    },
+    "track_type": {
+      "l10n_key": "circuit.track_type.mexico_city",
+      "strings": {
+        "en": "Permanent road course",
+        "nl": "Permanent road course"
+      }
+    },
+    "direction": {
+      "l10n_key": "circuit.direction.clockwise",
+      "strings": {
+        "en": "Clockwise",
+        "nl": "Clockwise"
+      }
+    }
+  },
+  "weather_forecast": {
+    "temperature_c": 23,
+    "rain_chance_pct": 20,
+    "wind_speed_kmh": 8,
+    "humidity_pct": 40,
+    "air_pressure_hpa": 1025
+  },
+  "risks_and_incidents": {
+    "red_flag_chance_pct": 15,
+    "vsc_chance_pct": 25,
+    "accident_chance_pct": 20,
+    "turn_1_accident_chance_pct": 35,
+    "safety_car_probability_pct": 57
+  },
+  "lap_and_speed_stats": {
+    "fastest_lap_record": {
+      "time": "1:17.774",
+      "driver": "Valtteri Bottas",
+      "year": 2021
+    },
+    "slowest_lap_historical": {
+      "time": "1:21.000",
+      "driver": "Nicholas Latifi",
+      "year": 2021
+    },
+    "average_lap_time": "1:19.000",
+    "top_speed_kmh": 350,
+    "average_speed_kmh": 195,
+    "max_g_force": 4.1,
+    "avg_g_force": 2.0
+  },
+  "tyres_and_strategy": {
+    "tire_wear": {
+      "l10n_key": "tyre.wear.medium",
+      "strings": {
+        "en": "Medium",
+        "nl": "Medium"
+      }
+    },
+    "strategy_typical": {
+      "l10n_key": "strategy.mexico_city.typical",
+      "strings": {
+        "en": "1 stop",
+        "nl": "1 stop"
+      }
+    },
+    "best_combination": {
+      "l10n_key": "strategy.mexico_city.combo",
+      "strings": {
+        "en": "Medium -> Hard",
+        "nl": "Medium -> Hard"
+      }
+    },
+    "fastest_pitstop_record": {
+      "time_s": 2.0,
+      "team": "Red Bull Racing",
+      "year": 2023
+    },
+    "braking_intensity": {
+      "l10n_key": "tyre.braking.mexico_city",
+      "strings": {
+        "en": "Medium",
+        "nl": "Medium"
+      }
+    },
+    "harvesting_difficulty": {
+      "l10n_key": "energy.harvest.mexico_city",
+      "strings": {
+        "en": "Medium",
+        "nl": "Medium"
+      }
+    }
+  },
+  "aerodynamics_2026": {
+    "x_mode_usage_pct": 44,
+    "z_mode_usage_pct": 56,
+    "manual_override_impact_score": 7.2,
+    "straight_mode_zones": 5,
+    "manual_override_activation_points": 3,
+    "active_aero_transitions_per_lap": 22
+  },
+  "energy_management": {
+    "electrical_power_ratio_pct": 50,
+    "ice_power_ratio_pct": 50,
+    "mgu_k_recovery_points": {
+      "l10n_key": "energy.mguk.mexico_city",
+      "strings": {
+        "en": "Medium (thin air)",
+        "nl": "Medium (thin air)"
+      }
+    },
+    "primary_deployment_sectors": [
+      {
+        "l10n_key": "energy.deploy.mexico_city.0",
+        "strings": {
+          "en": "Main straight",
+          "nl": "Main straight"
+        }
+      },
+      {
+        "l10n_key": "energy.deploy.mexico_city.1",
+        "strings": {
+          "en": "Stadium section",
+          "nl": "Stadium section"
+        }
+      }
+    ]
+  },
+  "ambient_conditions": {
+    "track_evolution_factor_pct": 12,
+    "sun_angle_at_race_start": {
+      "l10n_key": "ambient.sun.mexico_city",
+      "strings": {
+        "en": "38 degrees (South-West)",
+        "nl": "38 degrees (South-West)"
+      }
+    },
+    "visibility_risk_sectors": [
+      "Stadium",
+      "Turn 1"
+    ],
+    "elevation_above_sea_level_m": 2240,
+    "max_elevation_change_m": 45.0
+  },
+  "era_comparison": {
+    "avg_lap_time_2024_2025_qual_reference": "1:17.900",
+    "est_lap_time_2026": "1:17.050",
+    "delta_seconds": "-0.850",
+    "top_speed_increase_kmh": 9,
+    "methodology_note": {
+      "l10n_key": "era.methodology.2026",
+      "strings": {
+        "en": "Estimated from 2024/2025 qualifying reference; adjusted for -30 kg mass and active aero top-speed gain (indicative, not official).",
+        "nl": "Geschat t.o.v. kwalificatie 2024/2025; correctie voor -30 kg en active aero topsnelheid (indicatief)."
+      }
+    }
+  },
+  "historical_success_rate": {
+    "most_reliable_engine_supplier": "Honda RBPT",
+    "team_podium_percentage_last_5_years": {
+      "Red Bull Racing": 65,
+      "Ferrari": 35,
+      "Mercedes": 30
+    }
+  },
+  "circuit_characteristics": {
+    "key_points": [
+      {
+        "l10n_key": "circuits.mexico_city.key_point_0",
+        "strings": {
+          "en": "Altitude reduces drag; cooling and 50/50 deployment sensitive",
+          "nl": "Hoogte vermindert weerstand; koeling en 50/50 gevoelig"
+        }
+      }
+    ],
+    "full_throttle_pct": 67
+  }
+}

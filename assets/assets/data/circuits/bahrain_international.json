@@ -1,0 +1,131 @@
+﻿{
+    "circuit_id":  "bahrain_international",
+    "name":  "Bahrain International Circuit",
+    "location":  "Sakhir, Bahrain",
+    "categories":  [
+                       {
+                           "category_id":  "live_ambient_status",
+                           "label_l10n":  "cat_ambient_stats",
+                           "icon":  "cloud_sun",
+                           "data_points":  {
+                                               "temperature_c":  28,
+                                               "rain_chance_pct":  0,
+                                               "air_pressure_hpa":  1015,
+                                               "track_evolution_pct":  15,
+                                               "sun_angle_start":  "12_deg_night_race",
+                                               "elevation_sea_level_m":  7,
+                                               "max_elevation_change_m":  17.3,
+                                               "tyre_physics":  {
+                                                                    "asphalt_grip_score":  4,
+                                                                    "lateral_stress_score":  8
+                                                                },
+                                               "tyre_working_window_c":  125,
+                                               "wind_sensitivity_sector":  "S1",
+                                               "safety_car_window_laps":  "L16-L24",
+                                               "local_time_zone":  {
+                                                                       "zone_name":  "AST",
+                                                                       "utc_offset":  "UTC+3"
+                                                                   }
+                                           }
+                       },
+                       {
+                           "category_id":  "track_geometry",
+                           "label_l10n":  "cat_track_specs",
+                           "icon":  "straighten",
+                           "data_points":  {
+                                               "length_m":  5412,
+                                               "laps":  57,
+                                               "distance_to_t1_m":  425,
+                                               "on_calendar_since":  2004,
+                                               "contract_until":  2036,
+                                               "track_type_l10n":  "type_permanent_circuit",
+                                               "direction_l10n":  "dir_clockwise",
+                                               "sector_splits_m":  {
+                                                                       "s1":  1520,
+                                                                       "s3":  1912,
+                                                                       "s2":  1980
+                                                                   },
+                                               "circuit_director":  "Sheikh Salman bin Isa Al Khalifa",
+                                               "circuit_owner":  "Mumtalakat Holding Company",
+                                               "race_day_capacity":  "33,000",
+                                               "latitude":  26.0325,
+                                               "longitude":  50.5106
+                                           }
+                       },
+                       {
+                           "category_id":  "aero_power_2026",
+                           "label_l10n":  "cat_tech_2026",
+                           "icon":  "bolt_aero",
+                           "data_points":  {
+                                               "z_mode_usage_pct":  55,
+                                               "x_mode_usage_pct":  45,
+                                               "straight_mode_zones":  3,
+                                               "manual_override_points":  3,
+                                               "override_impact_score":  9.5,
+                                               "electrical_ratio_pct":  50,
+                                               "harvest_difficulty_l10n":  "diff_low",
+                                               "recovery_points":  15,
+                                               "energy_flow_strategy":  {
+                                                                            "harvesting_zones":  "T1, T4, T10",
+                                                                            "deployment_focus":  "Sector 1, Sector 3"
+                                                                        },
+                                               "manual_override_energy_cost_kj":  135,
+                                               "z_mode_activation_delay_ms":  130,
+                                               "engine_derating_risk_pct":  15,
+                                               "brake_cooling_requirement_score":  9
+                                           }
+                       },
+                       {
+                           "category_id":  "performance_risk",
+                           "label_l10n":  "cat_risks_stats",
+                           "icon":  "warning_speed",
+                           "data_points":  {
+                                               "top_speed_kmh":  342,
+                                               "max_g_force":  4.2,
+                                               "avg_g_force":  2.2,
+                                               "safety_car_prob_pct":  15,
+                                               "vsc_prob_pct":  20,
+                                               "red_flag_prob_pct":  5,
+                                               "t1_accident_risk_pct":  25,
+                                               "pit_exit_delta_s":  24.2,
+                                               "overtaking_delta_s":  0.6,
+                                               "undercut_potential_score":  9,
+                                               "circuit_difficulty_l10n":  "diff_medium",
+                                               "overtaking_difficulty_l10n":  "diff_easy"
+                                           }
+                       },
+                       {
+                           "category_id":  "historical_era",
+                           "label_l10n":  "cat_history_comparison",
+                           "icon":  "history_timer",
+                           "data_points":  {
+                                               "avg_time_2024_2025":  "1:31.250",
+                                               "est_time_2026":  "1:32.600",
+                                               "era_delta_s":  "+1.350",
+                                               "top_speed_delta_kmh":  11,
+                                               "pitstop_record_detail":  {
+                                                                             "team":  "Ferrari",
+                                                                             "driver":  "Charles Leclerc",
+                                                                             "year":  2023,
+                                                                             "time_s":  2.1
+                                                                         },
+                                               "lap_record_detail":  {
+                                                                         "time":  "1:31.447",
+                                                                         "engine":  "Honda RBPT",
+                                                                         "driver":  "Max Verstappen",
+                                                                         "year":  2024,
+                                                                         "team":  "Red Bull Racing"
+                                                                     }
+                                           }
+                       }
+                   ],
+    "characteristics":  {
+                            "key_features_l10n":  [
+                                                      "feature_heavy_braking",
+                                                      "feature_traction_limited",
+                                                      "feature_abrasive_asphalt",
+                                                      "feature_sand_on_track"
+                                                  ],
+                            "full_throttle_pct":  64
+                        }
+}

@@ -1,0 +1,202 @@
+{
+  "meta": {
+    "path": "/data/circuits/monaco.json",
+    "season": 2026,
+    "regulation_notes": "DRS terminology removed; use Straight Mode (Z-mode) and Manual Override Mode (MOM). Active Aero 2026. Electrical/ICE power split 50/50 for stated energy metrics."
+  },
+  "circuit_id": "monaco",
+  "name": "Circuit de Monaco",
+  "location": "Monte Carlo, Monaco",
+  "circuit_info": {
+    "length_m": 3337,
+    "laps": 78,
+    "distance_to_turn_1_m": 210,
+    "on_calendar_since": 1950,
+    "contract_until": 2027,
+    "circuit_difficulty": {
+      "l10n_key": "circuit.difficulty.very_high",
+      "strings": {
+        "en": "Very High",
+        "nl": "Zeer hoog"
+      }
+    },
+    "overtaking_difficulty": {
+      "l10n_key": "circuit.overtaking.very_high",
+      "strings": {
+        "en": "Very High",
+        "nl": "Zeer hoog"
+      }
+    },
+    "track_type": {
+      "l10n_key": "circuit.track_type.monaco",
+      "strings": {
+        "en": "Temporary street circuit",
+        "nl": "Temporary street circuit"
+      }
+    },
+    "direction": {
+      "l10n_key": "circuit.direction.clockwise",
+      "strings": {
+        "en": "Clockwise",
+        "nl": "Clockwise"
+      }
+    }
+  },
+  "weather_forecast": {
+    "temperature_c": 23,
+    "rain_chance_pct": 10,
+    "wind_speed_kmh": 8,
+    "humidity_pct": 55,
+    "air_pressure_hpa": 1016
+  },
+  "risks_and_incidents": {
+    "red_flag_chance_pct": 35,
+    "vsc_chance_pct": 45,
+    "accident_chance_pct": 50,
+    "turn_1_accident_chance_pct": 40,
+    "safety_car_probability_pct": 92
+  },
+  "lap_and_speed_stats": {
+    "fastest_lap_record": {
+      "time": "1:12.909",
+      "driver": "Lewis Hamilton",
+      "year": 2021
+    },
+    "slowest_lap_historical": {
+      "time": "1:18.000",
+      "driver": "Nikita Mazepin",
+      "year": 2021
+    },
+    "average_lap_time": "1:15.000",
+    "top_speed_kmh": 290,
+    "average_speed_kmh": 160,
+    "max_g_force": 3.6,
+    "avg_g_force": 1.8
+  },
+  "tyres_and_strategy": {
+    "tire_wear": {
+      "l10n_key": "tyre.wear.low",
+      "strings": {
+        "en": "Low",
+        "nl": "Low"
+      }
+    },
+    "strategy_typical": {
+      "l10n_key": "strategy.monaco.typical",
+      "strings": {
+        "en": "1 stop",
+        "nl": "1 stop"
+      }
+    },
+    "best_combination": {
+      "l10n_key": "strategy.monaco.combo",
+      "strings": {
+        "en": "Medium -> Hard",
+        "nl": "Medium -> Hard"
+      }
+    },
+    "fastest_pitstop_record": {
+      "time_s": 2.0,
+      "team": "Red Bull Racing",
+      "year": 2021
+    },
+    "braking_intensity": {
+      "l10n_key": "tyre.braking.monaco",
+      "strings": {
+        "en": "Low",
+        "nl": "Low"
+      }
+    },
+    "harvesting_difficulty": {
+      "l10n_key": "energy.harvest.monaco",
+      "strings": {
+        "en": "Low",
+        "nl": "Low"
+      }
+    }
+  },
+  "aerodynamics_2026": {
+    "x_mode_usage_pct": 65,
+    "z_mode_usage_pct": 35,
+    "manual_override_impact_score": 6.0,
+    "straight_mode_zones": 2,
+    "manual_override_activation_points": 2,
+    "active_aero_transitions_per_lap": 18
+  },
+  "energy_management": {
+    "electrical_power_ratio_pct": 50,
+    "ice_power_ratio_pct": 50,
+    "mgu_k_recovery_points": {
+      "l10n_key": "energy.mguk.monaco",
+      "strings": {
+        "en": "Low (short bursts)",
+        "nl": "Low (short bursts)"
+      }
+    },
+    "primary_deployment_sectors": [
+      {
+        "l10n_key": "energy.deploy.monaco.0",
+        "strings": {
+          "en": "Tunnel exit",
+          "nl": "Tunnel exit"
+        }
+      },
+      {
+        "l10n_key": "energy.deploy.monaco.1",
+        "strings": {
+          "en": "Swimming pool",
+          "nl": "Swimming pool"
+        }
+      }
+    ]
+  },
+  "ambient_conditions": {
+    "track_evolution_factor_pct": 20,
+    "sun_angle_at_race_start": {
+      "l10n_key": "ambient.sun.monaco",
+      "strings": {
+        "en": "52 degrees (South-West)",
+        "nl": "52 degrees (South-West)"
+      }
+    },
+    "visibility_risk_sectors": [
+      "Tunnel",
+      "Tabac"
+    ],
+    "elevation_above_sea_level_m": 47,
+    "max_elevation_change_m": 42.0
+  },
+  "era_comparison": {
+    "avg_lap_time_2024_2025_qual_reference": "1:11.200",
+    "est_lap_time_2026": "1:10.450",
+    "delta_seconds": "-0.750",
+    "top_speed_increase_kmh": 6,
+    "methodology_note": {
+      "l10n_key": "era.methodology.2026",
+      "strings": {
+        "en": "Estimated from 2024/2025 qualifying reference; adjusted for -30 kg mass and active aero top-speed gain (indicative, not official).",
+        "nl": "Geschat t.o.v. kwalificatie 2024/2025; correctie voor -30 kg en active aero topsnelheid (indicatief)."
+      }
+    }
+  },
+  "historical_success_rate": {
+    "most_reliable_engine_supplier": "Ferrari",
+    "team_podium_percentage_last_5_years": {
+      "Ferrari": 55,
+      "Red Bull Racing": 45,
+      "McLaren": 25
+    }
+  },
+  "circuit_characteristics": {
+    "key_points": [
+      {
+        "l10n_key": "circuits.monaco.key_point_0",
+        "strings": {
+          "en": "Minimal Straight Mode benefit; maximum X-mode precision",
+          "nl": "Minimaal Straight Mode-voordeel; maximale X-mode precisie"
+        }
+      }
+    ],
+    "full_throttle_pct": 48
+  }
+}

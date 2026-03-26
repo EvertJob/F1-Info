@@ -1,0 +1,131 @@
+﻿{
+    "circuit_id":  "silverstone_circuit",
+    "name":  "Silverstone Circuit",
+    "location":  "Silverstone, UK",
+    "categories":  [
+                       {
+                           "category_id":  "live_ambient_status",
+                           "label_l10n":  "cat_ambient_stats",
+                           "icon":  "cloud_sun",
+                           "data_points":  {
+                                               "temperature_c":  19,
+                                               "rain_chance_pct":  60,
+                                               "air_pressure_hpa":  1005,
+                                               "track_evolution_pct":  5,
+                                               "sun_angle_start":  "28_deg_overcast_risk",
+                                               "elevation_sea_level_m":  154,
+                                               "max_elevation_change_m":  11.3,
+                                               "tyre_physics":  {
+                                                                    "asphalt_grip_score":  9,
+                                                                    "lateral_stress_score":  10
+                                                                },
+                                               "tyre_working_window_c":  118,
+                                               "wind_sensitivity_sector":  "S2",
+                                               "safety_car_window_laps":  "L12-L22",
+                                               "local_time_zone":  {
+                                                                       "zone_name":  "GMT",
+                                                                       "utc_offset":  "UTC+0"
+                                                                   }
+                                           }
+                       },
+                       {
+                           "category_id":  "track_geometry",
+                           "label_l10n":  "cat_track_specs",
+                           "icon":  "straighten",
+                           "data_points":  {
+                                               "length_m":  5891,
+                                               "laps":  52,
+                                               "distance_to_t1_m":  420,
+                                               "on_calendar_since":  1950,
+                                               "contract_until":  2034,
+                                               "track_type_l10n":  "type_permanent_circuit",
+                                               "direction_l10n":  "dir_clockwise",
+                                               "sector_splits_m":  {
+                                                                       "s1":  1920,
+                                                                       "s3":  1961,
+                                                                       "s2":  2010
+                                                                   },
+                                               "circuit_director":  "Stuart Pringle",
+                                               "circuit_owner":  "British Racing Drivers\u0027 Club (BRDC)",
+                                               "race_day_capacity":  "160,000",
+                                               "latitude":  52.0786,
+                                               "longitude":  -1.0169
+                                           }
+                       },
+                       {
+                           "category_id":  "aero_power_2026",
+                           "label_l10n":  "cat_tech_2026",
+                           "icon":  "bolt_aero",
+                           "data_points":  {
+                                               "z_mode_usage_pct":  32,
+                                               "x_mode_usage_pct":  68,
+                                               "straight_mode_zones":  2,
+                                               "manual_override_points":  2,
+                                               "override_impact_score":  7.8,
+                                               "electrical_ratio_pct":  50,
+                                               "harvest_difficulty_l10n":  "diff_high",
+                                               "recovery_points":  18,
+                                               "energy_flow_strategy":  {
+                                                                            "harvesting_zones":  "T3, T6, T16",
+                                                                            "deployment_focus":  "Sector 2 (Hangar)"
+                                                                        },
+                                               "manual_override_energy_cost_kj":  115,
+                                               "z_mode_activation_delay_ms":  165,
+                                               "engine_derating_risk_pct":  12,
+                                               "brake_cooling_requirement_score":  5
+                                           }
+                       },
+                       {
+                           "category_id":  "performance_risk",
+                           "label_l10n":  "cat_risks_stats",
+                           "icon":  "warning_speed",
+                           "data_points":  {
+                                               "top_speed_kmh":  335,
+                                               "max_g_force":  5.1,
+                                               "avg_g_force":  3.3,
+                                               "safety_car_prob_pct":  50,
+                                               "vsc_prob_pct":  40,
+                                               "red_flag_prob_pct":  10,
+                                               "t1_accident_risk_pct":  5,
+                                               "pit_exit_delta_s":  20.5,
+                                               "overtaking_delta_s":  1.4,
+                                               "undercut_potential_score":  8,
+                                               "circuit_difficulty_l10n":  "diff_high",
+                                               "overtaking_difficulty_l10n":  "diff_medium"
+                                           }
+                       },
+                       {
+                           "category_id":  "historical_era",
+                           "label_l10n":  "cat_history_comparison",
+                           "icon":  "history_timer",
+                           "data_points":  {
+                                               "avg_time_2024_2025":  "1:24.650",
+                                               "est_time_2026":  "1:26.300",
+                                               "era_delta_s":  "+1.650",
+                                               "top_speed_delta_kmh":  9,
+                                               "pitstop_record_detail":  {
+                                                                             "team":  "McLaren",
+                                                                             "driver":  "Lando Norris",
+                                                                             "year":  2023,
+                                                                             "time_s":  2
+                                                                         },
+                                               "lap_record_detail":  {
+                                                                         "time":  "1:24.813",
+                                                                         "engine":  "Mercedes",
+                                                                         "driver":  "George Russell",
+                                                                         "year":  2024,
+                                                                         "team":  "Mercedes"
+                                                                     }
+                                           }
+                       }
+                   ],
+    "characteristics":  {
+                            "key_features_l10n":  [
+                                                      "feature_high_speed_corners",
+                                                      "feature_maggotts_becketts_flow",
+                                                      "feature_unpredictable_weather",
+                                                      "feature_high_lateral_load"
+                                                  ],
+                            "full_throttle_pct":  70
+                        }
+}

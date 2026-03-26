@@ -1,0 +1,209 @@
+{
+  "meta": {
+    "path": "/data/circuits/jeddah.json",
+    "season": 2026,
+    "regulation_notes": "DRS terminology removed; use Straight Mode (Z-mode) and Manual Override Mode (MOM). Active Aero 2026. Electrical/ICE power split 50/50 for stated energy metrics."
+  },
+  "circuit_id": "jeddah",
+  "name": "Jeddah Corniche Circuit",
+  "location": "Jeddah, Saudi Arabia",
+  "circuit_info": {
+    "length_m": 6174,
+    "laps": 50,
+    "distance_to_turn_1_m": 220,
+    "on_calendar_since": 2021,
+    "contract_until": 2030,
+    "circuit_difficulty": {
+      "l10n_key": "circuit.difficulty.very_high",
+      "strings": {
+        "en": "Very High",
+        "nl": "Zeer hoog"
+      }
+    },
+    "overtaking_difficulty": {
+      "l10n_key": "circuit.overtaking.medium",
+      "strings": {
+        "en": "Medium",
+        "nl": "Gemiddeld"
+      }
+    },
+    "track_type": {
+      "l10n_key": "circuit.track_type.jeddah",
+      "strings": {
+        "en": "Temporary street circuit",
+        "nl": "Temporary street circuit"
+      }
+    },
+    "direction": {
+      "l10n_key": "circuit.direction.clockwise",
+      "strings": {
+        "en": "Clockwise",
+        "nl": "Clockwise"
+      }
+    }
+  },
+  "weather_forecast": {
+    "temperature_c": 27,
+    "rain_chance_pct": 0,
+    "wind_speed_kmh": 10,
+    "humidity_pct": 60,
+    "air_pressure_hpa": 1010
+  },
+  "risks_and_incidents": {
+    "red_flag_chance_pct": 25,
+    "vsc_chance_pct": 35,
+    "accident_chance_pct": 40,
+    "turn_1_accident_chance_pct": 10,
+    "safety_car_probability_pct": 87
+  },
+  "lap_and_speed_stats": {
+    "fastest_lap_record": {
+      "time": "1:30.734",
+      "driver": "Lewis Hamilton",
+      "year": 2021
+    },
+    "slowest_lap_historical": {
+      "time": "1:34.000",
+      "driver": "Nicholas Latifi",
+      "year": 2022
+    },
+    "average_lap_time": "1:32.000",
+    "top_speed_kmh": 335,
+    "average_speed_kmh": 250,
+    "max_g_force": 4.9,
+    "avg_g_force": 2.8
+  },
+  "tyres_and_strategy": {
+    "tire_wear": {
+      "l10n_key": "tyre.wear.low",
+      "strings": {
+        "en": "Low",
+        "nl": "Low"
+      }
+    },
+    "strategy_typical": {
+      "l10n_key": "strategy.jeddah.typical",
+      "strings": {
+        "en": "1 stop",
+        "nl": "1 stop"
+      }
+    },
+    "best_combination": {
+      "l10n_key": "strategy.jeddah.combo",
+      "strings": {
+        "en": "Medium -> Hard",
+        "nl": "Medium -> Hard"
+      }
+    },
+    "fastest_pitstop_record": {
+      "time_s": 2.2,
+      "team": "McLaren",
+      "year": 2023
+    },
+    "braking_intensity": {
+      "l10n_key": "tyre.braking.jeddah",
+      "strings": {
+        "en": "Medium",
+        "nl": "Medium"
+      }
+    },
+    "harvesting_difficulty": {
+      "l10n_key": "energy.harvest.jeddah",
+      "strings": {
+        "en": "Low",
+        "nl": "Low"
+      }
+    }
+  },
+  "aerodynamics_2026": {
+    "x_mode_usage_pct": 38,
+    "z_mode_usage_pct": 62,
+    "manual_override_impact_score": 9.0,
+    "straight_mode_zones": 7,
+    "manual_override_activation_points": 5,
+    "active_aero_transitions_per_lap": 34
+  },
+  "energy_management": {
+    "electrical_power_ratio_pct": 50,
+    "ice_power_ratio_pct": 50,
+    "mgu_k_recovery_points": {
+      "l10n_key": "energy.mguk.jeddah",
+      "strings": {
+        "en": "Medium (high average speed)",
+        "nl": "Medium (high average speed)"
+      }
+    },
+    "primary_deployment_sectors": [
+      {
+        "l10n_key": "energy.deploy.jeddah.0",
+        "strings": {
+          "en": "Coastal straights",
+          "nl": "Coastal straights"
+        }
+      },
+      {
+        "l10n_key": "energy.deploy.jeddah.1",
+        "strings": {
+          "en": "Sector 2",
+          "nl": "Sector 2"
+        }
+      },
+      {
+        "l10n_key": "energy.deploy.jeddah.2",
+        "strings": {
+          "en": "Sector 3",
+          "nl": "Sector 3"
+        }
+      }
+    ]
+  },
+  "ambient_conditions": {
+    "track_evolution_factor_pct": 8,
+    "sun_angle_at_race_start": {
+      "l10n_key": "ambient.sun.jeddah",
+      "strings": {
+        "en": "18 degrees (West)",
+        "nl": "18 degrees (West)"
+      }
+    },
+    "visibility_risk_sectors": [
+      "Blind kinks",
+      "Turn 22"
+    ],
+    "elevation_above_sea_level_m": 5,
+    "max_elevation_change_m": 18.0
+  },
+  "era_comparison": {
+    "avg_lap_time_2024_2025_qual_reference": "1:28.500",
+    "est_lap_time_2026": "1:27.620",
+    "delta_seconds": "-0.880",
+    "top_speed_increase_kmh": 13,
+    "methodology_note": {
+      "l10n_key": "era.methodology.2026",
+      "strings": {
+        "en": "Estimated from 2024/2025 qualifying reference; adjusted for -30 kg mass and active aero top-speed gain (indicative, not official).",
+        "nl": "Geschat t.o.v. kwalificatie 2024/2025; correctie voor -30 kg en active aero topsnelheid (indicatief)."
+      }
+    }
+  },
+  "historical_success_rate": {
+    "most_reliable_engine_supplier": "Honda RBPT",
+    "team_podium_percentage_last_5_years": {
+      "Red Bull Racing": 60,
+      "McLaren": 40,
+      "Aston Martin": 25
+    }
+  },
+  "circuit_characteristics": {
+    "key_points": [
+      {
+        "l10n_key": "circuits.jeddah.key_point_0",
+        "strings": {
+          "en": "Fastest street layout; dense Active Aero transitions",
+          "nl": "Snelste stratencircuit; dichte Active Aero-transities"
+        }
+      }
+    ],
+    "full_throttle_pct": 72
+  }
+}

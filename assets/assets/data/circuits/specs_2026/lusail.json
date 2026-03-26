@@ -1,0 +1,202 @@
+{
+  "meta": {
+    "path": "/data/circuits/lusail.json",
+    "season": 2026,
+    "regulation_notes": "DRS terminology removed; use Straight Mode (Z-mode) and Manual Override Mode (MOM). Active Aero 2026. Electrical/ICE power split 50/50 for stated energy metrics."
+  },
+  "circuit_id": "lusail",
+  "name": "Losail International Circuit",
+  "location": "Lusail, Qatar",
+  "circuit_info": {
+    "length_m": 5419,
+    "laps": 57,
+    "distance_to_turn_1_m": 350,
+    "on_calendar_since": 2021,
+    "contract_until": 2032,
+    "circuit_difficulty": {
+      "l10n_key": "circuit.difficulty.high",
+      "strings": {
+        "en": "High",
+        "nl": "Hoog"
+      }
+    },
+    "overtaking_difficulty": {
+      "l10n_key": "circuit.overtaking.high",
+      "strings": {
+        "en": "High",
+        "nl": "Hoog"
+      }
+    },
+    "track_type": {
+      "l10n_key": "circuit.track_type.lusail",
+      "strings": {
+        "en": "Permanent road course",
+        "nl": "Permanent road course"
+      }
+    },
+    "direction": {
+      "l10n_key": "circuit.direction.clockwise",
+      "strings": {
+        "en": "Clockwise",
+        "nl": "Clockwise"
+      }
+    }
+  },
+  "weather_forecast": {
+    "temperature_c": 28,
+    "rain_chance_pct": 0,
+    "wind_speed_kmh": 18,
+    "humidity_pct": 55,
+    "air_pressure_hpa": 1013
+  },
+  "risks_and_incidents": {
+    "red_flag_chance_pct": 5,
+    "vsc_chance_pct": 15,
+    "accident_chance_pct": 15,
+    "turn_1_accident_chance_pct": 10,
+    "safety_car_probability_pct": 42
+  },
+  "lap_and_speed_stats": {
+    "fastest_lap_record": {
+      "time": "1:23.196",
+      "driver": "Max Verstappen",
+      "year": 2021
+    },
+    "slowest_lap_historical": {
+      "time": "1:27.000",
+      "driver": "Logan Sargeant",
+      "year": 2023
+    },
+    "average_lap_time": "1:25.000",
+    "top_speed_kmh": 330,
+    "average_speed_kmh": 235,
+    "max_g_force": 5.3,
+    "avg_g_force": 3.0
+  },
+  "tyres_and_strategy": {
+    "tire_wear": {
+      "l10n_key": "tyre.wear.very_high",
+      "strings": {
+        "en": "Very High",
+        "nl": "Very High"
+      }
+    },
+    "strategy_typical": {
+      "l10n_key": "strategy.lusail.typical",
+      "strings": {
+        "en": "3 stops",
+        "nl": "3 stops"
+      }
+    },
+    "best_combination": {
+      "l10n_key": "strategy.lusail.combo",
+      "strings": {
+        "en": "Medium -> Medium -> Hard -> Soft",
+        "nl": "Medium -> Medium -> Hard -> Soft"
+      }
+    },
+    "fastest_pitstop_record": {
+      "time_s": 1.8,
+      "team": "McLaren",
+      "year": 2023
+    },
+    "braking_intensity": {
+      "l10n_key": "tyre.braking.lusail",
+      "strings": {
+        "en": "Very High",
+        "nl": "Very High"
+      }
+    },
+    "harvesting_difficulty": {
+      "l10n_key": "energy.harvest.lusail",
+      "strings": {
+        "en": "Very High",
+        "nl": "Very High"
+      }
+    }
+  },
+  "aerodynamics_2026": {
+    "x_mode_usage_pct": 51,
+    "z_mode_usage_pct": 49,
+    "manual_override_impact_score": 9.0,
+    "straight_mode_zones": 4,
+    "manual_override_activation_points": 5,
+    "active_aero_transitions_per_lap": 31
+  },
+  "energy_management": {
+    "electrical_power_ratio_pct": 50,
+    "ice_power_ratio_pct": 50,
+    "mgu_k_recovery_points": {
+      "l10n_key": "energy.mguk.lusail",
+      "strings": {
+        "en": "Very high (high-speed sequence)",
+        "nl": "Very high (high-speed sequence)"
+      }
+    },
+    "primary_deployment_sectors": [
+      {
+        "l10n_key": "energy.deploy.lusail.0",
+        "strings": {
+          "en": "Main straight",
+          "nl": "Main straight"
+        }
+      },
+      {
+        "l10n_key": "energy.deploy.lusail.1",
+        "strings": {
+          "en": "Sector 2",
+          "nl": "Sector 2"
+        }
+      }
+    ]
+  },
+  "ambient_conditions": {
+    "track_evolution_factor_pct": 16,
+    "sun_angle_at_race_start": {
+      "l10n_key": "ambient.sun.lusail",
+      "strings": {
+        "en": "18 degrees (West)",
+        "nl": "18 degrees (West)"
+      }
+    },
+    "visibility_risk_sectors": [
+      "Turn 6",
+      "Turn 10"
+    ],
+    "elevation_above_sea_level_m": 5,
+    "max_elevation_change_m": 12.0
+  },
+  "era_comparison": {
+    "avg_lap_time_2024_2025_qual_reference": "1:23.800",
+    "est_lap_time_2026": "1:22.850",
+    "delta_seconds": "-0.950",
+    "top_speed_increase_kmh": 9,
+    "methodology_note": {
+      "l10n_key": "era.methodology.2026",
+      "strings": {
+        "en": "Estimated from 2024/2025 qualifying reference; adjusted for -30 kg mass and active aero top-speed gain (indicative, not official).",
+        "nl": "Geschat t.o.v. kwalificatie 2024/2025; correctie voor -30 kg en active aero topsnelheid (indicatief)."
+      }
+    }
+  },
+  "historical_success_rate": {
+    "most_reliable_engine_supplier": "Mercedes-AMG",
+    "team_podium_percentage_last_5_years": {
+      "Red Bull Racing": 65,
+      "McLaren": 40,
+      "Ferrari": 25
+    }
+  },
+  "circuit_characteristics": {
+    "key_points": [
+      {
+        "l10n_key": "circuits.lusail.key_point_0",
+        "strings": {
+          "en": "Tyre stress; night heat; sustained lateral load",
+          "nl": "Bandenstress; nachtwarmte; aanhoudende laterale belasting"
+        }
+      }
+    ],
+    "full_throttle_pct": 59
+  }
+}

@@ -1,0 +1,131 @@
+﻿{
+    "circuit_id":  "yas_marina",
+    "name":  "Yas Marina Circuit",
+    "location":  "Abu Dhabi, UAE",
+    "categories":  [
+                       {
+                           "category_id":  "live_ambient_status",
+                           "label_l10n":  "cat_ambient_stats",
+                           "icon":  "cloud_sun",
+                           "data_points":  {
+                                               "temperature_c":  26,
+                                               "rain_chance_pct":  0,
+                                               "air_pressure_hpa":  1014,
+                                               "track_evolution_pct":  15,
+                                               "sun_angle_start":  "10_deg_sunset_glare",
+                                               "elevation_sea_level_m":  3,
+                                               "max_elevation_change_m":  3.5,
+                                               "tyre_physics":  {
+                                                                    "asphalt_grip_score":  6,
+                                                                    "lateral_stress_score":  7
+                                                                },
+                                               "tyre_working_window_c":  114,
+                                               "wind_sensitivity_sector":  "S3",
+                                               "safety_car_window_laps":  "L15-L30",
+                                               "local_time_zone":  {
+                                                                       "zone_name":  "GST",
+                                                                       "utc_offset":  "UTC+4"
+                                                                   }
+                                           }
+                       },
+                       {
+                           "category_id":  "track_geometry",
+                           "label_l10n":  "cat_track_specs",
+                           "icon":  "straighten",
+                           "data_points":  {
+                                               "length_m":  5281,
+                                               "laps":  58,
+                                               "distance_to_t1_m":  290,
+                                               "on_calendar_since":  2009,
+                                               "contract_until":  2030,
+                                               "track_type_l10n":  "type_permanent_circuit",
+                                               "direction_l10n":  "dir_counter_clockwise",
+                                               "sector_splits_m":  {
+                                                                       "s1":  1680,
+                                                                       "s3":  1821,
+                                                                       "s2":  1780
+                                                                   },
+                                               "circuit_director":  "Saif Al Noaimi",
+                                               "circuit_owner":  "Ethara (Abu Dhabi Government)",
+                                               "race_day_capacity":  "60,000",
+                                               "latitude":  24.4672,
+                                               "longitude":  54.6031
+                                           }
+                       },
+                       {
+                           "category_id":  "aero_power_2026",
+                           "label_l10n":  "cat_tech_2026",
+                           "icon":  "bolt_aero",
+                           "data_points":  {
+                                               "z_mode_usage_pct":  60,
+                                               "x_mode_usage_pct":  40,
+                                               "straight_mode_zones":  2,
+                                               "manual_override_points":  2,
+                                               "override_impact_score":  9.2,
+                                               "electrical_ratio_pct":  50,
+                                               "harvest_difficulty_l10n":  "diff_medium",
+                                               "recovery_points":  16,
+                                               "energy_flow_strategy":  {
+                                                                            "harvesting_zones":  "T5, T6, T9",
+                                                                            "deployment_focus":  "Sector 2"
+                                                                        },
+                                               "manual_override_energy_cost_kj":  130,
+                                               "z_mode_activation_delay_ms":  145,
+                                               "engine_derating_risk_pct":  15,
+                                               "brake_cooling_requirement_score":  8
+                                           }
+                       },
+                       {
+                           "category_id":  "performance_risk",
+                           "label_l10n":  "cat_risks_stats",
+                           "icon":  "warning_speed",
+                           "data_points":  {
+                                               "top_speed_kmh":  340,
+                                               "max_g_force":  4.5,
+                                               "avg_g_force":  2.6,
+                                               "safety_car_prob_pct":  25,
+                                               "vsc_prob_pct":  30,
+                                               "red_flag_prob_pct":  10,
+                                               "t1_accident_risk_pct":  20,
+                                               "pit_exit_delta_s":  22.8,
+                                               "overtaking_delta_s":  1.1,
+                                               "undercut_potential_score":  7,
+                                               "circuit_difficulty_l10n":  "diff_medium",
+                                               "overtaking_difficulty_l10n":  "diff_medium"
+                                           }
+                       },
+                       {
+                           "category_id":  "historical_era",
+                           "label_l10n":  "cat_history_comparison",
+                           "icon":  "history_timer",
+                           "data_points":  {
+                                               "avg_time_2024_2025":  "1:25.950",
+                                               "est_time_2026":  "1:27.350",
+                                               "era_delta_s":  "+1.400",
+                                               "top_speed_delta_kmh":  12,
+                                               "pitstop_record_detail":  {
+                                                                             "team":  "Red Bull Racing",
+                                                                             "driver":  "Max Verstappen",
+                                                                             "year":  2023,
+                                                                             "time_s":  2.1
+                                                                         },
+                                               "lap_record_detail":  {
+                                                                         "time":  "1:23.445",
+                                                                         "engine":  "Honda RBPT",
+                                                                         "driver":  "Max Verstappen",
+                                                                         "year":  2024,
+                                                                         "team":  "Red Bull Racing"
+                                                                     }
+                                           }
+                       }
+                   ],
+    "characteristics":  {
+                            "key_features_l10n":  [
+                                                      "feature_sunset_to_night",
+                                                      "feature_hotel_underpass",
+                                                      "feature_technical_final_sector",
+                                                      "feature_heavy_traction_points"
+                                                  ],
+                            "full_throttle_pct":  64
+                        }
+}

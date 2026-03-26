@@ -1,0 +1,230 @@
+{
+  "meta": {
+    "path": "/data/circuits/albert_park.json",
+    "season": 2026,
+    "regulation_notes": "DRS terminology removed; use Straight Mode (Z-mode) and Manual Override Mode (MOM). Active Aero 2026. Electrical/ICE power split 50/50 for stated energy metrics."
+  },
+  "circuit_id": "albert_park",
+  "name": "Albert Park Circuit",
+  "location": "Melbourne, Australia",
+  "circuit_info": {
+    "length_m": 5278,
+    "laps": 58,
+    "distance_to_turn_1_m": 260,
+    "on_calendar_since": 1996,
+    "contract_until": 2037,
+    "circuit_difficulty": {
+      "l10n_key": "circuit.difficulty.medium",
+      "strings": {
+        "en": "Medium",
+        "nl": "Gemiddeld"
+      }
+    },
+    "overtaking_difficulty": {
+      "l10n_key": "circuit.overtaking.medium",
+      "strings": {
+        "en": "Medium",
+        "nl": "Gemiddeld"
+      }
+    },
+    "track_type": {
+      "l10n_key": "circuit.track_type.albert_park",
+      "strings": {
+        "en": "Temporary street circuit",
+        "nl": "Temporary street circuit"
+      }
+    },
+    "direction": {
+      "l10n_key": "circuit.direction.clockwise",
+      "strings": {
+        "en": "Clockwise",
+        "nl": "Clockwise"
+      }
+    }
+  },
+  "weather_forecast": {
+    "temperature_c": 22,
+    "rain_chance_pct": 20,
+    "wind_speed_kmh": 14,
+    "humidity_pct": 55,
+    "air_pressure_hpa": 1015
+  },
+  "risks_and_incidents": {
+    "red_flag_chance_pct": 15,
+    "vsc_chance_pct": 20,
+    "accident_chance_pct": 25,
+    "turn_1_accident_chance_pct": 15,
+    "safety_car_probability_pct": 57
+  },
+  "lap_and_speed_stats": {
+    "fastest_lap_record": {
+      "time": "1:19.813",
+      "driver": "Charles Leclerc",
+      "year": 2024
+    },
+    "slowest_lap_historical": {
+      "time": "1:35.000",
+      "driver": "Robert Kubica",
+      "year": 2019
+    },
+    "average_lap_time": "1:23.000",
+    "top_speed_kmh": 335,
+    "average_speed_kmh": 230,
+    "max_g_force": 4.8,
+    "avg_g_force": 2.6
+  },
+  "tyres_and_strategy": {
+    "tire_wear": {
+      "l10n_key": "tyre.wear.medium",
+      "strings": {
+        "en": "Medium",
+        "nl": "Medium"
+      }
+    },
+    "strategy_typical": {
+      "l10n_key": "strategy.albert_park.typical",
+      "strings": {
+        "en": "2 stops",
+        "nl": "2 stops"
+      }
+    },
+    "best_combination": {
+      "l10n_key": "strategy.albert_park.combo",
+      "strings": {
+        "en": "Medium -> Hard -> Hard",
+        "nl": "Medium -> Hard -> Hard"
+      }
+    },
+    "fastest_pitstop_record": {
+      "time_s": 2.3,
+      "team": "Ferrari",
+      "year": 2022
+    },
+    "braking_intensity": {
+      "l10n_key": "tyre.braking.albert_park",
+      "strings": {
+        "en": "Medium",
+        "nl": "Medium"
+      }
+    },
+    "harvesting_difficulty": {
+      "l10n_key": "energy.harvest.albert_park",
+      "strings": {
+        "en": "Low",
+        "nl": "Low"
+      }
+    }
+  },
+  "aerodynamics_2026": {
+    "x_mode_usage_pct": 42,
+    "z_mode_usage_pct": 58,
+    "manual_override_impact_score": 8.5,
+    "straight_mode_zones": 5,
+    "manual_override_activation_points": 4,
+    "active_aero_transitions_per_lap": 28
+  },
+  "energy_management": {
+    "electrical_power_ratio_pct": 50,
+    "ice_power_ratio_pct": 50,
+    "mgu_k_recovery_points": {
+      "l10n_key": "energy.mguk.albert_park",
+      "strings": {
+        "en": "High (14 braking zones)",
+        "nl": "High (14 braking zones)"
+      }
+    },
+    "primary_deployment_sectors": [
+      {
+        "l10n_key": "energy.deploy.albert_park.0",
+        "strings": {
+          "en": "Sector 1 (main straight)",
+          "nl": "Sector 1 (main straight)"
+        }
+      },
+      {
+        "l10n_key": "energy.deploy.albert_park.1",
+        "strings": {
+          "en": "Sector 2 (Lakeside)",
+          "nl": "Sector 2 (Lakeside)"
+        }
+      },
+      {
+        "l10n_key": "energy.deploy.albert_park.2",
+        "strings": {
+          "en": "Sector 3 (final sector)",
+          "nl": "Sector 3 (final sector)"
+        }
+      }
+    ]
+  },
+  "ambient_conditions": {
+    "track_evolution_factor_pct": 12,
+    "sun_angle_at_race_start": {
+      "l10n_key": "ambient.sun.albert_park",
+      "strings": {
+        "en": "32 degrees (North-West)",
+        "nl": "32 degrees (North-West)"
+      }
+    },
+    "visibility_risk_sectors": [
+      "Turn 1",
+      "Turn 3"
+    ],
+    "elevation_above_sea_level_m": 12,
+    "max_elevation_change_m": 8.0
+  },
+  "era_comparison": {
+    "avg_lap_time_2024_2025_qual_reference": "1:16.050",
+    "est_lap_time_2026": "1:15.180",
+    "delta_seconds": "-0.870",
+    "top_speed_increase_kmh": 12,
+    "methodology_note": {
+      "l10n_key": "era.methodology.2026",
+      "strings": {
+        "en": "Estimated from 2024/2025 qualifying reference; adjusted for -30 kg mass and active aero top-speed gain (indicative, not official).",
+        "nl": "Geschat t.o.v. kwalificatie 2024/2025; correctie voor -30 kg en active aero topsnelheid (indicatief)."
+      }
+    }
+  },
+  "historical_success_rate": {
+    "most_reliable_engine_supplier": "Mercedes-AMG",
+    "team_podium_percentage_last_5_years": {
+      "Red Bull Racing": 55,
+      "Ferrari": 45,
+      "McLaren": 40
+    }
+  },
+  "circuit_characteristics": {
+    "key_points": [
+      {
+        "l10n_key": "circuits.albert_park.key_point_0",
+        "strings": {
+          "en": "5 Straight Mode (Z-mode) zones with Active Aero transitions",
+          "nl": "5 Straight Mode (Z-mode) zones met Active Aero-transities"
+        }
+      },
+      {
+        "l10n_key": "circuits.albert_park.key_point_1",
+        "strings": {
+          "en": "Manual Override Mode (MOM) viable on long straights",
+          "nl": "Manual Override Mode (MOM) bruikbaar op lange rechters"
+        }
+      },
+      {
+        "l10n_key": "circuits.albert_park.key_point_2",
+        "strings": {
+          "en": "Sweeping high-speed corners; variable temporary-surface grip",
+          "nl": "Snelle vloeiende bochten; wisselende grip op tijdelijk asfalt"
+        }
+      },
+      {
+        "l10n_key": "circuits.albert_park.key_point_3",
+        "strings": {
+          "en": "Bumpy braking zones; 50/50 ICE/electric deployment discipline",
+          "nl": "Hobbelige remzones; 50/50 ICE/elektrisch vermogensbeheer"
+        }
+      }
+    ],
+    "full_throttle_pct": 69
+  }
+}
