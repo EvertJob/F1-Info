@@ -1,6 +1,6 @@
 name: f1
 description: "F1 Hub: A cross-platform Formula 1 dashboard with high-fidelity UI parity, live timing integration, and adaptive display modes."
-version: 1.0.2+28
+version: 1.0.2+29
 publish_to: 'none'
 
 # Metadata voor pub.dev (ook al staat publish_to op none, dit is best practice)
@@ -71,6 +71,7 @@ dependencies:
   syncfusion_flutter_charts: ^33.1.45
   flutter_staggered_grid_view: ^0.7.0
   font_awesome_flutter: 10.12.0
+  args: ^2.7.0
   
 
 dev_dependencies:
@@ -100,6 +101,60 @@ flutter:
 
   assets:
     - assets/data/f1-locations-2026.json
+    # Year roots: standings JSON in this folder. Subfolders are NOT bundled unless listed
+    # (Flutter web manifest only had *_standings_*.json without the lines below).
+    - assets/data/2024/
+    - assets/data/2025/
+    - assets/data/2026/
+    - assets/data/2024/austin/
+    - assets/data/2024/baku/
+    - assets/data/2024/catalunya/
+    - assets/data/2024/hungaroring/
+    - assets/data/2024/imola/
+    - assets/data/2024/interlagos/
+    - assets/data/2024/jeddah/
+    - assets/data/2024/las_vegas/
+    - assets/data/2024/lusail/
+    - assets/data/2024/melbourne/
+    - assets/data/2024/mexico_city/
+    - assets/data/2024/miami/
+    - assets/data/2024/monte_carlo/
+    - assets/data/2024/montreal/
+    - assets/data/2024/monza/
+    - assets/data/2024/sakhir/
+    - assets/data/2024/shanghai/
+    - assets/data/2024/silverstone/
+    - assets/data/2024/singapore/
+    - assets/data/2024/spafrancorchamps/
+    - assets/data/2024/spielberg/
+    - assets/data/2024/suzuka/
+    - assets/data/2024/yas_marina_circuit/
+    - assets/data/2024/zandvoort/
+    - assets/data/2025/austin/
+    - assets/data/2025/baku/
+    - assets/data/2025/catalunya/
+    - assets/data/2025/hungaroring/
+    - assets/data/2025/imola/
+    - assets/data/2025/interlagos/
+    - assets/data/2025/jeddah/
+    - assets/data/2025/melbourne/
+    - assets/data/2025/mexico_city/
+    - assets/data/2025/miami/
+    - assets/data/2025/monte_carlo/
+    - assets/data/2025/montreal/
+    - assets/data/2025/monza/
+    - assets/data/2025/sakhir/
+    - assets/data/2025/shanghai/
+    - assets/data/2025/silverstone/
+    - assets/data/2025/singapore/
+    - assets/data/2025/spafrancorchamps/
+    - assets/data/2025/spielberg/
+    - assets/data/2025/suzuka/
+    - assets/data/2025/zandvoort/
+    - assets/data/2026/melbourne/
+    - assets/data/2026/shanghai/
+    - assets/data/2026/suzuka/
+    - assets/data/results/
     - assets/data/circuits/
     # Submap staat niet automatisch in de bundle; nodig voor *.geojson op web.
     - assets/data/circuits/geojson/

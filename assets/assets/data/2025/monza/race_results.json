@@ -1,0 +1,495 @@
+{
+  "sessionKey": 9912,
+  "results": [
+    {
+      "driverNumber": 1,
+      "broadcastName": "M VERSTAPPEN",
+      "teamName": "Red Bull Racing",
+      "finishPosition": 1,
+      "points": 25.0,
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 37
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 38,
+          "lapEnd": 53
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 37,
+          "duration": 24.545
+        }
+      ]
+    },
+    {
+      "driverNumber": 4,
+      "broadcastName": "L NORRIS",
+      "teamName": "McLaren",
+      "finishPosition": 2,
+      "points": 18.0,
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 46
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 47,
+          "lapEnd": 53
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 46,
+          "duration": 27.498
+        }
+      ]
+    },
+    {
+      "driverNumber": 81,
+      "broadcastName": "O PIASTRI",
+      "teamName": "McLaren",
+      "finishPosition": 3,
+      "points": 15.0,
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 45
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 46,
+          "lapEnd": 53
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 45,
+          "duration": 23.602
+        }
+      ]
+    },
+    {
+      "driverNumber": 16,
+      "broadcastName": "C LECLERC",
+      "teamName": "Ferrari",
+      "finishPosition": 4,
+      "points": 12.0,
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 33
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 34,
+          "lapEnd": 53
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 33,
+          "duration": 24.235
+        }
+      ]
+    },
+    {
+      "driverNumber": 63,
+      "broadcastName": "G RUSSELL",
+      "teamName": "Mercedes",
+      "finishPosition": 5,
+      "points": 10.0,
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 27
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 28,
+          "lapEnd": 53
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 27,
+          "duration": 25.021
+        }
+      ]
+    },
+    {
+      "driverNumber": 44,
+      "broadcastName": "L HAMILTON",
+      "teamName": "Ferrari",
+      "finishPosition": 6,
+      "points": 8.0,
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 38
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 39,
+          "lapEnd": 53
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 38,
+          "duration": 23.971
+        }
+      ]
+    },
+    {
+      "driverNumber": 23,
+      "broadcastName": "A ALBON",
+      "teamName": "Williams",
+      "finishPosition": 7,
+      "points": 6.0,
+      "tyreStints": [
+        {
+          "compound": "HARD",
+          "lapStart": 1,
+          "lapEnd": 41
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 42,
+          "lapEnd": 53
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 41,
+          "duration": 24.717
+        }
+      ]
+    },
+    {
+      "driverNumber": 5,
+      "broadcastName": "G BORTOLETO",
+      "teamName": "Kick Sauber",
+      "finishPosition": 8,
+      "points": 4.0,
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 20
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 21,
+          "lapEnd": 53
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 20,
+          "duration": 26.143
+        }
+      ]
+    },
+    {
+      "driverNumber": 12,
+      "broadcastName": "K ANTONELLI",
+      "teamName": "Mercedes",
+      "finishPosition": 9,
+      "points": 2.0,
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 28
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 29,
+          "lapEnd": 53
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 28,
+          "duration": 24.916
+        }
+      ]
+    },
+    {
+      "driverNumber": 6,
+      "broadcastName": "I HADJAR",
+      "teamName": "Racing Bulls",
+      "finishPosition": 10,
+      "points": 1.0,
+      "tyreStints": [
+        {
+          "compound": "HARD",
+          "lapStart": 1,
+          "lapEnd": 32
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 33,
+          "lapEnd": 53
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 32,
+          "duration": 24.326
+        }
+      ]
+    },
+    {
+      "driverNumber": 55,
+      "broadcastName": "C SAINZ",
+      "teamName": "Williams",
+      "finishPosition": 11,
+      "points": 0.0,
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 30
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 31,
+          "lapEnd": 53
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 30,
+          "duration": 24.605
+        }
+      ]
+    },
+    {
+      "driverNumber": 87,
+      "broadcastName": "O BEARMAN",
+      "teamName": "Haas F1 Team",
+      "finishPosition": 12,
+      "points": 0.0,
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 18
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 19,
+          "lapEnd": 53
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 18,
+          "duration": 25.372
+        }
+      ]
+    },
+    {
+      "driverNumber": 22,
+      "broadcastName": "Y TSUNODA",
+      "teamName": "Red Bull Racing",
+      "finishPosition": 13,
+      "points": 0.0,
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 19
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 20,
+          "lapEnd": 53
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 19,
+          "duration": 24.372
+        }
+      ]
+    },
+    {
+      "driverNumber": 30,
+      "broadcastName": "L LAWSON",
+      "teamName": "Racing Bulls",
+      "finishPosition": 14,
+      "points": 0.0,
+      "tyreStints": [
+        {
+          "compound": "SOFT",
+          "lapStart": 1,
+          "lapEnd": 9
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 10,
+          "lapEnd": 53
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 9,
+          "duration": 24.156
+        }
+      ]
+    },
+    {
+      "driverNumber": 31,
+      "broadcastName": "E OCON",
+      "teamName": "Haas F1 Team",
+      "finishPosition": 15,
+      "points": 0.0,
+      "tyreStints": [
+        {
+          "compound": "HARD",
+          "lapStart": 1,
+          "lapEnd": 51
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 52,
+          "lapEnd": 52
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 51,
+          "duration": 30.754
+        }
+      ]
+    },
+    {
+      "driverNumber": 10,
+      "broadcastName": "P GASLY",
+      "teamName": "Alpine",
+      "finishPosition": 16,
+      "points": 0.0,
+      "tyreStints": [
+        {
+          "compound": "HARD",
+          "lapStart": 1,
+          "lapEnd": 49
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 50,
+          "lapEnd": 52
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 49,
+          "duration": 25.012
+        }
+      ]
+    },
+    {
+      "driverNumber": 43,
+      "broadcastName": "F COLAPINTO",
+      "teamName": "Alpine",
+      "finishPosition": 17,
+      "points": 0.0,
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 33
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 34,
+          "lapEnd": 52
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 33,
+          "duration": 24.971
+        }
+      ]
+    },
+    {
+      "driverNumber": 18,
+      "broadcastName": "L STROLL",
+      "teamName": "Aston Martin",
+      "finishPosition": 18,
+      "points": 0.0,
+      "tyreStints": [
+        {
+          "compound": "HARD",
+          "lapStart": 1,
+          "lapEnd": 49
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 50,
+          "lapEnd": 52
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 49,
+          "duration": 38.418
+        }
+      ]
+    },
+    {
+      "driverNumber": 14,
+      "broadcastName": "F ALONSO",
+      "teamName": "Aston Martin",
+      "finishPosition": null,
+      "points": 0.0,
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 20
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 21,
+          "lapEnd": 24
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 20,
+          "duration": 25.16
+        }
+      ]
+    },
+    {
+      "driverNumber": 27,
+      "broadcastName": "N HULKENBERG",
+      "teamName": "Kick Sauber",
+      "finishPosition": null,
+      "points": 0.0,
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 1
+        }
+      ],
+      "pitStops": []
+    }
+  ]
+}
