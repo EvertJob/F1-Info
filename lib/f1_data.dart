@@ -38,6 +38,8 @@ class Race {
         circuitImage: json['circuitImage'] as String,
         lat: (json['lat'] as num).toDouble(),
         lon: (json['lon'] as num).toDouble(),
+        circuitAssetId: json['circuit_asset_id'] as String? ?? '',
+        circuitDisplayName: json['circuit_display_name'] as String? ?? '',
       );
     }
   final String name;
@@ -74,6 +76,12 @@ class Race {
   final String circuitImage;
   final double lat;
   final double lon;
+
+  /// Stem of `assets/data/circuits/{id}.json` (must match `circuit_id` in that file).
+  final String circuitAssetId;
+
+  /// [CircuitData.name] from the same JSON (circuit’s official name on the hub).
+  final String circuitDisplayName;
 
   DateTime get fp1 => date.subtract(const Duration(days: 2, hours: 4));
   DateTime get fp2 => date.subtract(const Duration(days: 2));
@@ -117,6 +125,8 @@ class Race {
     required this.circuitImage,
     required this.lat,
     required this.lon,
+    required this.circuitAssetId,
+    required this.circuitDisplayName,
   });
 }
 
@@ -913,6 +923,8 @@ final List<Race> races = [
     lon: 144.968,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026trackmelbourneblackoutline.svg',
+    circuitAssetId: 'albert_park',
+    circuitDisplayName: 'Albert Park Circuit',
     weather: WeatherForecast(
       temperature: 22,
       rainChance: 20,
@@ -970,6 +982,8 @@ final List<Race> races = [
     lon: 121.22,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026trackshanghaiblackoutline.svg',
+    circuitAssetId: 'shanghai_international',
+    circuitDisplayName: 'Shanghai International Circuit',
     weather: WeatherForecast(
       temperature: 17,
       rainChance: 25,
@@ -1027,6 +1041,8 @@ final List<Race> races = [
     lon: 136.531,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026tracksuzukablackoutline.svg',
+    circuitAssetId: 'suzuka_circuit',
+    circuitDisplayName: 'Suzuka Circuit',
     weather: WeatherForecast(
       temperature: 19,
       rainChance: 30,
@@ -1084,6 +1100,8 @@ final List<Race> races = [
     lon: 50.5106,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026tracksakhirblackoutline.svg',
+    circuitAssetId: 'bahrain_international',
+    circuitDisplayName: 'Bahrain International Circuit',
     weather: WeatherForecast(
       temperature: 24,
       rainChance: 0,
@@ -1141,6 +1159,8 @@ final List<Race> races = [
     lon: 39.1044,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026trackjeddahblackoutline.svg',
+    circuitAssetId: 'jeddah_corniche',
+    circuitDisplayName: 'Jeddah Corniche Circuit',
     weather: WeatherForecast(
       temperature: 27,
       rainChance: 0,
@@ -1198,6 +1218,8 @@ final List<Race> races = [
     lon: -80.2389,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026trackmiamiblackoutline.svg',
+    circuitAssetId: 'miami_autodrome',
+    circuitDisplayName: 'Miami International Autodrome',
     weather: WeatherForecast(
       temperature: 29,
       rainChance: 40,
@@ -1255,6 +1277,8 @@ final List<Race> races = [
     lon: -73.5228,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026trackmontrealblackoutline.svg',
+    circuitAssetId: 'gilles_villeneuve',
+    circuitDisplayName: 'Circuit Gilles-Villeneuve',
     weather: WeatherForecast(
       temperature: 20,
       rainChance: 40,
@@ -1312,6 +1336,8 @@ final List<Race> races = [
     lon: 7.4206,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026trackmontecarloblackoutline.svg',
+    circuitAssetId: 'circuit_de_monaco',
+    circuitDisplayName: 'Circuit de Monaco',
     weather: WeatherForecast(
       temperature: 23,
       rainChance: 10,
@@ -1369,6 +1395,8 @@ final List<Race> races = [
     lon: 2.2611,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026trackcatalunyablackoutline.svg',
+    circuitAssetId: 'circuit_barcelona_catalunya',
+    circuitDisplayName: 'Circuit de Barcelona-Catalunya',
     weather: WeatherForecast(
       temperature: 28,
       rainChance: 5,
@@ -1426,6 +1454,8 @@ final List<Race> races = [
     lon: 14.7647,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026trackspielbergblackoutline.svg',
+    circuitAssetId: 'red_bull_ring',
+    circuitDisplayName: 'Red Bull Ring',
     weather: WeatherForecast(
       temperature: 24,
       rainChance: 30,
@@ -1483,6 +1513,8 @@ final List<Race> races = [
     lon: -1.0169,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_392/v1740000000/common/f1/2026/track/2026tracksilverstoneblackoutline.svg',
+    circuitAssetId: 'silverstone_circuit',
+    circuitDisplayName: 'Silverstone Circuit',
     weather: WeatherForecast(
       temperature: 20,
       rainChance: 50,
@@ -1540,6 +1572,8 @@ final List<Race> races = [
     lon: 5.9714,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026trackspafrancorchampsblackoutline.svg',
+    circuitAssetId: 'spa_francorchamps',
+    circuitDisplayName: 'Circuit de Spa-Francorchamps',
     weather: WeatherForecast(
       temperature: 18,
       rainChance: 60,
@@ -1597,6 +1631,8 @@ final List<Race> races = [
     lon: 19.2511,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_392/v1740000000/common/f1/2026/track/2026trackhungaroringblackoutline.svg',
+    circuitAssetId: 'hungaroring',
+    circuitDisplayName: 'Hungaroring',
     weather: WeatherForecast(
       temperature: 31,
       rainChance: 15,
@@ -1654,6 +1690,8 @@ final List<Race> races = [
     lon: 4.5409,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026trackzandvoortblackoutline.svg',
+    circuitAssetId: 'circuit_zandvoort',
+    circuitDisplayName: 'Circuit Zandvoort',
     weather: WeatherForecast(
       temperature: 20,
       rainChance: 45,
@@ -1711,6 +1749,8 @@ final List<Race> races = [
     lon: 9.2811,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026trackmonzablackoutline.svg',
+    circuitAssetId: 'monza_circuit',
+    circuitDisplayName: 'Autodromo Nazionale Monza',
     weather: WeatherForecast(
       temperature: 26,
       rainChance: 10,
@@ -1768,6 +1808,8 @@ final List<Race> races = [
     lon: -3.6200,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026trackmadringblackoutline.svg',
+    circuitAssetId: 'madrid_madring',
+    circuitDisplayName: 'Circuito de Madring',
     weather: WeatherForecast(
       temperature: 27,
       rainChance: 10,
@@ -1825,6 +1867,8 @@ final List<Race> races = [
     lon: 49.8533,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026trackbakublackoutline.svg',
+    circuitAssetId: 'baku_city_circuit',
+    circuitDisplayName: 'Baku City Circuit',
     weather: WeatherForecast(
       temperature: 24,
       rainChance: 5,
@@ -1882,6 +1926,8 @@ final List<Race> races = [
     lon: 103.864,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026tracksingaporeblackoutline.svg',
+    circuitAssetId: 'marina_bay_circuit',
+    circuitDisplayName: 'Marina Bay Street Circuit',
     weather: WeatherForecast(
       temperature: 31,
       rainChance: 50,
@@ -1939,6 +1985,8 @@ final List<Race> races = [
     lon: -97.6411,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026trackaustinblackoutline.svg',
+    circuitAssetId: 'circuit_of_the_americas',
+    circuitDisplayName: 'Circuit of the Americas',
     weather: WeatherForecast(
       temperature: 28,
       rainChance: 10,
@@ -1996,6 +2044,8 @@ final List<Race> races = [
     lon: -99.0907,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026trackmexicocityblackoutline.svg',
+    circuitAssetId: 'hermanos_rodriguez',
+    circuitDisplayName: 'Autódromo Hermanos Rodríguez',
     weather: WeatherForecast(
       temperature: 23,
       rainChance: 20,
@@ -2053,6 +2103,8 @@ final List<Race> races = [
     lon: -46.6997,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026trackinterlagosblackoutline.svg',
+    circuitAssetId: 'interlagos_circuit',
+    circuitDisplayName: 'Autódromo de Interlagos',
     weather: WeatherForecast(
       temperature: 25,
       rainChance: 60,
@@ -2110,6 +2162,8 @@ final List<Race> races = [
     lon: -115.1728,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026tracklasvegasblackoutline.svg',
+    circuitAssetId: 'las_vegas_strip',
+    circuitDisplayName: 'Las Vegas Strip Circuit',
     weather: WeatherForecast(
       temperature: 12,
       rainChance: 0,
@@ -2167,6 +2221,8 @@ final List<Race> races = [
     lon: 51.4542,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026tracklusailblackoutline.svg',
+    circuitAssetId: 'lusail_circuit',
+    circuitDisplayName: 'Lusail International Circuit',
     weather: WeatherForecast(
       temperature: 28,
       rainChance: 0,
@@ -2224,6 +2280,8 @@ final List<Race> races = [
     lon: 54.6031,
     circuitImage:
         'https://media.formula1.com/image/upload/c_lfill,w_3392/v1740000000/common/f1/2026/track/2026trackyasmarinacircuitblackoutline.svg',
+    circuitAssetId: 'yas_marina',
+    circuitDisplayName: 'Yas Marina Circuit',
     weather: WeatherForecast(
       temperature: 26,
       rainChance: 0,
@@ -2269,6 +2327,126 @@ final List<Race> races = [
     ],
   ),
 ];
+
+/// World Drivers’ Championship history for the current grid (year + constructor).
+const Map<String, Map<String, dynamic>> kDriverWorldTitles = {
+  'Lewis Hamilton': {
+    'count': 7,
+    'history': [
+      {'year': 2008, 'team': 'McLaren'},
+      {'year': 2014, 'team': 'Mercedes'},
+      {'year': 2015, 'team': 'Mercedes'},
+      {'year': 2017, 'team': 'Mercedes'},
+      {'year': 2018, 'team': 'Mercedes'},
+      {'year': 2019, 'team': 'Mercedes'},
+      {'year': 2020, 'team': 'Mercedes'},
+    ],
+  },
+  'Max Verstappen': {
+    'count': 4,
+    'history': [
+      {'year': 2021, 'team': 'Red Bull Racing'},
+      {'year': 2022, 'team': 'Red Bull Racing'},
+      {'year': 2023, 'team': 'Red Bull Racing'},
+      {'year': 2024, 'team': 'Red Bull Racing'},
+    ],
+  },
+  'Fernando Alonso': {
+    'count': 2,
+    'history': [
+      {'year': 2005, 'team': 'Renault'},
+      {'year': 2006, 'team': 'Renault'},
+    ],
+  },
+  'Lando Norris': {
+    'count': 1,
+    'history': [
+      {'year': 2025, 'team': 'McLaren'},
+    ],
+  },
+};
+
+/// Case-insensitive match for [kDriverWorldTitles] keys vs API / JSON driver strings
+/// (e.g. `"Lewis HAMILTON"` ↔ `"Lewis Hamilton"`).
+Map<String, dynamic>? kDriverWorldTitlesEntryForName(String driverName) {
+  final normalized = driverName.trim().toLowerCase();
+  if (normalized.isEmpty) return null;
+  for (final e in kDriverWorldTitles.entries) {
+    if (e.key.trim().toLowerCase() == normalized) {
+      return Map<String, dynamic>.from(
+        e.value.map((k, v) => MapEntry(k.toString(), v)),
+      );
+    }
+  }
+  return null;
+}
+
+String _formatWorldTitleYearRuns(List<int> years) {
+  if (years.isEmpty) return '';
+  final sorted = [...years]..sort();
+  final parts = <String>[];
+  var runStart = sorted.first;
+  var runEnd = sorted.first;
+  for (var i = 1; i < sorted.length; i++) {
+    final y = sorted[i];
+    if (y == runEnd + 1) {
+      runEnd = y;
+    } else {
+      parts.add(runStart == runEnd ? '$runStart' : '$runStart-$runEnd');
+      runStart = y;
+      runEnd = y;
+    }
+  }
+  parts.add(runStart == runEnd ? '$runStart' : '$runStart-$runEnd');
+  return parts.join(', ');
+}
+
+/// e.g. `4 Titles (Red Bull Racing: 2021, 2022, 2023, 2024)` or
+/// `7 Titles (McLaren: 2008 | Mercedes: 2014-2015, 2017-2020)`.
+String formatDriverWorldTitlesEntry(Map<String, dynamic> entry) {
+  final count = entry['count'] as int? ?? 0;
+  final rawHistory = entry['history'] as List<dynamic>? ?? const [];
+  final teamOrder = <String>[];
+  final teamYears = <String, List<int>>{};
+  for (final item in rawHistory) {
+    if (item is! Map) continue;
+    final m = item.map((k, v) => MapEntry(k.toString(), v));
+    final team = m['team']?.toString().trim() ?? '';
+    final yearRaw = m['year'];
+    final y = yearRaw is int
+        ? yearRaw
+        : int.tryParse(yearRaw?.toString() ?? '');
+    if (team.isEmpty || y == null) continue;
+    teamYears.putIfAbsent(team, () => <int>[]).add(y);
+    if (!teamOrder.contains(team)) {
+      teamOrder.add(team);
+    }
+  }
+  final segments = <String>[];
+  for (final team in teamOrder) {
+    final runs = _formatWorldTitleYearRuns(teamYears[team]!);
+    if (runs.isNotEmpty) {
+      segments.add('$team: $runs');
+    }
+  }
+  if (segments.isEmpty) return '';
+  return '$count Titles (${segments.join(' | ')})';
+}
+
+/// Standings subtitle: detailed map when present, else years-only fallback from [Driver].
+String driverStandingsTitlesLine(Driver d) {
+  final extra = kDriverWorldTitlesEntryForName(d.name);
+  if (extra != null) {
+    return formatDriverWorldTitlesEntry(extra);
+  }
+  if (d.championshipYears.isEmpty) return '';
+  return '${d.championships} Titles (${d.championshipYears.join(', ')})';
+}
+
+String driverStandingsTitlesLineDesktop(Driver d) {
+  final line = driverStandingsTitlesLine(d);
+  return line.isEmpty ? 'No titles' : line;
+}
 
 final List<Driver> drivers2026 = [
   Driver(

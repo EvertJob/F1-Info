@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'data/f1_asset_resolver.dart';
+
 List<int> _parseFavoriteDriverNumbers(dynamic raw) {
   if (raw is! List) return const [];
   final out = <int>[];
@@ -33,11 +35,19 @@ class ProfileFavoritesService {
   ProfileFavoritesService._();
   static final ProfileFavoritesService instance = ProfileFavoritesService._();
 
-  /// Loads team names from teams_standings_2026.json (standings[].team).
+  /// Loads team names from bundled standings (standings[].team).
   Future<List<String>> loadTeamNames() async {
     try {
-      final json = await rootBundle.loadString('data/results/teams/teams_standings_2026.json');
-      final map = jsonDecode(json) as Map<String, dynamic>;
+      final year = 2026;
+      String? raw;
+      for (final path in F1AssetResolver.teamsStandingsCandidatePaths(year)) {
+        try {
+          raw = await rootBundle.loadString(path);
+          break;
+        } catch (_) {}
+      }
+      if (raw == null) return [];
+      final map = jsonDecode(raw) as Map<String, dynamic>;
       final standings = map['standings'] as List<dynamic>? ?? [];
       return standings
           .map((e) => (e as Map<String, dynamic>)['team'] as String? ?? '')
@@ -49,11 +59,19 @@ class ProfileFavoritesService {
     }
   }
 
-  /// Loads driver names from drivers_standings_2026.json (standings[].driver).
+  /// Loads driver names from bundled standings (standings[].driver).
   Future<List<String>> loadDriverNames() async {
     try {
-      final json = await rootBundle.loadString('data/results/drivers/drivers_standings_2026.json');
-      final map = jsonDecode(json) as Map<String, dynamic>;
+      final year = 2026;
+      String? raw;
+      for (final path in F1AssetResolver.driversStandingsCandidatePaths(year)) {
+        try {
+          raw = await rootBundle.loadString(path);
+          break;
+        } catch (_) {}
+      }
+      if (raw == null) return [];
+      final map = jsonDecode(raw) as Map<String, dynamic>;
       final standings = map['standings'] as List<dynamic>? ?? [];
       return standings
           .map((e) => (e as Map<String, dynamic>)['driver'] as String? ?? '')

@@ -1514,6 +1514,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get race_control_filter_stewards => 'Stewards';
 
   @override
+  String get race_control_filter_penalties => 'Penalties';
+
+  @override
   String race_control_message_count(String visible, String total) {
     return '$visible of $total messages';
   }
@@ -1553,6 +1556,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get race_control_search_hint => 'Search by message, flag, category, lap or driver';
+
+  @override
+  String get race_control_track_limits_strip => 'Track limits — deleted laps';
+
+  @override
+  String get race_control_steward_storyline => 'Steward storyline';
 
   @override
   String get race_stats => 'Race Stats';
@@ -1954,6 +1963,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get weekend_hub_loading => 'Loading Weekend Hub...';
 
   @override
+  String get weekend_hub_no_results_yet => 'Results for this session are not yet available or have not been synced.';
+
+  @override
+  String get weekend_hub_session_insights => 'Session Insights';
+
+  @override
+  String get weekend_hub_fastest_sectors => 'Fastest Sectors';
+
+  @override
+  String get weekend_hub_sector_1_abbr => 'S1';
+
+  @override
+  String get weekend_hub_sector_2_abbr => 'S2';
+
+  @override
+  String get weekend_hub_sector_3_abbr => 'S3';
+
+  @override
+  String get weekend_hub_tyre_compound => 'Tyre Compound';
+
+  @override
+  String get weekend_hub_insights_sectors_unavailable => 'Sector data needs a live OpenF1 sync for this race.';
+
+  @override
+  String get weekend_hub_penalties_filter_empty => 'No penalty or investigation messages for this session.';
+
+  @override
+  String get weekend_hub_spot_placeholder_title => 'Live radar & DRS';
+
+  @override
+  String get weekend_hub_spot_placeholder_body => 'Weather radar, track rain radar, and a DRS zone overview will appear here in a future update.';
+
+  @override
   String get weekend_schedule => 'Weekend schedule';
 
   @override
@@ -2002,6 +2044,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get circuit_stat_full_throttle => 'Full throttle';
+
+  @override
+  String circuit_weekend_hub_go(String venue) {
+    return 'Go to $venue Hub';
+  }
+
+  @override
+  String get circuit_weekend_hub_no_data_tooltip => 'No session data available yet.';
 
   @override
   String live_timing_air_temp_abbr(String temp) {
@@ -2171,6 +2221,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orbit_track_standard => 'Standard';
 
   @override
+  String get orbit_track_details => 'Details';
+
+  @override
   String get orbit_track_technical => 'Technical';
 
   @override
@@ -2204,4 +2257,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unauthorized_page_title => 'Unauthorized';
+
+  @override
+  String get circuit_map_expand => 'Expand map';
+
+  @override
+  String get circuit_map_collapse => 'Collapse map';
+
+  @override
+  String get circuit_map_zoom_in => 'Zoom in';
+
+  @override
+  String get circuit_map_zoom_out => 'Zoom out';
 }

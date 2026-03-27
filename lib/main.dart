@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -37,6 +38,7 @@ import 'utils/driver_name_utils.dart';
 import 'package:f1/utils/l10n_extension.dart';
 import 'utils/l10n_lookups.dart';
 import 'package:f1/l10n/app_localizations.dart';
+import 'data/f1_asset_resolver.dart';
 import 'data/repositories/race_repository.dart';
 import 'data/local/hive/hive_boxes.dart';
 import 'data/local/hive/hive_bootstrap.dart';
@@ -1657,6 +1659,8 @@ String _normalizeSessionName(String? raw) {
     case 'sprint qualifying': return 'Sprint Qualifying';
     case 'sprint': return 'Sprint';
     case 'race': return 'Race';
+    case 'day 1': return 'Day 1';
+    case 'day 2': return 'Day 2';
     default: return raw?.trim() ?? '';
   }
 }
@@ -2045,14 +2049,72 @@ String _formatTyreCompound(String? compound) {
   }
 }
 
+/// OpenF1 weather JSON uses `date`, `air_temperature`, `wind_speed` (m/s), …;
+/// [CircuitWeatherPlaybackCard] expects `timestampUtc`, `airTemperatureC`, `windSpeed` (km/h).
+Map<String, dynamic> _normalizeWeatherPlaybackSample(Map<String, dynamic> raw) {
+  double? readNum(String a, String b) {
+    final v = raw[a] ?? raw[b];
+    if (v is num) return v.toDouble();
+    return double.tryParse(v?.toString() ?? '');
+  }
+
+  var ts = raw['timestampUtc']?.toString();
+  if (ts == null || ts.isEmpty) {
+    ts = raw['date']?.toString();
+  }
+  if (ts == null || ts.isEmpty) {
+    ts = raw['timestamp']?.toString();
+  }
+  ts ??= '';
+
+  final air = readNum('airTemperatureC', 'air_temperature');
+  final track = readNum('trackTemperatureC', 'track_temperature');
+  final humidity = readNum('humidity', 'humidity');
+  final rain = readNum('rainfall', 'rainfall') ?? 0;
+  final pressure = readNum('pressure', 'pressure');
+
+  double windKmh;
+  if (raw.containsKey('wind_speed') && raw['wind_speed'] != null) {
+    final ms = readNum('windSpeed', 'wind_speed') ?? 0;
+    windKmh = ms * 3.6;
+  } else {
+    windKmh = readNum('windSpeed', 'wind_speed') ?? 0;
+  }
+
+  final windDir = _asInt(raw['windDirection'] ?? raw['wind_direction']);
+
+  return <String, dynamic>{
+    'timestampUtc': ts,
+    if (air != null) 'airTemperatureC': air,
+    if (track != null) 'trackTemperatureC': track,
+    if (humidity != null) 'humidity': humidity,
+    'rainfall': rain,
+    if (pressure != null) 'pressure': pressure,
+    'windSpeed': windKmh,
+    if (windDir != null) 'windDirection': windDir,
+  };
+}
+
 List<Map<String, dynamic>> _buildInterpolatedWeatherSamples(
   List<Map<String, dynamic>> samples,
 ) {
-  if (samples.length < 2) {
-    return List<Map<String, dynamic>>.from(samples);
+  final normalized = samples
+      .map(
+        (m) => _normalizeWeatherPlaybackSample(
+          m.map((k, v) => MapEntry(k.toString(), v)),
+        ),
+      )
+      .where(
+        (m) =>
+            DateTime.tryParse(m['timestampUtc']?.toString() ?? '') != null,
+      )
+      .toList();
+
+  if (normalized.length < 2) {
+    return List<Map<String, dynamic>>.from(normalized);
   }
 
-  final sortedSamples = List<Map<String, dynamic>>.from(samples)
+  final sortedSamples = List<Map<String, dynamic>>.from(normalized)
     ..sort((a, b) {
       final aTime = DateTime.tryParse(a['timestampUtc']?.toString() ?? '');
       final bTime = DateTime.tryParse(b['timestampUtc']?.toString() ?? '');
@@ -3055,6 +3117,50 @@ Race? _findRaceBySlug(String slug) {
   return null;
 }
 
+/// OpenF1 bundle folder under `assets/data/{year}/` for this race.
+String? _venueFolderForRace(Race race) {
+  return F1AssetResolver.venueFolderForCircuitAssetId(race.circuitAssetId) ??
+      F1AssetResolver.venueFolderForYearAndRound(
+        race.date.year,
+        raceRoundFor(race),
+      );
+}
+
+/// Same calendar event (hub must reload when this changes; session stems are
+/// shared across venues so stale [State] would keep the previous JSON maps).
+bool _isSameGrandPrixWeekend(Race a, Race b) {
+  return a.name == b.name &&
+      a.country == b.country &&
+      a.date == b.date;
+}
+
+/// Weekend hub path segment: `melbourne`, `sakhir`, … (asset folder), not English GP slug.
+String _weekendHubSlugForRace(Race race) =>
+    _venueFolderForRace(race) ?? _raceSlug(race);
+
+/// Old `/weekendhub/australian` bookmarks → canonical venue slug.
+const Map<String, String> _weekendHubLegacyVenueRedirects = <String, String>{
+  'australian': 'melbourne',
+  'australian-grand-prix': 'melbourne',
+};
+
+Race? _findRaceByWeekendHubSlug(String slug) {
+  if (slug.isEmpty) return null;
+  final normalized = slug.toLowerCase().trim();
+  final venueTarget = _weekendHubLegacyVenueRedirects[normalized] ?? normalized;
+
+  Race? best;
+  for (final race in races) {
+    final hub = _weekendHubSlugForRace(race);
+    final vf = _venueFolderForRace(race);
+    if (hub != venueTarget && vf != venueTarget) continue;
+    if (best == null || race.date.isAfter(best.date)) {
+      best = race;
+    }
+  }
+  return best ?? _findRaceBySlug(normalized);
+}
+
 Driver? _findDriverBySlug(String slug) {
   final seenNames = <String>{};
   for (final seasonDrivers in driversData.values) {
@@ -3133,8 +3239,12 @@ const String _kGithubHelpIssuesUrl =
     'https://github.com/EvertJob/F1-Info/issues/new/choose';
 
 String _racePath(Race race) => '${_circuitsPath()}/${_raceSlug(race)}';
-/// Short shareable path (`/#/weekendhub/...`); also registered on the circuits shell branch.
-String _weekendHubPath(Race race) => '/weekendhub/${_raceSlug(race)}';
+
+/// JSON circuit hub (`CircuitPage`): slug = `circuit_id` / asset stem in `assets/data/circuits/*.json`.
+String _circuitJsonDetailPath(Race race) =>
+    '${_circuitsPath()}/${race.circuitAssetId}';
+/// Short shareable path (`/#/weekendhub/melbourne`, …); venue folder matches bundled JSON.
+String _weekendHubPath(Race race) => '/weekendhub/${_weekendHubSlugForRace(race)}';
 
 /// Nested paths like `/circuits/:slug/weekend` require a real [Race]; otherwise send to JSON circuit page or calendar.
 String? _circuitsRaceChildRedirect(String? slug) {
@@ -3458,7 +3568,12 @@ class _F1HubAppState extends State<F1HubApp> {
                           final race = _findRaceBySlug(
                             state.pathParameters['raceSlug']!,
                           )!;
-                          return WeekendHubScreen(race: race);
+                          return WeekendHubScreen(
+                            key: ValueKey(
+                              'weekend_hub_${race.country}_${race.date.toIso8601String()}',
+                            ),
+                            race: race,
+                          );
                         },
                       ),
                       GoRoute(
@@ -3528,14 +3643,27 @@ class _F1HubAppState extends State<F1HubApp> {
             GoRoute(
               path: '/weekendhub/:raceSlug',
               redirect: (context, state) {
-                final slug = state.pathParameters['raceSlug'] ?? '';
-                return _findRaceBySlug(slug) == null ? _circuitsPath() : null;
+                final slug = (state.pathParameters['raceSlug'] ?? '').trim();
+                if (slug.isEmpty) return _circuitsPath();
+                final lower = slug.toLowerCase();
+                final canon = _weekendHubLegacyVenueRedirects[lower];
+                if (canon != null) {
+                  return '/weekendhub/$canon';
+                }
+                return _findRaceByWeekendHubSlug(slug) == null
+                    ? _circuitsPath()
+                    : null;
               },
               builder: (context, state) {
-                final race = _findRaceBySlug(
+                final race = _findRaceByWeekendHubSlug(
                   state.pathParameters['raceSlug']!,
                 )!;
-                return WeekendHubScreen(race: race);
+                return WeekendHubScreen(
+                  key: ValueKey(
+                    'weekend_hub_${race.country}_${race.date.toIso8601String()}',
+                  ),
+                  race: race,
+                );
               },
             ),
             GoRoute(
@@ -4110,7 +4238,436 @@ class RaceResultRow {
     required this.averagePitTime,
   });
 
+  static bool _jsonLooksLikeOpenF1RaceResult(Map<String, dynamic> json) {
+    return json.containsKey('broadcastName') ||
+        (json.containsKey('driverNumber') &&
+            json.containsKey('finishPosition'));
+  }
+
+  /// Lap time in seconds (OpenF1) → `m:ss.mmm` for results tables.
+  static String formatOpenF1LapSeconds(dynamic raw) {
+    if (raw == null) return '-';
+    final sec = raw is num ? raw.toDouble() : double.tryParse(raw.toString());
+    if (sec == null || sec <= 0) return '-';
+    final duration = Duration(
+      microseconds: (sec * Duration.microsecondsPerSecond).round(),
+    );
+    final minutes = duration.inMinutes;
+    final seconds =
+        duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    final milliseconds =
+        ((duration.inMicroseconds.remainder(Duration.microsecondsPerSecond)) /
+                1000)
+            .round()
+            .toString()
+            .padLeft(3, '0');
+    return '$minutes:$seconds.$milliseconds';
+  }
+
+  static double? openF1ResultFastestLapSeconds(Map<String, dynamic> json) {
+    final v = json['fastestLapDuration'] ?? json['fastest_lap_duration'];
+    if (v is num) return v.toDouble();
+    return double.tryParse(v?.toString() ?? '');
+  }
+
+  /// Weekend hub / bundled JSON: gap vs leader when `timeOrGap` / `gap_to_leader` are absent.
+  static String openF1HubGapToLeaderLine(
+    Map<String, dynamic> json,
+    int finishPosition,
+    double? leaderFastestLapSec,
+  ) {
+    if (finishPosition <= 1) return '-';
+    final g = json['gap_to_leader'] ?? json['gapToLeader'];
+    if (g is num) {
+      final v = g.toDouble();
+      final sign = v >= 0 ? '+' : '';
+      return '$sign${v.toStringAsFixed(3)}s';
+    }
+    final gs = g?.toString().trim();
+    if (gs != null && gs.isNotEmpty && gs != '-') {
+      return gs;
+    }
+    final legacy = json['timeOrGap']?.toString().trim();
+    if (legacy != null &&
+        legacy.isNotEmpty &&
+        legacy != '-' &&
+        !legacy.toUpperCase().startsWith('P')) {
+      return legacy;
+    }
+    final my = openF1ResultFastestLapSeconds(json);
+    if (leaderFastestLapSec != null && my != null) {
+      final delta = my - leaderFastestLapSec;
+      if (delta.abs() < 1e-9) return '-';
+      final sign = delta > 0 ? '+' : '';
+      return '$sign${delta.toStringAsFixed(3)}s';
+    }
+    return '-';
+  }
+
+  /// P1 column: best lap from OpenF1 fields (bundled JSON has no reliable race-duration unit).
+  static String openF1HubLeaderSessionTimeLine(
+    Map<String, dynamic> json,
+    SessionOverviewRow row,
+  ) {
+    final lap = openF1ResultFastestLapSeconds(json);
+    if (lap != null && lap > 0) {
+      return formatOpenF1LapSeconds(lap);
+    }
+    final r = row.result.trim();
+    if (r.isNotEmpty && r != '-') return r;
+    return '-';
+  }
+
+  /// Per-driver `tyreStints` from bundled session results (`lapStart`/`lapEnd`, no `driver_number`).
+  static ({
+    int? totalLaps,
+    Map<String, int> tyreLaps,
+    List<SessionTyreLapBreakdownEntry> tyreLapSequence,
+  }) openF1TyreStintsSummaryForDriver(List<dynamic>? stintsRaw) {
+    if (stintsRaw == null || stintsRaw.isEmpty) {
+      return (
+        totalLaps: null,
+        tyreLaps: const <String, int>{},
+        tyreLapSequence: const <SessionTyreLapBreakdownEntry>[],
+      );
+    }
+    var maxLap = 0;
+    final sequence = <SessionTyreLapBreakdownEntry>[];
+    final lapsByCompound = <String, int>{};
+    for (final raw in stintsRaw) {
+      if (raw is! Map) continue;
+      final m = raw.map((k, v) => MapEntry(k.toString(), v));
+      final lapStartRaw = m['lapStart'] ?? m['lap_start'];
+      final lapEndRaw = m['lapEnd'] ?? m['lap_end'];
+      final start = lapStartRaw is num
+          ? lapStartRaw.toInt()
+          : int.tryParse(lapStartRaw?.toString() ?? '');
+      final end = lapEndRaw is num
+          ? lapEndRaw.toInt()
+          : int.tryParse(lapEndRaw?.toString() ?? '');
+      if (start == null || end == null || end < start) continue;
+      if (end > maxLap) maxLap = end;
+      final lapCount = end - start + 1;
+      if (lapCount <= 0) continue;
+      final compound = openF1CompoundDisplay(m['compound']?.toString());
+      final tyreAgeRaw = m['tyre_age_at_start'] ?? m['tyreAgeAtStart'];
+      final usedTyre = tyreAgeRaw is num
+          ? tyreAgeRaw.toInt() > 0
+          : (int.tryParse(tyreAgeRaw?.toString() ?? '') ?? 0) > 0;
+      if (compound != '-') {
+        lapsByCompound[compound] =
+            (lapsByCompound[compound] ?? 0) + lapCount;
+        sequence.add(
+          SessionTyreLapBreakdownEntry(
+            compound: compound,
+            laps: lapCount,
+            usedTyre: usedTyre,
+          ),
+        );
+      }
+    }
+    return (
+      totalLaps: maxLap > 0 ? maxLap : null,
+      tyreLaps: lapsByCompound,
+      tyreLapSequence: sequence,
+    );
+  }
+
+  static String openF1CompoundDisplay(String? raw) {
+    switch ((raw ?? '').toUpperCase()) {
+      case 'SOFT':
+        return 'Soft';
+      case 'MEDIUM':
+        return 'Medium';
+      case 'HARD':
+        return 'Hard';
+      case 'INTERMEDIATE':
+      case 'INTER':
+        return 'Inter';
+      case 'WET':
+        return 'Wet';
+      default:
+        return '-';
+    }
+  }
+
+  static int? openF1FastestLapLapNumber(Map<String, dynamic> json) {
+    const keys = <String>[
+      'fastest_lap_lap_number',
+      'fastestLapLapNumber',
+      'fastest_lap_number',
+      'fastestLapNumber',
+    ];
+    for (final k in keys) {
+      final v = json[k];
+      if (v is num) {
+        final n = v.toInt();
+        if (n > 0) return n;
+      }
+      final p = int.tryParse(v?.toString().trim() ?? '');
+      if (p != null && p > 0) return p;
+    }
+    return null;
+  }
+
+  /// Tyre compound letter for the lap that set [fastestLapDuration], when lap number + stints allow it.
+  static String openF1BestLapTyreAbbrev(Map<String, dynamic> json) {
+    final lapNum = openF1FastestLapLapNumber(json);
+    if (lapNum == null) return '—';
+    final stints = json['tyreStints'] as List<dynamic>? ?? const [];
+    for (final raw in stints) {
+      if (raw is! Map) continue;
+      final m = raw.map((k, v) => MapEntry(k.toString(), v));
+      final lapStartRaw = m['lapStart'] ?? m['lap_start'];
+      final lapEndRaw = m['lapEnd'] ?? m['lap_end'];
+      final start = lapStartRaw is num
+          ? lapStartRaw.toInt()
+          : int.tryParse(lapStartRaw?.toString() ?? '');
+      final end = lapEndRaw is num
+          ? lapEndRaw.toInt()
+          : int.tryParse(lapEndRaw?.toString() ?? '');
+      if (start == null || end == null || end < start) continue;
+      if (lapNum >= start && lapNum <= end) {
+        return tyreCompoundDisplayToInsightsLetter(
+          openF1CompoundDisplay(m['compound']?.toString()),
+        );
+      }
+    }
+    return '—';
+  }
+
+  static String tyreCompoundDisplayToInsightsLetter(String compound) {
+    final t = compound.trim();
+    if (t.isEmpty || t == '-') return '—';
+    final u = t.toUpperCase();
+    if (u.startsWith('SOFT')) return 'S';
+    if (u.startsWith('MEDIUM')) return 'M';
+    if (u.startsWith('HARD')) return 'H';
+    if (u.startsWith('INTER')) return 'I';
+    if (u.startsWith('WET')) return 'W';
+    return t.substring(0, 1).toUpperCase();
+  }
+
+  static String openF1FinishLabel(dynamic gridRaw, dynamic finishRaw) {
+    final finish = finishRaw is num
+        ? finishRaw.toInt()
+        : int.tryParse('${finishRaw ?? ''}'.trim());
+    if (finish == null || finish <= 0) return 'NC';
+    final grid = gridRaw is num
+        ? gridRaw.toInt()
+        : int.tryParse('${gridRaw ?? ''}'.trim());
+    if (grid == null || grid <= 0) return 'P$finish (-)';
+    final delta = grid - finish;
+    if (delta == 0) return 'P$finish (-)';
+    final sign = delta > 0 ? '+' : '';
+    return 'P$finish ($sign$delta)';
+  }
+
+  /// Maps OpenF1 `status` (and grid / `finishPosition`) to a compact finish label.
+  static String openF1RaceFinishFromSession(
+    dynamic statusRaw,
+    dynamic gridRaw,
+    dynamic finishRaw,
+  ) {
+    final s = statusRaw?.toString().trim() ?? '';
+    final upper = s.toUpperCase();
+
+    bool lapDownFinisher() =>
+        upper.startsWith('+') && upper.contains('LAP');
+
+    if (upper.contains('DID NOT START') ||
+        upper == 'DNS' ||
+        (upper.contains('NOT START') && !upper.contains('FINISH'))) {
+      return 'DNS';
+    }
+    if (upper.contains('DISQUALIF') || upper == 'DSQ') {
+      return 'DSQ';
+    }
+    if (lapDownFinisher() ||
+        upper == 'FINISHED' ||
+        upper == '-' ||
+        upper.isEmpty) {
+      return openF1FinishLabel(gridRaw, finishRaw);
+    }
+    if (upper.contains('NOT CLASSIFIED')) {
+      return 'NC';
+    }
+
+    const dnfHints = <String>[
+      'RETIRED',
+      'ACCIDENT',
+      'MECHANICAL',
+      'DNF',
+      'ENGINE',
+      'GEARBOX',
+      'SUSPENSION',
+      'HYDRAULIC',
+      'ELECTRICAL',
+      'OIL',
+      'WHEEL',
+      'TYRE',
+      'TIRE',
+      'BRAKE',
+      'DRIVESHAFT',
+      'SPUN OFF',
+      'COLLISION',
+      'PUNCTURE',
+      'FUEL',
+      'OVERHEAT',
+      'VIBRATION',
+      'POWER UNIT',
+      'ERS',
+      'CLUTCH',
+      'DID NOT FINISH',
+      'WITHDRAWN',
+      'DAMAGE',
+      'LOSS OF POWER',
+      'WATER LEAK',
+      'OIL LEAK',
+    ];
+    for (final hint in dnfHints) {
+      if (upper.contains(hint)) {
+        return 'DNF';
+      }
+    }
+
+    return openF1FinishLabel(gridRaw, finishRaw);
+  }
+
+  static String formatOpenF1PitStopsLine(List<Map<String, dynamic>> pitStops) {
+    if (pitStops.isEmpty) return '-';
+    final parts = <String>[];
+    for (final p in pitStops) {
+      final lapRaw = p['lap'] ?? p['lapNumber'] ?? p['pit_lap'];
+      final lap = lapRaw is num
+          ? lapRaw.toInt()
+          : int.tryParse(lapRaw?.toString().trim() ?? '');
+      final durRaw =
+          p['pit_duration'] ?? p['durationSeconds'] ?? p['laneDurationSeconds'];
+      final dur = durRaw is num
+          ? durRaw.toDouble()
+          : double.tryParse(durRaw?.toString().trim() ?? '');
+      if (lap == null || lap <= 0 || dur == null) continue;
+      final durStr = dur == dur.roundToDouble()
+          ? dur.toInt().toString()
+          : dur.toStringAsFixed(1);
+      parts.add('L$lap: ${durStr}s');
+    }
+    return parts.isEmpty ? '-' : parts.join(' · ');
+  }
+
+  factory RaceResultRow.fromOpenF1BundledJson(
+    Map<String, dynamic> json, {
+    double? leaderFastestLapSec,
+    double? sessionBestLapSec,
+  }) {
+    final broadcast = json['broadcastName']?.toString() ?? '-';
+    final grid = json['gridPosition'];
+    final start = grid == null ? '-' : grid.toString();
+    final finish = openF1RaceFinishFromSession(
+      json['status'],
+      grid,
+      json['finishPosition'],
+    );
+    final finishPos = json['finishPosition'] is num
+        ? (json['finishPosition'] as num).toInt()
+        : int.tryParse(json['finishPosition']?.toString() ?? '') ??
+            0;
+    final trimmedTimeOrGap = json['timeOrGap']?.toString().trim();
+    var timeOrGap = (finish == 'DNF' ||
+            finish == 'DNS' ||
+            finish == 'DSQ' ||
+            finish == 'NC')
+        ? '-'
+        : ((trimmedTimeOrGap != null && trimmedTimeOrGap.isNotEmpty)
+            ? trimmedTimeOrGap
+            : '-');
+    if (timeOrGap == '-') {
+      if (finishPos > 1 && leaderFastestLapSec != null) {
+        final g = openF1HubGapToLeaderLine(
+          json,
+          finishPos,
+          leaderFastestLapSec,
+        );
+        if (g != '-') {
+          timeOrGap = g;
+        }
+      } else if (finishPos == 1) {
+        final lap = openF1ResultFastestLapSeconds(json);
+        if (lap != null && lap > 0) {
+          timeOrGap = formatOpenF1LapSeconds(lap);
+        }
+      }
+    }
+    final pts = json['points'];
+    final pointsStr = pts is num
+        ? (pts == pts.roundToDouble()
+            ? pts.toInt().toString()
+            : pts.toString())
+        : (pts?.toString() ?? '0');
+    final fastest = formatOpenF1LapSeconds(json['fastestLapDuration']);
+    final myFastestSec = openF1ResultFastestLapSeconds(json);
+    final hasOverallFastest = sessionBestLapSec != null &&
+        myFastestSec != null &&
+        (myFastestSec - sessionBestLapSec).abs() < 1e-6;
+    final stintMaps = (json['tyreStints'] as List<dynamic>? ?? const [])
+        .whereType<Map>()
+        .map(
+          (e) => e.map((k, v) => MapEntry(k.toString(), v)),
+        )
+        .toList();
+    final orderedCompounds = <String>[];
+    for (final s in stintMaps) {
+      final label = openF1CompoundDisplay(s['compound']?.toString());
+      if (label != '-') orderedCompounds.add(label);
+    }
+    final tyreCompound =
+        orderedCompounds.isNotEmpty ? orderedCompounds.last : '-';
+    final tyreStrategy =
+        orderedCompounds.isEmpty ? '-' : orderedCompounds.join(' -> ');
+    final pitStops = (json['pitStops'] as List<dynamic>? ?? const [])
+        .whereType<Map>()
+        .map((p) {
+          final m = Map<String, dynamic>.from(
+            p.map((k, v) => MapEntry(k.toString(), v)),
+          );
+          final d = m['durationSeconds'] ?? m['laneDurationSeconds'];
+          if (d != null && m['pit_duration'] == null) {
+            m['pit_duration'] = d;
+          }
+          return m;
+        })
+        .toList();
+    return RaceResultRow(
+      driver: broadcast,
+      start: start,
+      finish: finish,
+      timeOrGap: timeOrGap,
+      fastestLap: fastest,
+      tyreCompound: tyreCompound,
+      penalty: json['penalty']?.toString() ?? '-',
+      points: pointsStr,
+      hasFastestLap: json['hasFastestLap'] == true || hasOverallFastest,
+      tyreCompounds: List<String>.from(orderedCompounds),
+      tyreStints: stintMaps,
+      tyreStrategy: tyreStrategy,
+      tyreChangeLaps: const [],
+      penaltyDetails: const [],
+      penaltyServed: false,
+      penaltyServedLaps: const [],
+      weatherSamples: const [],
+      raceControlMessages: const [],
+      pitStops: pitStops,
+      totalPitTime: json['totalPitTime']?.toString() ?? '-',
+      fastestPitStop: null,
+      averagePitTime: json['averagePitTime']?.toString() ?? '-',
+    );
+  }
+
   factory RaceResultRow.fromJson(Map<String, dynamic> json) {
+    if (_jsonLooksLikeOpenF1RaceResult(json)) {
+      return RaceResultRow.fromOpenF1BundledJson(json);
+    }
     return RaceResultRow(
       driver: json['driver']?.toString() ?? '-',
       start: json['start']?.toString() ?? '-',
@@ -4265,6 +4822,88 @@ class SessionOverviewRow {
     );
   }
 
+  factory SessionOverviewRow.fromOpenF1ResultMap(
+    Map<String, dynamic> json, {
+    double? leaderFastestLapSeconds,
+    double? sessionBestLapSeconds,
+  }) {
+    final grid = json['gridPosition'];
+    final finishLabel = RaceResultRow.openF1RaceFinishFromSession(
+      json['status'],
+      grid,
+      json['finishPosition'],
+    );
+    final finishPos = json['finishPosition'] is num
+        ? (json['finishPosition'] as num).toInt()
+        : int.tryParse(json['finishPosition']?.toString() ?? '') ??
+            0;
+    final gapRaw = json['timeOrGap']?.toString().trim();
+    var resultStr = (finishLabel == 'DNF' ||
+            finishLabel == 'DNS' ||
+            finishLabel == 'DSQ' ||
+            finishLabel == 'NC')
+        ? '-'
+        : (gapRaw != null && gapRaw.isNotEmpty ? gapRaw : '-');
+    final fastestLapStr =
+        RaceResultRow.formatOpenF1LapSeconds(json['fastestLapDuration']);
+    if (resultStr == '-' &&
+        fastestLapStr != '-' &&
+        finishLabel != 'DNF' &&
+        finishLabel != 'DNS' &&
+        finishLabel != 'DSQ' &&
+        finishLabel != 'NC') {
+      resultStr = fastestLapStr;
+    }
+    final pts = json['points'];
+    final pointsStr = pts is num
+        ? (pts % 1 == 0 ? pts.toInt().toString() : pts.toString())
+        : (pts?.toString() ?? '-');
+    var tyre = '-';
+    final stints = (json['tyreStints'] as List<dynamic>? ?? const []);
+    for (var i = stints.length - 1; i >= 0; i--) {
+      final s = stints[i];
+      if (s is! Map) continue;
+      final c = RaceResultRow.openF1CompoundDisplay(s['compound']?.toString());
+      if (c != '-') {
+        tyre = c;
+        break;
+      }
+    }
+    final tyreSummary =
+        RaceResultRow.openF1TyreStintsSummaryForDriver(stints);
+    var positionStr = finishLabel;
+    if (leaderFastestLapSeconds != null && finishPos > 0) {
+      final gapLine = RaceResultRow.openF1HubGapToLeaderLine(
+        json,
+        finishPos,
+        leaderFastestLapSeconds,
+      );
+      if (gapLine != '-') {
+        positionStr = 'P$finishPos ($gapLine)';
+      } else if (finishLabel.contains('(-)') && finishPos > 0) {
+        positionStr = 'P$finishPos';
+      }
+    }
+    final myFastest = RaceResultRow.openF1ResultFastestLapSeconds(json);
+    final hasFastest = sessionBestLapSeconds != null &&
+        myFastest != null &&
+        (myFastest - sessionBestLapSeconds).abs() < 1e-6;
+    return SessionOverviewRow(
+      driver: json['broadcastName']?.toString() ?? '-',
+      position: positionStr,
+      result: resultStr,
+      fastestLap: fastestLapStr,
+      tyreCompound: tyre,
+      points: pointsStr,
+      hasFastestLap: hasFastest,
+      usedTyre: false,
+      tyreAgeAtStart: null,
+      totalLaps: tyreSummary.totalLaps,
+      tyreLaps: tyreSummary.tyreLaps,
+      tyreLapSequence: tyreSummary.tyreLapSequence,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'driver': driver,
@@ -4377,6 +5016,8 @@ class WeekendHubPodiumEntry {
   final String fastestLap;
   final bool hasFastestLap;
   final List<String> tyreCompounds;
+  /// Single-letter tyre code on best lap when known (S/M/H/…); em dash when unknown.
+  final String bestLapTyreAbbrev;
 
   const WeekendHubPodiumEntry({
     required this.position,
@@ -4388,6 +5029,15 @@ class WeekendHubPodiumEntry {
     required this.fastestLap,
     required this.hasFastestLap,
     required this.tyreCompounds,
+    required this.bestLapTyreAbbrev,
+  });
+}
+
+class WeekendHubPodiumFetchResult {
+  final List<WeekendHubPodiumEntry> podium;
+
+  const WeekendHubPodiumFetchResult({
+    required this.podium,
   });
 }
 
@@ -4726,10 +5376,10 @@ Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromAsset(
   int year,
 ) async {
   try {
-    final driversStandingsPath = year == 2026
-        ? 'data/results/drivers/drivers_standings_2026.json'
-        : 'data/results/drivers/drivers_standings_$year.json';
-    try {
+    standingsPath:
+    for (final driversStandingsPath
+        in F1AssetResolver.driversStandingsCandidatePaths(year)) {
+      try {
       final raw = await rootBundle.loadString(driversStandingsPath);
       final decoded = jsonDecode(raw);
       if (decoded is Map<String, dynamic>) {
@@ -4776,7 +5426,7 @@ Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromAsset(
             pointsDeltaByRound[round] = deltas;
           }
           if (allDrivers.isEmpty || pointsDeltaByRound.isEmpty) {
-            return null;
+            continue standingsPath;
           }
           final standings = decoded['standings'];
           if (standings is List) {
@@ -4831,7 +5481,7 @@ Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromAsset(
               color: _chartColorForDriver(driverName, year, i),
             ));
           }
-          if (series.isEmpty) return null;
+          if (series.isEmpty) continue standingsPath;
           return DriverStandingsChartData(
             year: year,
             circuitLabels: labels,
@@ -4903,7 +5553,7 @@ Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromAsset(
         index++;
       }
         if (series.isEmpty) {
-          return null;
+          continue standingsPath;
         }
         series.sort((left, right) =>
           (right.pointsByRace.isEmpty ? 0.0 : right.pointsByRace.last.points)
@@ -4916,8 +5566,7 @@ Future<DriverStandingsChartData?> _loadDriverStandingsChartDataFromAsset(
           maxPoints: maxPoints <= 0 ? 1 : maxPoints,
         );
       }
-    } catch (_) {
-      // drivers_standings not found or parse failed; for 2017-2025 try driver_comparison
+      } catch (_) {}
     }
     if (year >= 2017 && year <= 2025) {
       final raw = await rootBundle.loadString(
@@ -4987,14 +5636,14 @@ Future<TeamStandingsChartData?> _fetchTeamStandingsChartData(int year) {
 Future<TeamStandingsChartData?> _loadTeamStandingsChartDataFromAsset(
   int year,
 ) async {
+  for (final teamsStandingsPath
+      in F1AssetResolver.teamsStandingsCandidatePaths(year)) {
   try {
-    final teamsStandingsPath =
-        'data/results/teams/teams_standings_$year.json';
     final raw = await rootBundle.loadString(teamsStandingsPath);
     final decoded = jsonDecode(raw);
-    if (decoded is! Map<String, dynamic>) return null;
+    if (decoded is! Map<String, dynamic>) continue;
     final roundsRaw = decoded['rounds'];
-    if (roundsRaw is! List) return null;
+    if (roundsRaw is! List) continue;
 
     double pointsReceivedForSession(dynamic sessionData) {
       if (sessionData is! Map) return 0.0;
@@ -5039,7 +5688,7 @@ Future<TeamStandingsChartData?> _loadTeamStandingsChartDataFromAsset(
       pointsDeltaByRound[round] = deltas;
     }
 
-    if (allTeams.isEmpty || pointsDeltaByRound.isEmpty) return null;
+    if (allTeams.isEmpty || pointsDeltaByRound.isEmpty) continue;
 
     final standings = decoded['standings'];
     if (standings is List) {
@@ -5098,16 +5747,16 @@ Future<TeamStandingsChartData?> _loadTeamStandingsChartDataFromAsset(
         color: F1TeamSchemes.getTeamColor(teamName),
       ));
     }
-    if (series.isEmpty) return null;
+    if (series.isEmpty) continue;
     return TeamStandingsChartData(
       year: year,
       circuitLabels: labels,
       series: series,
       maxPoints: maxPoints <= 0 ? 1 : maxPoints,
     );
-  } catch (_) {
-    return null;
+  } catch (_) {}
   }
+  return null;
 }
 
 // All API calls removed. Only local data is used.
@@ -5444,6 +6093,28 @@ int raceRoundFor(Race race) {
   return fallbackIndex == -1 ? 1 : fallbackIndex + 1;
 }
 
+List<Map<String, dynamic>>? _jsonDecodedToMapList(
+  Object? decoded, {
+  String listKey = 'results',
+}) {
+  if (decoded is List) {
+    return decoded
+        .whereType<Map>()
+        .map((e) => e.map((k, v) => MapEntry(k.toString(), v)))
+        .toList();
+  }
+  if (decoded is Map) {
+    final raw = decoded[listKey];
+    if (raw is List) {
+      return raw
+          .whereType<Map>()
+          .map((e) => e.map((k, v) => MapEntry(k.toString(), v)))
+          .toList();
+    }
+  }
+  return null;
+}
+
 class SessionDataManager extends ChangeNotifier {
   static final SessionDataManager _instance = SessionDataManager._internal();
   factory SessionDataManager() => _instance;
@@ -5599,10 +6270,59 @@ class SessionDataManager extends ChangeNotifier {
   }
 
   Future<void> ensureRaceDataAvailable(Race race, int roundIndex) async {
+    await _hydrateBundledRaceData(race);
     if (_hasRaceDataCached(race)) {
       return;
     }
     await fetchDataForRace(race, roundIndex);
+  }
+
+  /// Overwrite Hive/session cache with `assets/data/{year}/{venue}/` when present
+  /// so detail tables match bundled OpenF1 (avoids stale empty overview rows).
+  Future<void> _hydrateBundledRaceData(Race race) async {
+    final sessionNames = race.hasSprint
+        ? [
+            'Practice 1',
+            'Sprint Qualifying',
+            'Sprint',
+            'Qualifying',
+            'Race',
+          ]
+        : [
+            'Practice 1',
+            'Practice 2',
+            'Practice 3',
+            'Qualifying',
+            'Race',
+          ];
+    for (final sessionName in sessionNames) {
+      if (sessionName == 'Race') continue;
+      final rows = await _loadStaticSessionOverviewRows(race, sessionName);
+      if (rows.isNotEmpty) {
+        final key = _sessionOverviewKey(race, sessionName);
+        sessionOverviewCache[key] = rows;
+        await _saveSessionOverview(key, rows);
+      }
+    }
+    final raceRows = await _loadStaticRaceResults(race);
+    if (raceRows.isNotEmpty) {
+      final rk = _raceResultsKey(race);
+      raceResultsCache[rk] = raceRows;
+      await _saveRaceResults(rk, raceRows);
+    }
+    final weather = await _loadStaticRaceWeather(race);
+    if (weather.isNotEmpty) {
+      final wk = _raceWeatherKey(race);
+      raceWeatherCache[wk] = weather;
+      await _saveRaceWeather(wk, weather);
+    }
+    final rc = await _loadStaticRaceControl(race);
+    if (rc.isNotEmpty) {
+      final rck = _raceControlKey(race);
+      raceControlCache[rck] = rc;
+      await _saveRaceControl(rck, rc);
+    }
+    notifyListeners();
   }
 
   Future<void> clearStoredSessionCache() async {
@@ -5715,18 +6435,18 @@ class SessionDataManager extends ChangeNotifier {
   String sessionOverviewKeyFor(Race race, String sessionName) =>
       _sessionOverviewKey(race, sessionName);
 
-  Future<List<WeekendHubPodiumEntry>> fetchWeekendHubPodium(Race race) async {
+  Future<WeekendHubPodiumFetchResult> fetchWeekendHubPodium(Race race) async {
     final raceSession = await _findClosestSessionForRace(
       race: race,
       sessionName: 'Race',
     );
     if (raceSession == null) {
-      return const <WeekendHubPodiumEntry>[];
+      return const WeekendHubPodiumFetchResult(podium: []);
     }
 
     final raceSessionKey = _asInt(raceSession['session_key']);
     if (raceSessionKey == null) {
-      return const <WeekendHubPodiumEntry>[];
+      return const WeekendHubPodiumFetchResult(podium: []);
     }
 
     final results = await _fetchOpenF1Collection(
@@ -5744,7 +6464,7 @@ class SessionDataManager extends ChangeNotifier {
     });
 
     if (results.isEmpty || drivers.isEmpty) {
-      return const <WeekendHubPodiumEntry>[];
+      return const WeekendHubPodiumFetchResult(podium: []);
     }
 
     final driverNames = <int, String>{
@@ -5780,7 +6500,7 @@ class SessionDataManager extends ChangeNotifier {
         .cast<double?>()
         .firstWhere((value) => value != null, orElse: () => null);
 
-    return sortedResults
+    final podium = sortedResults
         .take(3)
         .map((entry) {
           final driverNumber = _asInt(entry['driver_number']);
@@ -5791,6 +6511,9 @@ class SessionDataManager extends ChangeNotifier {
               driverNumber != null &&
               overallFastestLap != null &&
               fastestLap?.duration == overallFastestLap.duration;
+          final tyreAbbrev = RaceResultRow.tyreCompoundDisplayToInsightsLetter(
+            _formatTyreCompound(fastestLap?.compound),
+          );
 
           return WeekendHubPodiumEntry(
             position: _asInt(entry['position']) ?? 0,
@@ -5806,9 +6529,12 @@ class SessionDataManager extends ChangeNotifier {
             tyreCompounds: driverNumber == null
                 ? const <String>[]
                 : (tyreStrategyByDriver[driverNumber] ?? const <String>[]),
+            bestLapTyreAbbrev: tyreAbbrev,
           );
         })
         .toList(growable: false);
+
+    return WeekendHubPodiumFetchResult(podium: podium);
   }
 
   Future<List<SessionResult>> _fetchSessionResults({
@@ -6155,40 +6881,19 @@ class SessionDataManager extends ChangeNotifier {
     Race race,
     String sessionName,
   ) async {
-    final fileName =
-        'sessions_${race.date.year}_round_${raceRoundFor(race)}.json';
-    final candidatePaths = <String>[
-      fileName,
-      'data/$fileName',
-      'data/results/$fileName',
-      'assets/data/results/$fileName',
-    ];
-
-    for (final candidatePath in candidatePaths) {
+    final year = race.date.year;
+    final round = raceRoundFor(race);
+    for (final path
+        in F1AssetResolver.legacySessionsOverviewPaths(year, round)) {
+      if (!await F1AssetResolver.bundleHasAsset(rootBundle, path)) continue;
       try {
-        final uri = Uri.base.resolve(candidatePath);
-        final response = await http
-            .get(uri)
-            .timeout(const Duration(seconds: 4));
-        if (response.statusCode != 200) {
-          continue;
-        }
-
-        final decoded = jsonDecode(response.body);
-        if (decoded is! Map<String, dynamic>) {
-          continue;
-        }
-
+        final body = await rootBundle.loadString(path);
+        final decoded = jsonDecode(body);
+        if (decoded is! Map<String, dynamic>) continue;
         final sessions = decoded['sessions'];
-        if (sessions is! Map<String, dynamic>) {
-          continue;
-        }
-
+        if (sessions is! Map<String, dynamic>) continue;
         final sessionRows = sessions[sessionName];
-        if (sessionRows is! List) {
-          continue;
-        }
-
+        if (sessionRows is! List) continue;
         final rows = sessionRows
             .whereType<Map>()
             .map(
@@ -6197,12 +6902,57 @@ class SessionDataManager extends ChangeNotifier {
               ),
             )
             .toList(growable: false);
-        if (rows.isNotEmpty) {
-          return rows;
-        }
-      } catch (_) {
-        continue;
+        if (rows.isNotEmpty) return rows;
+      } catch (_) {}
+    }
+
+    final venue = F1AssetResolver.venueFolderForCircuitAssetId(
+          race.circuitAssetId,
+        ) ??
+        F1AssetResolver.venueFolderForYearAndRound(year, round);
+    if (venue != null) {
+      final stem = F1AssetResolver.sanitizeSessionStem(sessionName);
+      final modularPath = F1AssetResolver.sessionAssetPath(
+        year: year,
+        venueFolder: venue,
+        sessionStem: stem,
+        suffix: 'results',
+      );
+      if (!await F1AssetResolver.bundleHasAsset(rootBundle, modularPath)) {
+        return const <SessionOverviewRow>[];
       }
+      try {
+        final body = await rootBundle.loadString(modularPath);
+        final list = _jsonDecodedToMapList(jsonDecode(body), listKey: 'results');
+        if (list != null && list.isNotEmpty) {
+          int posOf(Map<String, dynamic> m) {
+            final f = m['finishPosition'];
+            if (f is int) return f;
+            return int.tryParse(f?.toString() ?? '') ?? 999;
+          }
+
+          final sorted = List<Map<String, dynamic>>.from(list)
+            ..sort((a, b) => posOf(a).compareTo(posOf(b)));
+          final leaderLap =
+              RaceResultRow.openF1ResultFastestLapSeconds(sorted.first);
+          double? sessionBest;
+          for (final m in sorted) {
+            final t = RaceResultRow.openF1ResultFastestLapSeconds(m);
+            if (t != null && (sessionBest == null || t < sessionBest)) {
+              sessionBest = t;
+            }
+          }
+          return sorted
+              .map(
+                (m) => SessionOverviewRow.fromOpenF1ResultMap(
+                  m,
+                  leaderFastestLapSeconds: leaderLap,
+                  sessionBestLapSeconds: sessionBest,
+                ),
+              )
+              .toList(growable: false);
+        }
+      } catch (_) {}
     }
 
     return const <SessionOverviewRow>[];
@@ -6536,73 +7286,87 @@ class SessionDataManager extends ChangeNotifier {
   }
 
   Future<List<RaceResultRow>> _loadStaticRaceResults(Race race) async {
-    final fileName =
-        'results_${race.date.year}_round_${raceRoundFor(race)}.json';
-    final candidatePaths = <String>[
-      fileName,
-      'data/$fileName',
-      'data/results/$fileName',
-      'assets/data/results/$fileName',
-    ];
+    final year = race.date.year;
+    final round = raceRoundFor(race);
+    final paths = <String>[];
+    final venue = F1AssetResolver.venueFolderForCircuitAssetId(
+          race.circuitAssetId,
+        ) ??
+        F1AssetResolver.venueFolderForYearAndRound(year, round);
+    if (venue != null) {
+      paths.addAll(
+        F1AssetResolver.candidateRaceResultPaths(
+          year: year,
+          venueFolder: venue,
+        ),
+      );
+    }
+    paths.addAll(F1AssetResolver.legacyRoundResultPaths(year, round));
 
-    for (final candidatePath in candidatePaths) {
+    List<Map<String, dynamic>>? bestMaps;
+    for (final path in paths) {
+      if (!await F1AssetResolver.bundleHasAsset(rootBundle, path)) continue;
       try {
-        final uri = Uri.base.resolve(candidatePath);
-        final response = await http
-            .get(uri)
-            .timeout(const Duration(seconds: 4));
-        if (response.statusCode != 200) {
-          continue;
+        final body = await rootBundle.loadString(path);
+        final list = _jsonDecodedToMapList(jsonDecode(body), listKey: 'results');
+        if (list == null || list.isEmpty) continue;
+        if (bestMaps == null || list.length > bestMaps.length) {
+          bestMaps = list;
         }
-
-        final decoded = jsonDecode(response.body);
-        if (decoded is! List) {
-          continue;
-        }
-
-        final rows = decoded
-            .whereType<Map>()
-            .map(
-              (entry) => RaceResultRow.fromJson(
-                entry.map((key, value) => MapEntry(key.toString(), value)),
-              ),
-            )
-            .toList(growable: false);
-        if (rows.isNotEmpty) {
-          return rows;
-        }
-      } catch (_) {
-        continue;
-      }
+      } catch (_) {}
+    }
+    if (bestMaps == null) return const <RaceResultRow>[];
+    int posOf(Map<String, dynamic> m) {
+      final f = m['finishPosition'];
+      if (f is int) return f;
+      return int.tryParse(f?.toString() ?? '') ?? 999;
     }
 
-    return const <RaceResultRow>[];
+    final sorted = List<Map<String, dynamic>>.from(bestMaps)
+      ..sort((a, b) => posOf(a).compareTo(posOf(b)));
+    final leaderLap = RaceResultRow.openF1ResultFastestLapSeconds(sorted.first);
+    double? sessionBest;
+    for (final m in sorted) {
+      final t = RaceResultRow.openF1ResultFastestLapSeconds(m);
+      if (t != null && (sessionBest == null || t < sessionBest)) {
+        sessionBest = t;
+      }
+    }
+    return sorted
+        .map(
+          (e) => RaceResultRow.fromOpenF1BundledJson(
+            e,
+            leaderFastestLapSec: leaderLap,
+            sessionBestLapSec: sessionBest,
+          ),
+        )
+        .toList(growable: false);
   }
 
   Future<List<Map<String, dynamic>>> _loadStaticRaceWeather(Race race) async {
-    final fileName =
-        'weather_${race.date.year}_round_${raceRoundFor(race)}.json';
-    final candidatePaths = <String>[
-      fileName,
-      'data/$fileName',
-      'data/results/$fileName',
-      'assets/data/results/$fileName',
-    ];
+    final year = race.date.year;
+    final round = raceRoundFor(race);
+    final paths = <String>[];
+    final venue = F1AssetResolver.venueFolderForCircuitAssetId(
+          race.circuitAssetId,
+        ) ??
+        F1AssetResolver.venueFolderForYearAndRound(year, round);
+    if (venue != null) {
+      paths.addAll(
+        F1AssetResolver.candidateRaceWeatherPaths(
+          year: year,
+          venueFolder: venue,
+        ),
+      );
+    }
+    paths.addAll(F1AssetResolver.legacyRoundWeatherPaths(year, round));
 
-    for (final candidatePath in candidatePaths) {
+    for (final path in paths) {
+      if (!await F1AssetResolver.bundleHasAsset(rootBundle, path)) continue;
       try {
-        final uri = Uri.base.resolve(candidatePath);
-        final response = await http
-            .get(uri)
-            .timeout(const Duration(seconds: 4));
-        if (response.statusCode != 200) {
-          continue;
-        }
-
-        final decoded = jsonDecode(response.body);
-        if (decoded is! Map<String, dynamic>) {
-          continue;
-        }
+        final body = await rootBundle.loadString(path);
+        final decoded = jsonDecode(body);
+        if (decoded is! Map<String, dynamic>) continue;
 
         dynamic samples = decoded['samples'];
         if (samples is! List) {
@@ -6614,9 +7378,7 @@ class SessionDataManager extends ChangeNotifier {
             }
           }
         }
-        if (samples is! List) {
-          continue;
-        }
+        if (samples is! List) continue;
 
         final rows = samples
             .whereType<Map>()
@@ -6625,46 +7387,40 @@ class SessionDataManager extends ChangeNotifier {
                   entry.map((key, value) => MapEntry(key.toString(), value)),
             )
             .toList(growable: false);
-        if (rows.isNotEmpty) {
-          return rows;
-        }
-      } catch (_) {
-        continue;
-      }
+        if (rows.isNotEmpty) return rows;
+      } catch (_) {}
     }
 
     return const <Map<String, dynamic>>[];
   }
 
   Future<List<Map<String, dynamic>>> _loadStaticRaceControl(Race race) async {
-    final fileName =
-        'race_control_${race.date.year}_round_${raceRoundFor(race)}.json';
-    final candidatePaths = <String>[
-      fileName,
-      'data/$fileName',
-      'data/results/$fileName',
-      'assets/data/results/$fileName',
-    ];
+    final year = race.date.year;
+    final round = raceRoundFor(race);
+    final paths = <String>[];
+    final venue = F1AssetResolver.venueFolderForCircuitAssetId(
+          race.circuitAssetId,
+        ) ??
+        F1AssetResolver.venueFolderForYearAndRound(year, round);
+    if (venue != null) {
+      paths.addAll(
+        F1AssetResolver.candidateRaceRaceControlPaths(
+          year: year,
+          venueFolder: venue,
+        ),
+      );
+    }
+    paths.addAll(F1AssetResolver.legacyRoundRaceControlPaths(year, round));
 
-    for (final candidatePath in candidatePaths) {
+    for (final path in paths) {
+      if (!await F1AssetResolver.bundleHasAsset(rootBundle, path)) continue;
       try {
-        final uri = Uri.base.resolve(candidatePath);
-        final response = await http
-            .get(uri)
-            .timeout(const Duration(seconds: 4));
-        if (response.statusCode != 200) {
-          continue;
-        }
-
-        final decoded = jsonDecode(response.body);
-        if (decoded is! Map<String, dynamic>) {
-          continue;
-        }
+        final body = await rootBundle.loadString(path);
+        final decoded = jsonDecode(body);
+        if (decoded is! Map<String, dynamic>) continue;
 
         final messages = decoded['messages'];
-        if (messages is! List) {
-          continue;
-        }
+        if (messages is! List) continue;
 
         final rows = messages
             .whereType<Map>()
@@ -6673,12 +7429,8 @@ class SessionDataManager extends ChangeNotifier {
                   entry.map((key, value) => MapEntry(key.toString(), value)),
             )
             .toList(growable: false);
-        if (rows.isNotEmpty) {
-          return rows;
-        }
-      } catch (_) {
-        continue;
-      }
+        if (rows.isNotEmpty) return rows;
+      } catch (_) {}
     }
 
     return const <Map<String, dynamic>>[];
@@ -7239,7 +7991,7 @@ class SessionDataManager extends ChangeNotifier {
       return 'DNF';
     }
     if (_asBool(entry['dsq'])) {
-      return 'NC';
+      return 'DSQ';
     }
 
     final finishPosition = _asInt(entry['position']);
@@ -7269,7 +8021,7 @@ class SessionDataManager extends ChangeNotifier {
       return 'DNF';
     }
     if (_asBool(entry['dsq'])) {
-      return 'NC';
+      return 'DSQ';
     }
 
     return (_asInt(entry['position'])?.toString()) ?? '-';
@@ -7282,7 +8034,10 @@ class SessionDataManager extends ChangeNotifier {
     if (_asBool(entry['dnf'])) {
       return 'DNF';
     }
-    if (_asBool(entry['dsq']) || _asInt(entry['position']) == null) {
+    if (_asBool(entry['dsq'])) {
+      return 'DSQ';
+    }
+    if (_asInt(entry['position']) == null) {
       return 'NC';
     }
 
@@ -7311,7 +8066,10 @@ class SessionDataManager extends ChangeNotifier {
     if (_asBool(entry['dnf'])) {
       return 'DNF';
     }
-    if (_asBool(entry['dsq']) || _asInt(entry['position']) == null) {
+    if (_asBool(entry['dsq'])) {
+      return '-';
+    }
+    if (_asInt(entry['position']) == null) {
       return 'NC';
     }
 
@@ -7348,7 +8106,10 @@ class SessionDataManager extends ChangeNotifier {
     if (_asBool(entry['dnf'])) {
       return 'DNF';
     }
-    if (_asBool(entry['dsq']) || _asInt(entry['position']) == null) {
+    if (_asBool(entry['dsq'])) {
+      return '-';
+    }
+    if (_asInt(entry['position']) == null) {
       return 'NC';
     }
 
@@ -8805,6 +9566,15 @@ class _CircuitsViewState extends State<CircuitsView> {
     return race.name == 'Hungarian Grand Prix';
   }
 
+  List<Race> _calendarRacesList(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+    final hideCancelled = user != null &&
+        context.watch<CalendarPrefsNotifier>().value.hideCancelledRaces;
+    return hideCancelled
+        ? races.where((r) => !_isCancelledGrandPrix(r)).toList()
+        : List<Race>.from(races);
+  }
+
   /// Placeholder “cancelled” races (not on calendar when user hides them).
   bool _isCancelledGrandPrix(Race race) {
     return race.name == 'Bahrain Grand Prix' ||
@@ -8927,21 +9697,10 @@ class _CircuitsViewState extends State<CircuitsView> {
   }
 
   List<Widget> _buildCalendarEntries(BuildContext context) {
-    final user = Supabase.instance.client.auth.currentUser;
-    final hideCancelled = user != null &&
-        context.watch<CalendarPrefsNotifier>().value.hideCancelledRaces;
-    final calendarRaces = hideCancelled
-        ? races.where((r) => !_isCancelledGrandPrix(r))
-        : races;
-
-    final entries = <Widget>[];
-    for (final race in calendarRaces) {
-      entries.add(_buildCalendarRaceCard(context, race));
-      if (_hasSummerBreakAfter(race)) {
-        entries.add(_buildSummerBreakCard(context));
-      }
-    }
-    return entries;
+    final calendarRaces = _calendarRacesList(context);
+    return calendarRaces
+        .map((race) => _buildCalendarRaceCard(context, race))
+        .toList();
   }
 
   /// Vertical gap between calendar rows (races and summer-break banner), tied to [F1UiTheme.cardPadding].
@@ -9135,8 +9894,9 @@ class _CircuitsViewState extends State<CircuitsView> {
     BuildContext context, {
     bool includeColumnHeader = true,
   }) {
-    final entries = _buildCalendarEntries(context);
+    final calendarRaces = _calendarRacesList(context);
     final rowGap = _calendarInterRowGap(context);
+    const sepFixed = 12.0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -9144,10 +9904,29 @@ class _CircuitsViewState extends State<CircuitsView> {
           _buildDesktopCalendarHeader(context),
           SizedBox(height: (rowGap * 0.65).clamp(6.0, 14.0)),
         ],
-        for (var i = 0; i < entries.length; i++) ...[
-          if (i > 0) SizedBox(height: rowGap),
-          entries[i],
-        ],
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: calendarRaces.length,
+          separatorBuilder: (context, index) {
+            final gap = SizedBox(height: sepFixed.clamp(12.0, 16.0));
+            if (index < calendarRaces.length - 1 &&
+                _hasSummerBreakAfter(calendarRaces[index])) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  gap,
+                  _buildSummerBreakCard(context),
+                  gap,
+                ],
+              );
+            }
+            return gap;
+          },
+          itemBuilder: (context, index) =>
+              _buildCalendarRaceCard(context, calendarRaces[index]),
+        ),
       ],
     );
   }
@@ -9342,9 +10121,27 @@ class _CircuitsViewState extends State<CircuitsView> {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                l10nGrandPrix(context.l10n, upcoming.name),
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textColor),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    upcoming.circuitDisplayName,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    l10nGrandPrix(context.l10n, upcoming.name),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: textColor.withValues(alpha: 0.82),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -9393,7 +10190,7 @@ class _CircuitsViewState extends State<CircuitsView> {
 
     final scheme = Theme.of(context).colorScheme;
     return GestureDetector(
-      onTap: () => context.push(_racePath(upcoming)),
+      onTap: () => context.push(_circuitJsonDetailPath(upcoming)),
       child: F1Module(
         fillWidth: true,
         padding: const EdgeInsets.all(20),
@@ -9441,7 +10238,7 @@ class _CircuitsViewState extends State<CircuitsView> {
       return Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => context.push(_racePath(race)),
+          onTap: () => context.push(_circuitJsonDetailPath(race)),
           borderRadius: BorderRadius.circular(20),
           child: F1Module(
             fillWidth: true,
@@ -9465,7 +10262,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              l10nGrandPrix(context.l10n, race.name),
+                              race.circuitDisplayName,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -9476,7 +10273,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              race.name,
+                              l10nGrandPrix(context.l10n, race.name),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -9681,7 +10478,7 @@ class _CircuitsViewState extends State<CircuitsView> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => context.push(_racePath(race)),
+          onTap: () => context.push(_circuitJsonDetailPath(race)),
           borderRadius: BorderRadius.circular(20),
           child: F1Module(
             fillWidth: true,
@@ -9706,7 +10503,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            l10nGrandPrix(context.l10n, race.name),
+                            race.circuitDisplayName,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
@@ -9715,10 +10512,19 @@ class _CircuitsViewState extends State<CircuitsView> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            '${race.date.day}-${race.date.month}-${race.date.year}',
+                            l10nGrandPrix(context.l10n, race.name),
                             style: TextStyle(
                               color: theme.colorScheme.onSurfaceVariant,
                               fontSize: 11,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${race.date.day}-${race.date.month}-${race.date.year}',
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurfaceVariant
+                                  .withValues(alpha: 0.85),
+                              fontSize: 10,
                             ),
                           ),
                         ],
@@ -10117,7 +10923,8 @@ class _CircuitsViewState extends State<CircuitsView> {
                 child: RefreshIndicator(
                   onRefresh: _refreshCircuits,
                   child: SafeArea(
-                    top: false,
+                    top: true,
+                    bottom: true,
                     child: ListView.separated(
                       physics: const AlwaysScrollableScrollPhysics(),
                       padding: EdgeInsets.fromLTRB(
@@ -10247,6 +11054,15 @@ class _CircuitsViewState extends State<CircuitsView> {
 
 /// --- STANDINGS VIEW (TAB 1 ROOT) ----------------------------------------------
 
+Driver? _findDriverInRosterByName(List<Driver> roster, String rawName) {
+  final key = rawName.trim().toLowerCase();
+  if (key.isEmpty) return null;
+  for (final d in roster) {
+    if (d.name.trim().toLowerCase() == key) return d;
+  }
+  return null;
+}
+
 class StandingsView extends StatefulWidget {
   final Widget settingsMenu;
   final bool isDriverView;
@@ -10284,62 +11100,82 @@ class _StandingsViewState extends State<StandingsView> {
     if (_selectedYear == 2026 && widget.isDriverView) {
       setState(() => _isLoading = true);
       try {
-        final raw = await DefaultAssetBundle.of(context).loadString('data/results/drivers/drivers_standings_2026.json');
+        String? raw;
+        for (final path
+            in F1AssetResolver.driversStandingsCandidatePaths(2026)) {
+          if (!await F1AssetResolver.bundleHasAsset(
+                DefaultAssetBundle.of(context),
+                path,
+              )) {
+            continue;
+          }
+          try {
+            raw = await DefaultAssetBundle.of(context).loadString(path);
+            break;
+          } catch (_) {}
+        }
+        if (raw == null) throw Exception('No drivers standings asset');
         final jsonData = json.decode(raw);
         final standings = jsonData['standings'] as List<dynamic>;
         final localDrivers = driversData[2026] ?? [];
         List<Driver> mergedDrivers = [];
-        for (final entry in standings) {
-          final name = entry['driver'] as String;
-          final points = (entry['points'] as num).toDouble();
-          final local = localDrivers.firstWhere(
-            (d) => d.name == name,
-            orElse: () => Driver(
-              name: name,
-              flag: '',
-              points: points,
-              number: 0,
-              nationality: '',
-              team: '',
-              pointsFinishPct: 0.0,
-              seasonPointsFinishPct: 0.0,
-              wins: 0,
-              podiums2nd: 0,
-              podiums3rd: 0,
-              podiums: 0,
-              poles: 0,
-              fastestLaps: 0,
-              totalPoints: 0.0,
-              championships: 0,
-              championshipYears: [],
-              lapsRaced: 0,
-              starts: 0,
-              dnfs: 0,
-              dsqs: 0,
-              dnqs: 0,
-              lapsLed: 0,
-              frontRowStarts: 0,
-              highestFinish: '',
-              highestGrid: '',
-              hatTricks: 0,
-              overtakes: 0,
-              age: 0,
-              height: '',
-              birthPlace: '',
-              partner: '',
-              children: '',
-              pets: '',
-              manager: '',
-              realWorldFactsEn: [],
-              realWorldFactsNl: [],
-              pointsPerSeason: {},
-              debutYear: 0,
-              contractUntil: '',
-              previousTeams: [],
-              personalSponsors: [],
-              reserveDriver: null,
-            ),
+        for (final raw in standings) {
+          if (raw is! Map) continue;
+          final entry = Map<String, dynamic>.from(
+            raw.map((k, v) => MapEntry(k.toString(), v)),
           );
+          final name = entry['driver']?.toString() ?? '';
+          final points = entry['points'] is num
+              ? (entry['points'] as num).toDouble()
+              : double.tryParse(entry['points']?.toString() ?? '') ?? 0.0;
+          final teamJson = entry['team']?.toString().trim() ?? '';
+          final teamLabel = teamJson.isEmpty ? 'Independent' : teamJson;
+          final local = _findDriverInRosterByName(localDrivers, name) ??
+              Driver(
+                name: name,
+                flag: '',
+                points: points,
+                number: 0,
+                nationality: '',
+                team: teamLabel,
+                pointsFinishPct: 0.0,
+                seasonPointsFinishPct: 0.0,
+                wins: 0,
+                podiums2nd: 0,
+                podiums3rd: 0,
+                podiums: 0,
+                poles: 0,
+                fastestLaps: 0,
+                totalPoints: 0.0,
+                championships: 0,
+                championshipYears: [],
+                lapsRaced: 0,
+                starts: 0,
+                dnfs: 0,
+                dsqs: 0,
+                dnqs: 0,
+                lapsLed: 0,
+                frontRowStarts: 0,
+                highestFinish: '',
+                highestGrid: '',
+                hatTricks: 0,
+                overtakes: 0,
+                age: 0,
+                height: '',
+                birthPlace: '',
+                partner: '',
+                children: '',
+                pets: '',
+                manager: '',
+                realWorldFactsEn: [],
+                realWorldFactsNl: [],
+                pointsPerSeason: {},
+                debutYear: 0,
+                contractUntil: '',
+                previousTeams: [],
+                personalSponsors: [],
+                reserveDriver: null,
+              );
           mergedDrivers.add(Driver.copy(local, points));
         }
         mergedDrivers.sort((a, b) => b.points.compareTo(a.points));
@@ -10367,8 +11203,20 @@ class _StandingsViewState extends State<StandingsView> {
     if (_selectedYear == 2026 && !widget.isDriverView) {
       setState(() => _isLoading = true);
       try {
-        final raw = await DefaultAssetBundle.of(context)
-            .loadString('data/results/teams/teams_standings_2026.json');
+        String? raw;
+        for (final path in F1AssetResolver.teamsStandingsCandidatePaths(2026)) {
+          if (!await F1AssetResolver.bundleHasAsset(
+                DefaultAssetBundle.of(context),
+                path,
+              )) {
+            continue;
+          }
+          try {
+            raw = await DefaultAssetBundle.of(context).loadString(path);
+            break;
+          } catch (_) {}
+        }
+        if (raw == null) throw Exception('No teams standings asset');
         final jsonData = json.decode(raw);
         final standings = jsonData['standings'] as List<dynamic>;
         List<Team> mergedTeams = [];
@@ -10437,7 +11285,21 @@ class _StandingsViewState extends State<StandingsView> {
       return;
     }
 
-    // ...bestaande code voor andere jaren...
+    setState(() => _isLoading = true);
+    if (mounted) {
+      setState(() {
+        if (widget.isDriverView) {
+          _cachedDrivers = List<Driver>.from(
+            driversData[_selectedYear] ?? const <Driver>[],
+          );
+          _usingFallback = _cachedDrivers.isEmpty;
+        } else {
+          _cachedTeams = List<Team>.from(fallbackTeams);
+          _usingFallback = false;
+        }
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _refreshStandings() => _fetchStandings(forceRefresh: true);
@@ -10603,10 +11465,17 @@ class _StandingsViewState extends State<StandingsView> {
         ? driver!.team.toUpperCase()
         : team!.principalName.toUpperCase();
     final tertiaryLabel = isDriver
-        ? (driver!.championshipYears.isEmpty
-              ? 'No titles'
-              : driver.championshipYears.join(', '))
+        ? driverStandingsTitlesLineDesktop(driver!)
         : 'CC ${team!.ccWins}  DC ${team.dcWins}';
+
+    if (kDebugMode && isDriver) {
+      debugPrint('Standings desktop: Processing: ${driver!.name}');
+      debugPrint('Standings desktop: Found Team: ${driver.team}');
+      final te = kDriverWorldTitlesEntryForName(driver.name);
+      debugPrint(
+        'Standings desktop: Titles map: ${te != null}; tertiary="$tertiaryLabel"',
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -10694,13 +11563,18 @@ class _StandingsViewState extends State<StandingsView> {
                       ),
                     ),
                     const SizedBox(height: 3),
-                    Text(
-                      tertiaryLabel,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: theme.colorScheme.onSurfaceVariant,
+                    Tooltip(
+                      message: tertiaryLabel,
+                      waitDuration: const Duration(milliseconds: 400),
+                      child: Text(
+                        tertiaryLabel,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          height: 1.25,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   ],
@@ -10764,6 +11638,18 @@ class _StandingsViewState extends State<StandingsView> {
     final teamName = isDriver ? (item as Driver).team : (item as Team).name;
     final bool isSelected =
         _isCompareMode && _selectedForComparison.contains(item);
+    final driverTitlesLine =
+        isDriver ? driverStandingsTitlesLine(item as Driver) : '';
+
+    if (kDebugMode && isDriver) {
+      final d = item as Driver;
+      debugPrint('Standings mobile: Processing: ${d.name}');
+      debugPrint('Standings mobile: Found Team: ${d.team}');
+      final te = kDriverWorldTitlesEntryForName(d.name);
+      debugPrint(
+        'Standings mobile: Titles map: ${te != null}; line="${driverTitlesLine.isEmpty ? '(empty)' : driverTitlesLine}"',
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -10779,6 +11665,7 @@ class _StandingsViewState extends State<StandingsView> {
             ? F1TeamSchemes.getTeamColor(teamName)
             : null,
         child: ListTile(
+        isThreeLine: isDriver && driverTitlesLine.isNotEmpty,
         onTap: () => _handleStandingsTap(item, widget.isDriverView),
         leading: Text(
           '${index + 1}',
@@ -10813,15 +11700,22 @@ class _StandingsViewState extends State<StandingsView> {
                 ),
               ],
             ),
-            if (isDriver && (item as Driver).championshipYears.isNotEmpty)
+            if (isDriver && driverTitlesLine.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 4.0),
-                child: Text(
-                  item.championshipYears.join(', '),
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Colors.amber,
-                    fontWeight: FontWeight.bold,
+                child: Tooltip(
+                  message: driverTitlesLine,
+                  waitDuration: const Duration(milliseconds: 400),
+                  child: Text(
+                    driverTitlesLine,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      height: 1.25,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.amber,
+                    ),
                   ),
                 ),
               ),
@@ -10848,10 +11742,12 @@ class _StandingsViewState extends State<StandingsView> {
         final isDesktop = constraints.maxWidth >= _desktopStandingsBreakpoint;
 
         if (!isDesktop) {
-          return ListView.builder(
+          return ListView.separated(
             physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             itemCount: items.length,
-            padding: const EdgeInsets.symmetric(vertical: 10),
+            separatorBuilder: (context, index) =>
+                const SizedBox(height: 12),
             itemBuilder: (context, index) => _buildMobileStandingsRow(
               context,
               item: items[index],
@@ -10863,10 +11759,10 @@ class _StandingsViewState extends State<StandingsView> {
 
         return ListView.separated(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           itemCount: items.length + 1,
           separatorBuilder: (context, index) =>
-              SizedBox(height: index == 0 ? 0 : 8),
+              SizedBox(height: index == 0 ? 0 : 12),
           itemBuilder: (context, index) {
             if (index == 0) {
               return _buildDesktopStandingsHeader(context, isDriver);
@@ -14283,7 +15179,7 @@ style: TextStyle(
 
 /// Wraps a child with the unified F1 module style: surfaceContainerLow,
 /// 20px radius, fading perimeter border (primary → transparent at 50% width).
-/// Replaces the legacy 2px vertical stripe. Used by Weekend Hub, Race Control, Penalties.
+/// Replaces the legacy 2px vertical stripe. Used by Weekend Hub and Race Control.
 Widget _weekendHubCard(
   BuildContext context, {
   required Widget child,
@@ -14324,12 +15220,52 @@ String _sessionDisplayTitle(BuildContext context, String sessionName) {
       return context.l10n.qualifying;
     case 'Race':
       return '🏁 ${context.l10n.race}';
+    case 'Day 1':
+      return 'Day 1';
+    case 'Day 2':
+      return 'Day 2';
     default:
       return sessionName;
   }
 }
 
+/// Maps bundled JSON stem (`practice_1`, `day_3`, …) to UI session names for the hub.
+String _hubStemToUiSessionName(String stem) {
+  switch (stem) {
+    case 'practice_1':
+      return 'Practice 1';
+    case 'practice_2':
+      return 'Practice 2';
+    case 'practice_3':
+      return 'Practice 3';
+    case 'sprint_qualifying':
+      return 'Sprint Qualifying';
+    case 'sprint':
+      return 'Sprint';
+    case 'qualifying':
+      return 'Qualifying';
+    case 'race':
+      return 'Race';
+    case 'day_1':
+      return 'Day 1';
+    case 'day_2':
+      return 'Day 2';
+    case 'day_3':
+      return 'Race';
+    default:
+      return stem.replaceAll('_', ' ');
+  }
+}
+
+String _hubStemDisplayTitle(BuildContext context, String stem) {
+  return _sessionDisplayTitle(context, _hubStemToUiSessionName(stem));
+}
+
 class _WeekendHubScreenState extends State<WeekendHubScreen> {
+  /// When true, shows the third bottom card ("Live radar & DRS"). Kept off until
+  /// the feature ships; layout below assumes two columns on wide screens.
+  static const bool _kWeekendHubShowLiveRadarDrCard = false;
+
       void _debugPrintSessionCache() {
         final race = widget.race;
         final year = race.date.year;
@@ -14363,15 +15299,20 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
   static const String _rcFilterAll = 'all';
   static const String _rcFilterAlerts = 'alerts';
   static const String _rcFilterStewards = 'stewards';
+  static const String _rcFilterPenalties = 'penalties';
   String _selectedRaceControlQuickFilter = _rcFilterAll;
-  String _selectedWeekendSession = 'Race';
+  /// Asset stem (`race`, `practice_1`, `day_2`, …) for modular `assets/data/{year}/{venue}/`.
+  String _selectedSessionStem = '';
   String _raceControlSearchQuery = '';
   bool _showAllRaceControlMessages = false;
   Map<String, List<Map<String, dynamic>>> _weatherBySession =
       const <String, List<Map<String, dynamic>>>{};
-  Map<String, List<Map<String, dynamic>>> _lapTimelineBySession =
-      const <String, List<Map<String, dynamic>>>{};
   String? _loadError;
+  List<String> _hubSessionStems = const [];
+  final Map<String, List<Map<String, dynamic>>> _hubWeatherByStem = {};
+  final Map<String, List<Map<String, dynamic>>> _hubRaceControlByStem = {};
+  final Map<String, List<WeekendHubPodiumEntry>> _hubPodiumByStem = {};
+  final Map<String, List<Map<String, dynamic>>> _hubLapTimelineByStem = {};
 
   @override
   void initState() {
@@ -14385,9 +15326,234 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
   }
 
   @override
+  void didUpdateWidget(covariant WeekendHubScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_isSameGrandPrixWeekend(oldWidget.race, widget.race)) {
+      return;
+    }
+    final raceToLoad = widget.race;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      if (!_isSameGrandPrixWeekend(raceToLoad, widget.race)) {
+        return;
+      }
+      _loadWeekendData();
+    });
+  }
+
+  @override
   void dispose() {
     _raceControlSearchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _discoverAndPreloadHubAssets() async {
+    final race = widget.race;
+    final year = race.date.year;
+    final round = raceRoundFor(race);
+    final venue = F1AssetResolver.venueFolderForCircuitAssetId(
+          race.circuitAssetId,
+        ) ??
+        F1AssetResolver.venueFolderForYearAndRound(year, round);
+    _hubSessionStems = const [];
+    _hubWeatherByStem.clear();
+    _hubRaceControlByStem.clear();
+    _hubPodiumByStem.clear();
+    _hubLapTimelineByStem.clear();
+    if (venue == null || !mounted) {
+      return;
+    }
+
+    // Use [rootBundle] so discovery works on web and is not affected by an
+    // inherited [DefaultAssetBundle] above this route.
+    final bundle = rootBundle;
+    final stems = await F1AssetResolver.discoverSessionResultStems(
+      bundle: bundle,
+      year: year,
+      venueFolder: venue,
+      hasSprintWeekend: race.hasSprint,
+    );
+    if (!mounted) {
+      return;
+    }
+    _hubSessionStems = stems;
+    if (stems.isEmpty) {
+      return;
+    }
+
+    for (final stem in stems) {
+      final uiName = _hubStemToUiSessionName(stem);
+      final resPath = F1AssetResolver.sessionAssetPath(
+        year: year,
+        venueFolder: venue,
+        sessionStem: stem,
+        suffix: 'results',
+      );
+      final wxPath = F1AssetResolver.sessionAssetPath(
+        year: year,
+        venueFolder: venue,
+        sessionStem: stem,
+        suffix: 'weather',
+      );
+      final rcPath = F1AssetResolver.sessionAssetPath(
+        year: year,
+        venueFolder: venue,
+        sessionStem: stem,
+        suffix: 'race_control',
+      );
+      if (await F1AssetResolver.bundleHasAsset(bundle, wxPath)) {
+        try {
+          final wBody = await bundle.loadString(wxPath);
+          _hubWeatherByStem[stem] = _parseHubWeatherSamples(wBody);
+          _hubLapTimelineByStem[stem] = _parseHubLapTimeline(wBody);
+        } catch (_) {
+          _hubWeatherByStem[stem] = const [];
+          _hubLapTimelineByStem[stem] = const [];
+        }
+      } else {
+        _hubWeatherByStem[stem] = const [];
+        _hubLapTimelineByStem[stem] = const [];
+      }
+      if (await F1AssetResolver.bundleHasAsset(bundle, rcPath)) {
+        try {
+          final rcBody = await bundle.loadString(rcPath);
+          _hubRaceControlByStem[stem] =
+              _normalizeHubRaceControlJson(rcBody, uiName);
+        } catch (_) {
+          _hubRaceControlByStem[stem] = const [];
+        }
+      } else {
+        _hubRaceControlByStem[stem] = const [];
+      }
+      if (await F1AssetResolver.bundleHasAsset(bundle, resPath)) {
+        try {
+          final rBody = await bundle.loadString(resPath);
+          _hubPodiumByStem[stem] = _hubTopThreeFromResultsBody(rBody);
+        } catch (_) {
+          _hubPodiumByStem[stem] = const [];
+        }
+      } else {
+        _hubPodiumByStem[stem] = const [];
+      }
+    }
+  }
+
+  List<Map<String, dynamic>> _parseHubWeatherSamples(String body) {
+    final decoded = jsonDecode(body);
+    if (decoded is! Map<String, dynamic>) return const [];
+    final samples = decoded['samples'];
+    if (samples is! List) return const [];
+    return samples
+        .whereType<Map>()
+        .map((s) => s.map((k, v) => MapEntry(k.toString(), v)))
+        .toList(growable: false);
+  }
+
+  List<Map<String, dynamic>> _parseHubLapTimeline(String body) {
+    final decoded = jsonDecode(body);
+    if (decoded is! Map<String, dynamic>) return const [];
+    final lt = decoded['lapTimeline'];
+    if (lt is! List) return const [];
+    return lt
+        .whereType<Map>()
+        .map((m) => m.map((k, v) => MapEntry(k.toString(), v)))
+        .toList(growable: false);
+  }
+
+  List<Map<String, dynamic>> _normalizeHubRaceControlJson(
+    String body,
+    String uiSessionName,
+  ) {
+    final decoded = jsonDecode(body);
+    final msgs = decoded is Map<String, dynamic> ? decoded['messages'] : null;
+    if (msgs is! List) return const [];
+    return msgs
+        .whereType<Map>()
+        .map((m) {
+          final map = m.map((k, v) => MapEntry(k.toString(), v));
+          final ts = map['timestampUtc'] ?? map['date'];
+          return <String, dynamic>{
+            ...map,
+            'timestampUtc': ts,
+            'sessionName': uiSessionName,
+            'lap': map['lap'] ?? map['lap_number'],
+            'driverNumber': map['driverNumber'] ?? map['driver_number'],
+          };
+        })
+        .toList(growable: false);
+  }
+
+  List<WeekendHubPodiumEntry> _hubTopThreeFromResultsBody(String body) {
+    final decoded = jsonDecode(body);
+    final List<dynamic> raw;
+    if (decoded is List) {
+      raw = decoded;
+    } else if (decoded is Map<String, dynamic> &&
+        decoded['results'] is List) {
+      raw = decoded['results'] as List<dynamic>;
+    } else {
+      return const [];
+    }
+    final maps = <Map<String, dynamic>>[];
+    for (final item in raw) {
+      if (item is! Map) continue;
+      final m = item.map((k, v) => MapEntry(k.toString(), v));
+      if (!RaceResultRow._jsonLooksLikeOpenF1RaceResult(m)) continue;
+      maps.add(m);
+    }
+    int posOf(Map<String, dynamic> m) {
+      final f = m['finishPosition'];
+      if (f is int) return f;
+      return int.tryParse(f?.toString() ?? '') ?? 999;
+    }
+    maps.sort((a, b) => posOf(a).compareTo(posOf(b)));
+    final leaderLap = maps.isEmpty
+        ? null
+        : RaceResultRow.openF1ResultFastestLapSeconds(maps.first);
+    return maps
+        .take(3)
+        .map((m) {
+          final row = SessionOverviewRow.fromOpenF1ResultMap(m);
+          final tyreCompounds = row.tyreLapSequence
+              .map((e) => e.compound)
+              .where((c) => c.trim().isNotEmpty)
+              .toSet()
+              .toList(growable: false);
+          final position = int.tryParse(
+            row.position.replaceAll(RegExp(r'[^0-9]'), ''),
+          );
+          final pos = position ?? 0;
+          final gapLine = RaceResultRow.openF1HubGapToLeaderLine(m, pos, leaderLap);
+          final leaderTimeLine =
+              RaceResultRow.openF1HubLeaderSessionTimeLine(m, row);
+          return WeekendHubPodiumEntry(
+            position: pos,
+            driverNumber: null,
+            driver: row.driver,
+            points: row.points,
+            totalTime: leaderTimeLine,
+            gapToLeader: gapLine,
+            fastestLap: row.fastestLap,
+            hasFastestLap: row.hasFastestLap,
+            tyreCompounds: tyreCompounds.isNotEmpty
+                ? tyreCompounds
+                : (row.tyreCompound.trim().isEmpty || row.tyreCompound == '-')
+                ? const <String>[]
+                : <String>[row.tyreCompound],
+            bestLapTyreAbbrev: RaceResultRow.openF1BestLapTyreAbbrev(m),
+          );
+        })
+        .toList(growable: false);
+  }
+
+  bool _matchesRaceControlPenaltiesFilter(String? raw) {
+    final msg = raw?.toUpperCase() ?? '';
+    return msg.contains('PENALTY') ||
+        msg.contains('INVESTIGATION') ||
+        msg.contains('SUMMONED') ||
+        msg.contains('STEWARD');
   }
 
   Future<void> _loadWeekendData() async {
@@ -14402,6 +15568,14 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     var podiumDetails = _fallbackPodiumDetails();
 
     try {
+      // Bundled OpenF1 JSON under assets/data/{year}/{venue}/ — independent of
+      // SessionDataManager / network so the hub always tries local files first.
+      try {
+        await _discoverAndPreloadHubAssets();
+      } catch (e, st) {
+        debugPrint('Weekend hub asset discovery failed: $e\n$st');
+      }
+
       final roundIndex = raceRoundFor(widget.race);
       await SessionDataManager().ensureRaceDataAvailable(
         widget.race,
@@ -14409,11 +15583,11 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       );
       _debugPrintSessionCache();
       try {
-        final fetchedPodium = await SessionDataManager().fetchWeekendHubPodium(
+        final fetched = await SessionDataManager().fetchWeekendHubPodium(
           widget.race,
         );
-        if (fetchedPodium.isNotEmpty) {
-          podiumDetails = fetchedPodium;
+        if (fetched.podium.isNotEmpty) {
+          podiumDetails = fetched.podium;
         }
       } catch (_) {}
 
@@ -14425,27 +15599,27 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
         if (weatherData.weatherBySession.isNotEmpty && mounted) {
           setState(() {
             _weatherBySession = weatherData.weatherBySession;
-            _lapTimelineBySession = weatherData.lapTimelineBySession;
           });
         }
       } catch (_) {}
     } catch (_) {
-      _loadError = context.l10n.weekend_hub_load_error;
+      if (mounted) {
+        _loadError = context.l10n.weekend_hub_load_error;
+      }
     }
 
     if (mounted) {
-      // Bepaal de juiste sessie na het laden
-      final availableSessions = _availableWeekendSessions(
-        SessionDataManager().raceControlCache[SessionDataManager()._raceControlKey(widget.race)] ?? [],
-      );
-      String latestWithResults = availableSessions.reversed.firstWhere(
-        (session) => _hasSessionResults(session),
-        orElse: () => availableSessions.contains('Race') ? 'Race' : availableSessions.first,
-      );
+      final defaultStem = _hubSessionStems.isEmpty
+          ? ''
+          : _hubSessionStems.last;
       setState(() {
         _podiumDetails = podiumDetails;
         _loading = false;
-        _selectedWeekendSession = latestWithResults;
+        if (_hubSessionStems.isNotEmpty) {
+          if (!_hubSessionStems.contains(_selectedSessionStem)) {
+            _selectedSessionStem = defaultStem;
+          }
+        }
       });
     }
   }
@@ -14482,6 +15656,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                 row.tyreCompound == '-' || row.tyreCompound.trim().isEmpty
                 ? const <String>[]
                 : <String>[row.tyreCompound],
+            bestLapTyreAbbrev: RaceResultRow.tyreCompoundDisplayToInsightsLetter(
+              row.tyreCompound,
+            ),
           );
         })
         .toList(growable: false);
@@ -14526,6 +15703,10 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                   : (row.tyreCompound.trim().isEmpty || row.tyreCompound == '-')
                   ? const <String>[]
                   : <String>[row.tyreCompound],
+              bestLapTyreAbbrev:
+                  RaceResultRow.tyreCompoundDisplayToInsightsLetter(
+                row.tyreCompound,
+              ),
             );
           })
           .toList(growable: false);
@@ -14555,6 +15736,8 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
             fastestLap: row.time,
             hasFastestLap: entry.key == 0,
             tyreCompounds: tyreCompounds,
+            bestLapTyreAbbrev:
+                RaceResultRow.tyreCompoundDisplayToInsightsLetter(row.tyre),
           );
         })
         .toList(growable: false);
@@ -14562,10 +15745,10 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
 
   Future<void> _fetchWeekendWeather() async {
     try {
-      // API call removed. Use local data or set default values.
-      _temperature = '-';
-      _windSpeed = '-';
-      _rainChance = 0;
+      final w = widget.race.weather;
+      _temperature = '${w.temperature}';
+      _windSpeed = '${w.windSpeed}';
+      _rainChance = w.rainChance;
     } catch (_) {}
   }
 
@@ -14712,6 +15895,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       if (_selectedRaceControlQuickFilter == _rcFilterStewards) {
         return _matchesRaceControlStewardsFilter(msg);
       }
+      if (_selectedRaceControlQuickFilter == _rcFilterPenalties) {
+        return _matchesRaceControlPenaltiesFilter(msg);
+      }
       return true;
     }).toList(growable: false);
   }
@@ -14741,29 +15927,19 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
   }
 
   Future<_WeekendWeatherData> _loadStaticWeekendWeatherData() async {
-    final fileName =
-        'weather_${widget.race.date.year}_round_${raceRoundFor(widget.race)}.json';
-    final candidatePaths = <String>[
-      fileName,
-      'data/$fileName',
-      'data/results/$fileName',
-      'assets/data/results/$fileName',
-    ];
+    final race = widget.race;
+    final year = race.date.year;
+    final round = raceRoundFor(race);
 
-    for (final candidatePath in candidatePaths) {
+    for (final candidatePath
+        in F1AssetResolver.legacyRoundWeatherPaths(year, round)) {
+      if (!await F1AssetResolver.bundleHasAsset(rootBundle, candidatePath)) {
+        continue;
+      }
       try {
-        final uri = Uri.base.resolve(candidatePath);
-        final response = await http
-            .get(uri)
-            .timeout(const Duration(seconds: 4));
-        if (response.statusCode != 200) {
-          continue;
-        }
-
-        final decoded = jsonDecode(response.body);
-        if (decoded is! Map<String, dynamic>) {
-          continue;
-        }
+        final body = await rootBundle.loadString(candidatePath);
+        final decoded = jsonDecode(body);
+        if (decoded is! Map<String, dynamic>) continue;
 
         final sessions = decoded['sessions'];
         if (sessions is Map) {
@@ -14772,13 +15948,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
           for (final entry in sessions.entries) {
             final sessionName = entry.key.toString();
             final sessionData = entry.value;
-            if (sessionData is! Map) {
-              continue;
-            }
+            if (sessionData is! Map) continue;
             final samples = sessionData['samples'];
-            if (samples is! List) {
-              continue;
-            }
+            if (samples is! List) continue;
             weatherBySession[sessionName] = samples
                 .whereType<Map>()
                 .map(
@@ -14824,8 +15996,46 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
             lapTimelineBySession: const <String, List<Map<String, dynamic>>>{},
           );
         }
-      } catch (_) {
-        continue;
+      } catch (_) {}
+    }
+
+    final venue = F1AssetResolver.venueFolderForCircuitAssetId(
+          race.circuitAssetId,
+        ) ??
+        F1AssetResolver.venueFolderForYearAndRound(year, round);
+    if (venue != null) {
+      final modularBySession = <String, List<Map<String, dynamic>>>{};
+      for (final entry in _sessionSchedule()) {
+        final sessionNameStr = entry.key;
+        final stem = F1AssetResolver.sanitizeSessionStem(sessionNameStr);
+        final path = F1AssetResolver.sessionAssetPath(
+          year: year,
+          venueFolder: venue,
+          sessionStem: stem,
+          suffix: 'weather',
+        );
+        if (!await F1AssetResolver.bundleHasAsset(rootBundle, path)) continue;
+        try {
+          final body = await rootBundle.loadString(path);
+          final decoded = jsonDecode(body);
+          if (decoded is Map && decoded['samples'] is List) {
+            final samples = (decoded['samples'] as List)
+                .whereType<Map>()
+                .map(
+                  (s) => s.map((k, v) => MapEntry(k.toString(), v)),
+                )
+                .toList(growable: false);
+            if (samples.isNotEmpty) {
+              modularBySession[sessionNameStr] = samples;
+            }
+          }
+        } catch (_) {}
+      }
+      if (modularBySession.isNotEmpty) {
+        return _WeekendWeatherData(
+          weatherBySession: modularBySession,
+          lapTimelineBySession: const <String, List<Map<String, dynamic>>>{},
+        );
       }
     }
 
@@ -14856,6 +16066,139 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     return '$day-$month $hour:$minute:$second';
   }
 
+  String _formatRaceControlBroadcastClock(String? timestampUtc) {
+    if (timestampUtc == null || timestampUtc.trim().isEmpty) {
+      return '--:--:--';
+    }
+    final date = DateTime.tryParse(timestampUtc)?.toLocal();
+    if (date == null) {
+      return '--:--:--';
+    }
+    final h = date.hour.toString().padLeft(2, '0');
+    final m = date.minute.toString().padLeft(2, '0');
+    final s = date.second.toString().padLeft(2, '0');
+    return '$h:$m:$s';
+  }
+
+  static final RegExp _raceControlCarTurnHighlight =
+      RegExp(r'\b(CAR\s+\d+|TURN\s+\d+)\b', caseSensitive: false);
+
+  Widget _buildRaceControlBroadcastRichText(
+    String text,
+    Color baseColor,
+    double fontSize,
+  ) {
+    final spans = <InlineSpan>[];
+    var start = 0;
+    for (final match in _raceControlCarTurnHighlight.allMatches(text)) {
+      if (match.start > start) {
+        spans.add(
+          TextSpan(
+            text: text.substring(start, match.start),
+            style: TextStyle(
+              color: baseColor,
+              fontSize: fontSize,
+              fontWeight: FontWeight.w600,
+              height: 1.35,
+            ),
+          ),
+        );
+      }
+      spans.add(
+        TextSpan(
+          text: match.group(0),
+          style: TextStyle(
+            color: baseColor,
+            fontSize: fontSize,
+            fontWeight: FontWeight.w900,
+            height: 1.35,
+          ),
+        ),
+      );
+      start = match.end;
+    }
+    if (start < text.length) {
+      spans.add(
+        TextSpan(
+          text: text.substring(start),
+          style: TextStyle(
+            color: baseColor,
+            fontSize: fontSize,
+            fontWeight: FontWeight.w600,
+            height: 1.35,
+          ),
+        ),
+      );
+    }
+    if (spans.isEmpty) {
+      return Text(
+        text.isEmpty ? '-' : text,
+        style: TextStyle(
+          color: baseColor,
+          fontSize: fontSize,
+          fontWeight: FontWeight.w600,
+          height: 1.35,
+        ),
+        softWrap: true,
+        textAlign: TextAlign.start,
+      );
+    }
+    return Text.rich(
+      TextSpan(children: spans),
+      softWrap: true,
+      textAlign: TextAlign.start,
+    );
+  }
+
+  bool _isRaceControlTrackLimitDeletionMessage(String? rawMessage) {
+    final u = rawMessage?.toUpperCase() ?? '';
+    return u.contains('LAP TIME DELETED') || u.contains('DELETED LAP');
+  }
+
+  /// Groups NOTED / investigation / NFI with penalty imposition and PENALTY SERVED
+  /// when [penaltySignature] or incident signature matches.
+  String? _raceControlStorylineSignature(Map<String, dynamic> m) {
+    final text = m['message']?.toString();
+    final incident = _raceControlIncidentSignature(text);
+    if (incident != null) {
+      return 'i|$incident';
+    }
+    final penalty = _raceControlPenaltySignature(m);
+    if (penalty != null) {
+      return 'p|$penalty';
+    }
+    return null;
+  }
+
+  bool _isRaceControlStorylineClusterMessage(String? rawMessage) {
+    return _isRaceControlIncidentFamilyMessage(rawMessage) ||
+        _isRaceControlPenaltyMessage(rawMessage) ||
+        _isRaceControlPenaltyServedMessage(rawMessage);
+  }
+
+  List<List<Map<String, dynamic>>> _groupBroadcastStorylineMessages(
+    List<Map<String, dynamic>> ordered,
+  ) {
+    final groups = <List<Map<String, dynamic>>>[];
+    for (final m in ordered) {
+      final sig = _raceControlStorylineSignature(m);
+      final fam = _isRaceControlStorylineClusterMessage(m['message']?.toString());
+      if (fam &&
+          sig != null &&
+          groups.isNotEmpty &&
+          groups.last.length < 20) {
+        final last = groups.last;
+        final lastSig = _raceControlStorylineSignature(last.last);
+        if (lastSig == sig) {
+          last.add(m);
+          continue;
+        }
+      }
+      groups.add(<Map<String, dynamic>>[m]);
+    }
+    return groups;
+  }
+
   /// Race Control message style: Green (resolved), Red (alert), Orange (active).
   /// Uses FIA semantic colors (green/orange/red), not team primary.
   ({Color background, Color border, Color text})? _raceControlMessageStyle(
@@ -14870,10 +16213,17 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     final error = tokens.statusError;
     final warning = const Color(0xFFE65100); // Material Orange 900
     ({Color background, Color border, Color text}) style({required Color c}) => (
-      background: c,
-      border: c,
-      text: c,
-    );
+          background: c,
+          border: c,
+          text: F1ThemeTokens.textOnBackground(c),
+        );
+
+    final neutralGrey = const Color(0xFF757575);
+
+    // ─── GREY (Neutral closure) – NFI outcomes before generic “resolved” green ─
+    if (message.contains('NO FURTHER INVESTIGATION')) {
+      return style(c: neutralGrey);
+    }
 
     // ─── GREEN (Success/Resolved) – most specific first ─────────────────────
     // Resolution phrases (check before generic "ENDING" to avoid false matches)
@@ -14881,9 +16231,6 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       'PENALTY SERVED',
       'PENALTY NOTED', // penalty acknowledged / no further action
       'NO FURTHER ACTION',
-      'NO FURTHER INVESTIGATION REQUIRED',
-      'NO FURTHER INVESTIGATION', // e.g. "NOTED - NO FURTHER INVESTIGATION"
-      'REVIEWED NO FURTHER INVESTIGATION',
       'VSC ENDING',
       'VSC ENDED',
       'SAFETY CAR IN THIS LAP',
@@ -14932,6 +16279,10 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       'BLACK FLAG',
       'BLACK AND ORANGE',
     ])) {
+      return style(c: error);
+    }
+    // Imposed time penalties (explicit before generic PENALTY branch)
+    if (message.contains('TIME PENALTY')) {
       return style(c: error);
     }
     // Penalty imposition (not "PENALTY SERVED" – already handled above)
@@ -14989,10 +16340,13 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     final message = rawMessage?.trim().toUpperCase() ?? '';
     if (message.isEmpty) return null;
 
+    if (message.contains('NO FURTHER INVESTIGATION')) {
+      return 'neutral';
+    }
+
     if (_matchesAny(message, [
       'PENALTY SERVED', 'PENALTY NOTED', 'NO FURTHER ACTION',
-      'NO FURTHER INVESTIGATION REQUIRED', 'NO FURTHER INVESTIGATION',
-      'REVIEWED NO FURTHER INVESTIGATION', 'VSC ENDING', 'VSC ENDED',
+      'VSC ENDING', 'VSC ENDED',
       'SAFETY CAR IN THIS LAP', 'SAFETY CAR IN LAP', 'SAFETY CAR RETURNING',
       'TRACK CLEAR', 'CLEAR IN TRACK', 'ALL CLEAR', 'RACE RESUMED',
       'SESSION RESUMED', 'START PROCEDURE RESUMED', 'OVERTAKE RESTORED',
@@ -15012,6 +16366,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       'RED FLAG', 'RACE SUSPENDED', 'RACE STOPPED', 'SESSION SUSPENDED',
       'SESSION STOPPED', 'DISQUALIFIED', 'EXCLUDED', 'BLACK FLAG', 'BLACK AND ORANGE',
     ])) {
+      return 'error';
+    }
+    if (message.contains('TIME PENALTY')) {
       return 'error';
     }
     if (message.contains('PENALTY') && !message.contains('PENALTY SERVED') &&
@@ -15053,7 +16410,8 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
   bool _isRaceControlPenaltyMessage(String? rawMessage) {
     final message = rawMessage?.trim().toUpperCase() ?? '';
     return message.contains('PENALTY') &&
-        !_isRaceControlPenaltyServedMessage(rawMessage);
+        !_isRaceControlPenaltyServedMessage(rawMessage) &&
+        !message.contains('PENALTY NOTED');
   }
 
   bool _isRaceControlInvestigationMessage(String? rawMessage) {
@@ -15214,17 +16572,26 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       r'^(.*?)\s+(UNDER INVESTIGATION|WILL BE INVESTIGATED(?: AFTER THE SESSION| AFTER THE RACE)?|SUMMONED|NO FURTHER ACTION|NO FURTHER INVESTIGATION REQUIRED|REVIEWED NO FURTHER INVESTIGATION|NOTED|WARNING|REPRIMAND|BLACK AND WHITE FLAG|FINE)(?:\s*\-\s*(.*))?$',
       caseSensitive: false,
     ).firstMatch(source);
-    if (match == null) {
-      return null;
+    if (match != null) {
+      final incidentKey = _normalizeRaceControlMatchText(match.group(1) ?? '');
+      if (incidentKey.isEmpty) {
+        return null;
+      }
+      final reasonKey = _normalizeRaceControlMatchText(match.group(3) ?? '');
+      return '$incidentKey|$reasonKey';
     }
 
-    final incidentKey = _normalizeRaceControlMatchText(match.group(1) ?? '');
-    if (incidentKey.isEmpty) {
-      return null;
+    final upper = source.toUpperCase();
+    // Standalone NFI outcomes (often "… NO FURTHER INVESTIGATION … CAR n")
+    if (upper.contains('NO FURTHER INVESTIGATION')) {
+      final car = RegExp(r'CAR\s+(\d+)', caseSensitive: false).firstMatch(source);
+      final key = car != null
+          ? 'NFI_CAR_${car.group(1)}'
+          : _normalizeRaceControlMatchText(source);
+      return '$key|nfi';
     }
 
-    final reasonKey = _normalizeRaceControlMatchText(match.group(3) ?? '');
-    return '$incidentKey|$reasonKey';
+    return null;
   }
 
   bool _isRaceControlIncidentFamilyMessage(String? rawMessage) {
@@ -15679,6 +17046,13 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
             filter: _rcFilterStewards,
             selected: isSelected(_rcFilterStewards),
           ),
+          const SizedBox(width: 8),
+          _buildRaceControlFilterChip(
+            context,
+            label: context.l10n.race_control_filter_penalties,
+            filter: _rcFilterPenalties,
+            selected: isSelected(_rcFilterPenalties),
+          ),
         ],
       ),
     );
@@ -15749,9 +17123,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
   Widget _buildRaceControlSection(
     BuildContext context,
     List<Map<String, dynamic>> messages,
-    String selectedSession,
-  ) {
-
+    String selectedSession, {
+    bool broadcastLayout = false,
+  }) {
     final theme = Theme.of(context);
     final availableScopes = _raceControlScopes(messages, selectedSession);
     final selectedScope = availableScopes.contains(_selectedRaceControlScope)
@@ -15767,6 +17141,17 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
         ? filteredMessages
         : filteredMessages.take(_defaultRaceControlVisibleCount).toList();
 
+    if (broadcastLayout) {
+      return _buildWeekendHubBroadcastRaceControlSection(
+        context,
+        messages,
+        selectedSession,
+        availableScopes,
+        selectedScope,
+        filteredMessages,
+      );
+    }
+
     return _weekendHubCard(
       context,
       padding: const EdgeInsets.all(18),
@@ -15774,156 +17159,593 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionCardTitle(context, context.l10n.race_control),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _raceControlSearchController,
-              onChanged: (value) {
-                setState(() {
-                  _raceControlSearchQuery = value;
-                  _showAllRaceControlMessages = false;
-                });
-              },
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.search),
-                hintText: context.l10n.race_control_search_hint,
-              ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _raceControlSearchController,
+            onChanged: (value) {
+              setState(() {
+                _raceControlSearchQuery = value;
+                _showAllRaceControlMessages = false;
+              });
+            },
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.search),
+              hintText: context.l10n.race_control_search_hint,
             ),
-            const SizedBox(height: 12),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            context.l10n.scope,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          _buildRaceControlScopeChips(
+            context,
+            availableScopes,
+            selectedScope,
+          ),
+          const SizedBox(height: 12),
+          _buildRaceControlFilterBar(context),
+          const SizedBox(height: 12),
+          Text(
+            context.l10n.race_control_message_count(
+              '${visibleMessages.length}',
+              '${filteredMessages.length}',
+            ),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (filteredMessages.isEmpty)
             Text(
-              context.l10n.scope,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
-            _buildRaceControlScopeChips(
-              context,
-              availableScopes,
-              selectedScope,
-            ),
-            const SizedBox(height: 12),
-            _buildRaceControlFilterBar(context),
-            const SizedBox(height: 12),
-            Text(
-              context.l10n.race_control_message_count(
-                '${visibleMessages.length}',
-                '${filteredMessages.length}',
-              ),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 12),
-            if (filteredMessages.isEmpty)
-              Text(
-                context.l10n.race_control_empty,
-                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-              )
-            else
-              Column(
-                children: visibleMessages
-                    .map((message) {
-                      final tokens = _themeTokens(context);
-                      final messageStyle = _raceControlMessageStyle(
-                        message['message']?.toString(),
-                        tokens,
-                      );
-                      final relatedMessages = _relatedRaceControlMessages(
-                        messages,
-                        selectedSession,
-                        message,
-                      );
-                      return Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(20),
-                          onTap: () => _showRaceControlMessageDetails(
-                            context,
-                            messages,
-                            selectedSession,
-                            message,
-                          ),
-                          child: Container(
-                            width: double.infinity,
-                            margin: const EdgeInsets.only(bottom: 10),
-                            child: Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: messageStyle?.background ??
-                                        tokens.panelStrong,
-                                    borderRadius:
-                                        BorderRadius.circular(20),
-                                    border: messageStyle == null
-                                        ? Border.all(
-                                            color: tokens.outline
-                                                .withValues(alpha: 0.6),
-                                          )
-                                        : null,
-                                  ),
-                                  child: _buildRaceControlMessageContent(
-                                    context,
-                                    message,
-                                    theme,
-                                    tokens,
-                                    messageStyle,
-                                    relatedMessages,
-                                  ),
+              context.l10n.race_control_empty,
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+            )
+          else
+            Column(
+              children: visibleMessages
+                  .map((message) {
+                    final tokens = _themeTokens(context);
+                    final messageStyle = _raceControlMessageStyle(
+                      message['message']?.toString(),
+                      tokens,
+                    );
+                    final relatedMessages = _relatedRaceControlMessages(
+                      messages,
+                      selectedSession,
+                      message,
+                    );
+                    return Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: () => _showRaceControlMessageDetails(
+                          context,
+                          messages,
+                          selectedSession,
+                          message,
+                        ),
+                        child: Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.only(bottom: 10),
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: messageStyle?.background ??
+                                      tokens.panelStrong,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: messageStyle == null
+                                      ? Border.all(
+                                          color: tokens.outline
+                                              .withValues(alpha: 0.6),
+                                        )
+                                      : null,
                                 ),
-                                if (messageStyle != null)
-                                  Positioned.fill(
-                                    child: IgnorePointer(
-                                      child: CustomPaint(
-                                        painter: FadingBorderPainter(
-                                          color: theme.colorScheme.primary,
-                                          borderRadius: 20,
-                                          borderWidth: 2,
-                                        ),
+                                child: _buildRaceControlMessageContent(
+                                  context,
+                                  message,
+                                  theme,
+                                  tokens,
+                                  messageStyle,
+                                  relatedMessages,
+                                ),
+                              ),
+                              if (messageStyle != null)
+                                Positioned.fill(
+                                  child: IgnorePointer(
+                                    child: CustomPaint(
+                                      painter: FadingBorderPainter(
+                                        color: theme.colorScheme.primary,
+                                        borderRadius: 20,
+                                        borderWidth: 2,
                                       ),
                                     ),
                                   ),
-                              ],
-                            ),
+                                ),
+                            ],
                           ),
                         ),
-                      );
-                    })
-                    .toList(growable: false),
+                      ),
+                    );
+                  })
+                  .toList(growable: false),
+            ),
+          if (filteredMessages.length > _defaultRaceControlVisibleCount) ...[
+            const SizedBox(height: 4),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _showAllRaceControlMessages =
+                        !_showAllRaceControlMessages;
+                  });
+                },
+                icon: Icon(
+                  _showAllRaceControlMessages
+                      ? Icons.unfold_less
+                      : Icons.unfold_more,
+                ),
+                label: Text(
+                  _showAllRaceControlMessages
+                      ? context.l10n.show_less_messages
+                      : context.l10n.show_all_messages('${filteredMessages.length}'),
+                ),
               ),
-            if (filteredMessages.length > _defaultRaceControlVisibleCount) ...[
-              const SizedBox(height: 4),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _showAllRaceControlMessages =
-                          !_showAllRaceControlMessages;
-                    });
-                  },
-                  icon: Icon(
-                    _showAllRaceControlMessages
-                        ? Icons.unfold_less
-                        : Icons.unfold_more,
-                  ),
-                  label: Text(
-                    _showAllRaceControlMessages
-                        ? context.l10n.show_less_messages
-                        : context.l10n.show_all_messages('${filteredMessages.length}'),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  int _raceControlMessageSortMillis(Map<String, dynamic> m) {
+    final d = DateTime.tryParse(m['timestampUtc']?.toString() ?? '');
+    return d?.millisecondsSinceEpoch ?? 0;
+  }
+
+  Color _raceControlBroadcastBarColor(
+    Map<String, dynamic> message,
+    F1ThemeTokens tokens,
+    ThemeData theme,
+  ) {
+    final style = _raceControlMessageStyle(
+      message['message']?.toString(),
+      tokens,
+    );
+    if (style != null) {
+      return style.border;
+    }
+    final flagTint = _raceControlFlagColor(
+      message['flag']?.toString(),
+      tokens,
+      theme.colorScheme,
+    );
+    return flagTint ?? theme.colorScheme.outline.withValues(alpha: 0.5);
+  }
+
+  Widget _buildBroadcastRaceControlRow(
+    BuildContext context,
+    Map<String, dynamic> message,
+    List<Map<String, dynamic>> allSessionMessages,
+    String selectedSession,
+    F1ThemeTokens tokens,
+    ThemeData theme, {
+    bool inStoryline = false,
+  }) {
+    final scheme = theme.colorScheme;
+    final raw = message['message']?.toString() ?? '-';
+    final barColor = _raceControlBroadcastBarColor(message, tokens, theme);
+    // Rows render on the light module background; only the strip is green/orange/red.
+    // messageStyle.text is for text *on* those fill colors (often near-white) and is
+    // unreadable on white — always use on-surface for the message body.
+    final textColor = scheme.onSurface;
+    final linkedToOthers = _relatedRaceControlMessages(
+      allSessionMessages,
+      selectedSession,
+      message,
+    ).isNotEmpty;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => _showRaceControlMessageDetails(
+          context,
+          allSessionMessages,
+          selectedSession,
+          message,
+        ),
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: inStoryline ? 4 : 0,
+            top: 8,
+            bottom: 8,
+            right: 4,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 78,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _formatRaceControlBroadcastClock(
+                        message['timestampUtc']?.toString(),
+                      ),
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontFeatures: const [ui.FontFeature.tabularFigures()],
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        height: 1.2,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                    if (linkedToOthers) ...[
+                      const SizedBox(height: 2),
+                      Icon(
+                        Icons.link_sharp,
+                        size: 14,
+                        // primary can be very light in some team themes → invisible on white
+                        color: scheme.onSurface.withValues(alpha: 0.62),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              Container(
+                width: 4,
+                constraints: const BoxConstraints(minHeight: 40),
+                decoration: BoxDecoration(
+                  color: barColor,
+                  borderRadius: BorderRadius.circular(2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: barColor.withValues(alpha: 0.65),
+                      blurRadius: 8,
+                      spreadRadius: 0,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: _buildRaceControlBroadcastRichText(
+                    raw,
+                    textColor,
+                    14,
                   ),
                 ),
               ),
             ],
-          ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWeekendHubBroadcastStorylineBlock(
+    BuildContext context,
+    List<Map<String, dynamic>> group,
+    List<Map<String, dynamic>> allSessionMessages,
+    String selectedSession,
+    F1ThemeTokens tokens,
+    ThemeData theme,
+  ) {
+    if (group.length == 1) {
+      return _buildBroadcastRaceControlRow(
+        context,
+        group.single,
+        allSessionMessages,
+        selectedSession,
+        tokens,
+        theme,
+      );
+    }
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+      decoration: BoxDecoration(
+        color: tokens.panelStrong.withValues(alpha: 0.88),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: tokens.outline.withValues(alpha: 0.55)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.subtitles_outlined,
+                size: 18,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                context.l10n.race_control_steward_storyline,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.3,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ...group.map(
+            (m) => _buildBroadcastRaceControlRow(
+              context,
+              m,
+              allSessionMessages,
+              selectedSession,
+              tokens,
+              theme,
+              inStoryline: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeekendHubBroadcastRaceControlSection(
+    BuildContext context,
+    List<Map<String, dynamic>> messages,
+    String selectedSession,
+    List<String> availableScopes,
+    String selectedScope,
+    List<Map<String, dynamic>> filteredMessages,
+  ) {
+    final theme = Theme.of(context);
+    final tokens = _themeTokens(context);
+
+    final trackLimitMsgs = filteredMessages
+        .where(
+          (m) => _isRaceControlTrackLimitDeletionMessage(
+            m['message']?.toString(),
+          ),
+        )
+        .toList(growable: false)
+      ..sort(
+        (a, b) => _raceControlMessageSortMillis(a).compareTo(
+          _raceControlMessageSortMillis(b),
         ),
       );
+
+    final mainMsgs = filteredMessages
+        .where(
+          (m) => !_isRaceControlTrackLimitDeletionMessage(
+            m['message']?.toString(),
+          ),
+        )
+        .toList(growable: false)
+      ..sort(
+        (a, b) => _raceControlMessageSortMillis(a).compareTo(
+          _raceControlMessageSortMillis(b),
+        ),
+      );
+
+    final visibleMain = _showAllRaceControlMessages
+        ? mainMsgs
+        : mainMsgs.take(_defaultRaceControlVisibleCount).toList(growable: false);
+
+    final storylineGroups = _groupBroadcastStorylineMessages(visibleMain);
+
+    return _weekendHubCard(
+      context,
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionCardTitle(context, context.l10n.race_control),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _raceControlSearchController,
+            onChanged: (value) {
+              setState(() {
+                _raceControlSearchQuery = value;
+                _showAllRaceControlMessages = false;
+              });
+            },
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.search),
+              hintText: context.l10n.race_control_search_hint,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            context.l10n.scope,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          _buildRaceControlScopeChips(
+            context,
+            availableScopes,
+            selectedScope,
+          ),
+          const SizedBox(height: 12),
+          _buildRaceControlFilterBar(context),
+          const SizedBox(height: 12),
+          Text(
+            context.l10n.race_control_message_count(
+              '${visibleMain.length}',
+              '${filteredMessages.length}',
+            ),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (trackLimitMsgs.isNotEmpty) ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: 17,
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.9,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    context.l10n.race_control_track_limits_strip,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: theme.colorScheme.onSurfaceVariant,
+                      height: 1.25,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 88,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: trackLimitMsgs.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 10),
+                itemBuilder: (context, i) {
+                  final m = trackLimitMsgs[i];
+                  final msg = m['message']?.toString() ?? '-';
+                  return SizedBox(
+                    width: 260,
+                    child: Material(
+                      color: tokens.panel.withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(14),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(14),
+                        onTap: () => _showRaceControlMessageDetails(
+                          context,
+                          messages,
+                          selectedSession,
+                          m,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _formatRaceControlBroadcastClock(
+                                  m['timestampUtc']?.toString(),
+                                ),
+                                style: TextStyle(
+                                  fontFamily: 'monospace',
+                                  fontFeatures: const [
+                                    ui.FontFeature.tabularFigures(),
+                                  ],
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Expanded(
+                                child: Text(
+                                  msg,
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.25,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+          if (filteredMessages.isEmpty)
+            Text(
+              _selectedRaceControlQuickFilter == _rcFilterPenalties
+                  ? context.l10n.weekend_hub_penalties_filter_empty
+                  : context.l10n.race_control_empty,
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+            )
+          else if (mainMsgs.isEmpty)
+            const SizedBox.shrink()
+          else
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: storylineGroups
+                  .map(
+                    (g) => _buildWeekendHubBroadcastStorylineBlock(
+                      context,
+                      g,
+                      messages,
+                      selectedSession,
+                      tokens,
+                      theme,
+                    ),
+                  )
+                  .toList(growable: false),
+            ),
+          if (mainMsgs.length > _defaultRaceControlVisibleCount) ...[
+            const SizedBox(height: 4),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _showAllRaceControlMessages =
+                        !_showAllRaceControlMessages;
+                  });
+                },
+                icon: Icon(
+                  _showAllRaceControlMessages
+                      ? Icons.unfold_less
+                      : Icons.unfold_more,
+                ),
+                label: Text(
+                  _showAllRaceControlMessages
+                      ? context.l10n.show_less_messages
+                      : context.l10n.show_all_messages('${mainMsgs.length}'),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   Widget _buildRaceControlMessageContent(
@@ -16072,37 +17894,31 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final raceResults =
-        SessionDataManager().raceResultsCache[SessionDataManager()
-            .raceResultsKeyFor(widget.race)] ??
-        const <RaceResultRow>[];
-    final raceWeather =
-        SessionDataManager().raceWeatherCache[SessionDataManager()
-            .raceWeatherKeyFor(widget.race)] ??
-        const <Map<String, dynamic>>[];
-    final raceControlMessages =
-        SessionDataManager().raceControlCache[SessionDataManager()
-            .raceControlKeyFor(widget.race)] ??
-        const <Map<String, dynamic>>[];
-    final availableSessions = _availableWeekendSessions(raceControlMessages);
-    final selectedSession = availableSessions.contains(_selectedWeekendSession)
-        ? _selectedWeekendSession
-        : (availableSessions.contains('Race')
-              ? 'Race'
-              : availableSessions.first);
-    final selectedWeather =
-        _weatherBySession[selectedSession] ??
-        (selectedSession == 'Race'
-            ? raceWeather
-            : const <Map<String, dynamic>>[]);
-    final selectedLapTimeline =
-        _lapTimelineBySession[selectedSession] ??
-        const <Map<String, dynamic>>[];
-    final penalties = raceResults
-        .where(
-          (row) => row.penalty.trim().isNotEmpty && row.penalty.trim() != '-',
-        )
-        .toList(growable: false);
+    final hasHubAssets = _hubSessionStems.isNotEmpty;
+    final selectedStem = hasHubAssets
+        ? (_hubSessionStems.contains(_selectedSessionStem)
+              ? _selectedSessionStem
+              : _hubSessionStems.last)
+        : '';
+    final uiSessionName =
+        selectedStem.isEmpty ? 'Race' : _hubStemToUiSessionName(selectedStem);
+
+    final List<Map<String, dynamic>> selectedWeather;
+    final List<Map<String, dynamic>> selectedLapTimeline;
+    final List<Map<String, dynamic>> raceControlMessages;
+    final List<WeekendHubPodiumEntry> headerTopThree;
+
+    if (hasHubAssets) {
+      selectedWeather = _hubWeatherByStem[selectedStem] ?? const [];
+      selectedLapTimeline = _hubLapTimelineByStem[selectedStem] ?? const [];
+      raceControlMessages = _hubRaceControlByStem[selectedStem] ?? const [];
+      headerTopThree = _hubPodiumByStem[selectedStem] ?? const [];
+    } else {
+      selectedWeather = const [];
+      selectedLapTimeline = const [];
+      raceControlMessages = const [];
+      headerTopThree = const [];
+    }
 
     final scheme = theme.colorScheme;
     final desktopShell = _isDesktopShellLayout(context);
@@ -16167,25 +17983,128 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                     child: ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       padding: EdgeInsets.fromLTRB(
-                        20,
+                        16,
                         listTopPadding,
-                        20,
+                        16,
                         20,
                       ),
                       children: [
-                        _buildWeekendHubHeader(context, availableSessions),
-                        const SizedBox(height: 24),
-                        _buildWeekendHubLowerRow(
-                          context,
-                          selectedSession,
-                          selectedWeather,
-                          selectedLapTimeline,
-                          raceControlMessages,
-                          penalties,
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 280),
+                          switchInCurve: Curves.easeOutCubic,
+                          switchOutCurve: Curves.easeInCubic,
+                          child: KeyedSubtree(
+                            key: ValueKey<String>(
+                              hasHubAssets
+                                  ? 'weekend_hub_full_${widget.race.country}_${widget.race.date.toIso8601String()}'
+                                  : 'weekend_hub_minimal_${widget.race.country}_${widget.race.date.toIso8601String()}',
+                            ),
+                            child: hasHubAssets
+                                ? Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      _buildWeekendHubHeader(
+                                        context,
+                                        hasHubAssets: true,
+                                        sessionStems: _hubSessionStems,
+                                        selectedStem: selectedStem,
+                                        headerTopThree: headerTopThree,
+                                      ),
+                                      const SizedBox(height: 24),
+                                      _buildWeekendHubLowerRow(
+                                        context,
+                                        uiSessionName,
+                                        selectedWeather,
+                                        selectedLapTimeline,
+                                        raceControlMessages,
+                                      ),
+                                    ],
+                                  )
+                                : Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      _buildWeekendHubHeader(
+                                        context,
+                                        hasHubAssets: false,
+                                        sessionStems: const [],
+                                        selectedStem: '',
+                                        headerTopThree: const [],
+                                      ),
+                                    ],
+                                  ),
+                          ),
                         ),
                       ],
                     ),
                   ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeekendHubSpotPlaceholderCard(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = _themeTokens(context);
+    return _weekendHubCard(
+      context,
+      padding: const EdgeInsets.all(18),
+      fillWidth: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.radar, color: scheme.primary, size: 22),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  context.l10n.weekend_hub_spot_placeholder_title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: scheme.onSurface,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            context.l10n.weekend_hub_spot_placeholder_body,
+            style: TextStyle(
+              fontSize: 13,
+              height: 1.35,
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Container(
+            height: 72,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: tokens.panel.withValues(alpha: 0.55),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: scheme.outline.withValues(alpha: 0.28),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.podcasts_outlined,
+                  color: scheme.primary.withValues(alpha: 0.45),
+                  size: 28,
+                ),
+                const SizedBox(width: 10),
+                Icon(
+                  Icons.cloud_outlined,
+                  color: scheme.primary.withValues(alpha: 0.35),
+                  size: 28,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -16198,7 +18117,6 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     List<Map<String, dynamic>> sessionWeather,
     List<Map<String, dynamic>> sessionLapTimeline,
     List<Map<String, dynamic>> raceControlMessages,
-    List<RaceResultRow> penalties,
   ) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -16214,18 +18132,24 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
           context,
           raceControlMessages,
           selectedSession,
+          broadcastLayout: true,
         );
-        final penaltiesCard = _buildPenaltiesCard(context, penalties);
+        final hubSpot = _buildWeekendHubSpotPlaceholderCard(context);
+        // Align with top row: Circuit flex 6 vs Top3+Schedule flex 5+6 (→ 6 : 11).
+        const lowerTrackFlex = 6;
+        const lowerRaceControlFlex = 11;
 
         if (constraints.maxWidth >= 1180) {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(flex: 10, child: race),
+              Expanded(flex: lowerTrackFlex, child: race),
               const SizedBox(width: 24),
-              Expanded(flex: 13, child: raceControl),
-              const SizedBox(width: 24),
-              Expanded(flex: 9, child: penaltiesCard),
+              Expanded(flex: lowerRaceControlFlex, child: raceControl),
+              if (_kWeekendHubShowLiveRadarDrCard) ...[
+                const SizedBox(width: 24),
+                Expanded(flex: 6, child: hubSpot),
+              ],
             ],
           );
         }
@@ -16237,13 +18161,15 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(flex: 10, child: race),
+                  Expanded(flex: lowerTrackFlex, child: race),
                   const SizedBox(width: 24),
-                  Expanded(flex: 13, child: raceControl),
+                  Expanded(flex: lowerRaceControlFlex, child: raceControl),
                 ],
               ),
-              const SizedBox(height: 24),
-              penaltiesCard,
+              if (_kWeekendHubShowLiveRadarDrCard) ...[
+                const SizedBox(height: 24),
+                hubSpot,
+              ],
             ],
           );
         }
@@ -16254,8 +18180,10 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
             race,
             const SizedBox(height: 24),
             raceControl,
-            const SizedBox(height: 24),
-            penaltiesCard,
+            if (_kWeekendHubShowLiveRadarDrCard) ...[
+              const SizedBox(height: 24),
+              hubSpot,
+            ],
           ],
         );
       },
@@ -16266,6 +18194,22 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     final theme = Theme.of(context);
     final tokens = _themeTokens(context);
     final schedule = _sessionSchedule();
+    final now = DateTime.now();
+    int? activeOrNextIndex;
+    for (var i = 0; i < schedule.length; i++) {
+      if (_sessionStatus(schedule[i].value) == 'session_status_live_recent') {
+        activeOrNextIndex = i;
+        break;
+      }
+    }
+    if (activeOrNextIndex == null) {
+      for (var i = 0; i < schedule.length; i++) {
+        if (schedule[i].value.isAfter(now)) {
+          activeOrNextIndex = i;
+          break;
+        }
+      }
+    }
 
     return _weekendHubCard(
       context,
@@ -16281,7 +18225,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          ...schedule.map((entry) {
+          ...schedule.asMap().entries.map((indexed) {
+            final index = indexed.key;
+            final entry = indexed.value;
             final status = _sessionStatus(entry.value);
             final canOpenResults = status == 'session_status_completed';
             final statusColor = canOpenResults
@@ -16289,6 +18235,8 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                 : entry.value.isAfter(DateTime.now())
                 ? theme.colorScheme.primary
                 : theme.colorScheme.secondary;
+            final accent = theme.colorScheme.primary;
+            final isActiveOrNext = index == activeOrNextIndex;
 
             return Container(
               margin: const EdgeInsets.only(bottom: 8),
@@ -16299,16 +18247,40 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                   color: tokens.outline.withValues(alpha: 0.2),
                   width: 0.5,
                 ),
-              ),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: canOpenResults
-                    ? () => _openSingleSessionResults(entry.key)
+                boxShadow: isActiveOrNext
+                    ? [
+                        BoxShadow(
+                          color: accent.withValues(alpha: 0.12),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
                     : null,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: IntrinsicHeight(
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      if (isActiveOrNext)
+                        Container(
+                          width: 4,
+                          color: accent,
+                        ),
+                      Expanded(
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: canOpenResults
+                              ? () => _openSingleSessionResults(entry.key)
+                              : null,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            child: Row(
+                              children: [
                       Icon(
                         entry.key == 'Race'
                             ? Icons.flag
@@ -16366,6 +18338,11 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -16435,7 +18412,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
           ),
           const SizedBox(height: 14),
           Text(
-            'Geen weerdata beschikbaar voor ${_sessionDisplayTitle(context, selectedSession)}.',
+            'Geen weerdata beschikbaar',
             style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
           ),
           if (_loadError != null) ...[
@@ -16553,6 +18530,67 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
   return null;
 }
 
+  Widget _buildWeekendHubHeroWeatherMetric(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+  ) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final glow = scheme.primary.withValues(alpha: 0.55);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: _themeTokens(context).panelStrong.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: _themeTokens(context).outline.withValues(alpha: 0.45),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 26,
+            color: scheme.primary,
+            shadows: [
+              Shadow(color: glow, blurRadius: 14),
+              Shadow(color: glow.withValues(alpha: 0.35), blurRadius: 22),
+            ],
+          ),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.6,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  height: 1.05,
+                  color: scheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHubMetric(String label, String value, IconData icon) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -16572,22 +18610,33 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
   }
 
   Widget _buildWeekendHubHeader(
-    BuildContext context,
-    List<String> availableSessions,
-  ) {
+    BuildContext context, {
+    required bool hasHubAssets,
+    required List<String> sessionStems,
+    required String selectedStem,
+    required List<WeekendHubPodiumEntry> headerTopThree,
+  }) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 860;
         final isThreeColumn = constraints.maxWidth >= 1180;
-        final summary = _buildWeekendHubSummaryCard(context, availableSessions);
+        final summary = _buildWeekendHubSummaryCard(
+          context,
+          hasHubAssets: hasHubAssets,
+          sessionStems: sessionStems,
+          selectedStem: selectedStem,
+        );
         final summaryColumn = summary;
-        final selectedSession =
-            availableSessions.contains(_selectedWeekendSession)
-            ? _selectedWeekendSession
-            : (availableSessions.contains('Race')
-                  ? 'Race'
-                  : availableSessions.first);
-        final podium = _buildWeekendHubTopThreeCard(context, selectedSession);
+        final matchPodiumToSiblingCardHeight =
+            hasHubAssets && (isThreeColumn || isWide);
+        final podium = hasHubAssets
+            ? _buildWeekendHubTopThreeCard(
+                context,
+                headerTopThree,
+                _hubStemDisplayTitle(context, selectedStem),
+                matchSiblingCardHeight: matchPodiumToSiblingCardHeight,
+              )
+            : const SizedBox.shrink();
         final schedule = _buildWeekendScheduleCard(context);
 
         if (isThreeColumn) {
@@ -16595,11 +18644,13 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(child: summaryColumn),
+                Expanded(flex: 6, child: summaryColumn),
+                if (hasHubAssets) ...[
+                  const SizedBox(width: 24),
+                  Expanded(flex: 5, child: podium),
+                ],
                 const SizedBox(width: 24),
-                Expanded(child: podium),
-                const SizedBox(width: 24),
-                Expanded(child: schedule),
+                Expanded(flex: 6, child: schedule),
               ],
             ),
           );
@@ -16613,9 +18664,11 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(child: summaryColumn),
-                    const SizedBox(width: 24),
-                    Expanded(child: podium),
+                    Expanded(flex: 6, child: summaryColumn),
+                    if (hasHubAssets) ...[
+                      const SizedBox(width: 24),
+                      Expanded(flex: 5, child: podium),
+                    ],
                   ],
                 ),
               ),
@@ -16629,8 +18682,10 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             summary,
-            const SizedBox(height: 24),
-            podium,
+            if (hasHubAssets) ...[
+              const SizedBox(height: 24),
+              podium,
+            ],
             const SizedBox(height: 24),
             schedule,
           ],
@@ -16640,143 +18695,270 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
   }
 
   Widget _buildWeekendHubSummaryCard(
-    BuildContext context,
-    List<String> availableSessions,
-  ) {
+    BuildContext context, {
+    required bool hasHubAssets,
+    required List<String> sessionStems,
+    required String selectedStem,
+  }) {
     final theme = Theme.of(context);
-    final latestWithResults = availableSessions.reversed.firstWhere(
-      (session) => _hasSessionResults(session),
-      orElse: () => availableSessions.contains('Race') ? 'Race' : availableSessions.first,
-    );
-    final dropdownValue = availableSessions.contains(_selectedWeekendSession)
-        ? _selectedWeekendSession
-        : latestWithResults;
+    final scheme = theme.colorScheme;
+    final dropdownStem = hasHubAssets && sessionStems.contains(selectedStem)
+        ? selectedStem
+        : (hasHubAssets && sessionStems.isNotEmpty ? sessionStems.last : '');
+    final effectiveDropdownStem =
+        dropdownStem.isEmpty && sessionStems.isNotEmpty
+            ? sessionStems.first
+            : dropdownStem;
+
+    final circuitSvg = widget.race.circuitImage.trim();
+    final hasCircuitSvg =
+        circuitSvg.startsWith('http://') || circuitSvg.startsWith('https://');
 
     return _weekendHubCard(
       context,
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.zero,
       fillWidth: true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n.circuit,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(widget.race.flag, style: const TextStyle(fontSize: 42)),
-          const SizedBox(height: 10),
-          Text(
-            widget.race.name,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              _buildHubMetric(
-                context.l10n.temp,
-                '$_temperature°C',
-                Icons.thermostat,
-              ),
-              _buildHubMetric(
-                context.l10n.rain,
-                '$_rainChance%',
-                Icons.umbrella,
-              ),
-              _buildHubMetric(
-                context.l10n.wind,
-                '$_windSpeed km/h',
-                Icons.air,
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            context.l10n.session,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
-            key: ValueKey(dropdownValue),
-            initialValue: dropdownValue,
-            isExpanded: true,
-            decoration: const InputDecoration(
-              isDense: true,
-              prefixIcon: Icon(Icons.schedule, size: 18),
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 10,
-              ),
-            ),
-            items: availableSessions
-                .map(
-                  (session) => DropdownMenuItem<String>(
-                    value: session,
-                    child: Text(_sessionDisplayTitle(context, session)),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Stack(
+          clipBehavior: Clip.hardEdge,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 158),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      alignment: Alignment.centerLeft,
+                      children: [
+                        if (hasCircuitSvg)
+                          Positioned.fill(
+                            child: IgnorePointer(
+                              child: Opacity(
+                                opacity: 0.16,
+                                child: SvgPicture.network(
+                                  circuitSvg,
+                                  fit: BoxFit.contain,
+                                  alignment: Alignment.centerRight,
+                                  colorFilter: ColorFilter.mode(
+                                    scheme.onSurface.withValues(alpha: 0.92),
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              context.l10n.circuit,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: scheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.race.flag,
+                                  style: const TextStyle(fontSize: 40),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        widget.race.name,
+                                        style: theme.textTheme.headlineSmall
+                                            ?.copyWith(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 22,
+                                          height: 1.15,
+                                          color: scheme.onSurface,
+                                          shadows: [
+                                            Shadow(
+                                              color: scheme.surface
+                                                  .withValues(alpha: 0.9),
+                                              blurRadius: 14,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Wrap(
+                                        spacing: 10,
+                                        runSpacing: 10,
+                                        children: [
+                                          _buildWeekendHubHeroWeatherMetric(
+                                            context,
+                                            context.l10n.temp,
+                                            '$_temperature°C',
+                                            Icons.thermostat,
+                                          ),
+                                          _buildWeekendHubHeroWeatherMetric(
+                                            context,
+                                            context.l10n.rain,
+                                            '$_rainChance%',
+                                            Icons.umbrella,
+                                          ),
+                                          _buildWeekendHubHeroWeatherMetric(
+                                            context,
+                                            context.l10n.wind,
+                                            '$_windSpeed km/h',
+                                            Icons.air,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                )
-                .toList(growable: false),
-            onChanged: (value) {
-              if (value == null) return;
-              setState(() {
-                _selectedWeekendSession = value;
-                _showAllRaceControlMessages = false;
-              });
-            },
-          ),
-        ],
+                  if (hasHubAssets && sessionStems.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      context.l10n.session,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      key: ValueKey(effectiveDropdownStem),
+                      value: effectiveDropdownStem,
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        prefixIcon: Icon(Icons.schedule, size: 18),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                      ),
+                      items: sessionStems
+                          .map(
+                            (stem) => DropdownMenuItem<String>(
+                              value: stem,
+                              child: Text(_hubStemDisplayTitle(context, stem)),
+                            ),
+                          )
+                          .toList(growable: false),
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setState(() {
+                          _selectedSessionStem = value;
+                          _showAllRaceControlMessages = false;
+                        });
+                      },
+                    ),
+                  ],
+                  if (!hasHubAssets) ...[
+                    const SizedBox(height: 20),
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Text(
+                          context.l10n.weekend_hub_no_results_yet,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontStyle: FontStyle.italic,
+                            height: 1.4,
+                            color: scheme.onSurface.withValues(alpha: 0.52),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildWeekendHubTopThreeCard(
     BuildContext context,
-    String selectedSession,
-  ) {
+    List<WeekendHubPodiumEntry> topThree,
+    String sessionTitleForEmpty, {
+    bool matchSiblingCardHeight = false,
+  }) {
     final theme = Theme.of(context);
-    final topThree = _sessionTopThree(selectedSession);
+    final title = Text(
+      context.l10n.top_3,
+      style: theme.textTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.w800,
+        color: theme.colorScheme.onSurface,
+      ),
+    );
 
+    final Widget body;
+    if (topThree.isEmpty) {
+      body = matchSiblingCardHeight
+          ? Expanded(
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  context.l10n.session_data_unavailable(sessionTitleForEmpty),
+                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                ),
+              ),
+            )
+          : Text(
+              context.l10n.session_data_unavailable(sessionTitleForEmpty),
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+            );
+    } else {
+      final driverList = Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: topThree
+            .map((entry) => _buildTopThreeRow(context, entry))
+            .toList(growable: false),
+      );
+      body = matchSiblingCardHeight
+          ? Expanded(
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: driverList,
+              ),
+            )
+          : driverList;
+    }
+
+    // Never use [LayoutBuilder] here: this card sits inside [IntrinsicHeight] on
+    // desktop, and LayoutBuilder cannot participate in intrinsic height calc.
     return _weekendHubCard(
       context,
       padding: const EdgeInsets.all(18),
       fillWidth: true,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize:
+            matchSiblingCardHeight ? MainAxisSize.max : MainAxisSize.min,
         children: [
-          Text(
-            context.l10n.top_3,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
+          title,
           const SizedBox(height: 10),
-          if (topThree.isEmpty)
-            Text(
-              context.l10n.session_data_unavailable(
-                _sessionDisplayTitle(context, selectedSession),
-              ),
-              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-            )
-          else
-            Column(
-              children: topThree
-                  .map((entry) => _buildTopThreeRow(context, entry))
-                  .toList(growable: false),
-            ),
+          body,
         ],
       ),
     );
@@ -16807,6 +18989,7 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
         border: Border.all(color: accent.withValues(alpha: 0.55)),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -16874,6 +19057,7 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
   }) {
     final theme = Theme.of(context);
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -20815,13 +22999,38 @@ class OpenF1SessionWidget extends StatelessWidget {
         .trim();
   }
 
+  /// Pirelli-style solid fills (soft / medium / hard / inter / wet).
+  Color? _tyrePirelliFillColor(String compound) {
+    switch (_baseTyreCompound(compound).toUpperCase()) {
+      case 'SOFT':
+      case 'SOFTS':
+      case 'RED':
+        return const Color(0xFFE10600);
+      case 'MEDIUM':
+      case 'YELLOW':
+        return const Color(0xFFFFD200);
+      case 'HARD':
+      case 'WHITE':
+        return const Color(0xFFE8E8E8);
+      case 'INTER':
+      case 'INTERMEDIATE':
+      case 'GREEN':
+        return const Color(0xFF00A651);
+      case 'WET':
+      case 'BLUE':
+        return const Color(0xFF00AEEF);
+      default:
+        return null;
+    }
+  }
+
   Widget _buildTyreCell(BuildContext context, String compound) {
     final theme = Theme.of(context);
     final normalized = compound.trim();
     final baseCompound = _baseTyreCompound(normalized);
     final isUsedTyre = normalized.toLowerCase().contains('(used)');
     final isUnknown = normalized.isEmpty || normalized == '-';
-    final assetPath = _tyreAssetPath(baseCompound);
+    final fill = _tyrePirelliFillColor(baseCompound);
 
     if (isUnknown) {
       return Padding(
@@ -20837,6 +23046,56 @@ class OpenF1SessionWidget extends StatelessWidget {
       );
     }
 
+    if (fill != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: SizedBox(
+          width: double.infinity,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Semantics(
+                label: '$baseCompound tyre',
+                child: Container(
+                  width: 18,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    color: fill,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: theme.colorScheme.outline.withValues(alpha: 0.35),
+                    ),
+                  ),
+                ),
+              ),
+              if (isUsedTyre) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    'used',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.onSecondaryContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
+
+    final assetPath = _tyreAssetPath(baseCompound);
     if (assetPath != null) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -21005,18 +23264,25 @@ class OpenF1SessionWidget extends StatelessWidget {
   ) {
 
     final theme = Theme.of(context);
-    final assetPath = _tyreAssetPath(entry.compound);
+    final fill = _tyrePirelliFillColor(entry.compound);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (assetPath != null)
-          SvgPicture.asset(
-            assetPath,
-            width: 34,
-            height: 20,
-            fit: BoxFit.contain,
-            semanticsLabel: '${entry.compound} ${context.l10n.tyre}',
+        if (fill != null)
+          Semantics(
+            label: '${entry.compound} ${context.l10n.tyre}',
+            child: Container(
+              width: 16,
+              height: 16,
+              decoration: BoxDecoration(
+                color: fill,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.35),
+                ),
+              ),
+            ),
           )
         else
           Text(
@@ -21115,7 +23381,10 @@ class OpenF1SessionWidget extends StatelessWidget {
     TextAlign align = TextAlign.right,
   }) {
     final theme = Theme.of(context);
-    final baseColor = finish == 'DNF' || finish == 'DNS' || finish == 'NC'
+    final baseColor = finish == 'DNF' ||
+            finish == 'DNS' ||
+            finish == 'NC' ||
+            finish == 'DSQ'
         ? theme.colorScheme.error
         : theme.colorScheme.onSurface;
     final deltaMatch = RegExp(r'^(.*?)(\s*\(([+-]\d+)\))$').firstMatch(finish);
@@ -21403,6 +23672,18 @@ class OpenF1SessionWidget extends StatelessWidget {
                     children: [
                       _buildCompactRaceDetailRow(
                         context,
+                        label: context.l10n.start,
+                        child: buildValueText(
+                          row.start.trim().isEmpty || row.start == '-'
+                              ? '-'
+                              : (RegExp(r'^\d+$').hasMatch(row.start.trim())
+                                    ? 'P${row.start.trim()}'
+                                    : row.start),
+                          strong: true,
+                        ),
+                      ),
+                      _buildCompactRaceDetailRow(
+                        context,
                         label: context.l10n.best_lap,
                         child: buildValueText(
                           row.fastestLap,
@@ -21410,6 +23691,13 @@ class OpenF1SessionWidget extends StatelessWidget {
                           color: row.hasFastestLap
                               ? const Color(0xFF8E24AA)
                               : null,
+                        ),
+                      ),
+                      _buildCompactRaceDetailRow(
+                        context,
+                        label: context.l10n.cfield_pitstop_record_detail,
+                        child: buildValueText(
+                          RaceResultRow.formatOpenF1PitStopsLine(row.pitStops),
                         ),
                       ),
                       _buildCompactRaceDetailRow(
@@ -21729,7 +24017,6 @@ class OpenF1SessionWidget extends StatelessWidget {
   }) {
     const headerHeight = 48.0;
     const bodyRowHeight = 46.0;
-    const maxVisibleBodyRows = 8;
 
     return Container(
       width: double.infinity,
@@ -21747,13 +24034,9 @@ class OpenF1SessionWidget extends StatelessWidget {
               constraints.maxWidth,
               preferredColumnWidths,
             );
-            final visibleBodyRows = rows.isEmpty
-                ? 1
-                : (rows.length > maxVisibleBodyRows
-                      ? maxVisibleBodyRows
-                      : rows.length);
+            final bodyRowCount = rows.isEmpty ? 1 : rows.length;
             final tableHeight =
-                headerHeight + (visibleBodyRows * bodyRowHeight);
+                headerHeight + (bodyRowCount * bodyRowHeight);
             final lastRowIndex = rows.length;
             final lastColumnIndex = headerCells.length - 1;
 
@@ -22400,39 +24683,10 @@ class OpenF1SessionWidget extends StatelessWidget {
               ),
             ),
 
-            // Toon de Top 3 direct
             ...results
-                .take(3)
-                .toList()
                 .asMap()
                 .entries
                 .map((e) => _buildResultRow(e.value, e.key + 1)),
-
-            // Uitklapbaar voor de rest van de rijders (P4 t/m P22)
-            if (results.length > 3)
-              Theme(
-                data: Theme.of(
-                  context,
-                ).copyWith(dividerColor: Colors.transparent),
-                child: ExpansionTile(
-                  tilePadding: const EdgeInsets.symmetric(horizontal: 16),
-                  title: Text(
-                    "🔽 P4 t/m P${results.length} Weergeven",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isDark ? Colors.white54 : Colors.black54,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  children: results
-                      .skip(3)
-                      .toList()
-                      .asMap()
-                      .entries
-                      .map((e) => _buildResultRow(e.value, e.key + 4))
-                      .toList(),
-                ),
-              ),
 
             const SizedBox(height: 8),
             Divider(height: 1, color: isDark ? Colors.white10 : Colors.black12),
@@ -22550,9 +24804,6 @@ class _FullscreenRaceResultsScreenState
                 final viewportWidth = constraints.maxWidth.isFinite
                     ? constraints.maxWidth
                     : MediaQuery.sizeOf(context).width;
-                final viewportHeight = constraints.maxHeight.isFinite
-                    ? constraints.maxHeight
-                    : MediaQuery.sizeOf(context).height;
 
                 return InteractiveViewer(
                   constrained: false,
@@ -22560,7 +24811,6 @@ class _FullscreenRaceResultsScreenState
                   maxScale: 4.0,
                   child: SizedBox(
                     width: viewportWidth,
-                    height: viewportHeight,
                     child: Align(
                       alignment: Alignment.topCenter,
                       child: tableWidget._buildRaceResultsTable(

@@ -63,6 +63,41 @@ class RaceResult {
     );
   }
 
+  /// OpenF1 bundled session row (`broadcastName`, `driverNumber`, `finishPosition`, …).
+  factory RaceResult.fromOpenF1Row(
+    Map<String, dynamic> json, {
+    int season = 0,
+    int round = 0,
+    String grandPrixName = '',
+    String sessionName = 'Race',
+  }) {
+    final finish = json['finishPosition'];
+    final pos = finish is num
+        ? finish.toInt()
+        : int.tryParse(finish?.toString() ?? '') ?? 0;
+    final pts = json['points'];
+    final points = pts is num
+        ? pts.toDouble()
+        : double.tryParse(pts?.toString() ?? '') ?? 0.0;
+    final broadcast = json['broadcastName']?.toString().trim() ?? '';
+    final name = (json['driverName'] as String?)?.trim().isNotEmpty == true
+        ? json['driverName'] as String
+        : broadcast;
+    return RaceResult(
+      season: json['season'] as int? ?? season,
+      round: json['round'] as int? ?? round,
+      grandPrixName: json['grandPrixName'] as String? ?? grandPrixName,
+      sessionName: json['sessionName'] as String? ?? sessionName,
+      driverCode: json['driverCode'] as String? ?? '',
+      driverName: name,
+      teamName: json['teamName']?.toString() ?? '',
+      position: pos,
+      points: points,
+      status: json['status']?.toString() ?? '',
+      fastestLap: json['fastest_lap'] as bool? ?? false,
+    );
+  }
+
   factory RaceResult.fromErgastJson(
     Map<String, dynamic> json, {
     required int season,

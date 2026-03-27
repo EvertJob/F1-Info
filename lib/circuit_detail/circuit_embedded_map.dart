@@ -3,32 +3,37 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:f1/circuit_detail/circuit_map_placement.dart';
+import 'package:f1/circuit_detail/circuit_track_geojson.dart';
 import 'package:f1/display_settings_controller.dart';
 import 'package:f1/orbit/orbit_data.dart';
+import 'package:f1/orbit/orbit_technical_models.dart';
 import 'package:f1/theme/f1_ui_theme.dart';
+import 'package:f1/utils/l10n_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-/// Dark, cool OSM tiles (ambient / night) — aligned with Orbit technical styling.
-const List<double> kCircuitAmbientNightMapMatrix = <double>[
-  0.12,
-  0.42,
-  0.06,
+/// Desaturated “silver night” matrix for OSM tiles (neutral vs app ambient gradient).
+/// Google Maps JSON styles do not apply to raster OSM; this approximates a cool neutral base.
+const List<double> kCircuitSilverNightMapMatrix = <double>[
+  0.2,
+  0.52,
+  0.1,
   0,
   0,
-  0.12,
-  0.42,
-  0.06,
+  0.2,
+  0.52,
+  0.1,
   0,
-  8,
-  0.12,
-  0.42,
-  0.06,
+  14,
+  0.2,
+  0.52,
+  0.1,
   0,
-  22,
+  18,
   0,
   0,
   0,
@@ -38,14 +43,8 @@ const List<double> kCircuitAmbientNightMapMatrix = <double>[
 
 const Duration _kCircuitMapAnimDuration = Duration(milliseconds: 900);
 
-/// `bacinger/f1-circuits` uses stems like `zandvoort`, not `circuit_zandvoort`.
-String orbitGeoJsonStemForCircuitId(String circuitId) {
-  const prefix = 'circuit_';
-  if (circuitId.startsWith(prefix)) {
-    return circuitId.substring(prefix.length);
-  }
-  return circuitId;
-}
+const Color _kF1Blue = Color(0xFF1565C0);
+const Color _kTrackSourceModeActive = Color(0xFF0D47A1);
 
 LatLngBounds _ensureMinBoundsSpan(LatLngBounds b) {
   const minDelta = 0.0012;
@@ -78,7 +77,7 @@ LatLngBounds _intersectBounds(LatLngBounds track, LatLngBounds pan) {
   return LatLngBounds(LatLng(south, west), LatLng(north, east));
 }
 
-/// Embedded Orbit-style [FlutterMap] for [CircuitPage]: bounded pan, zoom limits, night tiles.
+/// Embedded Orbit-style [FlutterMap] for [CircuitPage]: bounded pan, zoom limits, styled tiles.
 class CircuitEmbeddedMap extends StatefulWidget {
   const CircuitEmbeddedMap({
     super.key,
@@ -86,6 +85,7 @@ class CircuitEmbeddedMap extends StatefulWidget {
     required this.title,
     required this.circuitId,
     this.height = 232,
+    this.onBack,
   });
 
   final CircuitMapPlacement placement;
@@ -93,21 +93,33 @@ class CircuitEmbeddedMap extends StatefulWidget {
   final String circuitId;
   final double height;
 
+  /// Terug in de glazen header (i.p.v. losse app bar) — dichter bij de titel, minder “loze” ruimte.
+  final VoidCallback? onBack;
+
   @override
   State<CircuitEmbeddedMap> createState() => _CircuitEmbeddedMapState();
 }
 
 class _CircuitEmbeddedMapState extends State<CircuitEmbeddedMap>
     with SingleTickerProviderStateMixin {
-  static const double _minZoom = 14;
-  static const double _maxZoom = 18;
+  /// Ruim bereik: ver uitzoomen (context) en tot OSM max detail inzoomen.
+  static const double _minZoom = 10;
+  static const double _maxZoom = 19;
+
+  static const EdgeInsets _kFitPadding = EdgeInsets.all(50);
 
   late final AnimatedMapController _animatedMap;
-  late final Future<void> _trackLoadFuture;
+  Future<void>? _trackLoadFuture;
   List<List<LatLng>>? _trackSegments;
   bool _trackFailed = false;
   bool _didInitialCamera = false;
   bool _didLateTrackRefit = false;
+  bool _mapExpanded = false;
+
+  /// Sectoren (kleuren), gates en bochten uit `*-details.geojson`.
+  CircuitDetailsMapOverlay? _detailsOverlay;
+  bool _hasDetailsAsset = false;
+  bool _useDetailsTrack = false;
 
   @override
   void initState() {
@@ -118,23 +130,74 @@ class _CircuitEmbeddedMapState extends State<CircuitEmbeddedMap>
       curve: Curves.easeOutExpo,
       cancelPreviousAnimations: true,
     );
-    _trackLoadFuture = _loadTrack();
   }
 
-  Future<void> _loadTrack() async {
-    final stem = orbitGeoJsonStemForCircuitId(widget.circuitId);
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _trackLoadFuture ??= _loadTrack(DefaultAssetBundle.of(context));
+  }
+
+  @override
+  void didUpdateWidget(covariant CircuitEmbeddedMap oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.circuitId != widget.circuitId) {
+      _trackLoadFuture = _loadTrack(DefaultAssetBundle.of(context));
+      _trackSegments = null;
+      _detailsOverlay = null;
+      _hasDetailsAsset = false;
+      _useDetailsTrack = false;
+      _trackFailed = false;
+      _didInitialCamera = false;
+      _didLateTrackRefit = false;
+      _mapExpanded = false;
+    }
+  }
+
+  Future<void> _loadTrack(AssetBundle bundle) async {
+    final detailsOverlay = await loadCircuitDetailsMapOverlay(
+      bundle: bundle,
+      circuitId: widget.circuitId,
+    );
+    final hasDetails = detailsOverlay != null && detailsOverlay.hasTrackData;
+
     try {
-      final segs = await OrbitDataService.instance.fetchTrackSegments(stem);
+      final segs = await loadCircuitTrackSegments(
+        bundle: bundle,
+        circuitId: widget.circuitId,
+        useNetworkFallback: true,
+      );
       if (!mounted) return;
-      setState(() => _trackSegments = segs);
+      final mainUsable = segs.where((s) => s.length >= 2).isNotEmpty;
+      setState(() {
+        _detailsOverlay = detailsOverlay;
+        _hasDetailsAsset = hasDetails;
+        _trackSegments = segs;
+        _trackFailed = false;
+        if (!_hasDetailsAsset) {
+          _useDetailsTrack = false;
+        } else if (!mainUsable) {
+          _useDetailsTrack = true;
+        }
+      });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _maybeRefitForLateTrack();
       });
-    } catch (_) {
+    } on Object catch (_) {
       if (!mounted) return;
       setState(() {
+        _detailsOverlay = detailsOverlay;
+        _hasDetailsAsset = hasDetails;
         _trackFailed = true;
         _trackSegments = null;
+        if (!_hasDetailsAsset) {
+          _useDetailsTrack = false;
+        } else {
+          _useDetailsTrack = true;
+        }
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _maybeRefitForLateTrack();
       });
     }
   }
@@ -145,20 +208,38 @@ class _CircuitEmbeddedMapState extends State<CircuitEmbeddedMap>
     super.dispose();
   }
 
+  List<List<LatLng>>? _activeTrackSegments() {
+    if (_useDetailsTrack &&
+        _detailsOverlay != null &&
+        _detailsOverlay!.hasTrackData) {
+      final segs = _detailsOverlay!.segmentsForBounds();
+      return segs.isEmpty ? null : segs;
+    }
+    if (_trackFailed) return null;
+    final s = _trackSegments;
+    if (s == null || s.isEmpty) return null;
+    return s;
+  }
+
   CameraFit? _trackCameraFit() {
     final p = widget.placement;
-    final segments = _trackSegments;
-    if (segments == null || segments.isEmpty || _trackFailed) {
+    final segments = _activeTrackSegments();
+    if (segments == null || segments.isEmpty) {
       return null;
     }
-    final flat = OrbitDataService.flattenSegments(segments);
+    var flat = OrbitDataService.flattenSegments(segments);
+    if (_useDetailsTrack && _detailsOverlay != null) {
+      for (final c in _detailsOverlay!.corners) {
+        flat = [...flat, c.point];
+      }
+    }
     if (flat.length < 2) return null;
     var bounds = LatLngBounds.fromPoints(flat);
     bounds = _ensureMinBoundsSpan(bounds);
     bounds = _intersectBounds(bounds, p.panBounds);
     return CameraFit.bounds(
       bounds: bounds,
-      padding: const EdgeInsets.fromLTRB(20, 36, 20, 28),
+      padding: _kFitPadding,
       maxZoom: _maxZoom,
       minZoom: _minZoom,
     );
@@ -220,12 +301,39 @@ class _CircuitEmbeddedMapState extends State<CircuitEmbeddedMap>
     }
   }
 
+  void _refitToActiveTrack() {
+    if (!mounted) return;
+    final fit = _trackCameraFit();
+    if (fit == null) return;
+    final motionReduced = context
+        .read<DisplaySettingsController>()
+        .motionReduced;
+    if (motionReduced) {
+      _animatedMap.mapController.fitCamera(fit);
+    } else {
+      unawaited(
+        _animatedMap.animatedFitCamera(
+          cameraFit: fit,
+          curve: Curves.easeOutExpo,
+          duration: _kCircuitMapAnimDuration,
+          cancelPreviousAnimations: true,
+        ),
+      );
+    }
+  }
+
+  void _onTrackSourceChanged(bool useDetails) {
+    setState(() => _useDetailsTrack = useDetails);
+    _didLateTrackRefit = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _refitToActiveTrack());
+  }
+
   void _scheduleInitialCamera() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted || _didInitialCamera) return;
 
       try {
-        await _trackLoadFuture.timeout(const Duration(milliseconds: 1600));
+        await _trackLoadFuture?.timeout(const Duration(milliseconds: 2400));
       } on TimeoutException {
         // Continue with center / partial track.
       }
@@ -239,6 +347,106 @@ class _CircuitEmbeddedMapState extends State<CircuitEmbeddedMap>
     });
   }
 
+  void _nudgeZoom(double delta) {
+    try {
+      final ctrl = _animatedMap.mapController;
+      final cam = ctrl.camera;
+      final z = (cam.zoom + delta).clamp(_minZoom, _maxZoom);
+      if ((z - cam.zoom).abs() < 0.001) return;
+      ctrl.move(cam.center, z);
+    } on Object catch (_) {}
+  }
+
+  double _effectiveMapHeight(BuildContext context) {
+    if (!_mapExpanded) return widget.height;
+    final h = MediaQuery.sizeOf(context).height;
+    return math.min(560, math.max(320, h * 0.52));
+  }
+
+  List<Polyline> _polylinesFromTechnicalDetail(
+    OrbitCircuitTechnicalDetail t,
+    bool isDark,
+  ) {
+    final halo = (isDark ? Colors.white : Colors.black).withValues(alpha: 0.2);
+    final out = <Polyline>[];
+    for (final s in t.sectors) {
+      if (s.points.length < 2) continue;
+      out.add(
+        Polyline(
+          points: s.points,
+          strokeWidth: s.strokeWidth + 2.5,
+          color: halo,
+          strokeCap: StrokeCap.round,
+          strokeJoin: StrokeJoin.round,
+        ),
+      );
+      out.add(
+        Polyline(
+          points: s.points,
+          strokeWidth: s.strokeWidth,
+          color: s.color,
+          strokeCap: StrokeCap.round,
+          strokeJoin: StrokeJoin.round,
+        ),
+      );
+    }
+    for (final g in t.gates) {
+      if (g.points.length < 2) continue;
+      out.add(
+        Polyline(
+          points: g.points,
+          strokeWidth: g.strokeWidth + 1.5,
+          color: Colors.white.withValues(alpha: 0.25),
+          strokeCap: StrokeCap.round,
+          strokeJoin: StrokeJoin.round,
+        ),
+      );
+      out.add(
+        Polyline(
+          points: g.points,
+          strokeWidth: g.strokeWidth,
+          color: g.color,
+          strokeCap: StrokeCap.round,
+          strokeJoin: StrokeJoin.round,
+        ),
+      );
+    }
+    return out;
+  }
+
+  /// Standaardbaan (F1-blauw) of Details met GeoJSON-kleuren / fallback.
+  List<Polyline> _mapPolylines(bool isDark) {
+    if (_useDetailsTrack && _detailsOverlay != null) {
+      final t = _detailsOverlay!.technical;
+      if (t != null && !t.isEmpty) {
+        return _polylinesFromTechnicalDetail(t, isDark);
+      }
+      final plain = _detailsOverlay!.fallbackPlainSegments;
+      if (plain != null && plain.isNotEmpty) {
+        final outer = (isDark ? Colors.white : _kF1Blue).withValues(alpha: 0.28);
+        return polylinesFromTrackSegments(
+          plain,
+          strokeColor: _kF1Blue,
+          strokeWidth: 4,
+          outerStrokeColor: outer,
+          outerStrokeWidth: 6,
+        );
+      }
+    }
+
+    if (_trackFailed) return const [];
+    final segments = _trackSegments;
+    if (segments == null || segments.isEmpty) return const [];
+    final outer = (isDark ? Colors.white : _kF1Blue).withValues(alpha: 0.28);
+    return polylinesFromTrackSegments(
+      segments,
+      strokeColor: _kF1Blue,
+      strokeWidth: 4,
+      outerStrokeColor: outer,
+      outerStrokeWidth: 6,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -247,45 +455,61 @@ class _CircuitEmbeddedMapState extends State<CircuitEmbeddedMap>
     final motionReduced = context.select<DisplaySettingsController, bool>(
       (c) => c.motionReduced,
     );
-    final mapBg = const Color(0xFF050816);
-    final f1PinkDeep = scheme.primary;
+    // Zelfde toon als gesilverde OSM-tegels — minder zichtbare “letterbox”-vlakken naast de baan.
+    final mapBg = Color.lerp(
+      const Color(0xFF1E2430),
+      scheme.surfaceContainerHighest,
+      0.22,
+    )!;
+
+    final isDark = scheme.brightness == Brightness.dark;
 
     final p = widget.placement;
+    final polylines = _mapPolylines(isDark);
+    final showDetailsOverlays =
+        _useDetailsTrack && _detailsOverlay != null && _hasDetailsAsset;
+    final technical = _detailsOverlay?.technical;
+    final showSectorChips =
+        showDetailsOverlays && technical != null && !technical.isEmpty;
+    final showCornerDots =
+        showDetailsOverlays && _detailsOverlay!.corners.isNotEmpty;
+    final l10n = context.l10n;
+    final mapH = _effectiveMapHeight(context);
+    final zoomColumnTop = _hasDetailsAsset ? 118.0 : 52.0;
 
     return SizedBox(
-      height: widget.height,
+      height: mapH,
       width: double.infinity,
       child: ClipRRect(
-        borderRadius: BorderRadius.vertical(
-          bottom: Radius.circular(radius + 4),
-        ),
+        borderRadius: BorderRadius.circular(radius),
         child: Stack(
           fit: StackFit.expand,
           children: [
-            FlutterMap(
-              mapController: _animatedMap.mapController,
-              options: MapOptions(
-                initialCenter: p.center,
-                initialZoom: 14.2,
-                initialRotation: 0,
-                minZoom: _minZoom,
-                maxZoom: _maxZoom,
-                backgroundColor: mapBg,
-                cameraConstraint: CameraConstraint.contain(bounds: p.panBounds),
-                interactionOptions: InteractionOptions(
-                  flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-                  cursorKeyboardRotationOptions:
-                      CursorKeyboardRotationOptions.disabled(),
+            Positioned.fill(
+              child: FlutterMap(
+                mapController: _animatedMap.mapController,
+                options: MapOptions(
+                  initialCenter: p.center,
+                  initialZoom: 14.2,
+                  initialRotation: 0,
+                  minZoom: _minZoom,
+                  maxZoom: _maxZoom,
+                  backgroundColor: mapBg,
+                  cameraConstraint: CameraConstraint.contain(
+                    bounds: p.panBounds,
+                  ),
+                  interactionOptions: InteractionOptions(
+                    flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+                    cursorKeyboardRotationOptions:
+                        CursorKeyboardRotationOptions.disabled(),
+                  ),
+                  onMapReady: _scheduleInitialCamera,
                 ),
-                onMapReady: _scheduleInitialCamera,
-              ),
-              children: [
-                RepaintBoundary(
-                  child: Opacity(
-                    opacity: 0.96,
+                children: [
+                  RepaintBoundary(
                     child: ColorFiltered(
                       colorFilter: const ColorFilter.matrix(
-                        kCircuitAmbientNightMapMatrix,
+                        kCircuitSilverNightMapMatrix,
                       ),
                       child: TileLayer(
                         urlTemplate:
@@ -295,40 +519,48 @@ class _CircuitEmbeddedMapState extends State<CircuitEmbeddedMap>
                       ),
                     ),
                   ),
-                ),
-                if (_trackSegments != null && _trackSegments!.isNotEmpty) ...[
-                  RepaintBoundary(
-                    child: PolylineLayer(
-                      polylines: [
-                        for (final seg in _trackSegments!)
-                          if (seg.length >= 2)
-                            Polyline(
-                              points: seg,
-                              strokeWidth: 7,
-                              color: f1PinkDeep.withValues(alpha: 0.2),
-                              strokeCap: StrokeCap.round,
-                              strokeJoin: StrokeJoin.round,
-                            ),
-                      ],
+                  if (polylines.isNotEmpty)
+                    RepaintBoundary(
+                      child: PolylineLayer(polylines: polylines),
                     ),
-                  ),
-                  RepaintBoundary(
-                    child: PolylineLayer(
-                      polylines: [
-                        for (final seg in _trackSegments!)
-                          if (seg.length >= 2)
-                            Polyline(
-                              points: seg,
-                              strokeWidth: 2.8,
-                              color: f1PinkDeep.withValues(alpha: 0.92),
-                              strokeCap: StrokeCap.round,
-                              strokeJoin: StrokeJoin.round,
+                  if (showSectorChips)
+                    RepaintBoundary(
+                      child: MarkerLayer(
+                        markers: [
+                          for (final s in technical.sectors)
+                            Marker(
+                              point: s.midpoint,
+                              width: 46,
+                              height: 46,
+                              alignment: Alignment.center,
+                              child: _CircuitSectorMapChip(
+                                sector: s,
+                                motionReduced: motionReduced,
+                              ),
                             ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
+                  if (showCornerDots)
+                    RepaintBoundary(
+                      child: MarkerLayer(
+                        markers: [
+                          for (final c in _detailsOverlay!.corners)
+                            Marker(
+                              point: c.point,
+                              width: 30,
+                              height: 30,
+                              alignment: Alignment.center,
+                              child: _CircuitCornerMapDot(
+                                corner: c,
+                                scheme: scheme,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
                 ],
-              ],
+              ),
             ),
             Positioned(
               left: 0,
@@ -336,8 +568,70 @@ class _CircuitEmbeddedMapState extends State<CircuitEmbeddedMap>
               top: 0,
               child: _GlassMapHeader(
                 title: widget.title,
+                borderRadius: radius,
                 motionReduced: motionReduced,
+                onBack: widget.onBack,
+                titleTrailingReserve: 44,
               ),
+            ),
+            Positioned(
+              top: 4,
+              right: 6,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  _MapChromeButton(
+                    tooltip: _mapExpanded
+                        ? l10n.circuit_map_collapse
+                        : l10n.circuit_map_expand,
+                    icon: _mapExpanded
+                        ? Icons.fullscreen_exit_rounded
+                        : Icons.open_in_full_rounded,
+                    isDark: isDark,
+                    onPressed: () => setState(() => _mapExpanded = !_mapExpanded),
+                  ),
+                  if (_hasDetailsAsset) ...[
+                    const SizedBox(height: 8),
+                    _CircuitMapTrackSourceToggle(
+                      scheme: scheme,
+                      isDark: isDark,
+                      useDetails: _useDetailsTrack,
+                      onChanged: _onTrackSourceChanged,
+                      standardLabel: l10n.orbit_track_standard,
+                      detailsLabel: l10n.orbit_track_details,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            Positioned(
+              right: 6,
+              top: zoomColumnTop,
+              bottom: 30,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _MapChromeButton(
+                    tooltip: l10n.circuit_map_zoom_in,
+                    icon: Icons.add_rounded,
+                    isDark: isDark,
+                    onPressed: () => _nudgeZoom(1),
+                  ),
+                  const SizedBox(height: 10),
+                  _MapChromeButton(
+                    tooltip: l10n.circuit_map_zoom_out,
+                    icon: Icons.remove_rounded,
+                    isDark: isDark,
+                    onPressed: () => _nudgeZoom(-1),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              right: 6,
+              bottom: 4,
+              child: _OsmAttributionChip(isDark: isDark),
             ),
           ],
         ),
@@ -346,52 +640,434 @@ class _CircuitEmbeddedMapState extends State<CircuitEmbeddedMap>
   }
 }
 
-class _GlassMapHeader extends StatelessWidget {
-  const _GlassMapHeader({required this.title, required this.motionReduced});
+/// S1 / S2 / S3 op het midden van de sectorpolylijn (zelfde idee als Orbit).
+class _CircuitSectorMapChip extends StatelessWidget {
+  const _CircuitSectorMapChip({
+    required this.sector,
+    required this.motionReduced,
+  });
 
-  final String title;
+  final OrbitSectorStroke sector;
   final bool motionReduced;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final blur = motionReduced ? 0.0 : 14.0;
+    Widget core = Container(
+      width: 44,
+      height: 44,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white.withValues(alpha: 0.94),
+        border: Border.all(color: sector.color, width: 2.2),
+        boxShadow: [
+          BoxShadow(
+            color: sector.color.withValues(alpha: 0.35),
+            blurRadius: 10,
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.22),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Text(
+        sector.label,
+        style: TextStyle(
+          color: sector.color,
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          height: 1,
+        ),
+      ),
+    );
 
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: DecoratedBox(
+    if (!motionReduced) {
+      core = ClipOval(
+        child: BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          child: core,
+        ),
+      );
+    }
+
+    return Tooltip(
+      message: sector.label,
+      child: IgnorePointer(child: core),
+    );
+  }
+}
+
+/// Bochtnummer (T1 …); tooltip met volledige naam.
+class _CircuitCornerMapDot extends StatelessWidget {
+  const _CircuitCornerMapDot({
+    required this.corner,
+    required this.scheme,
+  });
+
+  final CircuitDetailCornerPoint corner;
+  final ColorScheme scheme;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor =
+        corner.isBanked ? const Color(0xFFFFA000) : scheme.primary;
+    final label = corner.number?.toString() ?? '·';
+
+    return Tooltip(
+      message: corner.name.isEmpty ? label : corner.name,
+      child: IgnorePointer(
+        child: Container(
+          width: 28,
+          height: 28,
+          alignment: Alignment.center,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                scheme.surface.withValues(alpha: 0.55),
-                scheme.surface.withValues(alpha: 0.08),
-                Colors.transparent,
-              ],
+            shape: BoxShape.circle,
+            color: Colors.white.withValues(alpha: 0.95),
+            border: Border.all(color: borderColor, width: 1.6),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 5,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              color: scheme.primary,
+              height: 1,
             ),
-            border: Border(
-              bottom: BorderSide(
-                color: Colors.white.withValues(alpha: 0.12),
-                width: 0.8,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Standaard (hoofd-GeoJSON) vs Details (`*-details.geojson` sectoren), onder de vergroten-knop.
+class _CircuitMapTrackSourceToggle extends StatelessWidget {
+  const _CircuitMapTrackSourceToggle({
+    required this.scheme,
+    required this.isDark,
+    required this.useDetails,
+    required this.onChanged,
+    required this.standardLabel,
+    required this.detailsLabel,
+  });
+
+  final ColorScheme scheme;
+  final bool isDark;
+  final bool useDetails;
+  final void Function(bool useDetails) onChanged;
+  final String standardLabel;
+  final String detailsLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final panelBg = isDark
+        ? const Color(0xFF1E2836).withValues(alpha: 0.96)
+        : Colors.white.withValues(alpha: 0.97);
+    final panelBorder = isDark
+        ? Colors.white.withValues(alpha: 0.22)
+        : _kF1Blue.withValues(alpha: 0.55);
+
+    return Material(
+      elevation: 4,
+      shadowColor: Colors.black.withValues(alpha: isDark ? 0.5 : 0.2),
+      borderRadius: BorderRadius.circular(10),
+      color: Colors.transparent,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          width: 52,
+          decoration: BoxDecoration(
+            color: panelBg,
+            border: Border.all(color: panelBorder, width: 1.25),
+          ),
+          child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _TrackSourceCell(
+              label: standardLabel,
+              selected: !useDetails,
+              onTap: () => onChanged(false),
+              scheme: scheme,
+              isDark: isDark,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(7)),
+            ),
+            Divider(
+              height: 1,
+              thickness: 1,
+              color: scheme.outlineVariant.withValues(alpha: 0.35),
+            ),
+            _TrackSourceCell(
+              label: detailsLabel,
+              selected: useDetails,
+              onTap: () => onChanged(true),
+              scheme: scheme,
+              isDark: isDark,
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(7),
+              ),
+            ),
+          ],
+        ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TrackSourceCell extends StatelessWidget {
+  const _TrackSourceCell({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    required this.scheme,
+    required this.isDark,
+    required this.borderRadius,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final ColorScheme scheme;
+  final bool isDark;
+  final BorderRadius borderRadius;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: label,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: borderRadius,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            width: 52,
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 3),
+            decoration: BoxDecoration(
+              borderRadius: borderRadius,
+              color: selected
+                  ? _kTrackSourceModeActive.withValues(
+                      alpha: isDark ? 0.88 : 0.96,
+                    )
+                  : Colors.transparent,
+            ),
+            child: Text(
+              label,
+              maxLines: 2,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w800,
+                height: 1.05,
+                color: selected
+                    ? Colors.white
+                    : (isDark
+                          ? Colors.white.withValues(alpha: 0.88)
+                          : const Color(0xFF0D47A1)),
               ),
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: scheme.onSurface.withValues(alpha: 0.95),
-                  letterSpacing: 0.2,
+        ),
+      ),
+    );
+  }
+}
+
+/// Hoge contrast op lichte/grijze kaarttegels (was: bijna onzichtbaar wit 38%).
+class _MapChromeButton extends StatelessWidget {
+  const _MapChromeButton({
+    required this.tooltip,
+    required this.icon,
+    required this.isDark,
+    required this.onPressed,
+  });
+
+  final String tooltip;
+  final IconData icon;
+  final bool isDark;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final fill = isDark ? const Color(0xFF252E3D) : Colors.white;
+    final iconColor = isDark
+        ? Colors.white.withValues(alpha: 0.95)
+        : const Color(0xFF0D47A1);
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.3)
+        : _kF1Blue.withValues(alpha: 0.6);
+
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: fill.withValues(alpha: isDark ? 0.96 : 0.99),
+        elevation: 5,
+        shadowColor: Colors.black.withValues(alpha: isDark ? 0.55 : 0.22),
+        shape: CircleBorder(side: BorderSide(color: borderColor, width: 1.5)),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onPressed,
+          customBorder: const CircleBorder(),
+          child: SizedBox(
+            width: 44,
+            height: 44,
+            child: Icon(icon, size: 23, color: iconColor),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassMapHeader extends StatelessWidget {
+  const _GlassMapHeader({
+    required this.title,
+    required this.borderRadius,
+    required this.motionReduced,
+    this.onBack,
+    this.titleTrailingReserve = 0,
+  });
+
+  final String title;
+  final double borderRadius;
+  final bool motionReduced;
+  final VoidCallback? onBack;
+
+  /// Ruimte rechts zodat de titel niet onder de vergroten-knop schuift.
+  final double titleTrailingReserve;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final blur = motionReduced ? 0.0 : 18.0;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(borderRadius),
+      ),
+      child: Stack(
+        fit: StackFit.passthrough,
+        children: [
+          BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+            child: const SizedBox(height: 52, width: double.infinity),
+          ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withValues(alpha: 0.42),
+                  Colors.white.withValues(alpha: 0.14),
+                  Colors.white.withValues(alpha: 0.02),
+                  Colors.transparent,
+                ],
+                stops: const [0, 0.35, 0.65, 1],
+              ),
+              border: Border(
+                bottom: BorderSide(
+                  color: scheme.outline.withValues(alpha: 0.12),
+                  width: 0.9,
                 ),
               ),
+            ),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(4, 8, 8 + titleTrailingReserve, 12),
+              child: Row(
+                children: [
+                  if (onBack != null)
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
+                      ),
+                      icon: Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: scheme.primary,
+                        size: 20,
+                      ),
+                      onPressed: onBack,
+                      tooltip: MaterialLocalizations.of(
+                        context,
+                      ).backButtonTooltip,
+                    ),
+                  Expanded(
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: scheme.primary,
+                        letterSpacing: 0.15,
+                        shadows: [
+                          Shadow(
+                            color: Colors.white.withValues(alpha: 0.55),
+                            blurRadius: 8,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Compact OSM credit — avoids overlapping the global app bar; link opens copyright page.
+class _OsmAttributionChip extends StatelessWidget {
+  const _OsmAttributionChip({required this.isDark});
+
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          unawaited(
+            launchUrl(
+              Uri.parse('https://www.openstreetmap.org/copyright'),
+              mode: LaunchMode.externalApplication,
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Text(
+            '© OpenStreetMap',
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.onSurface.withValues(
+                alpha: isDark ? 0.45 : 0.5,
+              ),
+              decoration: TextDecoration.underline,
+              decorationColor: Theme.of(context).colorScheme.onSurface
+                  .withValues(alpha: 0.35),
             ),
           ),
         ),

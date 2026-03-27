@@ -249,6 +249,9 @@ class RaceDataFetcher {
   final Map<String, List<Map<String, dynamic>>> _openF1Cache = {};
   DateTime? _lastOpenF1RequestAt;
 
+  /// Only print the OpenF1 "live session" notice once per run.
+  bool _openF1LiveRestrictionPrinted = false;
+
   Future<RaceExport> fetchRaceExport({
     required int year,
     required int? round,
@@ -320,7 +323,8 @@ class RaceDataFetcher {
         'raceName': metadata.raceName,
         'source': 'OpenF1 weather',
         'availableSessions': const <String>[],
-        'sessions': const <Map<String, dynamic>>{},
+        // Must be Map<String,…>: `<Map<String,dynamic>>{}` is a Set in Dart, not a Map.
+        'sessions': const <String, Map<String, dynamic>>{},
       };
     }
 
@@ -332,7 +336,7 @@ class RaceDataFetcher {
         'raceName': metadata.raceName,
         'source': 'OpenF1 weather',
         'availableSessions': const <String>[],
-        'sessions': const <Map<String, dynamic>>{},
+        'sessions': const <String, Map<String, dynamic>>{},
       };
     }
 
@@ -1291,6 +1295,10 @@ class RaceDataFetcher {
         .timeout(const Duration(seconds: 10));
     _lastOpenF1RequestAt = DateTime.now();
     if (response.statusCode != 200) {
+      final body = response.body;
+      if (_isOpenF1LiveSessionRestrictionBody(body)) {
+        _printOpenF1LiveSessionRestrictionOnce(body);
+      }
       return const <Map<String, dynamic>>[];
     }
 
@@ -1307,6 +1315,66 @@ class RaceDataFetcher {
         .toList(growable: false);
     _openF1Cache[cacheKey] = result;
     return result;
+  }
+
+  /// OpenF1 returns HTTP ≠ 200 with e.g.
+  /// `{"detail":"Live F1 session in progress. Global API access ..."}`
+  /// while a session is live and the caller has no API key.
+  static bool _isOpenF1LiveSessionRestrictionBody(String body) {
+    if (body.isEmpty) {
+      return false;
+    }
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is! Map) {
+        return false;
+      }
+      final detail = decoded['detail'];
+      if (detail is! String) {
+        return false;
+      }
+      final lower = detail.toLowerCase();
+      return lower.contains('live f1 session') &&
+          lower.contains('global api access');
+    } on Object {
+      return false;
+    }
+  }
+
+  void _printOpenF1LiveSessionRestrictionOnce(String body) {
+    if (_openF1LiveRestrictionPrinted) {
+      return;
+    }
+    _openF1LiveRestrictionPrinted = true;
+
+    Object? decoded;
+    try {
+      decoded = jsonDecode(body);
+    } on Object {
+      decoded = null;
+    }
+
+    stdout.writeln('');
+    stdout.writeln(
+      'OpenF1 (api.openf1.org): live sessie — publieke API tijdelijk beperkt',
+    );
+    stdout.writeln(
+      '────────────────────────────────────────────────────────────',
+    );
+    if (decoded is Map) {
+      const encoder = JsonEncoder.withIndent('  ');
+      stdout.writeln(encoder.convert(decoded));
+    } else {
+      stdout.writeln(body.trim());
+    }
+    stdout.writeln(
+      '────────────────────────────────────────────────────────────',
+    );
+    stdout.writeln(
+      'OpenF1-calls worden voor deze run genegeerd (lege datasets); '
+      'Jolpica/Ergast blijft wel gebruikt waar mogelijk.',
+    );
+    stdout.writeln('');
   }
 
   Map<int, FastestLapDetails> _buildFastestLapDetailsMap(

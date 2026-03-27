@@ -1,0 +1,31 @@
+name: F1 Data Fetcher
+
+on:
+  schedule:
+    - cron: '0 * * * 5,6,0'
+  workflow_dispatch:
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Install dependencies
+        run: dart pub get
+
+      - name: Run Fetch Script
+        run: dart fetch_session_data.dart
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Automated F1 data update" || echo "No changes to commit"
+          git push

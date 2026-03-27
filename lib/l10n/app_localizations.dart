@@ -3009,6 +3009,12 @@ abstract class AppLocalizations {
   /// **'Stewards'**
   String get race_control_filter_stewards;
 
+  /// No description provided for @race_control_filter_penalties.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalties'**
+  String get race_control_filter_penalties;
+
   /// No description provided for @race_control_message_count.
   ///
   /// In en, this message translates to:
@@ -3086,6 +3092,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search by message, flag, category, lap or driver'**
   String get race_control_search_hint;
+
+  /// No description provided for @race_control_track_limits_strip.
+  ///
+  /// In en, this message translates to:
+  /// **'Track limits — deleted laps'**
+  String get race_control_track_limits_strip;
+
+  /// No description provided for @race_control_steward_storyline.
+  ///
+  /// In en, this message translates to:
+  /// **'Steward storyline'**
+  String get race_control_steward_storyline;
 
   /// No description provided for @race_stats.
   ///
@@ -3873,6 +3891,72 @@ abstract class AppLocalizations {
   /// **'Loading Weekend Hub...'**
   String get weekend_hub_loading;
 
+  /// No description provided for @weekend_hub_no_results_yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Results for this session are not yet available or have not been synced.'**
+  String get weekend_hub_no_results_yet;
+
+  /// No description provided for @weekend_hub_session_insights.
+  ///
+  /// In en, this message translates to:
+  /// **'Session Insights'**
+  String get weekend_hub_session_insights;
+
+  /// No description provided for @weekend_hub_fastest_sectors.
+  ///
+  /// In en, this message translates to:
+  /// **'Fastest Sectors'**
+  String get weekend_hub_fastest_sectors;
+
+  /// No description provided for @weekend_hub_sector_1_abbr.
+  ///
+  /// In en, this message translates to:
+  /// **'S1'**
+  String get weekend_hub_sector_1_abbr;
+
+  /// No description provided for @weekend_hub_sector_2_abbr.
+  ///
+  /// In en, this message translates to:
+  /// **'S2'**
+  String get weekend_hub_sector_2_abbr;
+
+  /// No description provided for @weekend_hub_sector_3_abbr.
+  ///
+  /// In en, this message translates to:
+  /// **'S3'**
+  String get weekend_hub_sector_3_abbr;
+
+  /// No description provided for @weekend_hub_tyre_compound.
+  ///
+  /// In en, this message translates to:
+  /// **'Tyre Compound'**
+  String get weekend_hub_tyre_compound;
+
+  /// No description provided for @weekend_hub_insights_sectors_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Sector data needs a live OpenF1 sync for this race.'**
+  String get weekend_hub_insights_sectors_unavailable;
+
+  /// No description provided for @weekend_hub_penalties_filter_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No penalty or investigation messages for this session.'**
+  String get weekend_hub_penalties_filter_empty;
+
+  /// No description provided for @weekend_hub_spot_placeholder_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Live radar & DRS'**
+  String get weekend_hub_spot_placeholder_title;
+
+  /// No description provided for @weekend_hub_spot_placeholder_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather radar, track rain radar, and a DRS zone overview will appear here in a future update.'**
+  String get weekend_hub_spot_placeholder_body;
+
   /// No description provided for @weekend_schedule.
   ///
   /// In en, this message translates to:
@@ -3968,6 +4052,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Full throttle'**
   String get circuit_stat_full_throttle;
+
+  /// No description provided for @circuit_weekend_hub_go.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to {venue} Hub'**
+  String circuit_weekend_hub_go(String venue);
+
+  /// No description provided for @circuit_weekend_hub_no_data_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'No session data available yet.'**
+  String get circuit_weekend_hub_no_data_tooltip;
 
   /// No description provided for @live_timing_air_temp_abbr.
   ///
@@ -4275,6 +4371,12 @@ abstract class AppLocalizations {
   /// **'Standard'**
   String get orbit_track_standard;
 
+  /// No description provided for @orbit_track_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get orbit_track_details;
+
   /// No description provided for @orbit_track_technical.
   ///
   /// In en, this message translates to:
@@ -4340,6 +4442,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unauthorized'**
   String get unauthorized_page_title;
+
+  /// No description provided for @circuit_map_expand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand map'**
+  String get circuit_map_expand;
+
+  /// No description provided for @circuit_map_collapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse map'**
+  String get circuit_map_collapse;
+
+  /// No description provided for @circuit_map_zoom_in.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom in'**
+  String get circuit_map_zoom_in;
+
+  /// No description provided for @circuit_map_zoom_out.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom out'**
+  String get circuit_map_zoom_out;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

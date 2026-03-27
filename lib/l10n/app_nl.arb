@@ -382,6 +382,15 @@
   "circuit_not_found_title": "Circuit niet gevonden",
   "circuit_open_in_maps": "Openen in Maps",
   "circuit_stat_full_throttle": "Vol gas",
+  "circuit_weekend_hub_go": "Naar {venue} Hub",
+  "@circuit_weekend_hub_go": {
+    "placeholders": {
+      "venue": {
+        "type": "String"
+      }
+    }
+  },
+  "circuit_weekend_hub_no_data_tooltip": "Nog geen sessiedata beschikbaar.",
   "circuits": "Circuits",
   "city": "Stad",
   "clear_cache": "Cache legen",
@@ -806,6 +815,7 @@
   "orbit_stat_lap_distance": "Rondelengte",
   "orbit_stat_max_elevation": "Max. hoogteverschil",
   "orbit_track_standard": "Standaard",
+  "orbit_track_details": "Details",
   "orbit_track_technical": "Technisch",
   "overtakes": "Inhaalacties",
   "overtaking_difficulty": "Inhaal moeilijkheid",
@@ -845,6 +855,7 @@
   "race_control_filter_alerts": "Waarschuwingen",
   "race_control_filter_all": "Alle",
   "race_control_filter_stewards": "Commissarissen",
+  "race_control_filter_penalties": "Straffen",
   "race_control_message_count": "{visible} van {total} berichten",
   "@race_control_message_count": {
     "placeholders": {
@@ -868,6 +879,8 @@
   "race_control_relation_served_later": "Later uitgevoerd",
   "race_control_relation_served_penalty": "Uitgevoerde straf",
   "race_control_search_hint": "Zoek op bericht, vlag, categorie, ronde of coureur",
+  "race_control_track_limits_strip": "Track limits — verwijderde rondes",
+  "race_control_steward_storyline": "Steward-verhaallijn",
   "race_results_empty": "Nog geen race-resultaten beschikbaar.",
   "race_stats": "Race statistieken",
   "rain": "Regen",
@@ -1036,10 +1049,25 @@
   "weekend_hub_card_subtitle": "Schema, weer, podium en penalties in één scherm",
   "weekend_hub_load_error": "Weekend hub kon niet volledig laden. Cachedata wordt getoond.",
   "weekend_hub_loading": "Weekend hub laden...",
+  "weekend_hub_no_results_yet": "Resultaten voor deze sessie zijn nog niet beschikbaar of zijn nog niet gesynchroniseerd.",
+  "weekend_hub_session_insights": "Sessie-inzichten",
+  "weekend_hub_fastest_sectors": "Snelste sectoren",
+  "weekend_hub_sector_1_abbr": "S1",
+  "weekend_hub_sector_2_abbr": "S2",
+  "weekend_hub_sector_3_abbr": "S3",
+  "weekend_hub_tyre_compound": "Bandencompound",
+  "weekend_hub_insights_sectors_unavailable": "Sectordata vereist een live OpenF1-sync voor deze race.",
+  "weekend_hub_penalties_filter_empty": "Geen straf- of onderzoeksmeldingen voor deze sessie.",
+  "weekend_hub_spot_placeholder_title": "Live radar & DRS",
+  "weekend_hub_spot_placeholder_body": "Weerradar, regen op het circuit en een DRS-zonesoverzicht verschijnen hier in een toekomstige update.",
   "weekend_schedule": "Weekend schema",
   "weeks": "weken",
   "win_rate": "Winrate %",
   "wind": "Wind",
   "wind_speed": "Windsnelheid",
-  "wins": "Overwinningen"
+  "wins": "Overwinningen",
+  "circuit_map_expand": "Kaart groter",
+  "circuit_map_collapse": "Kaart kleiner",
+  "circuit_map_zoom_in": "Inzoomen",
+  "circuit_map_zoom_out": "Uitzoomen"
 }

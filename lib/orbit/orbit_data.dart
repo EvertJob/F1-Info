@@ -75,18 +75,28 @@ class OrbitDataService {
     return segments;
   }
 
-  /// Bundled `assets/data/circuits/{id}-details.geojson` only; returns null if missing.
+  /// Bundled `*-details.geojson` (geojson-submap of circuits-root); returns null if missing.
+  ///
+  /// Twee paden: `geojson/{id}-details` en root `circuits/{id}-details` — Flutter bundle't
+  /// submappen van `assets/data/circuits/` niet automatisch mee.
   Future<OrbitCircuitTechnicalDetail?> tryLoadCircuitTechnicalDetail(
     String circuitId,
   ) async {
     final cached = _technicalCache[circuitId];
     if (_technicalCache.containsKey(circuitId)) return cached;
 
-    final path = 'assets/data/circuits/$circuitId-details.geojson';
-    String raw;
-    try {
-      raw = await rootBundle.loadString(path);
-    } catch (_) {
+    final candidatePaths = <String>[
+      'assets/data/circuits/geojson/$circuitId-details.geojson',
+      'assets/data/circuits/$circuitId-details.geojson',
+    ];
+    String? raw;
+    for (final path in candidatePaths) {
+      try {
+        raw = await rootBundle.loadString(path);
+        break;
+      } on Object catch (_) {}
+    }
+    if (raw == null) {
       _technicalCache[circuitId] = null;
       _technicalDetailsRawByCircuitId.remove(circuitId);
       return null;

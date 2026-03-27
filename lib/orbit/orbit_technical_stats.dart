@@ -3,7 +3,7 @@ import 'dart:math' as math;
 
 import 'package:f1/widgets/f1_elevation_chart.dart';
 
-/// Lap metrics derived from `*-details.geojson` + elevation profile.
+/// Lap metrics derived from `geojson/*-details.geojson` + elevation profile.
 class OrbitTechnicalStats {
   const OrbitTechnicalStats({
     required this.lapLengthKm,

@@ -6,6 +6,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// Top-level keys in [detail_expansion_prefs] JSON (per screen).
 abstract final class DetailExpansionCat {
   static const circuit = 'circuit';
+  /// JSON asset circuit hub (`CircuitPage` / `CircuitDetailView`).
+  static const circuitJson = 'circuit_json';
   static const driver = 'driver';
   static const team = 'team';
 }

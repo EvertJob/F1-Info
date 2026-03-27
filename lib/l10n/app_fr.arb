@@ -382,6 +382,15 @@
   "circuit_not_found_title": "Circuit introuvable",
   "circuit_open_in_maps": "Ouvrir dans Plans",
   "circuit_stat_full_throttle": "Plein gaz",
+  "circuit_weekend_hub_go": "Aller au hub {venue}",
+  "@circuit_weekend_hub_go": {
+    "placeholders": {
+      "venue": {
+        "type": "String"
+      }
+    }
+  },
+  "circuit_weekend_hub_no_data_tooltip": "Aucune donnée de session pour le moment.",
   "circuits": "Circuits",
   "city": "Ville",
   "clear_cache": "Vider le cache",
@@ -806,6 +815,7 @@
   "orbit_stat_lap_distance": "Longueur du tour",
   "orbit_stat_max_elevation": "Dénivelé max.",
   "orbit_track_standard": "Standard",
+  "orbit_track_details": "Détails",
   "orbit_track_technical": "Technique",
   "overtakes": "Dépassements",
   "overtaking_difficulty": "Difficulté de dépassement",
@@ -845,6 +855,7 @@
   "race_control_filter_alerts": "Alertes",
   "race_control_filter_all": "Tous",
   "race_control_filter_stewards": "Commissaires",
+  "race_control_filter_penalties": "Pénalités",
   "race_control_message_count": "{visible} sur {total} messages",
   "@race_control_message_count": {
     "placeholders": {
@@ -868,6 +879,8 @@
   "race_control_relation_served_later": "Effectuée plus tard",
   "race_control_relation_served_penalty": "Pénalité effectuée",
   "race_control_search_hint": "Rechercher par message, drapeau, catégorie, tour ou pilote",
+  "race_control_track_limits_strip": "Limites de piste — tours effacés",
+  "race_control_steward_storyline": "Fil d’incident stewards",
   "race_results_empty": "Aucun résultat de course pour le moment.",
   "race_stats": "Statistiques de course",
   "rain": "Pluie",
@@ -1036,10 +1049,25 @@
   "weekend_hub_card_subtitle": "Programme, météo, podium et pénalités sur un écran",
   "weekend_hub_load_error": "Le hub du week-end n’a pas pu se charger entièrement. Données en cache affichées.",
   "weekend_hub_loading": "Chargement du hub du week-end...",
+  "weekend_hub_no_results_yet": "Les résultats de cette session ne sont pas encore disponibles ou n’ont pas encore été synchronisés.",
+  "weekend_hub_session_insights": "Aperçu de la session",
+  "weekend_hub_fastest_sectors": "Secteurs les plus rapides",
+  "weekend_hub_sector_1_abbr": "S1",
+  "weekend_hub_sector_2_abbr": "S2",
+  "weekend_hub_sector_3_abbr": "S3",
+  "weekend_hub_tyre_compound": "Composé pneumatique",
+  "weekend_hub_insights_sectors_unavailable": "Les données de secteurs nécessitent une synchronisation OpenF1 en direct pour cette course.",
+  "weekend_hub_penalties_filter_empty": "Aucun message de pénalité ou d’enquête pour cette session.",
+  "weekend_hub_spot_placeholder_title": "Radar live & DRS",
+  "weekend_hub_spot_placeholder_body": "Radar météo, pluie sur la piste et aperçu des zones DRS apparaîtront ici dans une prochaine mise à jour.",
   "weekend_schedule": "Programme du week-end",
   "weeks": "semaines",
   "win_rate": "Taux de victoire %",
   "wind": "Vent",
   "wind_speed": "Vitesse du vent",
-  "wins": "Victoires"
+  "wins": "Victoires",
+  "circuit_map_expand": "Agrandir la carte",
+  "circuit_map_collapse": "Réduire la carte",
+  "circuit_map_zoom_in": "Zoom avant",
+  "circuit_map_zoom_out": "Zoom arrière"
 }

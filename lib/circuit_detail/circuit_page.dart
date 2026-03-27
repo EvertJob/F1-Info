@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:f1/circuit_detail/circuit_data.dart';
 import 'package:f1/circuit_detail/circuit_detail_view.dart';
 import 'package:f1/circuit_detail/circuit_embedded_map.dart';
+import 'package:f1/circuit_detail/circuit_weekend_hub_action_pill.dart';
 import 'package:f1/circuit_detail/circuit_map_launch.dart';
 import 'package:f1/circuit_detail/circuit_map_placement.dart';
 import 'package:f1/display_settings_controller.dart';
@@ -18,6 +19,34 @@ EdgeInsets _bodyPaddingUnderTransparentAppBar(BuildContext context) {
   return EdgeInsets.only(
     top: MediaQuery.paddingOf(context).top + kToolbarHeight,
   );
+}
+
+void _popCircuitRoute(BuildContext context) {
+  if (context.canPop()) {
+    context.pop();
+  } else {
+    context.go('/circuits');
+  }
+}
+
+/// City / short name for "Go to {venue} Hub" (e.g. "Suzuka, Japan" → Suzuka).
+String weekendHubVenueLabelForCircuit(CircuitData data) {
+  final loc = data.location.trim();
+  if (loc.isNotEmpty) {
+    final comma = loc.indexOf(',');
+    if (comma > 0) {
+      return loc.substring(0, comma).trim();
+    }
+    return loc;
+  }
+  final n = data.name.trim();
+  if (n.isEmpty) return '';
+  final lower = n.toLowerCase();
+  final circuitWord = lower.indexOf(' circuit');
+  if (circuitWord > 2) {
+    return n.substring(0, circuitWord).trim();
+  }
+  return n;
 }
 
 /// Loads `assets/data/circuits/{circuitAssetId}.json` and shows [CircuitDetailView].
@@ -91,7 +120,7 @@ class _CircuitPageState extends State<CircuitPage> {
         extendBodyBehindAppBar: true,
         backgroundColor: Colors.transparent,
         appBar: _ambientAppBar(context, title: ''),
-        body: _AmbientBackground(
+        body: _CircuitPageSurface(
           child: Padding(
             padding: _bodyPaddingUnderTransparentAppBar(context),
             child: const Center(child: CircularProgressIndicator()),
@@ -107,7 +136,7 @@ class _CircuitPageState extends State<CircuitPage> {
             extendBodyBehindAppBar: true,
             backgroundColor: Colors.transparent,
             appBar: _ambientAppBar(context, title: ''),
-            body: _AmbientBackground(
+            body: _CircuitPageSurface(
               child: Padding(
                 padding: _bodyPaddingUnderTransparentAppBar(context),
                 child: const Center(child: CircularProgressIndicator()),
@@ -124,7 +153,7 @@ class _CircuitPageState extends State<CircuitPage> {
               context,
               title: l10n.circuit_not_found_title,
             ),
-            body: _AmbientBackground(
+            body: _CircuitPageSurface(
               child: Padding(
                 padding: _bodyPaddingUnderTransparentAppBar(context),
                 child: Center(
@@ -145,59 +174,71 @@ class _CircuitPageState extends State<CircuitPage> {
         final openMapsLat = data.latitude ?? mapPlacement?.center.latitude;
         final openMapsLng = data.longitude ?? mapPlacement?.center.longitude;
 
+        if (mapPlacement != null) {
+          return Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+                  child: CircuitEmbeddedMap(
+                    placement: mapPlacement,
+                    title: data.name.isNotEmpty
+                        ? data.name
+                        : data.circuitId,
+                    circuitId: data.circuitId,
+                    onBack: () => _popCircuitRoute(context),
+                  ),
+                ),
+                Expanded(
+                  child: CircuitDetailView(
+                    data: data,
+                    showTitleHeader: false,
+                    useAppBarTopInset: false,
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                    onOpenInMaps:
+                        openMapsLat != null && openMapsLng != null
+                        ? () => launchCircuitMaps(
+                            latitude: openMapsLat,
+                            longitude: openMapsLng,
+                            label: data.name.isNotEmpty
+                                ? data.name
+                                : data.circuitId,
+                          )
+                        : null,
+                    belowLocationAction: CircuitWeekendHubActionPill(
+                      circuitAssetId: widget.circuitAssetId,
+                      venueLabel: weekendHubVenueLabelForCircuit(data),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
         return Scaffold(
           extendBodyBehindAppBar: true,
           backgroundColor: Colors.transparent,
-          appBar: _ambientAppBar(
-            context,
-            title: mapPlacement != null ? '' : data.name,
-          ),
-          body: _AmbientBackground(
-            child: Padding(
-              padding: _bodyPaddingUnderTransparentAppBar(context),
-              child: mapPlacement != null
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        CircuitEmbeddedMap(
-                          placement: mapPlacement,
-                          title: data.name.isNotEmpty
-                              ? data.name
-                              : data.circuitId,
-                          circuitId: data.circuitId,
-                        ),
-                        Expanded(
-                          child: CircuitDetailView(
-                            data: data,
-                            showTitleHeader: false,
-                            onOpenInMaps:
-                                openMapsLat != null && openMapsLng != null
-                                ? () => launchCircuitMaps(
-                                    latitude: openMapsLat,
-                                    longitude: openMapsLng,
-                                    label: data.name.isNotEmpty
-                                        ? data.name
-                                        : data.circuitId,
-                                  )
-                                : null,
-                          ),
-                        ),
-                      ],
-                    )
-                  : CircuitDetailView(
-                      data: data,
-                      showTitleHeader: false,
-                      onOpenInMaps:
-                          data.latitude != null && data.longitude != null
-                          ? () => launchCircuitMaps(
-                              latitude: data.latitude!,
-                              longitude: data.longitude!,
-                              label: data.name.isNotEmpty
-                                  ? data.name
-                                  : data.circuitId,
-                            )
-                          : null,
-                    ),
+          appBar: _ambientAppBar(context, title: ''),
+          body: CircuitDetailView(
+            data: data,
+            showTitleHeader: true,
+            useAppBarTopInset: true,
+            onOpenInMaps:
+                data.latitude != null && data.longitude != null
+                ? () => launchCircuitMaps(
+                    latitude: data.latitude!,
+                    longitude: data.longitude!,
+                    label: data.name.isNotEmpty
+                        ? data.name
+                        : data.circuitId,
+                  )
+                : null,
+            belowLocationAction: CircuitWeekendHubActionPill(
+              circuitAssetId: widget.circuitAssetId,
+              venueLabel: weekendHubVenueLabelForCircuit(data),
             ),
           ),
         );
@@ -217,13 +258,7 @@ class _CircuitPageState extends State<CircuitPage> {
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
         icon: Icon(Icons.arrow_back_ios_new_rounded, color: scheme.primary),
-        onPressed: () {
-          if (context.canPop()) {
-            context.pop();
-          } else {
-            context.go('/circuits');
-          }
-        },
+        onPressed: () => _popCircuitRoute(context),
       ),
       title: title.isEmpty
           ? null
@@ -239,49 +274,18 @@ class _CircuitPageState extends State<CircuitPage> {
   }
 }
 
-class _AmbientBackground extends StatelessWidget {
-  const _AmbientBackground({required this.child});
+/// Flat shell so the circuit dashboard matches the rest of the app (no gradient/blur).
+class _CircuitPageSurface extends StatelessWidget {
+  const _CircuitPageSurface({required this.child});
 
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final isDark = scheme.brightness == Brightness.dark;
-    final motionReduced = context.select<DisplaySettingsController, bool>(
-      (c) => c.motionReduced,
-    );
-    final blur = motionReduced ? 0.0 : 24.0;
-
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                scheme.primaryContainer.withValues(alpha: isDark ? 0.35 : 0.55),
-                scheme.surface.withValues(alpha: 0.92),
-                const Color(0xFF0D47A1).withValues(alpha: isDark ? 0.45 : 0.18),
-                scheme.surfaceContainerHighest.withValues(
-                  alpha: isDark ? 0.5 : 0.85,
-                ),
-              ],
-              stops: const [0, 0.35, 0.72, 1],
-            ),
-          ),
-        ),
-        if (blur > 0)
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-              child: const SizedBox.expand(),
-            ),
-          ),
-        SafeArea(child: child),
-      ],
+    return ColoredBox(
+      color: scheme.surface,
+      child: SafeArea(child: child),
     );
   }
 }
@@ -296,6 +300,7 @@ class _CircuitNotFoundCard extends StatelessWidget {
     final isDark = scheme.brightness == Brightness.dark;
     final f1 = Theme.of(context).extension<F1UiTheme>();
     final radius = f1?.cardBorderRadius ?? 22;
+    final showOutline = f1?.showFadingBorder ?? true;
     final motionReduced = context.select<DisplaySettingsController, bool>(
       (c) => c.motionReduced,
     );
@@ -328,10 +333,14 @@ class _CircuitNotFoundCard extends StatelessWidget {
                   Color(0xFFE3F2FD).withValues(alpha: isDark ? 0.08 : 0.28),
                 ],
               ),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: isDark ? 0.32 : 0.72),
-                width: 1.2,
-              ),
+              border: showOutline
+                  ? Border.all(
+                      color: Colors.white.withValues(
+                        alpha: isDark ? 0.32 : 0.72,
+                      ),
+                      width: 1.2,
+                    )
+                  : null,
             ),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(22, 22, 22, 20),

@@ -382,6 +382,15 @@
   "circuit_not_found_title": "Strecke nicht gefunden",
   "circuit_open_in_maps": "In Maps öffnen",
   "circuit_stat_full_throttle": "Vollgas",
+  "circuit_weekend_hub_go": "Zum {venue}-Hub",
+  "@circuit_weekend_hub_go": {
+    "placeholders": {
+      "venue": {
+        "type": "String"
+      }
+    }
+  },
+  "circuit_weekend_hub_no_data_tooltip": "Noch keine Session-Daten verfügbar.",
   "circuits": "Strecken",
   "city": "Stadt",
   "clear_cache": "Cache leeren",
@@ -806,6 +815,7 @@
   "orbit_stat_lap_distance": "Rundenlänge",
   "orbit_stat_max_elevation": "Max. Höhenunterschied",
   "orbit_track_standard": "Standard",
+  "orbit_track_details": "Details",
   "orbit_track_technical": "Technisch",
   "overtakes": "Überholmanöver",
   "overtaking_difficulty": "Überholschwierigkeit",
@@ -845,6 +855,7 @@
   "race_control_filter_alerts": "Warnungen",
   "race_control_filter_all": "Alle",
   "race_control_filter_stewards": "Streckenposten",
+  "race_control_filter_penalties": "Strafen",
   "race_control_message_count": "{visible} von {total} Nachrichten",
   "@race_control_message_count": {
     "placeholders": {
@@ -868,6 +879,8 @@
   "race_control_relation_served_later": "Später abgesessen",
   "race_control_relation_served_penalty": "Abgesessene Strafe",
   "race_control_search_hint": "Suche nach Nachricht, Flagge, Kategorie, Runde oder Fahrer",
+  "race_control_track_limits_strip": "Track Limits — gestrichene Runden",
+  "race_control_steward_storyline": "Steward-Fallverlauf",
   "race_results_empty": "Noch keine Rennergebnisse verfügbar.",
   "race_stats": "Rennstatistiken",
   "rain": "Regen",
@@ -1036,10 +1049,25 @@
   "weekend_hub_card_subtitle": "Zeitplan, Wetter, Podium und Strafen auf einem Screen",
   "weekend_hub_load_error": "Wochenend-Hub konnte nicht vollständig geladen werden. Zwischengespeicherte Daten werden angezeigt.",
   "weekend_hub_loading": "Wochenend-Hub wird geladen...",
+  "weekend_hub_no_results_yet": "Ergebnisse für diese Session sind noch nicht verfügbar oder wurden noch nicht synchronisiert.",
+  "weekend_hub_session_insights": "Session-Einblicke",
+  "weekend_hub_fastest_sectors": "Schnellste Sektoren",
+  "weekend_hub_sector_1_abbr": "S1",
+  "weekend_hub_sector_2_abbr": "S2",
+  "weekend_hub_sector_3_abbr": "S3",
+  "weekend_hub_tyre_compound": "Reifenmischung",
+  "weekend_hub_insights_sectors_unavailable": "Sektordaten erfordern eine Live-OpenF1-Synchronisierung für dieses Rennen.",
+  "weekend_hub_penalties_filter_empty": "Keine Straf- oder Untersuchungsmeldungen für diese Session.",
+  "weekend_hub_spot_placeholder_title": "Live-Radar & DRS",
+  "weekend_hub_spot_placeholder_body": "Wetterradar, Regenradar und eine DRS-Zonenübersicht erscheinen hier in einem zukünftigen Update.",
   "weekend_schedule": "Wochenend-Zeitplan",
   "weeks": "Wochen",
   "win_rate": "Siegquote %",
   "wind": "Wind",
   "wind_speed": "Windgeschwindigkeit",
-  "wins": "Siege"
+  "wins": "Siege",
+  "circuit_map_expand": "Karte vergrößern",
+  "circuit_map_collapse": "Karte verkleinern",
+  "circuit_map_zoom_in": "Hineinzoomen",
+  "circuit_map_zoom_out": "Herauszoomen"
 }

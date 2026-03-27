@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 
-/// One sector polyline from a `*-details.geojson` feature (Name contains "Sector").
+/// One sector polyline from `assets/.../geojson/*-details.geojson` (Name contains "Sector").
 class OrbitSectorStroke {
   const OrbitSectorStroke({
     required this.points,

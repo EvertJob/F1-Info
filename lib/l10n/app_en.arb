@@ -709,6 +709,7 @@
   "race_control_filter_alerts": "Alerts",
   "race_control_filter_all": "All",
   "race_control_filter_stewards": "Stewards",
+  "race_control_filter_penalties": "Penalties",
   "race_control_message_count": "{visible} of {total} messages",
   "@race_control_message_count": {
     "placeholders": {
@@ -732,6 +733,8 @@
   "race_control_relation_served_later": "Served later",
   "race_control_relation_served_penalty": "Served penalty",
   "race_control_search_hint": "Search by message, flag, category, lap or driver",
+  "race_control_track_limits_strip": "Track limits — deleted laps",
+  "race_control_steward_storyline": "Steward storyline",
   "race_stats": "Race Stats",
   "rain": "Rain",
   "rain_chance": "Rain Chance",
@@ -884,6 +887,17 @@
   "weekend_hub_card_subtitle": "Schedule, weather, podium and penalties in one screen",
   "weekend_hub_load_error": "Weekend Hub could not be fully loaded. Cached data is being shown.",
   "weekend_hub_loading": "Loading Weekend Hub...",
+  "weekend_hub_no_results_yet": "Results for this session are not yet available or have not been synced.",
+  "weekend_hub_session_insights": "Session Insights",
+  "weekend_hub_fastest_sectors": "Fastest Sectors",
+  "weekend_hub_sector_1_abbr": "S1",
+  "weekend_hub_sector_2_abbr": "S2",
+  "weekend_hub_sector_3_abbr": "S3",
+  "weekend_hub_tyre_compound": "Tyre Compound",
+  "weekend_hub_insights_sectors_unavailable": "Sector data needs a live OpenF1 sync for this race.",
+  "weekend_hub_penalties_filter_empty": "No penalty or investigation messages for this session.",
+  "weekend_hub_spot_placeholder_title": "Live radar & DRS",
+  "weekend_hub_spot_placeholder_body": "Weather radar, track rain radar, and a DRS zone overview will appear here in a future update.",
   "weekend_schedule": "Weekend schedule",
   "weeks": "weeks",
   "win_rate": "Win rate %",
@@ -907,6 +921,15 @@
   "circuit_not_found_title": "Circuit not found",
   "circuit_open_in_maps": "Open in Maps",
   "circuit_stat_full_throttle": "Full throttle",
+  "circuit_weekend_hub_go": "Go to {venue} Hub",
+  "@circuit_weekend_hub_go": {
+    "placeholders": {
+      "venue": {
+        "type": "String"
+      }
+    }
+  },
+  "circuit_weekend_hub_no_data_tooltip": "No session data available yet.",
   "live_timing_air_temp_abbr": "A {temp}",
   "@live_timing_air_temp_abbr": {
     "placeholders": {
@@ -1013,6 +1036,7 @@
     }
   },
   "orbit_track_standard": "Standard",
+  "orbit_track_details": "Details",
   "orbit_track_technical": "Technical",
   "orbit_elevation_profile": "Elevation profile",
   "orbit_stat_lap_distance": "Lap distance",
@@ -1033,5 +1057,9 @@
     }
   },
   "unauthorized_page_message": "You are not authorized to view this page.",
-  "unauthorized_page_title": "Unauthorized"
+  "unauthorized_page_title": "Unauthorized",
+  "circuit_map_expand": "Expand map",
+  "circuit_map_collapse": "Collapse map",
+  "circuit_map_zoom_in": "Zoom in",
+  "circuit_map_zoom_out": "Zoom out"
 }

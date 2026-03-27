@@ -1514,6 +1514,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get race_control_filter_stewards => 'Commissarissen';
 
   @override
+  String get race_control_filter_penalties => 'Straffen';
+
+  @override
   String race_control_message_count(String visible, String total) {
     return '$visible van $total berichten';
   }
@@ -1553,6 +1556,12 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get race_control_search_hint => 'Zoek op bericht, vlag, categorie, ronde of coureur';
+
+  @override
+  String get race_control_track_limits_strip => 'Track limits — verwijderde rondes';
+
+  @override
+  String get race_control_steward_storyline => 'Steward-verhaallijn';
 
   @override
   String get race_stats => 'Race statistieken';
@@ -1954,6 +1963,39 @@ class AppLocalizationsNl extends AppLocalizations {
   String get weekend_hub_loading => 'Weekend hub laden...';
 
   @override
+  String get weekend_hub_no_results_yet => 'Resultaten voor deze sessie zijn nog niet beschikbaar of zijn nog niet gesynchroniseerd.';
+
+  @override
+  String get weekend_hub_session_insights => 'Sessie-inzichten';
+
+  @override
+  String get weekend_hub_fastest_sectors => 'Snelste sectoren';
+
+  @override
+  String get weekend_hub_sector_1_abbr => 'S1';
+
+  @override
+  String get weekend_hub_sector_2_abbr => 'S2';
+
+  @override
+  String get weekend_hub_sector_3_abbr => 'S3';
+
+  @override
+  String get weekend_hub_tyre_compound => 'Bandencompound';
+
+  @override
+  String get weekend_hub_insights_sectors_unavailable => 'Sectordata vereist een live OpenF1-sync voor deze race.';
+
+  @override
+  String get weekend_hub_penalties_filter_empty => 'Geen straf- of onderzoeksmeldingen voor deze sessie.';
+
+  @override
+  String get weekend_hub_spot_placeholder_title => 'Live radar & DRS';
+
+  @override
+  String get weekend_hub_spot_placeholder_body => 'Weerradar, regen op het circuit en een DRS-zonesoverzicht verschijnen hier in een toekomstige update.';
+
+  @override
   String get weekend_schedule => 'Weekend schema';
 
   @override
@@ -2002,6 +2044,14 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get circuit_stat_full_throttle => 'Vol gas';
+
+  @override
+  String circuit_weekend_hub_go(String venue) {
+    return 'Naar $venue Hub';
+  }
+
+  @override
+  String get circuit_weekend_hub_no_data_tooltip => 'Nog geen sessiedata beschikbaar.';
 
   @override
   String live_timing_air_temp_abbr(String temp) {
@@ -2171,6 +2221,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get orbit_track_standard => 'Standaard';
 
   @override
+  String get orbit_track_details => 'Details';
+
+  @override
   String get orbit_track_technical => 'Technisch';
 
   @override
@@ -2204,4 +2257,16 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get unauthorized_page_title => 'Niet geautoriseerd';
+
+  @override
+  String get circuit_map_expand => 'Kaart groter';
+
+  @override
+  String get circuit_map_collapse => 'Kaart kleiner';
+
+  @override
+  String get circuit_map_zoom_in => 'Inzoomen';
+
+  @override
+  String get circuit_map_zoom_out => 'Uitzoomen';
 }
