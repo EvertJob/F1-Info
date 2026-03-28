@@ -2,7 +2,7 @@ name: F1 Data Fetcher & Deploy
 
 on:
   schedule:
-    - cron: '0 * * * 5,6,0'
+    - cron: '00 00,01,13,14,15,16,17,18,19,20,21,22,23 * * 5,6,0'
   workflow_dispatch:
 
 permissions:
