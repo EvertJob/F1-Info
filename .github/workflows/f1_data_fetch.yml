@@ -1,9 +1,12 @@
-name: F1 Data Fetcher
+name: F1 Data Fetcher & Deploy
 
 on:
   schedule:
     - cron: '0 * * * 5,6,0'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   run-script:
@@ -12,22 +15,53 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable' # Of 'beta' als je dat gebruikt
+          channel: 'stable'
 
       - name: Install dependencies
-        run: flutter pub get # Gebruik flutter i.p.v. dart
+        run: flutter pub get
 
       - name: Run Fetch Script
-        run: dart fetch_session_data.dart # Dart commando werkt nog steeds zodra Flutter er is
+        run: |
+          dart fetch_session_data.dart
+          # Controleer of er data is bijgekomen
+          ls -R assets/data/
 
-      - name: Commit and Push changes
+      - name: Commit and Push Data
+        # We pushen eerst de data naar de main branch
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
           git commit -m "Automated F1 data update" || echo "No changes to commit"
-          git push
+          git push origin main
+
+      - name: Build Flutter Web
+        # Nu bouwen we de app INCLUSIEF de net gecommitte data
+        run: flutter build web --release --base-href "/F1-Info/"
+
+      - name: Upload Build Artifact
+        # We slaan de build tijdelijk op zodat de deployer niet in je main-files hoeft te wroeten
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy:
+    # Dit is een aparte job die alleen de build-output pakt en live zet
+    needs: run-script
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
