@@ -7,16 +7,15 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -27,13 +26,9 @@ jobs:
         run: flutter pub get
 
       - name: Run Fetch Script
-        run: |
-          dart fetch_session_data.dart
-          # Controleer of er data is bijgekomen
-          ls -R assets/data/
+        run: dart fetch_session_data.dart
 
       - name: Commit and Push Data
-        # We pushen eerst de data naar de main branch
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -42,22 +37,16 @@ jobs:
           git push origin main
 
       - name: Build Flutter Web
-        # Nu bouwen we de app INCLUSIEF de net gecommitte data
         run: flutter build web --release --base-href "/F1-Info/"
 
       - name: Upload Build Artifact
-        # We slaan de build tijdelijk op zodat de deployer niet in je main-files hoeft te wroeten
         uses: actions/upload-pages-artifact@v3
         with:
           path: build/web
 
   deploy:
-    # Dit is een aparte job die alleen de build-output pakt en live zet
     needs: run-script
     runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
