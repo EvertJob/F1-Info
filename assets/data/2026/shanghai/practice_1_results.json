@@ -7,7 +7,14 @@
       "teamName": "Mercedes",
       "finishPosition": 1,
       "points": 0,
+      "duration": 92.741,
       "gap_to_leader": 0,
+      "fastestLapDuration": 92.741,
+      "driverFastestLap": {
+        "duration": 92.741,
+        "time": "1:32.741",
+        "lapNumber": 23
+      },
       "tyreStints": [
         {
           "compound": "SOFT",
@@ -45,7 +52,14 @@
       "teamName": "Mercedes",
       "finishPosition": 2,
       "points": 0,
+      "duration": 92.861,
       "gap_to_leader": 0.12,
+      "fastestLapDuration": 92.861,
+      "driverFastestLap": {
+        "duration": 92.861,
+        "time": "1:32.861",
+        "lapNumber": 25
+      },
       "tyreStints": [
         {
           "compound": "SOFT",
@@ -83,7 +97,14 @@
       "teamName": "McLaren",
       "finishPosition": 3,
       "points": 0,
+      "duration": 93.296,
       "gap_to_leader": 0.555,
+      "fastestLapDuration": 93.296,
+      "driverFastestLap": {
+        "duration": 93.296,
+        "time": "1:33.296",
+        "lapNumber": 26
+      },
       "tyreStints": [
         {
           "compound": "SOFT",
@@ -116,7 +137,14 @@
       "teamName": "McLaren",
       "finishPosition": 4,
       "points": 0,
+      "duration": 93.472,
       "gap_to_leader": 0.731,
+      "fastestLapDuration": 93.472,
+      "driverFastestLap": {
+        "duration": 93.472,
+        "time": "1:33.472",
+        "lapNumber": 24
+      },
       "tyreStints": [
         {
           "compound": "SOFT",
@@ -154,7 +182,14 @@
       "teamName": "Ferrari",
       "finishPosition": 5,
       "points": 0,
+      "duration": 93.599,
       "gap_to_leader": 0.858,
+      "fastestLapDuration": 93.599,
+      "driverFastestLap": {
+        "duration": 93.599,
+        "time": "1:33.599",
+        "lapNumber": 19
+      },
       "tyreStints": [
         {
           "compound": "SOFT",
@@ -192,7 +227,14 @@
       "teamName": "Ferrari",
       "finishPosition": 6,
       "points": 0,
+      "duration": 94.129,
       "gap_to_leader": 1.388,
+      "fastestLapDuration": 94.129,
+      "driverFastestLap": {
+        "duration": 94.129,
+        "time": "1:34.129",
+        "lapNumber": 21
+      },
       "tyreStints": [
         {
           "compound": "SOFT",
@@ -235,7 +277,14 @@
       "teamName": "Haas F1 Team",
       "finishPosition": 7,
       "points": 0,
+      "duration": 94.426,
       "gap_to_leader": 1.685,
+      "fastestLapDuration": 94.426,
+      "driverFastestLap": {
+        "duration": 94.426,
+        "time": "1:34.426",
+        "lapNumber": 24
+      },
       "tyreStints": [
         {
           "compound": "SOFT",
@@ -273,7 +322,14 @@
       "teamName": "Red Bull Racing",
       "finishPosition": 8,
       "points": 0,
+      "duration": 94.541,
       "gap_to_leader": 1.8,
+      "fastestLapDuration": 94.541,
+      "driverFastestLap": {
+        "duration": 94.541,
+        "time": "1:34.541",
+        "lapNumber": 18
+      },
       "tyreStints": [
         {
           "compound": "SOFT",
@@ -307,7 +363,14 @@
       "teamName": "Audi",
       "finishPosition": 9,
       "points": 0,
+      "duration": 94.639,
       "gap_to_leader": 1.898,
+      "fastestLapDuration": 94.639,
+      "driverFastestLap": {
+        "duration": 94.639,
+        "time": "1:34.639",
+        "lapNumber": 22
+      },
       "tyreStints": [
         {
           "compound": "SOFT",
@@ -349,7 +412,14 @@
       "teamName": "Alpine",
       "finishPosition": 10,
       "points": 0,
+      "duration": 94.676,
       "gap_to_leader": 1.935,
+      "fastestLapDuration": 94.676,
+      "driverFastestLap": {
+        "duration": 94.676,
+        "time": "1:34.676",
+        "lapNumber": 21
+      },
       "tyreStints": [
         {
           "compound": "MEDIUM",
@@ -382,7 +452,14 @@
       "teamName": "Racing Bulls",
       "finishPosition": 11,
       "points": 0,
+      "duration": 94.773,
       "gap_to_leader": 2.032,
+      "fastestLapDuration": 94.773,
+      "driverFastestLap": {
+        "duration": 94.773,
+        "time": "1:34.773",
+        "lapNumber": 24
+      },
       "tyreStints": [
         {
           "compound": "MEDIUM",
@@ -420,7 +497,14 @@
       "teamName": "Audi",
       "finishPosition": 12,
       "points": 0,
+      "duration": 94.828,
       "gap_to_leader": 2.087,
+      "fastestLapDuration": 94.828,
+      "driverFastestLap": {
+        "duration": 94.828,
+        "time": "1:34.828",
+        "lapNumber": 23
+      },
       "tyreStints": [
         {
           "compound": "SOFT",
@@ -454,7 +538,14 @@
       "teamName": "Red Bull Racing",
       "finishPosition": 13,
       "points": 0,
+      "duration": 94.856,
       "gap_to_leader": 2.115,
+      "fastestLapDuration": 94.856,
+      "driverFastestLap": {
+        "duration": 94.856,
+        "time": "1:34.856",
+        "lapNumber": 23
+      },
       "tyreStints": [
         {
           "compound": "SOFT",
@@ -483,7 +574,14 @@
       "teamName": "Haas F1 Team",
       "finishPosition": 14,
       "points": 0,
+      "duration": 94.877,
       "gap_to_leader": 2.136,
+      "fastestLapDuration": 94.877,
+      "driverFastestLap": {
+        "duration": 94.877,
+        "time": "1:34.877",
+        "lapNumber": 18
+      },
       "tyreStints": [
         {
           "compound": "SOFT",
@@ -534,7 +632,14 @@
       "teamName": "Alpine",
       "finishPosition": 15,
       "points": 0,
+      "duration": 94.947,
       "gap_to_leader": 2.206,
+      "fastestLapDuration": 94.947,
+      "driverFastestLap": {
+        "duration": 94.947,
+        "time": "1:34.947",
+        "lapNumber": 23
+      },
       "tyreStints": [
         {
           "compound": "SOFT",
@@ -563,7 +668,14 @@
       "teamName": "Williams",
       "finishPosition": 16,
       "points": 0,
+      "duration": 95.48,
       "gap_to_leader": 2.739,
+      "fastestLapDuration": 95.48,
+      "driverFastestLap": {
+        "duration": 95.48,
+        "time": "1:35.480",
+        "lapNumber": 25
+      },
       "tyreStints": [
         {
           "compound": "SOFT",
@@ -601,7 +713,14 @@
       "teamName": "Williams",
       "finishPosition": 17,
       "points": 0,
+      "duration": 95.679,
       "gap_to_leader": 2.938,
+      "fastestLapDuration": 95.679,
+      "driverFastestLap": {
+        "duration": 95.679,
+        "time": "1:35.679",
+        "lapNumber": 12
+      },
       "tyreStints": [
         {
           "compound": "SOFT",
@@ -630,7 +749,14 @@
       "teamName": "Aston Martin",
       "finishPosition": 18,
       "points": 0,
+      "duration": 95.856,
       "gap_to_leader": 3.115,
+      "fastestLapDuration": 95.856,
+      "driverFastestLap": {
+        "duration": 95.856,
+        "time": "1:35.856",
+        "lapNumber": 16
+      },
       "tyreStints": [
         {
           "compound": "MEDIUM",
@@ -663,7 +789,14 @@
       "teamName": "Cadillac",
       "finishPosition": 19,
       "points": 0,
+      "duration": 96.057,
       "gap_to_leader": 3.316,
+      "fastestLapDuration": 96.057,
+      "driverFastestLap": {
+        "duration": 96.057,
+        "time": "1:36.057",
+        "lapNumber": 19
+      },
       "tyreStints": [
         {
           "compound": "SOFT",
@@ -697,7 +830,14 @@
       "teamName": "Aston Martin",
       "finishPosition": 20,
       "points": 0,
+      "duration": 97.224,
       "gap_to_leader": 4.483,
+      "fastestLapDuration": 97.224,
+      "driverFastestLap": {
+        "duration": 97.224,
+        "time": "1:37.224",
+        "lapNumber": 17
+      },
       "tyreStints": [
         {
           "compound": "MEDIUM",
@@ -730,7 +870,14 @@
       "teamName": "Racing Bulls",
       "finishPosition": 21,
       "points": 0,
+      "duration": 97.896,
       "gap_to_leader": 5.155,
+      "fastestLapDuration": 97.896,
+      "driverFastestLap": {
+        "duration": 97.896,
+        "time": "1:37.896",
+        "lapNumber": 3
+      },
       "tyreStints": [
         {
           "compound": "MEDIUM",
@@ -751,7 +898,14 @@
       "teamName": "Cadillac",
       "finishPosition": 22,
       "points": 0,
+      "duration": 99.2,
       "gap_to_leader": 6.459,
+      "fastestLapDuration": 99.2,
+      "driverFastestLap": {
+        "duration": 99.2,
+        "time": "1:39.200",
+        "lapNumber": 4
+      },
       "tyreStints": [
         {
           "compound": "MEDIUM",
@@ -770,5 +924,11 @@
         }
       ]
     }
-  ]
+  ],
+  "sessionFastestLap": {
+    "driverName": "George RUSSELL",
+    "time": "1:32.741",
+    "duration": 92.741,
+    "lapNumber": 23
+  }
 }

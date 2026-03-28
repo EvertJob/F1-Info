@@ -4264,10 +4264,94 @@ class RaceResultRow {
     return '$minutes:$seconds.$milliseconds';
   }
 
+  /// OpenF1 `session_result.duration` is a single lap time (practice) or a list
+  /// of segment times (qualifying). Races use a large total-time `duration`; those
+  /// must not be treated as a lap time (see [_kOpenF1MaxLapLikeSeconds]).
+  static const double _kOpenF1MaxLapLikeSeconds = 360;
+
   static double? openF1ResultFastestLapSeconds(Map<String, dynamic> json) {
-    final v = json['fastestLapDuration'] ?? json['fastest_lap_duration'];
-    if (v is num) return v.toDouble();
-    return double.tryParse(v?.toString() ?? '');
+    for (final key in ['fastestLapDuration', 'fastest_lap_duration']) {
+      final v = json[key];
+      if (v is num) return v.toDouble();
+      final parsed = double.tryParse(v?.toString() ?? '');
+      if (parsed != null) return parsed;
+    }
+    final dfl = json['driverFastestLap'];
+    if (dfl is Map) {
+      final n = dfl['duration'];
+      if (n is num && n.toDouble() > 0) return n.toDouble();
+      final p = double.tryParse(n?.toString() ?? '');
+      if (p != null && p > 0) return p;
+    }
+    final d = json['duration'];
+    if (d is num) {
+      final sec = d.toDouble();
+      if (sec > 0 && sec <= _kOpenF1MaxLapLikeSeconds) return sec;
+      return null;
+    }
+    if (d is List) {
+      double? best;
+      for (final e in d) {
+        if (e is! num) continue;
+        final x = e.toDouble();
+        if (x > 0 && (best == null || x < best)) best = x;
+      }
+      return best;
+    }
+    return null;
+  }
+
+  /// Bundled `*_results.json`: prefer [driverFastestLap.time], else format from seconds.
+  static String openF1BundledFastestLapDisplayString(Map<String, dynamic> json) {
+    final dfl = json['driverFastestLap'];
+    if (dfl is Map) {
+      final t = dfl['time']?.toString().trim();
+      if (t != null && t.isNotEmpty && t != '-') {
+        return t;
+      }
+    }
+    return formatOpenF1LapSeconds(openF1ResultFastestLapSeconds(json));
+  }
+
+  static int? _openF1LapNumberFromDriverFastestLap(Map<String, dynamic> json) {
+    final dfl = json['driverFastestLap'];
+    if (dfl is! Map) return null;
+    final ln = dfl['lapNumber'];
+    if (ln is num) return ln.toInt();
+    return int.tryParse(ln?.toString() ?? '');
+  }
+
+  /// e.g. `1:28.778 (12)` when [driverFastestLap.lapNumber] is set in bundled JSON.
+  static String openF1BundledFastestLapWithLapNumber(Map<String, dynamic> json) {
+    final base = openF1BundledFastestLapDisplayString(json);
+    return openF1AppendLapNumberInParens(
+      base,
+      _openF1LapNumberFromDriverFastestLap(json),
+    );
+  }
+
+  static String openF1AppendLapNumberInParens(String lapTimeDisplay, int? lapNumber) {
+    if (lapTimeDisplay.isEmpty ||
+        lapTimeDisplay == '-' ||
+        lapNumber == null ||
+        lapNumber <= 0) {
+      return lapTimeDisplay;
+    }
+    return '$lapTimeDisplay ($lapNumber)';
+  }
+
+  static bool _openF1TimeOrGapIsMeaningful(String? raw) {
+    if (raw == null) return false;
+    final s = raw.trim();
+    if (s.isEmpty || s == '-') return false;
+    return true;
+  }
+
+  /// Hub labels like `P2 (+0.298s)` / `P1 (-)` → finish position only (not all digits).
+  static int? openF1PositionFromPLabel(String raw) {
+    final m = RegExp(r'^P\s*(\d+)').firstMatch(raw.trim());
+    if (m == null) return null;
+    return int.tryParse(m.group(1) ?? '');
   }
 
   /// Weekend hub / bundled JSON: gap vs leader when `timeOrGap` / `gap_to_leader` are absent.
@@ -4282,6 +4366,15 @@ class RaceResultRow {
       final v = g.toDouble();
       final sign = v >= 0 ? '+' : '';
       return '$sign${v.toStringAsFixed(3)}s';
+    }
+    if (g is List) {
+      for (var i = g.length - 1; i >= 0; i--) {
+        final e = g[i];
+        if (e is! num) continue;
+        final v = e.toDouble();
+        final sign = v >= 0 ? '+' : '';
+        return '$sign${v.toStringAsFixed(3)}s';
+      }
     }
     final gs = g?.toString().trim();
     if (gs != null && gs.isNotEmpty && gs != '-') {
@@ -4309,9 +4402,9 @@ class RaceResultRow {
     Map<String, dynamic> json,
     SessionOverviewRow row,
   ) {
-    final lap = openF1ResultFastestLapSeconds(json);
-    if (lap != null && lap > 0) {
-      return formatOpenF1LapSeconds(lap);
+    final formatted = openF1BundledFastestLapWithLapNumber(json);
+    if (formatted != '-') {
+      return formatted;
     }
     final r = row.result.trim();
     if (r.isNotEmpty && r != '-') return r;
@@ -4574,14 +4667,15 @@ class RaceResultRow {
         : int.tryParse(json['finishPosition']?.toString() ?? '') ??
             0;
     final trimmedTimeOrGap = json['timeOrGap']?.toString().trim();
+    final meaningfulGap = _openF1TimeOrGapIsMeaningful(trimmedTimeOrGap)
+        ? trimmedTimeOrGap!
+        : null;
     var timeOrGap = (finish == 'DNF' ||
             finish == 'DNS' ||
             finish == 'DSQ' ||
             finish == 'NC')
         ? '-'
-        : ((trimmedTimeOrGap != null && trimmedTimeOrGap.isNotEmpty)
-            ? trimmedTimeOrGap
-            : '-');
+        : (meaningfulGap ?? '-');
     if (timeOrGap == '-') {
       if (finishPos > 1 && leaderFastestLapSec != null) {
         final g = openF1HubGapToLeaderLine(
@@ -4593,9 +4687,9 @@ class RaceResultRow {
           timeOrGap = g;
         }
       } else if (finishPos == 1) {
-        final lap = openF1ResultFastestLapSeconds(json);
-        if (lap != null && lap > 0) {
-          timeOrGap = formatOpenF1LapSeconds(lap);
+        final leaderFmt = openF1BundledFastestLapWithLapNumber(json);
+        if (leaderFmt != '-') {
+          timeOrGap = leaderFmt;
         }
       }
     }
@@ -4605,7 +4699,7 @@ class RaceResultRow {
             ? pts.toInt().toString()
             : pts.toString())
         : (pts?.toString() ?? '0');
-    final fastest = formatOpenF1LapSeconds(json['fastestLapDuration']);
+    final fastest = openF1BundledFastestLapWithLapNumber(json);
     final myFastestSec = openF1ResultFastestLapSeconds(json);
     final hasOverallFastest = sessionBestLapSec != null &&
         myFastestSec != null &&
@@ -4838,14 +4932,16 @@ class SessionOverviewRow {
         : int.tryParse(json['finishPosition']?.toString() ?? '') ??
             0;
     final gapRaw = json['timeOrGap']?.toString().trim();
+    final useGap =
+        RaceResultRow._openF1TimeOrGapIsMeaningful(gapRaw) ? gapRaw! : null;
     var resultStr = (finishLabel == 'DNF' ||
             finishLabel == 'DNS' ||
             finishLabel == 'DSQ' ||
             finishLabel == 'NC')
         ? '-'
-        : (gapRaw != null && gapRaw.isNotEmpty ? gapRaw : '-');
+        : (useGap ?? '-');
     final fastestLapStr =
-        RaceResultRow.formatOpenF1LapSeconds(json['fastestLapDuration']);
+        RaceResultRow.openF1BundledFastestLapWithLapNumber(json);
     if (resultStr == '-' &&
         fastestLapStr != '-' &&
         finishLabel != 'DNF' &&
@@ -6524,7 +6620,10 @@ class SessionDataManager extends ChangeNotifier {
             points: _formatPoints(_asDouble(entry['points']) ?? 0),
             totalTime: _formatTotalRaceTime(entry, winnerDuration),
             gapToLeader: _formatTimeOrGap(entry, winnerDuration),
-            fastestLap: _formatLapDuration(fastestLap?.duration),
+            fastestLap: _formatLapDurationWithOptionalLap(
+              fastestLap?.duration,
+              fastestLap?.lapNumber,
+            ),
             hasFastestLap: hasOverallFastestLap,
             tyreCompounds: driverNumber == null
                 ? const <String>[]
@@ -8203,6 +8302,16 @@ class SessionDataManager extends ChangeNotifier {
             .toString()
             .padLeft(3, '0');
     return '$minutes:$seconds.$milliseconds';
+  }
+
+  String _formatLapDurationWithOptionalLap(
+    double? totalSeconds,
+    int? lapNumber,
+  ) {
+    return RaceResultRow.openF1AppendLapNumberInParens(
+      _formatLapDuration(totalSeconds),
+      lapNumber,
+    );
   }
 
   String _formatTyreCompound(String? compound) {
@@ -15488,6 +15597,14 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
   List<WeekendHubPodiumEntry> _hubTopThreeFromResultsBody(String body) {
     final decoded = jsonDecode(body);
     final List<dynamic> raw;
+    double? rootSessionBest;
+    if (decoded is Map<String, dynamic>) {
+      final sfl = decoded['sessionFastestLap'];
+      if (sfl is Map) {
+        final d = sfl['duration'];
+        if (d is num) rootSessionBest = d.toDouble();
+      }
+    }
     if (decoded is List) {
       raw = decoded;
     } else if (decoded is Map<String, dynamic> &&
@@ -15512,19 +15629,29 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     final leaderLap = maps.isEmpty
         ? null
         : RaceResultRow.openF1ResultFastestLapSeconds(maps.first);
+    var sessionBest = rootSessionBest;
+    if (sessionBest == null) {
+      for (final m in maps) {
+        final t = RaceResultRow.openF1ResultFastestLapSeconds(m);
+        if (t != null && (sessionBest == null || t < sessionBest)) {
+          sessionBest = t;
+        }
+      }
+    }
     return maps
         .take(3)
         .map((m) {
-          final row = SessionOverviewRow.fromOpenF1ResultMap(m);
+          final row = SessionOverviewRow.fromOpenF1ResultMap(
+            m,
+            leaderFastestLapSeconds: leaderLap,
+            sessionBestLapSeconds: sessionBest,
+          );
           final tyreCompounds = row.tyreLapSequence
               .map((e) => e.compound)
               .where((c) => c.trim().isNotEmpty)
               .toSet()
               .toList(growable: false);
-          final position = int.tryParse(
-            row.position.replaceAll(RegExp(r'[^0-9]'), ''),
-          );
-          final pos = position ?? 0;
+          final pos = posOf(m);
           final gapLine = RaceResultRow.openF1HubGapToLeaderLine(m, pos, leaderLap);
           final leaderTimeLine =
               RaceResultRow.openF1HubLeaderSessionTimeLine(m, row);
@@ -15685,12 +15812,11 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                 .where((compound) => compound.trim().isNotEmpty)
                 .toSet()
                 .toList(growable: false);
-            final position = int.tryParse(
-              row.position.replaceAll(RegExp(r'[^0-9]'), ''),
-            );
+            final position =
+                RaceResultRow.openF1PositionFromPLabel(row.position) ?? 0;
             final resultValue = row.result.trim().isEmpty ? '-' : row.result;
             return WeekendHubPodiumEntry(
-              position: position ?? 0,
+              position: position,
               driverNumber: null,
               driver: row.driver,
               points: row.points,

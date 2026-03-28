@@ -439,12 +439,11 @@ abstract final class F1AssetResolver {
       await probe('race');
     } else {
       await probe('practice_1');
+      await probe('practice_2');
+      await probe('practice_3');
       if (hasSprintWeekend) {
         await probe('sprint_qualifying');
         await probe('sprint');
-      } else {
-        await probe('practice_2');
-        await probe('practice_3');
       }
       await probe('qualifying');
       await probe('race');
@@ -459,8 +458,10 @@ abstract final class F1AssetResolver {
 
   /// Session stems with a bundled `_results.json`, in weekend order.
   ///
-  /// Uses [AssetManifest] first; falls back to path probing if the manifest lists
-  /// nothing (e.g. tests without a full manifest).
+  /// Merges [AssetManifest] discovery with path probing. Relying on the manifest
+  /// alone can **drop** sessions on some web builds (incomplete key lists), so
+  /// the dropdown would miss e.g. `practice_3` / `qualifying` even when those
+  /// JSON files are bundled.
   static Future<List<String>> discoverSessionResultStems({
     required AssetBundle bundle,
     required int year,
@@ -473,15 +474,18 @@ abstract final class F1AssetResolver {
       venueFolder: venueFolder,
       hasSprintWeekend: hasSprintWeekend,
     );
-    if (fromManifest.isNotEmpty) {
-      return fromManifest;
-    }
-    return discoverSessionResultStemsByProbing(
+    final fromProbing = await discoverSessionResultStemsByProbing(
       bundle: bundle,
       year: year,
       venueFolder: venueFolder,
       hasSprintWeekend: hasSprintWeekend,
     );
+    final merged = <String>{...fromManifest, ...fromProbing}.toList()
+      ..sort(
+        (a, b) => stemDiscoveryIndex(a, venueFolder, hasSprintWeekend)
+            .compareTo(stemDiscoveryIndex(b, venueFolder, hasSprintWeekend)),
+      );
+    return merged;
   }
 
   /// Chronological index for dropdown ordering (low → high through the weekend).
@@ -497,6 +501,8 @@ abstract final class F1AssetResolver {
     final order = hasSprintWeekend
         ? const [
             'practice_1',
+            'practice_2',
+            'practice_3',
             'sprint_qualifying',
             'sprint',
             'qualifying',

@@ -95,7 +95,16 @@ Future<void> _processYear(http.Client client, String year, ArgResults flags) asy
       final safeName = _sanitizeName(sessionName);
       if (dataFlag == null || dataFlag == 'race_control') await _fetchAndSaveRaceControl(client, dir.path, safeName, sessionKey);
       if (dataFlag == null || dataFlag == 'weather') await _fetchAndSaveWeather(client, dir.path, safeName, sessionKey);
-      if (dataFlag == null || dataFlag == 'results') await _fetchAndSaveResults(client, dir.path, safeName, sessionKey, driversMap);
+      if (dataFlag == null || dataFlag == 'results') {
+        await _fetchAndSaveResults(
+          client,
+          dir.path,
+          safeName,
+          sessionName,
+          sessionKey,
+          driversMap,
+        );
+      }
     }
   }
 
@@ -193,24 +202,265 @@ Future<void> _fetchAndSaveWeather(http.Client client, String dir, String sess, i
   if (data.isNotEmpty) await _writeJsonFile(dir, '${sess}_weather.json', {'sessionKey': key, 'samples': data});
 }
 
-Future<void> _fetchAndSaveResults(http.Client client, String dir, String sess, int key, Map<int, Map<String, dynamic>> lookup) async {
+double? _asDouble(dynamic v) {
+  if (v == null) return null;
+  if (v is num) return v.toDouble();
+  return double.tryParse(v.toString());
+}
+
+int? _asInt(dynamic v) {
+  if (v == null) return null;
+  if (v is num) return v.toInt();
+  return int.tryParse(v.toString());
+}
+
+/// F1-style lap string: `M:SS.mmm` (e.g. 84.123 → `1:24.123`).
+String _formatLapTime(double seconds) {
+  if (seconds <= 0) {
+    return '0:00.000';
+  }
+  final duration = Duration(
+    microseconds: (seconds * Duration.microsecondsPerSecond).round(),
+  );
+  final minutes = duration.inMinutes;
+  final sec = duration.inSeconds.remainder(60);
+  final ms = ((duration.inMicroseconds %
+              Duration.microsecondsPerSecond) /
+          1000)
+      .round()
+      .clamp(0, 999);
+  return '$minutes:${sec.toString().padLeft(2, '0')}.'
+      '${ms.toString().padLeft(3, '0')}';
+}
+
+/// Per-driver best [lap_duration] (pit-out excluded) + which lap set it; session overall best.
+(
+  Map<int, ({double duration, int lapNumber})> byDriver,
+  int? sessionBestDriver,
+  double? sessionBestDuration,
+) _fastestLapSecondsFromLaps(List<dynamic> laps) {
+  final byDriver = <int, ({double duration, int lapNumber})>{};
+  for (final raw in laps) {
+    if (raw is! Map) continue;
+    final lap = Map<String, dynamic>.from(raw as Map);
+    final driverNumber = _asInt(lap['driver_number']);
+    final lapDuration = _asDouble(lap['lap_duration']);
+    final lapNumber = _asInt(lap['lap_number']);
+    if (driverNumber == null ||
+        lapDuration == null ||
+        lapDuration <= 0 ||
+        lapNumber == null ||
+        lapNumber <= 0) {
+      continue;
+    }
+    if (_asBool(lap['is_pit_out_lap'])) {
+      continue;
+    }
+    final prev = byDriver[driverNumber];
+    if (prev == null || lapDuration < prev.duration) {
+      byDriver[driverNumber] = (duration: lapDuration, lapNumber: lapNumber);
+    }
+  }
+  int? bestDriver;
+  double? bestDuration;
+  for (final e in byDriver.entries) {
+    if (bestDuration == null || e.value.duration < bestDuration) {
+      bestDuration = e.value.duration;
+      bestDriver = e.key;
+    }
+  }
+  return (byDriver, bestDriver, bestDuration);
+}
+
+String _driverDisplayName(Map<int, Map<String, dynamic>> lookup, int driverNumber) {
+  final row = lookup[driverNumber];
+  if (row == null) {
+    return 'Driver $driverNumber';
+  }
+  final full = row['full_name']?.toString().trim();
+  if (full != null && full.isNotEmpty) {
+    return full;
+  }
+  final broadcast = row['broadcast_name']?.toString().trim();
+  if (broadcast != null && broadcast.isNotEmpty) {
+    return broadcast;
+  }
+  return 'Driver $driverNumber';
+}
+
+bool _asBool(dynamic v) =>
+    v == true || v == 1 || v?.toString().toLowerCase() == 'true';
+
+const double _kMaxLapLikeSeconds = 360;
+
+double? _openF1FastestLapSecondsFromDuration(
+  dynamic duration, {
+  required bool raceClock,
+}) {
+  if (raceClock) return null;
+  if (duration is num) {
+    final s = duration.toDouble();
+    return (s > 0 && s <= _kMaxLapLikeSeconds) ? s : null;
+  }
+  if (duration is List) {
+    double? best;
+    for (final e in duration) {
+      if (e is! num) continue;
+      final x = e.toDouble();
+      if (x > 0 && (best == null || x < best)) best = x;
+    }
+    return best;
+  }
+  return null;
+}
+
+/// OpenF1 qualifying uses a list; UI and hub expect one scalar (final segment gap).
+dynamic _normalizeGapToLeader(dynamic g) {
+  if (g is List) {
+    for (var i = g.length - 1; i >= 0; i--) {
+      final e = g[i];
+      if (e is num) return e.toDouble();
+    }
+    return null;
+  }
+  return g;
+}
+
+String _formatRaceDurationSeconds(double totalSeconds) {
+  final duration = Duration(
+    microseconds: (totalSeconds * Duration.microsecondsPerSecond).round(),
+  );
+  final hours = duration.inHours;
+  final minutes =
+      duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+  final seconds =
+      duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+  final milliseconds =
+      ((duration.inMicroseconds.remainder(Duration.microsecondsPerSecond)) /
+              1000)
+          .round()
+          .toString()
+          .padLeft(3, '0');
+  return '$hours:$minutes:$seconds.$milliseconds';
+}
+
+String _formatRaceSessionTimeOrGap(
+  Map<String, dynamic> r,
+  double? winnerDuration,
+) {
+  if (_asBool(r['dns'])) return 'DNS';
+  if (_asBool(r['dnf'])) return 'DNF';
+  if (_asBool(r['dsq'])) return 'NC';
+  final position = (r['position'] as num?)?.toInt();
+  if (position == null) return 'NC';
+  final gap = _normalizeGapToLeader(r['gap_to_leader']);
+  final duration = _asDouble(r['duration']);
+  if (position == 1) {
+    return duration == null ? '-' : _formatRaceDurationSeconds(duration);
+  }
+  if (gap is num) {
+    return '+${gap.toDouble().toStringAsFixed(3)}s';
+  }
+  if (duration != null && winnerDuration != null) {
+    return '+${(duration - winnerDuration).toStringAsFixed(3)}s';
+  }
+  return '-';
+}
+
+Future<void> _fetchAndSaveResults(
+  http.Client client,
+  String dir,
+  String filePrefix,
+  String openF1SessionName,
+  int key,
+  Map<int, Map<String, dynamic>> lookup,
+) async {
   final res = await _fetchList(client, '$_baseUrl/session_result?session_key=$key', '   > Resultaten');
   if (res.isEmpty) return;
   final stints = await _fetchList(client, '$_baseUrl/stints?session_key=$key', '   > Banden');
   final pits = await _fetchList(client, '$_baseUrl/pit?session_key=$key', '   > Pits');
+  final laps = await _fetchList(client, '$_baseUrl/laps?session_key=$key', '   > Laps');
 
-  List<Map<String, dynamic>> enriched = res.map((r) {
+  final (fastestLapDetailByDriver, sessionFastestDriver, sessionFastestDuration) =
+      _fastestLapSecondsFromLaps(laps);
+
+  final raceClock =
+      openF1SessionName == 'Race' || openF1SessionName == 'Sprint';
+  double? winnerDuration;
+  if (raceClock) {
+    for (final r in res) {
+      if (r is! Map) continue;
+      final m = Map<String, dynamic>.from(r as Map);
+      if ((m['position'] as num?)?.toInt() == 1) {
+        winnerDuration = _asDouble(m['duration']);
+        break;
+      }
+    }
+  }
+
+  List<Map<String, dynamic>> enriched = res.map((raw) {
+    final r = Map<String, dynamic>.from(raw as Map);
     final d = r['driver_number'];
+    final driverNum = _asInt(d);
+    final gapStored = _normalizeGapToLeader(r['gap_to_leader']);
+    final fromLaps = driverNum != null
+        ? fastestLapDetailByDriver[driverNum]
+        : null;
+    final fromSession = _openF1FastestLapSecondsFromDuration(
+      r['duration'],
+      raceClock: raceClock,
+    );
+    final fastestSeconds = fromLaps?.duration ?? fromSession;
     return {
-      'driverNumber': d, 'broadcastName': lookup[d]?['broadcast_name'] ?? '??', 'teamName': lookup[d]?['team_name'] ?? '??',
-      'finishPosition': r['position'], 'points': r['points'] ?? 0,
-      // Voor weekend hub: verschil t.o.v. leider (OpenF1 session_result).
-      if (r['gap_to_leader'] != null) 'gap_to_leader': r['gap_to_leader'],
-      'tyreStints': stints.where((s) => s['driver_number'] == d).map((s) => {'compound': s['compound'], 'lapStart': s['lap_start'], 'lapEnd': s['lap_end']}).toList(),
-      'pitStops': pits.where((p) => p['driver_number'] == d).map((p) => {'lap': p['lap_number'], 'duration': p['pit_duration']}).toList()
+      'driverNumber': d,
+      'broadcastName': lookup[d]?['broadcast_name'] ?? '??',
+      'teamName': lookup[d]?['team_name'] ?? '??',
+      'finishPosition': r['position'],
+      'points': r['points'] ?? 0,
+      'duration': ?r['duration'],
+      'gap_to_leader': ?gapStored,
+      'fastestLapDuration': ?fastestSeconds,
+      if (fastestSeconds != null)
+        'driverFastestLap': {
+          'duration': fastestSeconds,
+          'time': _formatLapTime(fastestSeconds),
+          if (fromLaps != null) 'lapNumber': fromLaps.lapNumber,
+        },
+      if (raceClock) 'timeOrGap': _formatRaceSessionTimeOrGap(r, winnerDuration),
+      'tyreStints': stints
+          .where((s) => s['driver_number'] == d)
+          .map((s) => {
+                'compound': s['compound'],
+                'lapStart': s['lap_start'],
+                'lapEnd': s['lap_end'],
+              })
+          .toList(),
+      'pitStops': pits
+          .where((p) => p['driver_number'] == d)
+          .map((p) => {
+                'lap': p['lap_number'],
+                'duration': p['pit_duration'],
+              })
+          .toList(),
     };
   }).toList();
-  await _writeJsonFile(dir, '${sess}_results.json', {'sessionKey': key, 'results': enriched});
+
+  final root = <String, dynamic>{
+    'sessionKey': key,
+    'results': enriched,
+  };
+  if (sessionFastestDriver != null && sessionFastestDuration != null) {
+    final sessionLapDetail =
+        fastestLapDetailByDriver[sessionFastestDriver];
+    root['sessionFastestLap'] = {
+      'driverName': _driverDisplayName(lookup, sessionFastestDriver),
+      'time': _formatLapTime(sessionFastestDuration),
+      'duration': sessionFastestDuration,
+      if (sessionLapDetail != null) 'lapNumber': sessionLapDetail.lapNumber,
+    };
+  }
+
+  await _writeJsonFile(dir, '${filePrefix}_results.json', root);
 }
 
 Future<List<dynamic>> _fetchChampionshipMeetings(http.Client client, String year) async {
