@@ -2272,4 +2272,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get circuit_map_zoom_out => 'Zoom out';
+
+  @override
+  String get recent_form_trend_title => 'Recent Form Trend';
+
+  @override
+  String get recent_form_last_5_points => 'Last 5 Points';
+
+  @override
+  String get recent_form_avg_finish => 'Avg. Finish';
+
+  @override
+  String get recent_form_total_season_points => 'Total Season Points';
+
+  @override
+  String get recent_form_avg_race_finish => 'Avg. Race Finish';
+
+  @override
+  String get recent_form_total_podiums => 'Total Podiums (Race + Sprint)';
+
+  @override
+  String get recent_form_expand_tooltip => 'Open full season view';
+
+  @override
+  String get recent_form_close => 'Close';
+
+  @override
+  String get recent_form_no_data => 'No form data for this season yet.';
 }

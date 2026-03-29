@@ -105,11 +105,11 @@
         "total_points": 581.0,
         "championships": 0,
         "championship_years": [],
-        "laps_raced": 13650,
-        "starts": 231,
+        "laps_raced": 13541,
+        "starts": 228,
         "dnfs": 42,
         "dsqs": 0,
-        "dnqs": 1,
+        "dnqs": 0,
         "laps_led": 43,
         "front_row_starts": 2,
         "highest_finish": "4e (x3)",
@@ -142,8 +142,7 @@
           "2024": 40.0,
           "2023": 9.0,
           "2022": 0.0,
-          "2021": 0.0,
-          "2026": 0.0
+          "2021": 0.0
         },
         "debut_year": 2010,
         "contract_until": "2026",
@@ -164,18 +163,7 @@
           "Dekra",
           "Ravenol"
         ],
-        "reserve_driver": null,
-        "merge_meta_2026": {
-          "schema": 1,
-          "baseline_season_year": 2025,
-          "baseline_is_synthetic_zero": false,
-          "events_scanned": [
-            "melbourne",
-            "shanghai",
-            "suzuka"
-          ],
-          "computed_at": "2026-03-29T13:36:23.628598Z"
-        }
+        "reserve_driver": null
       }
     }
   ]

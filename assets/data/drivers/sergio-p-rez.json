@@ -489,8 +489,8 @@
         "total_points": 1637.0,
         "championships": 0,
         "championship_years": [],
-        "laps_raced": 15286,
-        "starts": 283,
+        "laps_raced": 15123,
+        "starts": 280,
         "dnfs": 31,
         "dsqs": 0,
         "dnqs": 0,
@@ -526,8 +526,7 @@
           "2024": 150.0,
           "2023": 285.0,
           "2022": 305.0,
-          "2021": 190.0,
-          "2026": 0.0
+          "2021": 190.0
         },
         "debut_year": 2011,
         "contract_until": "2026",
@@ -545,18 +544,7 @@
           "Telmex",
           "Claro"
         ],
-        "reserve_driver": null,
-        "merge_meta_2026": {
-          "schema": 1,
-          "baseline_season_year": 2025,
-          "baseline_is_synthetic_zero": false,
-          "events_scanned": [
-            "melbourne",
-            "shanghai",
-            "suzuka"
-          ],
-          "computed_at": "2026-03-29T13:36:23.641596Z"
-        }
+        "reserve_driver": null
       }
     }
   ]

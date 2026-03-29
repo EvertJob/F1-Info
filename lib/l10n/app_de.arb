@@ -1070,5 +1070,14 @@
   "circuit_map_expand": "Karte vergrößern",
   "circuit_map_collapse": "Karte verkleinern",
   "circuit_map_zoom_in": "Hineinzoomen",
-  "circuit_map_zoom_out": "Herauszoomen"
+  "circuit_map_zoom_out": "Herauszoomen",
+  "recent_form_trend_title": "Aktuelle Form",
+  "recent_form_last_5_points": "Letzte 5 Punkte",
+  "recent_form_avg_finish": "Ø Platzierung",
+  "recent_form_total_season_points": "Saisonpunkte gesamt",
+  "recent_form_avg_race_finish": "Ø Renn-Platzierung",
+  "recent_form_total_podiums": "Podien gesamt (Rennen + Sprint)",
+  "recent_form_expand_tooltip": "Vollständige Saisonansicht",
+  "recent_form_close": "Schließen",
+  "recent_form_no_data": "Noch keine Formdaten für diese Saison."
 }

@@ -758,7 +758,7 @@
       "record": {
         "name": "Lewis Hamilton",
         "flag": "🇬🇧",
-        "points": 41.0,
+        "points": 0.0,
         "number": 44,
         "nationality": "British",
         "team": "Ferrari",
@@ -766,11 +766,11 @@
         "season_points_finish_pct": 66.6,
         "wins": 105,
         "podiums_2nd": 56,
-        "podiums_3rd": 41,
-        "podiums": 202,
+        "podiums_3rd": 40,
+        "podiums": 201,
         "poles": 104,
         "fastest_laps": 67,
-        "total_points": 4936.5,
+        "total_points": 4895.5,
         "championships": 7,
         "championship_years": [
           2008,
@@ -781,8 +781,8 @@
           2019,
           2020
         ],
-        "laps_raced": 19779,
-        "starts": 359,
+        "laps_raced": 19612,
+        "starts": 356,
         "dnfs": 31,
         "dsqs": 1,
         "dnqs": 0,
@@ -818,8 +818,7 @@
           "2024": 200.0,
           "2023": 234.0,
           "2022": 240.0,
-          "2021": 387.5,
-          "2026": 41.0
+          "2021": 387.5
         },
         "debut_year": 2007,
         "contract_until": "2026+",
@@ -836,18 +835,7 @@
           "IWC",
           "Monster Energy"
         ],
-        "reserve_driver": null,
-        "merge_meta_2026": {
-          "schema": 1,
-          "baseline_season_year": 2025,
-          "baseline_is_synthetic_zero": false,
-          "events_scanned": [
-            "melbourne",
-            "shanghai",
-            "suzuka"
-          ],
-          "computed_at": "2026-03-29T13:36:23.619599Z"
-        }
+        "reserve_driver": null
       }
     }
   ]

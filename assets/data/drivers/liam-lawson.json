@@ -159,7 +159,7 @@
       "record": {
         "name": "Liam Lawson",
         "flag": "🇳🇿",
-        "points": 10.0,
+        "points": 0.0,
         "number": 30,
         "nationality": "New Zealander",
         "team": "Racing Bulls",
@@ -171,18 +171,18 @@
         "podiums": 0,
         "poles": 0,
         "fastest_laps": 0,
-        "total_points": 50.0,
+        "total_points": 40.0,
         "championships": 0,
         "championship_years": [],
-        "laps_raced": 1619,
-        "starts": 32,
+        "laps_raced": 1453,
+        "starts": 29,
         "dnfs": 2,
         "dsqs": 0,
         "dnqs": 0,
         "laps_led": 0,
         "front_row_starts": 0,
-        "highest_finish": "7e (x1)",
-        "highest_grid": "8e (x1)",
+        "highest_finish": "9e (x1)",
+        "highest_grid": "10e (x1)",
         "hat_tricks": 0,
         "overtakes": 30,
         "age": 24,
@@ -208,11 +208,10 @@
         ],
         "points_per_season": {
           "2025": 30.0,
-          "2024": 6.0,
+          "2024": 0.0,
           "2023": 2.0,
           "2022": 0.0,
-          "2021": 0.0,
-          "2026": 10.0
+          "2021": 0.0
         },
         "debut_year": 2023,
         "contract_until": "2026",
@@ -227,18 +226,7 @@
           "Red Bull",
           "Rodin Cars"
         ],
-        "reserve_driver": null,
-        "merge_meta_2026": {
-          "schema": 1,
-          "baseline_season_year": 2025,
-          "baseline_is_synthetic_zero": false,
-          "events_scanned": [
-            "melbourne",
-            "shanghai",
-            "suzuka"
-          ],
-          "computed_at": "2026-03-29T13:36:23.622599Z"
-        }
+        "reserve_driver": null
       }
     }
   ]

@@ -2272,4 +2272,31 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get circuit_map_zoom_out => 'Herauszoomen';
+
+  @override
+  String get recent_form_trend_title => 'Aktuelle Form';
+
+  @override
+  String get recent_form_last_5_points => 'Letzte 5 Punkte';
+
+  @override
+  String get recent_form_avg_finish => 'Ø Platzierung';
+
+  @override
+  String get recent_form_total_season_points => 'Saisonpunkte gesamt';
+
+  @override
+  String get recent_form_avg_race_finish => 'Ø Renn-Platzierung';
+
+  @override
+  String get recent_form_total_podiums => 'Podien gesamt (Rennen + Sprint)';
+
+  @override
+  String get recent_form_expand_tooltip => 'Vollständige Saisonansicht';
+
+  @override
+  String get recent_form_close => 'Schließen';
+
+  @override
+  String get recent_form_no_data => 'Noch keine Formdaten für diese Saison.';
 }

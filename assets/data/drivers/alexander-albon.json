@@ -177,11 +177,11 @@
         "total_points": 315.0,
         "championships": 0,
         "championship_years": [],
-        "laps_raced": 6211,
-        "starts": 108,
+        "laps_raced": 6102,
+        "starts": 105,
         "dnfs": 14,
         "dsqs": 0,
-        "dnqs": 1,
+        "dnqs": 0,
         "laps_led": 1,
         "front_row_starts": 0,
         "highest_finish": "3e (x2)",
@@ -214,8 +214,7 @@
           "2024": 40.0,
           "2023": 27.0,
           "2022": 4.0,
-          "2021": 0.0,
-          "2026": 0.0
+          "2021": 0.0
         },
         "debut_year": 2019,
         "contract_until": "2027",
@@ -234,18 +233,7 @@
           "Red Bull",
           "Moose"
         ],
-        "reserve_driver": null,
-        "merge_meta_2026": {
-          "schema": 1,
-          "baseline_season_year": 2025,
-          "baseline_is_synthetic_zero": false,
-          "events_scanned": [
-            "melbourne",
-            "shanghai",
-            "suzuka"
-          ],
-          "computed_at": "2026-03-29T13:36:23.532819Z"
-        }
+        "reserve_driver": null
       }
     }
   ]

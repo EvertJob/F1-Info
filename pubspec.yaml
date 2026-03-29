@@ -138,6 +138,8 @@ flutter:
     - assets/data/2025/imola/
     - assets/data/2025/interlagos/
     - assets/data/2025/jeddah/
+    - assets/data/2025/las_vegas/
+    - assets/data/2025/lusail/
     - assets/data/2025/melbourne/
     - assets/data/2025/mexico_city/
     - assets/data/2025/miami/
@@ -151,7 +153,9 @@ flutter:
     - assets/data/2025/spafrancorchamps/
     - assets/data/2025/spielberg/
     - assets/data/2025/suzuka/
+    - assets/data/2025/yas_marina_circuit/
     - assets/data/2025/zandvoort/
+    # 2026 OpenF1 event folders (alphabetical); year root above picks up *_standings_*.json only.
     - assets/data/2026/melbourne/
     - assets/data/2026/shanghai/
     - assets/data/2026/suzuka/

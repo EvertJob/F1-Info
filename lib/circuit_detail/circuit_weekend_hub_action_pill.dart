@@ -76,7 +76,8 @@ class _CircuitWeekendHubActionPillState extends State<CircuitWeekendHubActionPil
       bundle: bundle,
       venueFolder: venue,
     );
-    return _HubResolve(venue: venue, hasData: hasData);
+    final hubSlug = F1AssetResolver.weekendHubPathSlug(venue);
+    return _HubResolve(venue: hubSlug, hasData: hasData);
   }
 
   String _displayVenue(String bundleVenue) {

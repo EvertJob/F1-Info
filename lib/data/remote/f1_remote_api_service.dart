@@ -12,18 +12,26 @@ class F1RemoteApiService {
     required int season,
     required int round,
   }) async {
-    final venue = F1AssetResolver.venueFolderForYearAndRound(season, round);
     final candidates = <String>[];
-    if (venue != null) {
+    for (final venue in F1AssetResolver.expandedVenueFoldersForRace(
+      circuitAssetId: '',
+      year: season,
+      round: round,
+    )) {
       candidates.addAll(
-        F1AssetResolver.candidateRaceResultPaths(year: season, venueFolder: venue),
+        F1AssetResolver.candidateRaceResultPaths(
+          year: season,
+          venueFolder: venue,
+        ),
       );
     }
     candidates.addAll(F1AssetResolver.legacyRoundResultPaths(season, round));
 
-    Object? lastError;
     for (final assetPath in candidates) {
       try {
+        if (!await F1AssetResolver.bundleHasAsset(rootBundle, assetPath)) {
+          continue;
+        }
         final jsonString = await rootBundle.loadString(assetPath);
         final results = _parseLocalResults(
           jsonString,
@@ -33,13 +41,9 @@ class F1RemoteApiService {
         if (results.isNotEmpty) {
           return results;
         }
-      } catch (e) {
-        lastError = e;
-      }
+      } catch (_) {}
     }
-    throw RemoteDataException(
-      'Failed to load local results for $season round $round: $lastError',
-    );
+    return const <RaceResult>[];
   }
 
   Future<List<RaceResult>> fetchLatestRaceResults() async {

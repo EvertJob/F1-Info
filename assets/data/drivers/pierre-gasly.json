@@ -312,7 +312,7 @@
       "record": {
         "name": "Pierre Gasly",
         "flag": "🇫🇷",
-        "points": 15.0,
+        "points": 0.0,
         "number": 10,
         "nationality": "French",
         "team": "Alpine",
@@ -324,11 +324,11 @@
         "podiums": 4,
         "poles": 0,
         "fastest_laps": 3,
-        "total_points": 431.0,
+        "total_points": 416.0,
         "championships": 0,
         "championship_years": [],
-        "laps_raced": 8807,
-        "starts": 157,
+        "laps_raced": 8641,
+        "starts": 154,
         "dnfs": 24,
         "dsqs": 1,
         "dnqs": 0,
@@ -364,8 +364,7 @@
           "2024": 35.0,
           "2023": 62.0,
           "2022": 23.0,
-          "2021": 110.0,
-          "2026": 15.0
+          "2021": 110.0
         },
         "debut_year": 2017,
         "contract_until": "2026+",
@@ -383,18 +382,7 @@
           "AlphaTauri",
           "Red Bull"
         ],
-        "reserve_driver": null,
-        "merge_meta_2026": {
-          "schema": 1,
-          "baseline_season_year": 2025,
-          "baseline_is_synthetic_zero": false,
-          "events_scanned": [
-            "melbourne",
-            "shanghai",
-            "suzuka"
-          ],
-          "computed_at": "2026-03-29T13:36:23.634596Z"
-        }
+        "reserve_driver": null
       }
     }
   ]

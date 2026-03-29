@@ -234,26 +234,26 @@
       "record": {
         "name": "Oscar Piastri",
         "flag": "🇦🇺",
-        "points": 21.0,
+        "points": 0.0,
         "number": 81,
         "nationality": "Australian",
         "team": "McLaren",
         "points_finish_pct": 75.0,
         "season_points_finish_pct": 87.5,
         "wins": 2,
-        "podiums_2nd": 9,
+        "podiums_2nd": 8,
         "podiums_3rd": 5,
-        "podiums": 19,
+        "podiums": 18,
         "poles": 4,
         "fastest_laps": 6,
-        "total_points": 628.0,
+        "total_points": 607.0,
         "championships": 0,
         "championship_years": [],
-        "laps_raced": 2469,
-        "starts": 49,
+        "laps_raced": 2415,
+        "starts": 46,
         "dnfs": 4,
         "dsqs": 0,
-        "dnqs": 2,
+        "dnqs": 0,
         "laps_led": 154,
         "front_row_starts": 8,
         "highest_finish": "1e (x2)",
@@ -286,8 +286,7 @@
           "2024": 250.0,
           "2023": 97.0,
           "2022": 0.0,
-          "2021": 0.0,
-          "2026": 21.0
+          "2021": 0.0
         },
         "debut_year": 2023,
         "contract_until": "2026",
@@ -302,18 +301,7 @@
           "HP",
           "GoPro"
         ],
-        "reserve_driver": null,
-        "merge_meta_2026": {
-          "schema": 1,
-          "baseline_season_year": 2025,
-          "baseline_is_synthetic_zero": false,
-          "events_scanned": [
-            "melbourne",
-            "shanghai",
-            "suzuka"
-          ],
-          "computed_at": "2026-03-29T13:36:23.632593Z"
-        }
+        "reserve_driver": null
       }
     }
   ]

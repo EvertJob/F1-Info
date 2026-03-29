@@ -69,7 +69,23 @@ abstract final class F1AssetResolver {
     ],
   };
 
-  /// Maps hub [circuitAssetId] to OpenF1 bundle folder under `assets/data/{year}/`.
+  /// OpenF1-style folder names first (see [fetch_session_data] `_sanitizeName`), then
+  /// legacy short names still present on disk. [venueFolderCandidates] merges a token
+  /// with its group so both `spafrancorchamps` and `spa` resolve the same search order.
+  static const List<List<String>> kVenueFolderAliasGroups = [
+    ['spafrancorchamps', 'spa_francorchamps', 'spa'],
+    ['hungaroring', 'budapest'],
+    ['catalunya', 'barcelona_catalunya', 'barcelona'],
+    ['monte_carlo', 'monaco'],
+    ['interlagos', 'sao_paulo'],
+    ['yas_marina_circuit', 'yas_marina'],
+  ];
+
+  /// Maps hub [circuitAssetId] to **preferred** bundle folder under `assets/data/{year}/`
+  /// (OpenF1 sanitization where it differs from older short folders).
+  ///
+  /// Legacy slugs such as `spa` / `budapest` are still reachable via [venueFolderCandidates]
+  /// and [kVenueOrderByYear] round fallback.
   static const Map<String, String> kCircuitAssetIdToVenueFolder = {
     'albert_park': 'melbourne',
     'shanghai_international': 'shanghai',
@@ -78,12 +94,12 @@ abstract final class F1AssetResolver {
     'jeddah_corniche': 'jeddah',
     'miami_autodrome': 'miami',
     'gilles_villeneuve': 'montreal',
-    'circuit_de_monaco': 'monaco',
-    'circuit_barcelona_catalunya': 'barcelona',
+    'circuit_de_monaco': 'monte_carlo',
+    'circuit_barcelona_catalunya': 'catalunya',
     'red_bull_ring': 'spielberg',
     'silverstone_circuit': 'silverstone',
-    'spa_francorchamps': 'spa',
-    'hungaroring': 'budapest',
+    'spa_francorchamps': 'spafrancorchamps',
+    'hungaroring': 'hungaroring',
     'circuit_zandvoort': 'zandvoort',
     'monza_circuit': 'monza',
     'madrid_madring': 'madrid',
@@ -91,10 +107,10 @@ abstract final class F1AssetResolver {
     'marina_bay_circuit': 'singapore',
     'circuit_of_the_americas': 'austin',
     'hermanos_rodriguez': 'mexico_city',
-    'interlagos_circuit': 'sao_paulo',
+    'interlagos_circuit': 'interlagos',
     'las_vegas_strip': 'las_vegas',
     'lusail_circuit': 'lusail',
-    'yas_marina': 'yas_marina',
+    'yas_marina': 'yas_marina_circuit',
   };
 
   /// Sakhir-style weekends use `day_N_*` instead of `race_*` in some bundles.
@@ -110,6 +126,138 @@ abstract final class F1AssetResolver {
     final order = kVenueOrderByYear[year];
     if (order == null || round > order.length) return null;
     return order[round - 1];
+  }
+
+  /// Ordered folder names to probe on disk for [folderToken] (any alias from a group).
+  static List<String> venueFolderCandidates(String folderToken) {
+    final key = folderToken.trim().toLowerCase();
+    if (key.isEmpty) return const [];
+    for (final group in kVenueFolderAliasGroups) {
+      for (final g in group) {
+        if (g == key) {
+          return List<String>.from(group);
+        }
+      }
+    }
+    return <String>[key];
+  }
+
+  /// Stable `/weekendhub/{slug}` segment (short names) for shareable URLs.
+  static String weekendHubPathSlug(String folderToken) {
+    final c = folderToken.trim().toLowerCase();
+    if (c == 'spafrancorchamps' || c == 'spa_francorchamps' || c == 'spa') {
+      return 'spa';
+    }
+    if (c == 'hungaroring' || c == 'budapest') {
+      return 'budapest';
+    }
+    if (c == 'catalunya' || c == 'barcelona_catalunya' || c == 'barcelona') {
+      return 'barcelona';
+    }
+    if (c == 'monte_carlo' || c == 'monaco') {
+      return 'monaco';
+    }
+    if (c == 'interlagos' || c == 'sao_paulo') {
+      return 'sao_paulo';
+    }
+    if (c == 'yas_marina_circuit' || c == 'yas_marina') {
+      return 'yas_marina';
+    }
+    return c;
+  }
+
+  /// Whether [slug] (path or alias) refers to the same venue as [canonicalVenueFolder]
+  /// from [venueFolderForCircuitAssetId] / [venueFolderForYearAndRound].
+  static bool weekendHubSlugMatches(String slug, String canonicalVenueFolder) {
+    final s = slug.trim().toLowerCase();
+    if (s.isEmpty) return false;
+    final canon = canonicalVenueFolder.trim().toLowerCase();
+    if (s == canon) return true;
+    if (s == weekendHubPathSlug(canon)) return true;
+    for (final c in venueFolderCandidates(canon)) {
+      if (s == c) return true;
+      if (s == weekendHubPathSlug(c)) return true;
+    }
+    return false;
+  }
+
+  /// Unique folder names to search for modular JSON, circuit mapping first, then round.
+  static List<String> expandedVenueFoldersForRace({
+    required String circuitAssetId,
+    required int year,
+    required int round,
+  }) {
+    final seen = <String>{};
+    final out = <String>[];
+    void addTok(String? t) {
+      if (t == null || t.isEmpty) return;
+      for (final c in venueFolderCandidates(t)) {
+        if (seen.add(c)) {
+          out.add(c);
+        }
+      }
+    }
+
+    addTok(venueFolderForCircuitAssetId(circuitAssetId));
+    addTok(venueFolderForYearAndRound(year, round));
+    return out;
+  }
+
+  /// True if any obvious session results JSON exists for this year/folder.
+  static Future<bool> bundledVenueHasProbeResults({
+    required AssetBundle bundle,
+    required int year,
+    required String venueFolder,
+  }) async {
+    if (kVenuesWithDayNumberedSessions.contains(venueFolder)) {
+      for (final stem in ['day_3', 'day_2', 'race', 'day_1']) {
+        final p = sessionAssetPath(
+          year: year,
+          venueFolder: venueFolder,
+          sessionStem: stem,
+          suffix: 'results',
+        );
+        if (await bundleHasAsset(bundle, p)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    for (final stem in ['race', 'practice_1', 'qualifying']) {
+      final p = sessionAssetPath(
+        year: year,
+        venueFolder: venueFolder,
+        sessionStem: stem,
+        suffix: 'results',
+      );
+      if (await bundleHasAsset(bundle, p)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// First folder under `assets/data/{year}/` that has bundled session results, or null.
+  static Future<String?> resolveBundledVenueFolder({
+    required AssetBundle bundle,
+    required int year,
+    String circuitAssetId = '',
+    int round = 0,
+  }) async {
+    for (final folder in expandedVenueFoldersForRace(
+      circuitAssetId: circuitAssetId,
+      year: year,
+      round: round,
+    )) {
+      if (await bundledVenueHasProbeResults(
+        bundle: bundle,
+        year: year,
+        venueFolder: folder,
+      )) {
+        return folder;
+      }
+    }
+    return null;
   }
 
   /// Same rules as `fetch_session_data.dart` `_sanitizeName`.
@@ -329,6 +477,25 @@ abstract final class F1AssetResolver {
   /// are already bundled. [WeekendHubScreen] still resolves the latest GP via
   /// `/weekendhub/{venue}`.
   static Future<bool> venueHasAnyBundledSessionResults({
+    required AssetBundle bundle,
+    required String venueFolder,
+    int referenceYear = 0,
+    int yearsBack = 8,
+  }) async {
+    for (final folder in venueFolderCandidates(venueFolder)) {
+      if (await _venueHasAnyBundledSessionResultsForSingleFolder(
+            bundle: bundle,
+            venueFolder: folder,
+            referenceYear: referenceYear,
+            yearsBack: yearsBack,
+          )) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static Future<bool> _venueHasAnyBundledSessionResultsForSingleFolder({
     required AssetBundle bundle,
     required String venueFolder,
     int referenceYear = 0,

@@ -9,7 +9,7 @@
       "record": {
         "name": "Arvid Lindblad",
         "flag": "🇬🇧",
-        "points": 4.0,
+        "points": 0.0,
         "number": 41,
         "nationality": "British",
         "team": "Racing Bulls",
@@ -21,18 +21,18 @@
         "podiums": 0,
         "poles": 0,
         "fastest_laps": 0,
-        "total_points": 4.0,
+        "total_points": 0.0,
         "championships": 0,
         "championship_years": [],
-        "laps_raced": 165,
-        "starts": 3,
+        "laps_raced": 0,
+        "starts": 0,
         "dnfs": 0,
         "dsqs": 0,
         "dnqs": 0,
         "laps_led": 0,
         "front_row_starts": 0,
-        "highest_finish": "8e (x1)",
-        "highest_grid": "9e (x1)",
+        "highest_finish": "N.v.t.",
+        "highest_grid": "N.v.t.",
         "hat_tricks": 0,
         "overtakes": 0,
         "age": 18,
@@ -57,7 +57,11 @@
           "Geboorteplaats: London, UK."
         ],
         "points_per_season": {
-          "2026": 4.0
+          "2025": 0.0,
+          "2024": 0.0,
+          "2023": 0.0,
+          "2022": 0.0,
+          "2021": 0.0
         },
         "debut_year": 2026,
         "contract_until": "2026",
@@ -69,18 +73,7 @@
         "personal_sponsors": [
           "Red Bull"
         ],
-        "reserve_driver": null,
-        "merge_meta_2026": {
-          "schema": 1,
-          "baseline_season_year": null,
-          "baseline_is_synthetic_zero": true,
-          "events_scanned": [
-            "melbourne",
-            "shanghai",
-            "suzuka"
-          ],
-          "computed_at": "2026-03-29T13:36:23.554331Z"
-        }
+        "reserve_driver": null
       }
     }
   ]

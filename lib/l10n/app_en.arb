@@ -1062,5 +1062,14 @@
   "circuit_map_expand": "Expand map",
   "circuit_map_collapse": "Collapse map",
   "circuit_map_zoom_in": "Zoom in",
-  "circuit_map_zoom_out": "Zoom out"
+  "circuit_map_zoom_out": "Zoom out",
+  "recent_form_trend_title": "Recent Form Trend",
+  "recent_form_last_5_points": "Last 5 Points",
+  "recent_form_avg_finish": "Avg. Finish",
+  "recent_form_total_season_points": "Total Season Points",
+  "recent_form_avg_race_finish": "Avg. Race Finish",
+  "recent_form_total_podiums": "Total Podiums (Race + Sprint)",
+  "recent_form_expand_tooltip": "Open full season view",
+  "recent_form_close": "Close",
+  "recent_form_no_data": "No form data for this season yet."
 }

@@ -2272,4 +2272,31 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get circuit_map_zoom_out => 'Uitzoomen';
+
+  @override
+  String get recent_form_trend_title => 'Recente vorm';
+
+  @override
+  String get recent_form_last_5_points => 'Laatste 5 punten';
+
+  @override
+  String get recent_form_avg_finish => 'Gem. finish';
+
+  @override
+  String get recent_form_total_season_points => 'Totaal seizoenspunten';
+
+  @override
+  String get recent_form_avg_race_finish => 'Gem. race-finish';
+
+  @override
+  String get recent_form_total_podiums => 'Totaal podiums (race + sprint)';
+
+  @override
+  String get recent_form_expand_tooltip => 'Volledig seizoen openen';
+
+  @override
+  String get recent_form_close => 'Sluiten';
+
+  @override
+  String get recent_form_no_data => 'Nog geen vormdata voor dit seizoen.';
 }

@@ -308,30 +308,30 @@
       "record": {
         "name": "George Russell",
         "flag": "🇬🇧",
-        "points": 63.0,
+        "points": 0.0,
         "number": 63,
         "nationality": "British",
         "team": "Mercedes",
         "points_finish_pct": 65.4,
         "season_points_finish_pct": 83.3,
-        "wins": 3,
-        "podiums_2nd": 6,
+        "wins": 2,
+        "podiums_2nd": 5,
         "podiums_3rd": 10,
-        "podiums": 21,
-        "poles": 5,
+        "podiums": 19,
+        "poles": 4,
         "fastest_laps": 8,
-        "total_points": 851.0,
+        "total_points": 788.0,
         "championships": 0,
         "championship_years": [],
-        "laps_raced": 7679,
-        "starts": 131,
+        "laps_raced": 7512,
+        "starts": 128,
         "dnfs": 18,
         "dsqs": 1,
         "dnqs": 0,
         "laps_led": 210,
         "front_row_starts": 10,
-        "highest_finish": "1e (x3)",
-        "highest_grid": "1e (x5)",
+        "highest_finish": "1e (x2)",
+        "highest_grid": "1e (x4)",
         "hat_tricks": 0,
         "overtakes": 350,
         "age": 28,
@@ -360,8 +360,7 @@
           "2024": 200.0,
           "2023": 175.0,
           "2022": 275.0,
-          "2021": 16.0,
-          "2026": 63.0
+          "2021": 16.0
         },
         "debut_year": 2019,
         "contract_until": "2025",
@@ -376,18 +375,7 @@
           "Puma",
           "Alpinestars"
         ],
-        "reserve_driver": "Frederik Vesti",
-        "merge_meta_2026": {
-          "schema": 1,
-          "baseline_season_year": 2025,
-          "baseline_is_synthetic_zero": false,
-          "events_scanned": [
-            "melbourne",
-            "shanghai",
-            "suzuka"
-          ],
-          "computed_at": "2026-03-29T13:36:23.598063Z"
-        }
+        "reserve_driver": "Frederik Vesti"
       }
     }
   ]

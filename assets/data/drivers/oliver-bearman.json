@@ -82,7 +82,7 @@
       "record": {
         "name": "Oliver Bearman",
         "flag": "🇬🇧",
-        "points": 17.0,
+        "points": 0.0,
         "number": 87,
         "nationality": "British",
         "team": "Haas F1 Team",
@@ -94,17 +94,17 @@
         "podiums": 0,
         "poles": 0,
         "fastest_laps": 0,
-        "total_points": 64.0,
+        "total_points": 47.0,
         "championships": 0,
         "championship_years": [],
-        "laps_raced": 1422,
-        "starts": 28,
-        "dnfs": 4,
+        "laps_raced": 1289,
+        "starts": 25,
+        "dnfs": 3,
         "dsqs": 0,
         "dnqs": 0,
         "laps_led": 0,
         "front_row_starts": 0,
-        "highest_finish": "5e (x1)",
+        "highest_finish": "7e (x2)",
         "highest_grid": "8e (x1)",
         "hat_tricks": 0,
         "overtakes": 25,
@@ -134,8 +134,7 @@
           "2024": 7.0,
           "2023": 0.0,
           "2022": 0.0,
-          "2021": 0.0,
-          "2026": 17.0
+          "2021": 0.0
         },
         "debut_year": 2024,
         "contract_until": "2026",
@@ -148,18 +147,7 @@
         "personal_sponsors": [
           "Richard Mille"
         ],
-        "reserve_driver": null,
-        "merge_meta_2026": {
-          "schema": 1,
-          "baseline_season_year": 2025,
-          "baseline_is_synthetic_zero": false,
-          "events_scanned": [
-            "melbourne",
-            "shanghai",
-            "suzuka"
-          ],
-          "computed_at": "2026-03-29T13:36:23.630596Z"
-        }
+        "reserve_driver": null
       }
     }
   ]

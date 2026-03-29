@@ -1070,5 +1070,14 @@
   "circuit_map_expand": "Kaart groter",
   "circuit_map_collapse": "Kaart kleiner",
   "circuit_map_zoom_in": "Inzoomen",
-  "circuit_map_zoom_out": "Uitzoomen"
+  "circuit_map_zoom_out": "Uitzoomen",
+  "recent_form_trend_title": "Recente vorm",
+  "recent_form_last_5_points": "Laatste 5 punten",
+  "recent_form_avg_finish": "Gem. finish",
+  "recent_form_total_season_points": "Totaal seizoenspunten",
+  "recent_form_avg_race_finish": "Gem. race-finish",
+  "recent_form_total_podiums": "Totaal podiums (race + sprint)",
+  "recent_form_expand_tooltip": "Volledig seizoen openen",
+  "recent_form_close": "Sluiten",
+  "recent_form_no_data": "Nog geen vormdata voor dit seizoen."
 }

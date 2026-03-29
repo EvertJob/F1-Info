@@ -4472,6 +4472,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Zoom out'**
   String get circuit_map_zoom_out;
+
+  /// No description provided for @recent_form_trend_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Form Trend'**
+  String get recent_form_trend_title;
+
+  /// No description provided for @recent_form_last_5_points.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 5 Points'**
+  String get recent_form_last_5_points;
+
+  /// No description provided for @recent_form_avg_finish.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg. Finish'**
+  String get recent_form_avg_finish;
+
+  /// No description provided for @recent_form_total_season_points.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Season Points'**
+  String get recent_form_total_season_points;
+
+  /// No description provided for @recent_form_avg_race_finish.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg. Race Finish'**
+  String get recent_form_avg_race_finish;
+
+  /// No description provided for @recent_form_total_podiums.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Podiums (Race + Sprint)'**
+  String get recent_form_total_podiums;
+
+  /// No description provided for @recent_form_expand_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Open full season view'**
+  String get recent_form_expand_tooltip;
+
+  /// No description provided for @recent_form_close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get recent_form_close;
+
+  /// No description provided for @recent_form_no_data.
+  ///
+  /// In en, this message translates to:
+  /// **'No form data for this season yet.'**
+  String get recent_form_no_data;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -597,7 +597,7 @@
       "record": {
         "name": "Charles Leclerc",
         "flag": "🇲🇨",
-        "points": 49.0,
+        "points": 0.0,
         "number": 16,
         "nationality": "Monegasque",
         "team": "Ferrari",
@@ -605,15 +605,15 @@
         "season_points_finish_pct": 79.1,
         "wins": 8,
         "podiums_2nd": 15,
-        "podiums_3rd": 22,
-        "podiums": 45,
+        "podiums_3rd": 20,
+        "podiums": 43,
         "poles": 27,
         "fastest_laps": 10,
-        "total_points": 1469.0,
+        "total_points": 1420.0,
         "championships": 0,
         "championship_years": [],
-        "laps_raced": 8599,
-        "starts": 151,
+        "laps_raced": 8432,
+        "starts": 148,
         "dnfs": 22,
         "dsqs": 1,
         "dnqs": 0,
@@ -649,8 +649,7 @@
           "2024": 280.0,
           "2023": 206.0,
           "2022": 308.0,
-          "2021": 159.0,
-          "2026": 49.0
+          "2021": 159.0
         },
         "debut_year": 2018,
         "contract_until": "2029",
@@ -665,18 +664,7 @@
           "Richard Mille",
           "Giorgio Armani"
         ],
-        "reserve_driver": null,
-        "merge_meta_2026": {
-          "schema": 1,
-          "baseline_season_year": 2025,
-          "baseline_is_synthetic_zero": false,
-          "events_scanned": [
-            "melbourne",
-            "shanghai",
-            "suzuka"
-          ],
-          "computed_at": "2026-03-29T13:36:23.573874Z"
-        }
+        "reserve_driver": null
       }
     }
   ]

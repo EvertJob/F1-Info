@@ -256,6 +256,15 @@ class MyPaddockWidget extends StatelessWidget {
             ),
           ),
         ],
+        if (_paddockRecentFormDriverName(f) != null) ...[
+          const SizedBox(height: 16),
+          paddockModule(
+            child: RecentFormTrendCard(
+              driverName: _paddockRecentFormDriverName(f)!,
+              seasonYear: _paddockRecentFormSeasonYear(),
+            ),
+          ),
+        ],
         if (teamNames.isNotEmpty) ...[
           const SizedBox(height: 16),
           paddockModule(

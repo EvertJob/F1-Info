@@ -390,21 +390,21 @@
         "team": "Cadillac",
         "points_finish_pct": 70.0,
         "season_points_finish_pct": 15.0,
-        "wins": 1,
-        "podiums_2nd": 1,
-        "podiums_3rd": 9,
-        "podiums": 11,
-        "poles": 4,
-        "fastest_laps": 4,
-        "total_points": 1738.0,
+        "wins": 10,
+        "podiums_2nd": 30,
+        "podiums_3rd": 27,
+        "podiums": 67,
+        "poles": 20,
+        "fastest_laps": 19,
+        "total_points": 1797.0,
         "championships": 0,
         "championship_years": [],
-        "laps_raced": 10622,
-        "starts": 181,
-        "dnfs": 20,
+        "laps_raced": 13500,
+        "starts": 250,
+        "dnfs": 25,
         "dsqs": 0,
         "dnqs": 0,
-        "laps_led": 700,
+        "laps_led": 650,
         "front_row_starts": 45,
         "highest_finish": "1e (x10)",
         "highest_grid": "1e (x20)",
@@ -432,12 +432,11 @@
           "Heeft 20 polepositions."
         ],
         "points_per_season": {
-          "2021": 226.0,
-          "2020": 223.0,
-          "2019": 326.0,
-          "2018": 247.0,
-          "2017": 305.0,
-          "2026": 0.0
+          "2025": 50.0,
+          "2024": 0.0,
+          "2023": 10.0,
+          "2022": 49.0,
+          "2021": 226.0
         },
         "debut_year": 2013,
         "contract_until": "2026",
@@ -454,18 +453,7 @@
           "Wihuri",
           "Abloy"
         ],
-        "reserve_driver": null,
-        "merge_meta_2026": {
-          "schema": 1,
-          "baseline_season_year": 2021,
-          "baseline_is_synthetic_zero": false,
-          "events_scanned": [
-            "melbourne",
-            "shanghai",
-            "suzuka"
-          ],
-          "computed_at": "2026-03-29T13:36:23.644596Z"
-        }
+        "reserve_driver": null
       }
     }
   ]

@@ -53,6 +53,7 @@ import 'widgets/news_settings.dart';
 import 'coach_corner_data.dart';
 part 'f1_data.dart';
 part 'widgets/my_paddock_widget.dart';
+part 'widgets/recent_form_trend_card.dart';
 
 // Normalizes driver names for lookup (diacritics, special chars, etc.)
 String _normalizeDriverLookupName(String value) {
@@ -3126,9 +3127,14 @@ bool _isSameGrandPrixWeekend(Race a, Race b) {
       a.date == b.date;
 }
 
-/// Weekend hub path segment: `melbourne`, `sakhir`, … (asset folder), not English GP slug.
-String _weekendHubSlugForRace(Race race) =>
-    _venueFolderForRace(race) ?? _raceSlug(race);
+/// Weekend hub path segment: stable short slug (`spa`, `barcelona`, …), not raw asset folder.
+String _weekendHubSlugForRace(Race race) {
+  final vf = _venueFolderForRace(race);
+  if (vf != null && vf.isNotEmpty) {
+    return F1AssetResolver.weekendHubPathSlug(vf);
+  }
+  return _raceSlug(race);
+}
 
 /// Old `/weekendhub/australian` bookmarks → canonical venue slug.
 const Map<String, String> _weekendHubLegacyVenueRedirects = <String, String>{
@@ -3143,9 +3149,10 @@ Race? _findRaceByWeekendHubSlug(String slug) {
 
   Race? best;
   for (final race in races) {
-    final hub = _weekendHubSlugForRace(race);
     final vf = _venueFolderForRace(race);
-    if (hub != venueTarget && vf != venueTarget) continue;
+    final matches = vf != null &&
+        F1AssetResolver.weekendHubSlugMatches(venueTarget, vf);
+    if (!matches) continue;
     if (best == null || race.date.isAfter(best.date)) {
       best = race;
     }
@@ -7034,12 +7041,12 @@ class SessionDataManager extends ChangeNotifier {
       } catch (_) {}
     }
 
-    final venue = F1AssetResolver.venueFolderForCircuitAssetId(
-          race.circuitAssetId,
-        ) ??
-        F1AssetResolver.venueFolderForYearAndRound(year, round);
-    if (venue != null) {
-      final stem = F1AssetResolver.sanitizeSessionStem(sessionName);
+    final stem = F1AssetResolver.sanitizeSessionStem(sessionName);
+    for (final venue in F1AssetResolver.expandedVenueFoldersForRace(
+      circuitAssetId: race.circuitAssetId,
+      year: year,
+      round: round,
+    )) {
       final modularPath = F1AssetResolver.sessionAssetPath(
         year: year,
         venueFolder: venue,
@@ -7047,7 +7054,7 @@ class SessionDataManager extends ChangeNotifier {
         suffix: 'results',
       );
       if (!await F1AssetResolver.bundleHasAsset(rootBundle, modularPath)) {
-        return const <SessionOverviewRow>[];
+        continue;
       }
       try {
         final body = await rootBundle.loadString(modularPath);
@@ -7417,11 +7424,11 @@ class SessionDataManager extends ChangeNotifier {
     final year = race.date.year;
     final round = raceRoundFor(race);
     final paths = <String>[];
-    final venue = F1AssetResolver.venueFolderForCircuitAssetId(
-          race.circuitAssetId,
-        ) ??
-        F1AssetResolver.venueFolderForYearAndRound(year, round);
-    if (venue != null) {
+    for (final venue in F1AssetResolver.expandedVenueFoldersForRace(
+      circuitAssetId: race.circuitAssetId,
+      year: year,
+      round: round,
+    )) {
       paths.addAll(
         F1AssetResolver.candidateRaceResultPaths(
           year: year,
@@ -7475,11 +7482,11 @@ class SessionDataManager extends ChangeNotifier {
     final year = race.date.year;
     final round = raceRoundFor(race);
     final paths = <String>[];
-    final venue = F1AssetResolver.venueFolderForCircuitAssetId(
-          race.circuitAssetId,
-        ) ??
-        F1AssetResolver.venueFolderForYearAndRound(year, round);
-    if (venue != null) {
+    for (final venue in F1AssetResolver.expandedVenueFoldersForRace(
+      circuitAssetId: race.circuitAssetId,
+      year: year,
+      round: round,
+    )) {
       paths.addAll(
         F1AssetResolver.candidateRaceWeatherPaths(
           year: year,
@@ -7526,11 +7533,11 @@ class SessionDataManager extends ChangeNotifier {
     final year = race.date.year;
     final round = raceRoundFor(race);
     final paths = <String>[];
-    final venue = F1AssetResolver.venueFolderForCircuitAssetId(
-          race.circuitAssetId,
-        ) ??
-        F1AssetResolver.venueFolderForYearAndRound(year, round);
-    if (venue != null) {
+    for (final venue in F1AssetResolver.expandedVenueFoldersForRace(
+      circuitAssetId: race.circuitAssetId,
+      year: year,
+      round: round,
+    )) {
       paths.addAll(
         F1AssetResolver.candidateRaceRaceControlPaths(
           year: year,
@@ -15566,22 +15573,28 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     final race = widget.race;
     final year = race.date.year;
     final round = raceRoundFor(race);
-    final venue = F1AssetResolver.venueFolderForCircuitAssetId(
-          race.circuitAssetId,
-        ) ??
-        F1AssetResolver.venueFolderForYearAndRound(year, round);
     _hubSessionStems = const [];
     _hubWeatherByStem.clear();
     _hubRaceControlByStem.clear();
     _hubPodiumByStem.clear();
     _hubLapTimelineByStem.clear();
-    if (venue == null || !mounted) {
+    if (!mounted) {
       return;
     }
 
     // Use [rootBundle] so discovery works on web and is not affected by an
     // inherited [DefaultAssetBundle] above this route.
     final bundle = rootBundle;
+    final venue = await F1AssetResolver.resolveBundledVenueFolder(
+      bundle: bundle,
+      year: year,
+      circuitAssetId: race.circuitAssetId,
+      round: round,
+    );
+    if (venue == null || !mounted) {
+      return;
+    }
+
     final stems = await F1AssetResolver.discoverSessionResultStems(
       bundle: bundle,
       year: year,
@@ -16229,14 +16242,15 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
       } catch (_) {}
     }
 
-    final venue = F1AssetResolver.venueFolderForCircuitAssetId(
-          race.circuitAssetId,
-        ) ??
-        F1AssetResolver.venueFolderForYearAndRound(year, round);
-    if (venue != null) {
-      final modularBySession = <String, List<Map<String, dynamic>>>{};
+    final modularBySession = <String, List<Map<String, dynamic>>>{};
+    for (final venue in F1AssetResolver.expandedVenueFoldersForRace(
+      circuitAssetId: race.circuitAssetId,
+      year: year,
+      round: round,
+    )) {
       for (final entry in _sessionSchedule()) {
         final sessionNameStr = entry.key;
+        if (modularBySession.containsKey(sessionNameStr)) continue;
         final stem = F1AssetResolver.sanitizeSessionStem(sessionNameStr);
         final path = F1AssetResolver.sessionAssetPath(
           year: year,
@@ -16261,12 +16275,12 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
           }
         } catch (_) {}
       }
-      if (modularBySession.isNotEmpty) {
-        return _WeekendWeatherData(
-          weatherBySession: modularBySession,
-          lapTimelineBySession: const <String, List<Map<String, dynamic>>>{},
-        );
-      }
+    }
+    if (modularBySession.isNotEmpty) {
+      return _WeekendWeatherData(
+        weatherBySession: modularBySession,
+        lapTimelineBySession: const <String, List<Map<String, dynamic>>>{},
+      );
     }
 
     return const _WeekendWeatherData(
@@ -20566,187 +20580,6 @@ class _DriverDetailViewState extends State<DriverDetailView> {
     );
   }
 
-  Widget _buildRecentFormTrend() {
-    final theme = Theme.of(context);
-    final entryGroups = _buildDriverRecentFormEntries(_detailDriver.name);
-
-    if (entryGroups.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-        child: Text(
-          'Recent form verschijnt zodra recente race-resultaten in cache staan.',
-          style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-        ),
-      );
-    }
-
-    // Bepaal max punten voor schaal (over sprint en race entries)
-    final allEntries = entryGroups.expand((e) => e).toList();
-    final maxPoints = allEntries.fold<double>(0, (best, entry) {
-      return entry.points > best ? entry.points : best;
-    });
-    final resolvedMaxPoints = maxPoints <= 0 ? 25.0 : maxPoints;
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            height: 210,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: entryGroups.map((entries) {
-                // Per weekend: 1 of 2 entries (sprint, race)
-                final raceLabel = entries.first.race.name
-                    .replaceAll(' Grand Prix', '')
-                    .split(' ')
-                    .first;
-                return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        ...entries.map((entry) => Column(
-                          children: [
-                            Text(
-                              entry.label,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: entry.isPodium
-                                    ? const Color(0xFFFFB300)
-                                    : theme.colorScheme.onSurface,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 250),
-                              width: 28,
-                              height: ((entry.points / resolvedMaxPoints) * 60)
-                                  .clamp(14, 60)
-                                  .toDouble(),
-                              decoration: BoxDecoration(
-                                color: entry.isDnf
-                                    ? const Color(0xFFE53935)
-                                    : F1TeamSchemes.getTeamColor(_detailDriver.team),
-                                borderRadius: BorderRadius.circular(8),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: F1TeamSchemes.getTeamColor(
-                                      _detailDriver.team,
-                                    ).withValues(alpha: 0.25),
-                                    blurRadius: 8,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              entry.points == entry.points.roundToDouble()
-                                  ? entry.points.toInt().toString()
-                                  : entry.points.toStringAsFixed(1),
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: theme.colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            Text(
-                              entry.sessionName == 'Sprint' ? 'Sprint' : 'Race',
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: entry.sessionName == 'Sprint'
-                                    ? Colors.deepOrange
-                                    : theme.colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                if (entry.hasFastestLap)
-                                  const Icon(
-                                    Icons.timer,
-                                    size: 12,
-                                    color: Color(0xFF8E24AA),
-                                  ),
-                                if (entry.hasPenalty)
-                                  const Padding(
-                                    padding: EdgeInsets.only(left: 4),
-                                    child: Icon(
-                                      Icons.warning_amber_rounded,
-                                      size: 12,
-                                      color: Color(0xFFF57C00),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                          ],
-                        )),
-                        Text(
-                          raceLabel,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _buildMiniStatPill(
-                'Last 5 points',
-                _formatFormPoints(entryGroups),
-                Icons.toll,
-              ),
-              _buildMiniStatPill(
-                'Avg finish',
-                _formatDriverAverageFinish(entryGroups),
-                Icons.analytics,
-              ),
-              _buildMiniStatPill(
-                'Podiums',
-                entryGroups.expand((e) => e).where((entry) => entry.isPodium).length.toString(),
-                Icons.emoji_events,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMiniStatPill(String label, String value, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: _themeTokens(context).panelStrong,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16),
-          const SizedBox(width: 8),
-          Text(context.l10n.metric_label_value(label, value)),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
 
@@ -20812,14 +20645,23 @@ style: TextStyle(
           v,
         ),
         title: Text(
-          'Recent Form Trend',
+          context.l10n.recent_form_trend_title,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 13,
             color: Theme.of(context).colorScheme.primary,
           ),
         ),
-        children: [_buildRecentFormTrend()],
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: RecentFormTrendCard(
+              driverName: _detailDriver.name,
+              seasonYear: _paddockRecentFormSeasonYear(),
+              showHeaderTitle: false,
+            ),
+          ),
+        ],
       )),
       if (_detailDriver.previousTeams.isNotEmpty)
         _detailOverviewSectionCard(

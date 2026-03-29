@@ -164,7 +164,7 @@
       "record": {
         "name": "Esteban Ocon",
         "flag": "🇫🇷",
-        "points": 1.0,
+        "points": 0.0,
         "number": 31,
         "nationality": "French",
         "team": "Haas F1 Team",
@@ -176,11 +176,11 @@
         "podiums": 4,
         "poles": 0,
         "fastest_laps": 0,
-        "total_points": 461.0,
+        "total_points": 460.0,
         "championships": 0,
         "championship_years": [],
-        "laps_raced": 8907,
-        "starts": 160,
+        "laps_raced": 8742,
+        "starts": 157,
         "dnfs": 28,
         "dsqs": 1,
         "dnqs": 0,
@@ -216,8 +216,7 @@
           "2024": 30.0,
           "2023": 58.0,
           "2022": 92.0,
-          "2021": 74.0,
-          "2026": 1.0
+          "2021": 74.0
         },
         "debut_year": 2016,
         "contract_until": "2026",
@@ -235,18 +234,7 @@
           "Castrol",
           "Mapfre"
         ],
-        "reserve_driver": null,
-        "merge_meta_2026": {
-          "schema": 1,
-          "baseline_season_year": 2025,
-          "baseline_is_synthetic_zero": false,
-          "events_scanned": [
-            "melbourne",
-            "shanghai",
-            "suzuka"
-          ],
-          "computed_at": "2026-03-29T13:36:23.585818Z"
-        }
+        "reserve_driver": null
       }
     }
   ]

@@ -81,31 +81,31 @@
       "record": {
         "name": "Kimi Antonelli",
         "flag": "🇮🇹",
-        "points": 72.0,
+        "points": 0.0,
         "number": 12,
         "nationality": "Italian",
         "team": "Mercedes",
         "points_finish_pct": 60.0,
         "season_points_finish_pct": 60.0,
-        "wins": 2,
-        "podiums_2nd": 2,
+        "wins": 0,
+        "podiums_2nd": 1,
         "podiums_3rd": 2,
-        "podiums": 6,
-        "poles": 2,
-        "fastest_laps": 3,
-        "total_points": 222.0,
+        "podiums": 3,
+        "poles": 0,
+        "fastest_laps": 1,
+        "total_points": 150.0,
         "championships": 0,
         "championship_years": [],
-        "laps_raced": 1411,
-        "starts": 27,
+        "laps_raced": 1244,
+        "starts": 24,
         "dnfs": 3,
         "dsqs": 0,
         "dnqs": 0,
         "laps_led": 12,
         "front_row_starts": 1,
-        "highest_finish": "1e (x2)",
-        "highest_grid": "1e (x2)",
-        "hat_tricks": 2,
+        "highest_finish": "2e (x1)",
+        "highest_grid": "2e (x1)",
+        "hat_tricks": 0,
         "overtakes": 20,
         "age": 19,
         "height": "1.72m",
@@ -133,8 +133,7 @@
           "2024": 0.0,
           "2023": 0.0,
           "2022": 0.0,
-          "2021": 0.0,
-          "2026": 72.0
+          "2021": 0.0
         },
         "debut_year": 2025,
         "contract_until": "2026+",
@@ -146,18 +145,7 @@
           "Petronas",
           "Puma"
         ],
-        "reserve_driver": "Frederik Vesti",
-        "merge_meta_2026": {
-          "schema": 1,
-          "baseline_season_year": 2025,
-          "baseline_is_synthetic_zero": false,
-          "events_scanned": [
-            "melbourne",
-            "shanghai",
-            "suzuka"
-          ],
-          "computed_at": "2026-03-29T13:36:23.605063Z"
-        }
+        "reserve_driver": "Frederik Vesti"
       }
     }
   ]

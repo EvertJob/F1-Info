@@ -1070,5 +1070,14 @@
   "circuit_map_expand": "Agrandir la carte",
   "circuit_map_collapse": "Réduire la carte",
   "circuit_map_zoom_in": "Zoom avant",
-  "circuit_map_zoom_out": "Zoom arrière"
+  "circuit_map_zoom_out": "Zoom arrière",
+  "recent_form_trend_title": "Tendance de forme",
+  "recent_form_last_5_points": "5 derniers points",
+  "recent_form_avg_finish": "Moy. arrivée",
+  "recent_form_total_season_points": "Points saison totaux",
+  "recent_form_avg_race_finish": "Moy. arrivée (GP)",
+  "recent_form_total_podiums": "Podiums totaux (course + sprint)",
+  "recent_form_expand_tooltip": "Ouvrir la saison complète",
+  "recent_form_close": "Fermer",
+  "recent_form_no_data": "Pas encore de données de forme pour cette saison."
 }
