@@ -1,0 +1,252 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "alexander-albon",
+  "driver_name": "Alexander Albon",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2019,
+      "record": {
+        "name": "Alexander Albon",
+        "flag": "🇹🇭",
+        "points": 92.0,
+        "number": 23,
+        "nationality": "Thai",
+        "team": "Red Bull Racing",
+        "points_finish_pct": 60.0,
+        "season_points_finish_pct": 65.0,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 0,
+        "podiums": 0,
+        "poles": 0,
+        "fastest_laps": 0,
+        "total_points": 92.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 1100,
+        "starts": 21,
+        "dnfs": 1,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 0,
+        "front_row_starts": 0,
+        "highest_finish": "4e (x1)",
+        "highest_grid": "5e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 80,
+        "age": 23,
+        "height": "1.86m",
+        "birth_place": "London, UK",
+        "partner": "-",
+        "children": "-",
+        "pets": "Albon Pets",
+        "manager": "Grau Private Management",
+        "real_world_facts_en": [
+          "Made his F1 debut in 2019 and was promoted to Red Bull mid-season.",
+          "His sure first podium was taken away in Brazil after a spin caused by Hamilton.",
+          "Carries car number #23.",
+          "Made their F1 debut in 2019.",
+          "Birthplace: London, UK."
+        ],
+        "real_world_facts_nl": [
+          "Maakte in 2019 zijn F1-debuut en werd halverwege al gepromoveerd naar Red Bull.",
+          "Zijn eerste zekere podium werd in Brazilië ontnomen door een tik van Hamilton.",
+          "Rijdt met startnummer #23.",
+          "Maakte het F1-debuut in 2019.",
+          "Geboorteplaats: London, UK."
+        ],
+        "points_per_season": {
+          "2019": 92.0
+        },
+        "debut_year": 2019,
+        "contract_until": "2020",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2011)",
+          "EPIC Racing - Formula Renault 2.0 Alps (2012)",
+          "KTR - Formula Renault 2.0 Eurocup (2013)",
+          "Signature - Formula Renault 2.0 Alps (2014)",
+          "Various Teams - FIA F3 European Championship (2015)",
+          "ART Grand Prix - GP3 (2016)",
+          "DAMS - F2 (2018)",
+          "Toro Rosso - F1 (2019)"
+        ],
+        "personal_sponsors": [
+          "Red Bull",
+          "Moose"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2025,
+      "record": {
+        "name": "Alexander Albon",
+        "flag": "🇹🇭",
+        "points": 60.0,
+        "number": 23,
+        "nationality": "Thai",
+        "team": "Williams",
+        "points_finish_pct": 45.2,
+        "season_points_finish_pct": 54.1,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 2,
+        "podiums": 2,
+        "poles": 0,
+        "fastest_laps": 0,
+        "total_points": 315.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 6102,
+        "starts": 105,
+        "dnfs": 14,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 1,
+        "front_row_starts": 0,
+        "highest_finish": "3e (x2)",
+        "highest_grid": "4e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 300,
+        "age": 30,
+        "height": "1.86m",
+        "birth_place": "London, UK",
+        "partner": "Lily Muni",
+        "children": "-",
+        "pets": "Albon Pets",
+        "manager": "Grau Private Management",
+        "real_world_facts_en": [
+          "Known as the tire whisperer.",
+          "Strong comeback after a year off.",
+          "Has 2 podium finishes.",
+          "Carries car number #23.",
+          "Made their F1 debut in 2019."
+        ],
+        "real_world_facts_nl": [
+          "Staat bekend als banden-fluisteraar.",
+          "Kwam knap terug na jaar afwezigheid.",
+          "Heeft 2 podiumplaatsen.",
+          "Rijdt met startnummer #23.",
+          "Maakte het F1-debuut in 2019."
+        ],
+        "points_per_season": {
+          "2025": 60.0,
+          "2024": 40.0,
+          "2023": 27.0,
+          "2022": 4.0,
+          "2021": 0.0
+        },
+        "debut_year": 2019,
+        "contract_until": "2027",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2011)",
+          "EPIC Racing - Formula Renault 2.0 Alps (2012)",
+          "KTR - Formula Renault 2.0 Eurocup (2013)",
+          "Signature - Formula Renault 2.0 Alps (2014)",
+          "Various Teams - FIA F3 European Championship (2015)",
+          "ART Grand Prix - GP3 (2016)",
+          "DAMS - F2 (2018)",
+          "Toro Rosso - F1 (2019)",
+          "Red Bull Racing - F1 (2019-2020)"
+        ],
+        "personal_sponsors": [
+          "Red Bull",
+          "Moose"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2026,
+      "record": {
+        "name": "Alexander Albon",
+        "flag": "🇹🇭",
+        "points": 0.0,
+        "number": 23,
+        "nationality": "Thai",
+        "team": "Williams",
+        "points_finish_pct": 45.2,
+        "season_points_finish_pct": 54.1,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 2,
+        "podiums": 2,
+        "poles": 0,
+        "fastest_laps": 0,
+        "total_points": 315.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 6211,
+        "starts": 108,
+        "dnfs": 14,
+        "dsqs": 0,
+        "dnqs": 1,
+        "laps_led": 1,
+        "front_row_starts": 0,
+        "highest_finish": "3e (x2)",
+        "highest_grid": "4e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 300,
+        "age": 30,
+        "height": "1.86m",
+        "birth_place": "London, UK",
+        "partner": "Lily Muni",
+        "children": "-",
+        "pets": "Albon Pets",
+        "manager": "Grau Private Management",
+        "real_world_facts_en": [
+          "Known as the tire whisperer.",
+          "Strong comeback after a year off.",
+          "Has 2 podium finishes.",
+          "Carries car number #23.",
+          "Made their F1 debut in 2019."
+        ],
+        "real_world_facts_nl": [
+          "Staat bekend als banden-fluisteraar.",
+          "Kwam knap terug na jaar afwezigheid.",
+          "Heeft 2 podiumplaatsen.",
+          "Rijdt met startnummer #23.",
+          "Maakte het F1-debuut in 2019."
+        ],
+        "points_per_season": {
+          "2025": 60.0,
+          "2024": 40.0,
+          "2023": 27.0,
+          "2022": 4.0,
+          "2021": 0.0,
+          "2026": 0.0
+        },
+        "debut_year": 2019,
+        "contract_until": "2027",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2011)",
+          "EPIC Racing - Formula Renault 2.0 Alps (2012)",
+          "KTR - Formula Renault 2.0 Eurocup (2013)",
+          "Signature - Formula Renault 2.0 Alps (2014)",
+          "Various Teams - FIA F3 European Championship (2015)",
+          "ART Grand Prix - GP3 (2016)",
+          "DAMS - F2 (2018)",
+          "Toro Rosso - F1 (2019)",
+          "Red Bull Racing - F1 (2019-2020)"
+        ],
+        "personal_sponsors": [
+          "Red Bull",
+          "Moose"
+        ],
+        "reserve_driver": null,
+        "merge_meta_2026": {
+          "schema": 1,
+          "baseline_season_year": 2025,
+          "baseline_is_synthetic_zero": false,
+          "events_scanned": [
+            "melbourne",
+            "shanghai",
+            "suzuka"
+          ],
+          "computed_at": "2026-03-29T13:36:23.532819Z"
+        }
+      }
+    }
+  ]
+}

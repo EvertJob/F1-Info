@@ -1,0 +1,683 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "charles-leclerc",
+  "driver_name": "Charles Leclerc",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2018,
+      "record": {
+        "name": "Charles Leclerc",
+        "flag": "🇲🇨",
+        "points": 39.0,
+        "number": 16,
+        "nationality": "Monegasque",
+        "team": "Sauber",
+        "points_finish_pct": 45.0,
+        "season_points_finish_pct": 50.0,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 0,
+        "podiums": 0,
+        "poles": 0,
+        "fastest_laps": 0,
+        "total_points": 39.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 1100,
+        "starts": 21,
+        "dnfs": 5,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 0,
+        "front_row_starts": 0,
+        "highest_finish": "6e (x1)",
+        "highest_grid": "7e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 80,
+        "age": 21,
+        "height": "1.80m",
+        "birth_place": "Monte Carlo, Monaco",
+        "partner": "Giada Gianni",
+        "children": "-",
+        "pets": "-",
+        "manager": "Nicholas Todt",
+        "real_world_facts_en": [
+          "Had a stunning rookie year, regularly reaching Q3 in a Sauber.",
+          "Was promoted to Ferrari for 2019 before his rookie year even ended.",
+          "Carries car number #16.",
+          "Made their F1 debut in 2018.",
+          "Birthplace: Monte Carlo, Monaco."
+        ],
+        "real_world_facts_nl": [
+          "Maakte een verbluffend debuutjaar door met regelmaat Q3 te halen in een Sauber.",
+          "Werd nog voor het einde van zijn debuutjaar gepromoveerd naar Ferrari voor 2019.",
+          "Rijdt met startnummer #16.",
+          "Maakte het F1-debuut in 2018.",
+          "Geboorteplaats: Monte Carlo, Monaco."
+        ],
+        "points_per_season": {
+          "2018": 39.0
+        },
+        "debut_year": 2018,
+        "contract_until": "2018",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Fortec Motorsports - Formula Renault 2.0 Alps (2014)",
+          "ART Grand Prix - FIA F3 European Championship (2015)",
+          "Prema Racing - GP3 / F2 (2016-2017)"
+        ],
+        "personal_sponsors": [
+          "Richard Mille"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2019,
+      "record": {
+        "name": "Charles Leclerc",
+        "flag": "🇲🇨",
+        "points": 264.0,
+        "number": 16,
+        "nationality": "Monegasque",
+        "team": "Ferrari",
+        "points_finish_pct": 65.0,
+        "season_points_finish_pct": 75.0,
+        "wins": 2,
+        "podiums_2nd": 2,
+        "podiums_3rd": 6,
+        "podiums": 10,
+        "poles": 7,
+        "fastest_laps": 4,
+        "total_points": 303.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 2500,
+        "starts": 42,
+        "dnfs": 8,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 246,
+        "front_row_starts": 7,
+        "highest_finish": "1e (x2)",
+        "highest_grid": "1e (x7)",
+        "hat_tricks": 0,
+        "overtakes": 100,
+        "age": 22,
+        "height": "1.80m",
+        "birth_place": "Monte Carlo, Monaco",
+        "partner": "Giada Gianni",
+        "children": "-",
+        "pets": "-",
+        "manager": "Nicholas Todt",
+        "real_world_facts_en": [
+          "Won the legendary races in Spa and Monza back-to-back in 2019.",
+          "Took the most pole positions (7) of any driver that year.",
+          "Has 2 Grand Prix victories.",
+          "Has 10 podium finishes.",
+          "Has 7 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Won in 2019 back-to-back de legendarische races in Spa en Monza.",
+          "Pakte de meeste pole positions (7) van alle coureurs dat jaar.",
+          "Heeft 2 Grand Prix-zeges.",
+          "Heeft 10 podiumplaatsen.",
+          "Heeft 7 polepositions."
+        ],
+        "points_per_season": {
+          "2019": 264.0,
+          "2018": 39.0
+        },
+        "debut_year": 2018,
+        "contract_until": "2024",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Fortec Motorsports - Formula Renault 2.0 Alps (2014)",
+          "ART Grand Prix - FIA F3 European Championship (2015)",
+          "Prema Racing - GP3 / F2 (2016-2017)",
+          "Sauber - F1 (2018)"
+        ],
+        "personal_sponsors": [
+          "Richard Mille",
+          "Giorgio Armani"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2020,
+      "record": {
+        "name": "Charles Leclerc",
+        "flag": "🇲🇨",
+        "points": 98.0,
+        "number": 16,
+        "nationality": "Monegasque",
+        "team": "Ferrari",
+        "points_finish_pct": 62.0,
+        "season_points_finish_pct": 65.0,
+        "wins": 2,
+        "podiums_2nd": 3,
+        "podiums_3rd": 7,
+        "podiums": 12,
+        "poles": 7,
+        "fastest_laps": 4,
+        "total_points": 401.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 3600,
+        "starts": 59,
+        "dnfs": 10,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 246,
+        "front_row_starts": 8,
+        "highest_finish": "1e (x2)",
+        "highest_grid": "1e (x7)",
+        "hat_tricks": 0,
+        "overtakes": 150,
+        "age": 23,
+        "height": "1.80m",
+        "birth_place": "Monte Carlo, Monaco",
+        "partner": "Charlotte Sine",
+        "children": "-",
+        "pets": "-",
+        "manager": "Nicholas Todt",
+        "real_world_facts_en": [
+          "Managed to score two podiums despite a very poor Ferrari engine.",
+          "Pulled off miraculous performances in a car that struggled in the midfield.",
+          "Has 2 Grand Prix victories.",
+          "Has 12 podium finishes.",
+          "Has 7 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Wist ondanks een zeer slechte Ferrari-motor toch twee keer het podium te halen.",
+          "Haalde wonderbaarlijke prestaties uit een auto die het middenveld nauwelijks kon bijhouden.",
+          "Heeft 2 Grand Prix-zeges.",
+          "Heeft 12 podiumplaatsen.",
+          "Heeft 7 polepositions."
+        ],
+        "points_per_season": {
+          "2020": 98.0,
+          "2019": 264.0,
+          "2018": 39.0
+        },
+        "debut_year": 2018,
+        "contract_until": "2024",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Fortec Motorsports - Formula Renault 2.0 Alps (2014)",
+          "ART Grand Prix - FIA F3 European Championship (2015)",
+          "Prema Racing - GP3 / F2 (2016-2017)",
+          "Sauber - F1 (2018)"
+        ],
+        "personal_sponsors": [
+          "Richard Mille",
+          "Giorgio Armani"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2021,
+      "record": {
+        "name": "Charles Leclerc",
+        "flag": "🇲🇨",
+        "points": 159.0,
+        "number": 16,
+        "nationality": "Monegasque",
+        "team": "Ferrari",
+        "points_finish_pct": 65.0,
+        "season_points_finish_pct": 81.0,
+        "wins": 0,
+        "podiums_2nd": 1,
+        "podiums_3rd": 0,
+        "podiums": 1,
+        "poles": 2,
+        "fastest_laps": 0,
+        "total_points": 560.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 5100,
+        "starts": 80,
+        "dnfs": 13,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 246,
+        "front_row_starts": 10,
+        "highest_finish": "1e (x2)",
+        "highest_grid": "1e (x9)",
+        "hat_tricks": 0,
+        "overtakes": 250,
+        "age": 24,
+        "height": "1.80m",
+        "birth_place": "Monte Carlo, Monaco",
+        "partner": "Charlotte Sine",
+        "children": "-",
+        "pets": "-",
+        "manager": "Nicholas Todt",
+        "real_world_facts_en": [
+          "Took pole at his home race (Monaco), but couldn't start due to a broken driveshaft.",
+          "Helped Ferrari secure P3 in the constructors' championship.",
+          "Has 1 podium finish.",
+          "Has 2 pole positions.",
+          "Carries car number #16."
+        ],
+        "real_world_facts_nl": [
+          "Pakte pole in zijn thuisrace (Monaco), maar kon door een kapotte aandrijfas niet starten.",
+          "Hielp Ferrari aan P3 in het constructeurskampioenschap.",
+          "Heeft 1 podiumplaats.",
+          "Heeft 2 polepositions.",
+          "Rijdt met startnummer #16."
+        ],
+        "points_per_season": {
+          "2021": 159.0,
+          "2020": 98.0,
+          "2019": 264.0,
+          "2018": 39.0
+        },
+        "debut_year": 2018,
+        "contract_until": "2024",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Fortec Motorsports - Formula Renault 2.0 Alps (2014)",
+          "ART Grand Prix - FIA F3 European Championship (2015)",
+          "Prema Racing - GP3 / F2 (2016-2017)",
+          "Sauber - F1 (2018)"
+        ],
+        "personal_sponsors": [
+          "Richard Mille",
+          "Giorgio Armani"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2022,
+      "record": {
+        "name": "Charles Leclerc",
+        "flag": "🇲🇨",
+        "points": 308.0,
+        "number": 16,
+        "nationality": "Monegasque",
+        "team": "Ferrari",
+        "points_finish_pct": 70.0,
+        "season_points_finish_pct": 81.0,
+        "wins": 3,
+        "podiums_2nd": 5,
+        "podiums_3rd": 3,
+        "podiums": 11,
+        "poles": 9,
+        "fastest_laps": 3,
+        "total_points": 868.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 6200,
+        "starts": 102,
+        "dnfs": 16,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 500,
+        "front_row_starts": 22,
+        "highest_finish": "1e (x5)",
+        "highest_grid": "1e (x18)",
+        "hat_tricks": 2,
+        "overtakes": 380,
+        "age": 25,
+        "height": "1.80m",
+        "birth_place": "Monte Carlo, Monaco",
+        "partner": "Charlotte Sine",
+        "children": "-",
+        "pets": "-",
+        "manager": "Nicholas Todt",
+        "real_world_facts_en": [
+          "Led the championship in the first half of the 2022 season.",
+          "Took the most pole positions of the entire grid in 2022.",
+          "Has 3 Grand Prix victories.",
+          "Has 11 podium finishes.",
+          "Has 9 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Leidde het kampioenschap in de eerste seizoenshelft van 2022.",
+          "Pakte in 2022 de meeste pole positions van het hele veld.",
+          "Heeft 3 Grand Prix-zeges.",
+          "Heeft 11 podiumplaatsen.",
+          "Heeft 9 polepositions."
+        ],
+        "points_per_season": {
+          "2022": 308.0,
+          "2021": 159.0,
+          "2020": 98.0,
+          "2019": 264.0,
+          "2018": 39.0
+        },
+        "debut_year": 2018,
+        "contract_until": "2024",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Fortec Motorsports - Formula Renault 2.0 Alps (2014)",
+          "ART Grand Prix - FIA F3 European Championship (2015)",
+          "Prema Racing - GP3 / F2 (2016-2017)",
+          "Sauber - F1 (2018)"
+        ],
+        "personal_sponsors": [
+          "Richard Mille",
+          "Giorgio Armani"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2023,
+      "record": {
+        "name": "Charles Leclerc",
+        "flag": "🇲🇨",
+        "points": 206.0,
+        "number": 16,
+        "nationality": "Monegasque",
+        "team": "Ferrari",
+        "points_finish_pct": 71.0,
+        "season_points_finish_pct": 72.0,
+        "wins": 5,
+        "podiums_2nd": 11,
+        "podiums_3rd": 14,
+        "podiums": 30,
+        "poles": 23,
+        "fastest_laps": 7,
+        "total_points": 1074.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 7300,
+        "starts": 123,
+        "dnfs": 19,
+        "dsqs": 1,
+        "dnqs": 0,
+        "laps_led": 650,
+        "front_row_starts": 28,
+        "highest_finish": "1e (x5)",
+        "highest_grid": "1e (x23)",
+        "hat_tricks": 2,
+        "overtakes": 450,
+        "age": 26,
+        "height": "1.80m",
+        "birth_place": "Monte Carlo, Monaco",
+        "partner": "Alexandra Saint Mleux",
+        "children": "-",
+        "pets": "-",
+        "manager": "Nicholas Todt",
+        "real_world_facts_en": [
+          "Suffered from bad luck and strategy errors at Ferrari in 2023.",
+          "Often started from the front row without winning.",
+          "Has 5 Grand Prix victories.",
+          "Has 30 podium finishes.",
+          "Has 23 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Had in 2023 veel pech en strategische missers bij Ferrari.",
+          "Startte vaak vanaf de eerste rij zonder te winnen.",
+          "Heeft 5 Grand Prix-zeges.",
+          "Heeft 30 podiumplaatsen.",
+          "Heeft 23 polepositions."
+        ],
+        "points_per_season": {
+          "2023": 206.0,
+          "2022": 308.0,
+          "2021": 159.0,
+          "2020": 98.0,
+          "2019": 264.0
+        },
+        "debut_year": 2018,
+        "contract_until": "2024",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Fortec Motorsports - Formula Renault 2.0 Alps (2014)",
+          "ART Grand Prix - FIA F3 European Championship (2015)",
+          "Prema Racing - GP3 / F2 (2016-2017)",
+          "Sauber - F1 (2018)"
+        ],
+        "personal_sponsors": [
+          "Richard Mille",
+          "Giorgio Armani"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2024,
+      "record": {
+        "name": "Charles Leclerc",
+        "flag": "🇲🇨",
+        "points": 300.0,
+        "number": 16,
+        "nationality": "Monegasque",
+        "team": "Ferrari",
+        "points_finish_pct": 72.0,
+        "season_points_finish_pct": 80.0,
+        "wins": 8,
+        "podiums_2nd": 15,
+        "podiums_3rd": 20,
+        "podiums": 43,
+        "poles": 27,
+        "fastest_laps": 10,
+        "total_points": 1420.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 8432,
+        "starts": 148,
+        "dnfs": 22,
+        "dsqs": 1,
+        "dnqs": 0,
+        "laps_led": 890,
+        "front_row_starts": 35,
+        "highest_finish": "1e (x8)",
+        "highest_grid": "1e (x27)",
+        "hat_tricks": 3,
+        "overtakes": 550,
+        "age": 27,
+        "height": "1.80m",
+        "birth_place": "Monte Carlo, Monaco",
+        "partner": "Alexandra Saint Mleux",
+        "children": "-",
+        "pets": "Leo (Dog)",
+        "manager": "Nicholas Todt",
+        "real_world_facts_en": [
+          "Finally won his home race in Monaco in 2024.",
+          "Plays the piano and releases his own classical music.",
+          "Has 8 Grand Prix victories.",
+          "Has 43 podium finishes.",
+          "Has 27 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Won in 2024 eindelijk zijn thuisrace in Monaco.",
+          "Speelt piano en brengt zijn eigen klassieke muziek uit.",
+          "Heeft 8 Grand Prix-zeges.",
+          "Heeft 43 podiumplaatsen.",
+          "Heeft 27 polepositions."
+        ],
+        "points_per_season": {
+          "2024": 300.0,
+          "2023": 206.0,
+          "2022": 308.0,
+          "2021": 159.0,
+          "2020": 98.0
+        },
+        "debut_year": 2018,
+        "contract_until": "2029",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Fortec Motorsports - Formula Renault 2.0 Alps (2014)",
+          "ART Grand Prix - FIA F3 European Championship (2015)",
+          "Prema Racing - GP3 / F2 (2016-2017)",
+          "Sauber - F1 (2018)"
+        ],
+        "personal_sponsors": [
+          "Richard Mille",
+          "Giorgio Armani"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2025,
+      "record": {
+        "name": "Charles Leclerc",
+        "flag": "🇲🇨",
+        "points": 300.0,
+        "number": 16,
+        "nationality": "Monegasque",
+        "team": "Ferrari",
+        "points_finish_pct": 72.8,
+        "season_points_finish_pct": 79.1,
+        "wins": 8,
+        "podiums_2nd": 15,
+        "podiums_3rd": 20,
+        "podiums": 43,
+        "poles": 27,
+        "fastest_laps": 10,
+        "total_points": 1420.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 8432,
+        "starts": 148,
+        "dnfs": 22,
+        "dsqs": 1,
+        "dnqs": 0,
+        "laps_led": 890,
+        "front_row_starts": 35,
+        "highest_finish": "1e (x8)",
+        "highest_grid": "1e (x27)",
+        "hat_tricks": 3,
+        "overtakes": 550,
+        "age": 28,
+        "height": "1.80m",
+        "birth_place": "Monte Carlo, Monaco",
+        "partner": "Alexandra Saint Mleux",
+        "children": "-",
+        "pets": "Leo (Dog)",
+        "manager": "Nicholas Todt",
+        "real_world_facts_en": [
+          "Won home race Monaco in 2024.",
+          "Very strong in qualifying.",
+          "Has 8 Grand Prix victories.",
+          "Has 43 podium finishes.",
+          "Has 27 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Won thuisrace Monaco in 2024.",
+          "Zeer sterk in kwalificaties.",
+          "Heeft 8 Grand Prix-zeges.",
+          "Heeft 43 podiumplaatsen.",
+          "Heeft 27 polepositions."
+        ],
+        "points_per_season": {
+          "2025": 300.0,
+          "2024": 280.0,
+          "2023": 206.0,
+          "2022": 308.0,
+          "2021": 159.0
+        },
+        "debut_year": 2018,
+        "contract_until": "2029",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Fortec Motorsports - Formula Renault 2.0 Alps (2014)",
+          "ART Grand Prix - FIA F3 European Championship (2015)",
+          "Prema Racing - GP3 / F2 (2016-2017)",
+          "Sauber - F1 (2018)"
+        ],
+        "personal_sponsors": [
+          "Richard Mille",
+          "Giorgio Armani"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2026,
+      "record": {
+        "name": "Charles Leclerc",
+        "flag": "🇲🇨",
+        "points": 49.0,
+        "number": 16,
+        "nationality": "Monegasque",
+        "team": "Ferrari",
+        "points_finish_pct": 72.8,
+        "season_points_finish_pct": 79.1,
+        "wins": 8,
+        "podiums_2nd": 15,
+        "podiums_3rd": 22,
+        "podiums": 45,
+        "poles": 27,
+        "fastest_laps": 10,
+        "total_points": 1469.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 8599,
+        "starts": 151,
+        "dnfs": 22,
+        "dsqs": 1,
+        "dnqs": 0,
+        "laps_led": 890,
+        "front_row_starts": 35,
+        "highest_finish": "1e (x8)",
+        "highest_grid": "1e (x27)",
+        "hat_tricks": 3,
+        "overtakes": 550,
+        "age": 28,
+        "height": "1.80m",
+        "birth_place": "Monte Carlo, Monaco",
+        "partner": "Alexandra Saint Mleux",
+        "children": "-",
+        "pets": "Leo (Dog)",
+        "manager": "Nicholas Todt",
+        "real_world_facts_en": [
+          "Won home race Monaco in 2024.",
+          "Very strong in qualifying.",
+          "Has 8 Grand Prix victories.",
+          "Has 43 podium finishes.",
+          "Has 27 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Won thuisrace Monaco in 2024.",
+          "Zeer sterk in kwalificaties.",
+          "Heeft 8 Grand Prix-zeges.",
+          "Heeft 43 podiumplaatsen.",
+          "Heeft 27 polepositions."
+        ],
+        "points_per_season": {
+          "2025": 300.0,
+          "2024": 280.0,
+          "2023": 206.0,
+          "2022": 308.0,
+          "2021": 159.0,
+          "2026": 49.0
+        },
+        "debut_year": 2018,
+        "contract_until": "2029",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Fortec Motorsports - Formula Renault 2.0 Alps (2014)",
+          "ART Grand Prix - FIA F3 European Championship (2015)",
+          "Prema Racing - GP3 / F2 (2016-2017)",
+          "Sauber - F1 (2018)"
+        ],
+        "personal_sponsors": [
+          "Richard Mille",
+          "Giorgio Armani"
+        ],
+        "reserve_driver": null,
+        "merge_meta_2026": {
+          "schema": 1,
+          "baseline_season_year": 2025,
+          "baseline_is_synthetic_zero": false,
+          "events_scanned": [
+            "melbourne",
+            "shanghai",
+            "suzuka"
+          ],
+          "computed_at": "2026-03-29T13:36:23.573874Z"
+        }
+      }
+    }
+  ]
+}

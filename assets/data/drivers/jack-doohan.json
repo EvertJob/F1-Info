@@ -1,0 +1,81 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "jack-doohan",
+  "driver_name": "Jack Doohan",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2025,
+      "record": {
+        "name": "Jack Doohan",
+        "flag": "🇦🇺",
+        "points": 15.0,
+        "number": 7,
+        "nationality": "Australian",
+        "team": "Alpine",
+        "points_finish_pct": 20.0,
+        "season_points_finish_pct": 20.0,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 0,
+        "podiums": 0,
+        "poles": 0,
+        "fastest_laps": 0,
+        "total_points": 15.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 1100,
+        "starts": 24,
+        "dnfs": 4,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 0,
+        "front_row_starts": 0,
+        "highest_finish": "8e (x1)",
+        "highest_grid": "10e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 20,
+        "age": 23,
+        "height": "1.83m",
+        "birth_place": "Gold Coast, Australia",
+        "partner": "-",
+        "children": "-",
+        "pets": "-",
+        "manager": "Mick Doohan",
+        "real_world_facts_en": [
+          "Son of 5-time MotoGP champ Mick Doohan.",
+          "Made his full-time F1 debut in 2025.",
+          "Carries car number #7.",
+          "Made their F1 debut in 2025.",
+          "Birthplace: Gold Coast, Australia."
+        ],
+        "real_world_facts_nl": [
+          "Zoon van 5-voudig MotoGP kampioen Mick Doohan.",
+          "Maakte zijn full-time F1 debuut in 2025.",
+          "Rijdt met startnummer #7.",
+          "Maakte het F1-debuut in 2025.",
+          "Geboorteplaats: Gold Coast, Australia."
+        ],
+        "points_per_season": {
+          "2025": 15.0,
+          "2024": 0.0,
+          "2023": 0.0,
+          "2022": 0.0,
+          "2021": 0.0
+        },
+        "debut_year": 2025,
+        "contract_until": "2025",
+        "previous_teams": [
+          "Various Teams - Karting (2013-2017)",
+          "TRS Arden Junior Team - British F4 (2018)",
+          "Double R Racing - British F3 (2019)",
+          "HWA Racelab / MP Motorsport / Virtuosi Racing - FIA F3 / F2 (2020-2023)"
+        ],
+        "personal_sponsors": [
+          "Invicta Watch Group"
+        ],
+        "reserve_driver": null
+      }
+    }
+  ]
+}

@@ -793,6 +793,119 @@ class Driver {
   );
 }
 
+/// Latest `seasons[].record` from a hub driver export (`f1_hub_driver_export_v1`).
+Map<String, dynamic>? latestHubDriverRecordFromExportDoc(
+  Map<String, dynamic> doc,
+) {
+  if (doc['schema'] != 'f1_hub_driver_export_v1') {
+    return null;
+  }
+  final seasons = doc['seasons'];
+  if (seasons is! List) {
+    return null;
+  }
+  var bestY = -1;
+  Map<String, dynamic>? best;
+  for (final s in seasons) {
+    if (s is! Map) {
+      continue;
+    }
+    final y = s['season_year'];
+    if (y is int && y > bestY) {
+      bestY = y;
+      final r = s['record'];
+      if (r is Map) {
+        best = Map<String, dynamic>.from(r);
+      }
+    }
+  }
+  return best;
+}
+
+/// [Driver] from `assets/data/drivers/*.json` record (snake_case keys).
+Driver driverFromHubExportJsonRecord(Map<String, dynamic> json) {
+  List<String> strList(String k) {
+    final v = json[k];
+    if (v is! List) {
+      return const [];
+    }
+    return v.map((e) => e.toString()).toList();
+  }
+
+  final pps = <int, double>{};
+  final raw = json['points_per_season'];
+  if (raw is Map) {
+    for (final e in raw.entries) {
+      final y = int.tryParse(e.key.toString());
+      if (y != null && e.value is num) {
+        pps[y] = (e.value as num).toDouble();
+      }
+    }
+  }
+
+  num? n(String k) => json[k] as num?;
+
+  String s(String k, String d) => json[k] is String ? json[k] as String : d;
+
+  final chY = <int>[];
+  final rawCh = json['championship_years'];
+  if (rawCh is List) {
+    for (final e in rawCh) {
+      if (e is int) {
+        chY.add(e);
+      } else if (e is num) {
+        chY.add(e.toInt());
+      }
+    }
+  }
+
+  return Driver(
+    name: s('name', ''),
+    flag: s('flag', ''),
+    points: n('points')?.toDouble() ?? 0,
+    number: n('number')?.toInt() ?? 0,
+    nationality: s('nationality', ''),
+    team: s('team', ''),
+    pointsFinishPct: n('points_finish_pct')?.toDouble() ?? 0,
+    seasonPointsFinishPct: n('season_points_finish_pct')?.toDouble() ?? 0,
+    wins: n('wins')?.toInt() ?? 0,
+    podiums2nd: n('podiums_2nd')?.toInt() ?? 0,
+    podiums3rd: n('podiums_3rd')?.toInt() ?? 0,
+    podiums: n('podiums')?.toInt() ?? 0,
+    poles: n('poles')?.toInt() ?? 0,
+    fastestLaps: n('fastest_laps')?.toInt() ?? 0,
+    totalPoints: n('total_points')?.toDouble() ?? 0,
+    championships: n('championships')?.toInt() ?? 0,
+    championshipYears: chY,
+    lapsRaced: n('laps_raced')?.toInt() ?? 0,
+    starts: n('starts')?.toInt() ?? 0,
+    dnfs: n('dnfs')?.toInt() ?? 0,
+    dsqs: n('dsqs')?.toInt() ?? 0,
+    dnqs: n('dnqs')?.toInt() ?? 0,
+    lapsLed: n('laps_led')?.toInt() ?? 0,
+    frontRowStarts: n('front_row_starts')?.toInt() ?? 0,
+    highestFinish: s('highest_finish', ''),
+    highestGrid: s('highest_grid', ''),
+    hatTricks: n('hat_tricks')?.toInt() ?? 0,
+    overtakes: n('overtakes')?.toInt() ?? 0,
+    age: n('age')?.toInt() ?? 0,
+    height: s('height', ''),
+    birthPlace: s('birth_place', ''),
+    partner: s('partner', ''),
+    children: s('children', ''),
+    pets: s('pets', ''),
+    manager: s('manager', ''),
+    realWorldFactsEn: strList('real_world_facts_en'),
+    realWorldFactsNl: strList('real_world_facts_nl'),
+    pointsPerSeason: pps,
+    debutYear: n('debut_year')?.toInt() ?? 0,
+    contractUntil: s('contract_until', ''),
+    previousTeams: strList('previous_teams'),
+    personalSponsors: strList('personal_sponsors'),
+    reserveDriver: json['reserve_driver'] as String?,
+  );
+}
+
 class Team {
   final String name;
   final String flag;

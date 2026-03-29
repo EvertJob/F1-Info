@@ -1,0 +1,523 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "lando-norris",
+  "driver_name": "Lando Norris",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2019,
+      "record": {
+        "name": "Lando Norris",
+        "flag": "🇬🇧",
+        "points": 49.0,
+        "number": 4,
+        "nationality": "British",
+        "team": "McLaren",
+        "points_finish_pct": 50.0,
+        "season_points_finish_pct": 52.0,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 0,
+        "podiums": 0,
+        "poles": 0,
+        "fastest_laps": 0,
+        "total_points": 49.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 1150,
+        "starts": 21,
+        "dnfs": 4,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 0,
+        "front_row_starts": 0,
+        "highest_finish": "6e (x2)",
+        "highest_grid": "5e (x2)",
+        "hat_tricks": 0,
+        "overtakes": 60,
+        "age": 20,
+        "height": "1.70m",
+        "birth_place": "Bristol, UK",
+        "partner": "-",
+        "children": "-",
+        "pets": "-",
+        "manager": "Mark Berryman",
+        "real_world_facts_en": [
+          "Immediately made a fantastic impression as a fast joker in his rookie year.",
+          "Formed an incredibly popular driver pairing with Sainz among the fans.",
+          "Carries car number #4.",
+          "Made their F1 debut in 2019.",
+          "Birthplace: Bristol, UK."
+        ],
+        "real_world_facts_nl": [
+          "Maakte als snelle grappenmaker direct een fantastische indruk in zijn rookie-jaar.",
+          "Zorgde samen met Sainz voor een ontzettend geliefd rijdersduo bij de fans.",
+          "Rijdt met startnummer #4.",
+          "Maakte het F1-debuut in 2019.",
+          "Geboorteplaats: Bristol, UK."
+        ],
+        "points_per_season": {
+          "2019": 49.0
+        },
+        "debut_year": 2019,
+        "contract_until": "2022",
+        "previous_teams": [
+          "Various Teams - Karting (2008-2014)",
+          "Carlin - Ginetta Junior / BRDC F4 / Formula Renault / F3 / F2 (2015-2018)"
+        ],
+        "personal_sponsors": [
+          "Quadrant",
+          "Bell Helmets"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2021,
+      "record": {
+        "name": "Lando Norris",
+        "flag": "🇬🇧",
+        "points": 160.0,
+        "number": 4,
+        "nationality": "British",
+        "team": "McLaren",
+        "points_finish_pct": 75.0,
+        "season_points_finish_pct": 90.0,
+        "wins": 0,
+        "podiums_2nd": 1,
+        "podiums_3rd": 3,
+        "podiums": 4,
+        "poles": 1,
+        "fastest_laps": 1,
+        "total_points": 306.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 3000,
+        "starts": 60,
+        "dnfs": 6,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 31,
+        "front_row_starts": 1,
+        "highest_finish": "2e (x1)",
+        "highest_grid": "1e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 150,
+        "age": 22,
+        "height": "1.70m",
+        "birth_place": "Bristol, UK",
+        "partner": "-",
+        "children": "-",
+        "pets": "-",
+        "manager": "Mark Berryman",
+        "real_world_facts_en": [
+          "Took his first pole in Russia, but lost the race due to late rain.",
+          "Had an extremely strong first half of the season.",
+          "Has 4 podium finishes.",
+          "Has 1 pole position.",
+          "Has set 1 fastest lap."
+        ],
+        "real_world_facts_nl": [
+          "Pakte in Rusland zijn eerste pole position, maar verloor de race door regen in de slotfase.",
+          "Kende een extreem sterke eerste seizoenshelft.",
+          "Heeft 4 podiumplaatsen.",
+          "Heeft 1 poleposition.",
+          "Reed 1 snelste ronde."
+        ],
+        "points_per_season": {
+          "2021": 160.0,
+          "2020": 97.0,
+          "2019": 49.0
+        },
+        "debut_year": 2019,
+        "contract_until": "2023",
+        "previous_teams": [
+          "Various Teams - Karting (2008-2014)",
+          "Carlin - Ginetta Junior / BRDC F4 / Formula Renault / F3 / F2 (2015-2018)"
+        ],
+        "personal_sponsors": [
+          "Quadrant",
+          "Bell Helmets"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2022,
+      "record": {
+        "name": "Lando Norris",
+        "flag": "🇬🇧",
+        "points": 122.0,
+        "number": 4,
+        "nationality": "British",
+        "team": "McLaren",
+        "points_finish_pct": 80.0,
+        "season_points_finish_pct": 77.0,
+        "wins": 0,
+        "podiums_2nd": 1,
+        "podiums_3rd": 5,
+        "podiums": 6,
+        "poles": 1,
+        "fastest_laps": 5,
+        "total_points": 428.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 4100,
+        "starts": 82,
+        "dnfs": 7,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 60,
+        "front_row_starts": 2,
+        "highest_finish": "2e (x1)",
+        "highest_grid": "1e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 250,
+        "age": 23,
+        "height": "1.70m",
+        "birth_place": "Bristol, UK",
+        "partner": "Luisinha Oliveira",
+        "children": "-",
+        "pets": "-",
+        "manager": "Mark Berryman",
+        "real_world_facts_en": [
+          "Was the only driver outside Red Bull, Ferrari and Mercedes to score a podium in 2022.",
+          "Beat teammate Ricciardo by a huge margin.",
+          "Has 6 podium finishes.",
+          "Has 1 pole position.",
+          "Has set 5 fastest laps."
+        ],
+        "real_world_facts_nl": [
+          "Was de enige coureur buiten Red Bull, Ferrari en Mercedes die in 2022 een podium haalde.",
+          "Versloeg teamgenoot Ricciardo met groot verschil.",
+          "Heeft 6 podiumplaatsen.",
+          "Heeft 1 poleposition.",
+          "Reed 5 snelste rondes."
+        ],
+        "points_per_season": {
+          "2022": 122.0,
+          "2021": 160.0,
+          "2020": 97.0,
+          "2019": 49.0
+        },
+        "debut_year": 2019,
+        "contract_until": "2025",
+        "previous_teams": [
+          "Various Teams - Karting (2008-2014)",
+          "Carlin - Ginetta Junior / BRDC F4 / Formula Renault / F3 / F2 (2015-2018)"
+        ],
+        "personal_sponsors": [
+          "Quadrant",
+          "TUMI"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2023,
+      "record": {
+        "name": "Lando Norris",
+        "flag": "🇬🇧",
+        "points": 205.0,
+        "number": 4,
+        "nationality": "British",
+        "team": "McLaren",
+        "points_finish_pct": 81.0,
+        "season_points_finish_pct": 81.0,
+        "wins": 0,
+        "podiums_2nd": 6,
+        "podiums_3rd": 7,
+        "podiums": 13,
+        "poles": 1,
+        "fastest_laps": 6,
+        "total_points": 633.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 5200,
+        "starts": 104,
+        "dnfs": 8,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 60,
+        "front_row_starts": 5,
+        "highest_finish": "2e (x6)",
+        "highest_grid": "1e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 320,
+        "age": 24,
+        "height": "1.70m",
+        "birth_place": "Bristol, UK",
+        "partner": "-",
+        "children": "-",
+        "pets": "-",
+        "manager": "Mark Berryman",
+        "real_world_facts_en": [
+          "Led McLaren in a bizarre comeback in the second half of 2023.",
+          "Broke Max Verstappen's trophy in Hungary.",
+          "Has 13 podium finishes.",
+          "Has 1 pole position.",
+          "Has set 6 fastest laps."
+        ],
+        "real_world_facts_nl": [
+          "Zorgde met McLaren voor een bizarre comeback in de tweede seizoenshelft van 2023.",
+          "Brak de bokaal van Max Verstappen in Hongarije.",
+          "Heeft 13 podiumplaatsen.",
+          "Heeft 1 poleposition.",
+          "Reed 6 snelste rondes."
+        ],
+        "points_per_season": {
+          "2023": 205.0,
+          "2022": 122.0,
+          "2021": 160.0,
+          "2020": 97.0,
+          "2019": 49.0
+        },
+        "debut_year": 2019,
+        "contract_until": "2025",
+        "previous_teams": [
+          "Various Teams - Karting (2008-2014)",
+          "Carlin - Ginetta Junior / BRDC F4 / Formula Renault / F3 / F2 (2015-2018)"
+        ],
+        "personal_sponsors": [
+          "Quadrant",
+          "TUMI",
+          "GoPuff"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2024,
+      "record": {
+        "name": "Lando Norris",
+        "flag": "🇬🇧",
+        "points": 423.0,
+        "number": 4,
+        "nationality": "British",
+        "team": "McLaren",
+        "points_finish_pct": 82.0,
+        "season_points_finish_pct": 88.0,
+        "wins": 3,
+        "podiums_2nd": 12,
+        "podiums_3rd": 8,
+        "podiums": 23,
+        "poles": 8,
+        "fastest_laps": 9,
+        "total_points": 1056.0,
+        "championships": 1,
+        "championship_years": [
+          2025
+        ],
+        "laps_raced": 6241,
+        "starts": 128,
+        "dnfs": 9,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 642,
+        "front_row_starts": 16,
+        "highest_finish": "1e (x3)",
+        "highest_grid": "1e (x8)",
+        "hat_tricks": 2,
+        "overtakes": 400,
+        "age": 25,
+        "height": "1.70m",
+        "birth_place": "Bristol, UK",
+        "partner": "-",
+        "children": "-",
+        "pets": "-",
+        "manager": "Mark Berryman",
+        "real_world_facts_en": [
+          "Finally won his first Grands Prix in 2024 (e.g. Miami).",
+          "Held the record for most podiums without a win for a long time.",
+          "Won 1 world title, most recently in 2025.",
+          "Has 3 Grand Prix victories.",
+          "Has 23 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "Won in 2024 eindelijk zijn eerste Grands Prix (o.a. Miami).",
+          "Stond lange tijd bekend als de coureur met de meeste podiums zonder zege.",
+          "Werd 1 keer wereldkampioen, meest recent in 2025.",
+          "Heeft 3 Grand Prix-zeges.",
+          "Heeft 23 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2025": 423.0,
+          "2024": 335.0,
+          "2023": 205.0,
+          "2022": 122.0,
+          "2021": 160.0
+        },
+        "debut_year": 2019,
+        "contract_until": "2027+",
+        "previous_teams": [
+          "Various Teams - Karting (2008-2014)",
+          "Carlin - Ginetta Junior / BRDC F4 / Formula Renault / F3 / F2 (2015-2018)"
+        ],
+        "personal_sponsors": [
+          "Quadrant",
+          "TUMI",
+          "GoPuff"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2025,
+      "record": {
+        "name": "Lando Norris",
+        "flag": "🇬🇧",
+        "points": 350.0,
+        "number": 4,
+        "nationality": "British",
+        "team": "McLaren",
+        "points_finish_pct": 83.5,
+        "season_points_finish_pct": 91.6,
+        "wins": 3,
+        "podiums_2nd": 10,
+        "podiums_3rd": 7,
+        "podiums": 25,
+        "poles": 8,
+        "fastest_laps": 9,
+        "total_points": 1056.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 6241,
+        "starts": 128,
+        "dnfs": 9,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 642,
+        "front_row_starts": 16,
+        "highest_finish": "1e (x3)",
+        "highest_grid": "1e (x8)",
+        "hat_tricks": 2,
+        "overtakes": 400,
+        "age": 26,
+        "height": "1.70m",
+        "birth_place": "Bristol, UK",
+        "partner": "-",
+        "children": "-",
+        "pets": "-",
+        "manager": "Mark Berryman",
+        "real_world_facts_en": [
+          "Won Miami GP 2024.",
+          "Founder of gaming brand Quadrant.",
+          "Has 3 Grand Prix victories.",
+          "Has 25 podium finishes.",
+          "Has 8 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Won Miami GP 2024.",
+          "Oprichter gaming merk Quadrant.",
+          "Heeft 3 Grand Prix-zeges.",
+          "Heeft 25 podiumplaatsen.",
+          "Heeft 8 polepositions."
+        ],
+        "points_per_season": {
+          "2025": 350.0,
+          "2024": 300.0,
+          "2023": 205.0,
+          "2022": 122.0,
+          "2021": 160.0
+        },
+        "debut_year": 2019,
+        "contract_until": "2027+",
+        "previous_teams": [
+          "Various Teams - Karting (2008-2014)",
+          "Carlin - Ginetta Junior / BRDC F4 / Formula Renault / F3 / F2 (2015-2018)"
+        ],
+        "personal_sponsors": [
+          "Quadrant",
+          "TUMI",
+          "GoPuff"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2026,
+      "record": {
+        "name": "Lando Norris",
+        "flag": "🇬🇧",
+        "points": 0.0,
+        "number": 4,
+        "nationality": "British",
+        "team": "McLaren",
+        "points_finish_pct": 83.5,
+        "season_points_finish_pct": 91.6,
+        "wins": 3,
+        "podiums_2nd": 10,
+        "podiums_3rd": 7,
+        "podiums": 25,
+        "poles": 8,
+        "fastest_laps": 9,
+        "total_points": 1056.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 6241,
+        "starts": 128,
+        "dnfs": 9,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 642,
+        "front_row_starts": 16,
+        "highest_finish": "1e (x3)",
+        "highest_grid": "1e (x8)",
+        "hat_tricks": 2,
+        "overtakes": 400,
+        "age": 26,
+        "height": "1.70m",
+        "birth_place": "Bristol, UK",
+        "partner": "-",
+        "children": "-",
+        "pets": "-",
+        "manager": "Mark Berryman",
+        "real_world_facts_en": [
+          "Won Miami GP 2024.",
+          "Founder of gaming brand Quadrant.",
+          "Won 1 world title, most recently in 2025.",
+          "Has 3 Grand Prix victories.",
+          "Has 25 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "Won Miami GP 2024.",
+          "Oprichter gaming merk Quadrant.",
+          "Werd 1 keer wereldkampioen, meest recent in 2025.",
+          "Heeft 3 Grand Prix-zeges.",
+          "Heeft 25 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2025": 350.0,
+          "2024": 300.0,
+          "2023": 205.0,
+          "2022": 122.0,
+          "2021": 160.0,
+          "2026": 0.0
+        },
+        "debut_year": 2019,
+        "contract_until": "2027+",
+        "previous_teams": [
+          "Various Teams - Karting (2008-2014)",
+          "Carlin - Ginetta Junior / BRDC F4 / Formula Renault / F3 / F2 (2015-2018)"
+        ],
+        "personal_sponsors": [
+          "Quadrant",
+          "TUMI",
+          "GoPuff"
+        ],
+        "reserve_driver": null,
+        "merge_meta_2026": {
+          "schema": 1,
+          "baseline_season_year": 2025,
+          "baseline_is_synthetic_zero": false,
+          "events_scanned": [
+            "melbourne",
+            "shanghai",
+            "suzuka"
+          ],
+          "computed_at": "2026-03-29T13:36:23.614595Z"
+        }
+      }
+    }
+  ]
+}

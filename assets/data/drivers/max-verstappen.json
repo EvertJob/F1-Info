@@ -1,0 +1,782 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "max-verstappen",
+  "driver_name": "Max Verstappen",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2017,
+      "record": {
+        "name": "Max Verstappen",
+        "flag": "🇳🇱",
+        "points": 168.0,
+        "number": 33,
+        "nationality": "Dutch",
+        "team": "Red Bull Racing",
+        "points_finish_pct": 60.0,
+        "season_points_finish_pct": 65.0,
+        "wins": 3,
+        "podiums_2nd": 5,
+        "podiums_3rd": 3,
+        "podiums": 11,
+        "poles": 0,
+        "fastest_laps": 2,
+        "total_points": 421.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 3000,
+        "starts": 60,
+        "dnfs": 18,
+        "dsqs": 1,
+        "dnqs": 0,
+        "laps_led": 80,
+        "front_row_starts": 2,
+        "highest_finish": "1e (x3)",
+        "highest_grid": "2e (x2)",
+        "hat_tricks": 0,
+        "overtakes": 300,
+        "age": 20,
+        "height": "1.81m",
+        "birth_place": "Hasselt, Belgium",
+        "partner": "-",
+        "children": "-",
+        "pets": "-",
+        "manager": "Raymond Vermeulen",
+        "real_world_facts_en": [
+          "Suffered a lot of bad luck with the reliability of the Renault engine in 2017.",
+          "Took brutal revenge by winning dominantly in Malaysia and Mexico.",
+          "Has 3 Grand Prix victories.",
+          "Has 11 podium finishes.",
+          "Has set 2 fastest laps."
+        ],
+        "real_world_facts_nl": [
+          "Had in 2017 enorm veel pech met de betrouwbaarheid van de Renault-motor.",
+          "Nam keihard wraak door zeer dominant te winnen in Maleisië en Mexico.",
+          "Heeft 3 Grand Prix-zeges.",
+          "Heeft 11 podiumplaatsen.",
+          "Reed 2 snelste rondes."
+        ],
+        "points_per_season": {
+          "2017": 168.0,
+          "2016": 204.0,
+          "2015": 49.0
+        },
+        "debut_year": 2015,
+        "contract_until": "2020",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Van Amersfoort Racing - FIA F3 European Championship (2014)",
+          "Toro Rosso - F1 (2015-2016)"
+        ],
+        "personal_sponsors": [
+          "Red Bull",
+          "Jumbo",
+          "Exact"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2018,
+      "record": {
+        "name": "Max Verstappen",
+        "flag": "🇳🇱",
+        "points": 249.0,
+        "number": 33,
+        "nationality": "Dutch",
+        "team": "Red Bull Racing",
+        "points_finish_pct": 70.0,
+        "season_points_finish_pct": 75.0,
+        "wins": 5,
+        "podiums_2nd": 8,
+        "podiums_3rd": 9,
+        "podiums": 22,
+        "poles": 0,
+        "fastest_laps": 4,
+        "total_points": 670.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 4300,
+        "starts": 81,
+        "dnfs": 21,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 100,
+        "front_row_starts": 2,
+        "highest_finish": "1e (x5)",
+        "highest_grid": "2e (x2)",
+        "hat_tricks": 0,
+        "overtakes": 350,
+        "age": 21,
+        "height": "1.81m",
+        "birth_place": "Hasselt, Belgium",
+        "partner": "-",
+        "children": "-",
+        "pets": "-",
+        "manager": "Raymond Vermeulen",
+        "real_world_facts_en": [
+          "Had a crash-prone start to the season, but bounced back masterfully in the second half.",
+          "Dominant winner in Austria and Mexico.",
+          "Has 5 Grand Prix victories.",
+          "Has 22 podium finishes.",
+          "Has set 4 fastest laps."
+        ],
+        "real_world_facts_nl": [
+          "Kende een crash-gevoelige seizoensstart, maar sloeg magistraal terug in de tweede seizoenshelft.",
+          "Dominant winnaar in Oostenrijk en Mexico.",
+          "Heeft 5 Grand Prix-zeges.",
+          "Heeft 22 podiumplaatsen.",
+          "Reed 4 snelste rondes."
+        ],
+        "points_per_season": {
+          "2018": 249.0,
+          "2017": 168.0,
+          "2016": 204.0,
+          "2015": 49.0
+        },
+        "debut_year": 2015,
+        "contract_until": "2020",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Van Amersfoort Racing - FIA F3 European Championship (2014)",
+          "Toro Rosso - F1 (2015-2016)"
+        ],
+        "personal_sponsors": [
+          "Red Bull",
+          "Jumbo",
+          "Ziggo",
+          "Exact"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2019,
+      "record": {
+        "name": "Max Verstappen",
+        "flag": "🇳🇱",
+        "points": 278.0,
+        "number": 33,
+        "nationality": "Dutch",
+        "team": "Red Bull Racing",
+        "points_finish_pct": 75.0,
+        "season_points_finish_pct": 80.0,
+        "wins": 8,
+        "podiums_2nd": 10,
+        "podiums_3rd": 13,
+        "podiums": 31,
+        "poles": 2,
+        "fastest_laps": 7,
+        "total_points": 948.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 5500,
+        "starts": 102,
+        "dnfs": 23,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 150,
+        "front_row_starts": 5,
+        "highest_finish": "1e (x8)",
+        "highest_grid": "1e (x2)",
+        "hat_tricks": 0,
+        "overtakes": 400,
+        "age": 22,
+        "height": "1.81m",
+        "birth_place": "Hasselt, Belgium",
+        "partner": "Dilara Sanlik",
+        "children": "-",
+        "pets": "-",
+        "manager": "Raymond Vermeulen",
+        "real_world_facts_en": [
+          "Achieved his very first pole position in Hungary in 2019.",
+          "Won in Austria after a spectacular late-race charge against Leclerc.",
+          "Has 8 Grand Prix victories.",
+          "Has 31 podium finishes.",
+          "Has 2 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Behaalde in 2019 zijn allereerste pole position in Hongarije.",
+          "Won in Oostenrijk na een spectaculaire inhaalrace op Leclerc in de slotfase.",
+          "Heeft 8 Grand Prix-zeges.",
+          "Heeft 31 podiumplaatsen.",
+          "Heeft 2 polepositions."
+        ],
+        "points_per_season": {
+          "2019": 278.0,
+          "2018": 249.0,
+          "2017": 168.0,
+          "2016": 204.0,
+          "2015": 49.0
+        },
+        "debut_year": 2015,
+        "contract_until": "2020",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Van Amersfoort Racing - FIA F3 European Championship (2014)",
+          "Toro Rosso - F1 (2015-2016)"
+        ],
+        "personal_sponsors": [
+          "Red Bull",
+          "Jumbo",
+          "Ziggo"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2020,
+      "record": {
+        "name": "Max Verstappen",
+        "flag": "🇳🇱",
+        "points": 214.0,
+        "number": 33,
+        "nationality": "Dutch",
+        "team": "Red Bull Racing",
+        "points_finish_pct": 78.0,
+        "season_points_finish_pct": 85.0,
+        "wins": 10,
+        "podiums_2nd": 15,
+        "podiums_3rd": 17,
+        "podiums": 42,
+        "poles": 3,
+        "fastest_laps": 10,
+        "total_points": 1162.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 6500,
+        "starts": 119,
+        "dnfs": 28,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 350,
+        "front_row_starts": 10,
+        "highest_finish": "1e (x10)",
+        "highest_grid": "1e (x3)",
+        "hat_tricks": 0,
+        "overtakes": 450,
+        "age": 23,
+        "height": "1.81m",
+        "birth_place": "Hasselt, Belgium",
+        "partner": "Kelly Piquet",
+        "children": "-",
+        "pets": "-",
+        "manager": "Raymond Vermeulen",
+        "real_world_facts_en": [
+          "Won the 70th Anniversary Grand Prix at Silverstone in 2020.",
+          "Dominated the season finale in Abu Dhabi from pole position.",
+          "Has 10 Grand Prix victories.",
+          "Has 42 podium finishes.",
+          "Has 3 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Won in 2020 de 70th Anniversary Grand Prix op Silverstone.",
+          "Domineerde de seizoensafsluiter in Abu Dhabi vanaf pole position.",
+          "Heeft 10 Grand Prix-zeges.",
+          "Heeft 42 podiumplaatsen.",
+          "Heeft 3 polepositions."
+        ],
+        "points_per_season": {
+          "2020": 214.0,
+          "2019": 278.0,
+          "2018": 249.0,
+          "2017": 168.0,
+          "2016": 204.0
+        },
+        "debut_year": 2015,
+        "contract_until": "2023",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Van Amersfoort Racing - FIA F3 European Championship (2014)",
+          "Toro Rosso - F1 (2015-2016)"
+        ],
+        "personal_sponsors": [
+          "Red Bull",
+          "Jumbo",
+          "Ziggo"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2021,
+      "record": {
+        "name": "Max Verstappen",
+        "flag": "🇳🇱",
+        "points": 395.5,
+        "number": 33,
+        "nationality": "Dutch",
+        "team": "Red Bull Racing",
+        "points_finish_pct": 80.0,
+        "season_points_finish_pct": 86.0,
+        "wins": 10,
+        "podiums_2nd": 8,
+        "podiums_3rd": 0,
+        "podiums": 18,
+        "poles": 10,
+        "fastest_laps": 6,
+        "total_points": 1557.5,
+        "championships": 1,
+        "championship_years": [
+          2021
+        ],
+        "laps_raced": 7800,
+        "starts": 141,
+        "dnfs": 31,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 652,
+        "front_row_starts": 30,
+        "highest_finish": "1e (x20)",
+        "highest_grid": "1e (x13)",
+        "hat_tricks": 3,
+        "overtakes": 500,
+        "age": 24,
+        "height": "1.81m",
+        "birth_place": "Hasselt, Belgium",
+        "partner": "Kelly Piquet",
+        "children": "Penelope (step)",
+        "pets": "Jimmy & Sassy (Cats)",
+        "manager": "Raymond Vermeulen",
+        "real_world_facts_en": [
+          "Clinched his first world title on the very last lap of the season.",
+          "Held the record for most podiums in a single season (18).",
+          "Won 1 world title, most recently in 2021.",
+          "Has 10 Grand Prix victories.",
+          "Has 18 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "Pakte zijn eerste wereldtitel in de allerlaatste ronde van het seizoen.",
+          "Had het record voor meeste podiums in één seizoen (18).",
+          "Werd 1 keer wereldkampioen, meest recent in 2021.",
+          "Heeft 10 Grand Prix-zeges.",
+          "Heeft 18 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2021": 395.5,
+          "2020": 214.0,
+          "2019": 278.0,
+          "2018": 249.0,
+          "2017": 168.0
+        },
+        "debut_year": 2015,
+        "contract_until": "2023",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Van Amersfoort Racing - FIA F3 European Championship (2014)",
+          "Toro Rosso - F1 (2015-2016)"
+        ],
+        "personal_sponsors": [
+          "Red Bull",
+          "Jumbo",
+          "Ziggo",
+          "G-Star RAW"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2022,
+      "record": {
+        "name": "Max Verstappen",
+        "flag": "🇳🇱",
+        "points": 454.0,
+        "number": 1,
+        "nationality": "Dutch",
+        "team": "Red Bull Racing",
+        "points_finish_pct": 81.0,
+        "season_points_finish_pct": 95.0,
+        "wins": 15,
+        "podiums_2nd": 2,
+        "podiums_3rd": 0,
+        "podiums": 17,
+        "poles": 7,
+        "fastest_laps": 5,
+        "total_points": 2011.5,
+        "championships": 2,
+        "championship_years": [
+          2021,
+          2022
+        ],
+        "laps_raced": 8900,
+        "starts": 163,
+        "dnfs": 31,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 1850,
+        "front_row_starts": 40,
+        "highest_finish": "1e (x35)",
+        "highest_grid": "1e (x20)",
+        "hat_tricks": 5,
+        "overtakes": 650,
+        "age": 25,
+        "height": "1.81m",
+        "birth_place": "Hasselt, Belgium",
+        "partner": "Kelly Piquet",
+        "children": "Penelope (step)",
+        "pets": "Jimmy & Sassy (Cats)",
+        "manager": "Raymond Vermeulen",
+        "real_world_facts_en": [
+          "Broke the then-record for most wins in a single season (15) in 2022.",
+          "Chose to race with car number 1 as the defending champion.",
+          "Won 2 world titles, most recently in 2022.",
+          "Has 15 Grand Prix victories.",
+          "Has 17 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "Brak in 2022 het toenmalige record van meeste zeges in één seizoen (15).",
+          "Koos ervoor om met startnummer 1 te rijden als regerend kampioen.",
+          "Werd 2 keer wereldkampioen, meest recent in 2022.",
+          "Heeft 15 Grand Prix-zeges.",
+          "Heeft 17 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2022": 454.0,
+          "2021": 395.5,
+          "2020": 214.0,
+          "2019": 278.0,
+          "2018": 249.0
+        },
+        "debut_year": 2015,
+        "contract_until": "2028",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Van Amersfoort Racing - FIA F3 European Championship (2014)",
+          "Toro Rosso - F1 (2015-2016)"
+        ],
+        "personal_sponsors": [
+          "Red Bull",
+          "Jumbo",
+          "Viaplay",
+          "EA Sports"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2023,
+      "record": {
+        "name": "Max Verstappen",
+        "flag": "🇳🇱",
+        "points": 575.0,
+        "number": 33,
+        "nationality": "Dutch",
+        "team": "Red Bull Racing",
+        "points_finish_pct": 84.0,
+        "season_points_finish_pct": 100.0,
+        "wins": 54,
+        "podiums_2nd": 29,
+        "podiums_3rd": 15,
+        "podiums": 98,
+        "poles": 32,
+        "fastest_laps": 30,
+        "total_points": 2586.5,
+        "championships": 3,
+        "championship_years": [
+          2021,
+          2022,
+          2023
+        ],
+        "laps_raced": 10123,
+        "starts": 185,
+        "dnfs": 31,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 2850,
+        "front_row_starts": 55,
+        "highest_finish": "1e (x54)",
+        "highest_grid": "1e (x32)",
+        "hat_tricks": 11,
+        "overtakes": 800,
+        "age": 26,
+        "height": "1.81m",
+        "birth_place": "Hasselt, Belgium",
+        "partner": "Kelly Piquet",
+        "children": "Penelope (step)",
+        "pets": "Jimmy & Sassy (Cats)",
+        "manager": "Raymond Vermeulen",
+        "real_world_facts_en": [
+          "Broke the record for most wins in a single season in 2023 (19).",
+          "Led over 1000 laps in a single year.",
+          "Won 3 world titles, most recently in 2023.",
+          "Has 54 Grand Prix victories.",
+          "Has 98 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "Brak in 2023 het record voor meeste overwinningen in een seizoen (19).",
+          "Leidde meer dan 1000 ronden in één jaar.",
+          "Werd 3 keer wereldkampioen, meest recent in 2023.",
+          "Heeft 54 Grand Prix-zeges.",
+          "Heeft 98 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2023": 575.0,
+          "2022": 454.0,
+          "2021": 395.5,
+          "2020": 214.0,
+          "2019": 278.0
+        },
+        "debut_year": 2015,
+        "contract_until": "2028",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Van Amersfoort Racing - FIA F3 European Championship (2014)",
+          "Toro Rosso - F1 (2015-2016)"
+        ],
+        "personal_sponsors": [
+          "Red Bull",
+          "Jumbo",
+          "Viaplay",
+          "EA Sports"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2024,
+      "record": {
+        "name": "Max Verstappen",
+        "flag": "🇳🇱",
+        "points": 395.0,
+        "number": 33,
+        "nationality": "Dutch",
+        "team": "Red Bull Racing",
+        "points_finish_pct": 84.5,
+        "season_points_finish_pct": 91.6,
+        "wins": 62,
+        "podiums_2nd": 31,
+        "podiums_3rd": 16,
+        "podiums": 116,
+        "poles": 45,
+        "fastest_laps": 35,
+        "total_points": 3400.5,
+        "championships": 4,
+        "championship_years": [
+          2021,
+          2022,
+          2023,
+          2024
+        ],
+        "laps_raced": 11452,
+        "starts": 210,
+        "dnfs": 31,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 3350,
+        "front_row_starts": 65,
+        "highest_finish": "1e (x62)",
+        "highest_grid": "1e (x45)",
+        "hat_tricks": 13,
+        "overtakes": 850,
+        "age": 27,
+        "height": "1.81m",
+        "birth_place": "Hasselt, Belgium",
+        "partner": "Kelly Piquet",
+        "children": "Penelope (step)",
+        "pets": "Jimmy & Sassy (Cats)",
+        "manager": "Raymond Vermeulen",
+        "real_world_facts_en": [
+          "Clinched his fourth consecutive world title in 2024.",
+          "Founder of Team Redline simracing.",
+          "Won 4 world titles, most recently in 2024.",
+          "Has 62 Grand Prix victories.",
+          "Has 116 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "Pakte in 2024 zijn vierde wereldtitel op rij.",
+          "Oprichter van Team Redline simracing.",
+          "Werd 4 keer wereldkampioen, meest recent in 2024.",
+          "Heeft 62 Grand Prix-zeges.",
+          "Heeft 116 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2024": 395.0,
+          "2023": 575.0,
+          "2022": 454.0,
+          "2021": 395.5,
+          "2020": 214.0
+        },
+        "debut_year": 2015,
+        "contract_until": "2028",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Van Amersfoort Racing - FIA F3 European Championship (2014)",
+          "Toro Rosso - F1 (2015-2016)"
+        ],
+        "personal_sponsors": [
+          "Red Bull",
+          "Jumbo",
+          "Viaplay",
+          "EA Sports"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2025,
+      "record": {
+        "name": "Max Verstappen",
+        "flag": "🇳🇱",
+        "points": 450.0,
+        "number": 33,
+        "nationality": "Dutch",
+        "team": "Red Bull Racing",
+        "points_finish_pct": 85.1,
+        "season_points_finish_pct": 95.8,
+        "wins": 62,
+        "podiums_2nd": 31,
+        "podiums_3rd": 16,
+        "podiums": 116,
+        "poles": 45,
+        "fastest_laps": 35,
+        "total_points": 3400.5,
+        "championships": 4,
+        "championship_years": [
+          2021,
+          2022,
+          2023,
+          2024
+        ],
+        "laps_raced": 11452,
+        "starts": 210,
+        "dnfs": 31,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 3350,
+        "front_row_starts": 65,
+        "highest_finish": "1e (x62)",
+        "highest_grid": "1e (x45)",
+        "hat_tricks": 13,
+        "overtakes": 850,
+        "age": 28,
+        "height": "1.81m",
+        "birth_place": "Hasselt, Belgium",
+        "partner": "Kelly Piquet",
+        "children": "Penelope (step), Carola",
+        "pets": "Jimmy & Sassy (Cats)",
+        "manager": "Raymond Vermeulen",
+        "real_world_facts_en": [
+          "Youngest ever driver in a GP weekend.",
+          "Most wins in a single season (19).",
+          "Won 4 world titles, most recently in 2024.",
+          "Has 62 Grand Prix victories.",
+          "Has 116 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "Jongste coureur ooit in een Grand Prix-weekend.",
+          "Recordhouder meeste overwinningen in één seizoen (19).",
+          "Werd 4 keer wereldkampioen, meest recent in 2024.",
+          "Heeft 62 Grand Prix-zeges.",
+          "Heeft 116 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2025": 450.0,
+          "2024": 400.0,
+          "2023": 575.0,
+          "2022": 454.0,
+          "2021": 395.5
+        },
+        "debut_year": 2015,
+        "contract_until": "2028",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Van Amersfoort Racing - FIA F3 European Championship (2014)",
+          "Toro Rosso - F1 (2015-2016)"
+        ],
+        "personal_sponsors": [
+          "Red Bull"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2026,
+      "record": {
+        "name": "Max Verstappen",
+        "flag": "🇳🇱",
+        "points": 0.0,
+        "number": 33,
+        "nationality": "Dutch",
+        "team": "Red Bull Racing",
+        "points_finish_pct": 85.1,
+        "season_points_finish_pct": 95.8,
+        "wins": 62,
+        "podiums_2nd": 31,
+        "podiums_3rd": 16,
+        "podiums": 116,
+        "poles": 45,
+        "fastest_laps": 35,
+        "total_points": 3400.5,
+        "championships": 4,
+        "championship_years": [
+          2021,
+          2022,
+          2023,
+          2024
+        ],
+        "laps_raced": 11452,
+        "starts": 210,
+        "dnfs": 31,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 3350,
+        "front_row_starts": 65,
+        "highest_finish": "1e (x62)",
+        "highest_grid": "1e (x45)",
+        "hat_tricks": 13,
+        "overtakes": 850,
+        "age": 28,
+        "height": "1.81m",
+        "birth_place": "Hasselt, Belgium",
+        "partner": "Kelly Piquet",
+        "children": "Penelope (step), Carola",
+        "pets": "Jimmy & Sassy (Cats)",
+        "manager": "Raymond Vermeulen",
+        "real_world_facts_en": [
+          "Youngest ever driver in a GP weekend.",
+          "Most wins in a single season (19).",
+          "Won 4 world titles, most recently in 2024.",
+          "Has 62 Grand Prix victories.",
+          "Has 116 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "Jongste coureur ooit in een Grand Prix-weekend.",
+          "Recordhouder meeste overwinningen in één seizoen (19).",
+          "Werd 4 keer wereldkampioen, meest recent in 2024.",
+          "Heeft 62 Grand Prix-zeges.",
+          "Heeft 116 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2025": 450.0,
+          "2024": 400.0,
+          "2023": 575.0,
+          "2022": 454.0,
+          "2021": 395.5,
+          "2026": 0.0
+        },
+        "debut_year": 2015,
+        "contract_until": "2028",
+        "previous_teams": [
+          "Various Teams - Karting (2005-2013)",
+          "Van Amersfoort Racing - FIA F3 European Championship (2014)",
+          "Toro Rosso - F1 (2015-2016)"
+        ],
+        "personal_sponsors": [
+          "Red Bull"
+        ],
+        "reserve_driver": null,
+        "merge_meta_2026": {
+          "schema": 1,
+          "baseline_season_year": 2025,
+          "baseline_is_synthetic_zero": false,
+          "events_scanned": [
+            "melbourne",
+            "shanghai",
+            "suzuka"
+          ],
+          "computed_at": "2026-03-29T13:36:23.624596Z"
+        }
+      }
+    }
+  ]
+}

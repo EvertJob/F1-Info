@@ -1,0 +1,170 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "lance-stroll",
+  "driver_name": "Lance Stroll",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2025,
+      "record": {
+        "name": "Lance Stroll",
+        "flag": "🇨🇦",
+        "points": 40.0,
+        "number": 18,
+        "nationality": "Canadian",
+        "team": "Aston Martin",
+        "points_finish_pct": 42.0,
+        "season_points_finish_pct": 20.8,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 3,
+        "podiums": 3,
+        "poles": 1,
+        "fastest_laps": 0,
+        "total_points": 311.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 9145,
+        "starts": 167,
+        "dnfs": 32,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 32,
+        "front_row_starts": 1,
+        "highest_finish": "3e (x3)",
+        "highest_grid": "1e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 350,
+        "age": 27,
+        "height": "1.82m",
+        "birth_place": "Montreal, Canada",
+        "partner": "Marilou Bélanger",
+        "children": "-",
+        "pets": "-",
+        "manager": "Steve Robertson",
+        "real_world_facts_en": [
+          "Raced with broken wrists.",
+          "Pole in wet Turkey 2020.",
+          "Has 3 podium finishes.",
+          "Has 1 pole position.",
+          "Carries car number #18."
+        ],
+        "real_world_facts_nl": [
+          "Reed race met gebroken polsen.",
+          "Pole in natte Turkije 2020.",
+          "Heeft 3 podiumplaatsen.",
+          "Heeft 1 poleposition.",
+          "Rijdt met startnummer #18."
+        ],
+        "points_per_season": {
+          "2025": 40.0,
+          "2024": 30.0,
+          "2023": 74.0,
+          "2022": 18.0,
+          "2021": 34.0
+        },
+        "debut_year": 2017,
+        "contract_until": "Rolling",
+        "previous_teams": [
+          "Various Teams - Karting (2008-2013)",
+          "Prema Powerteam - Italian F4 / Toyota Racing Series / FIA F3 European Championship (2014-2016)",
+          "Williams - Reserve / Academy (2016)",
+          "Williams - F1 (2017)",
+          "Racing Point / Force India - F1 (2019-2020)"
+        ],
+        "personal_sponsors": [
+          "Bombardier",
+          "Tag Heuer"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2026,
+      "record": {
+        "name": "Lance Stroll",
+        "flag": "🇨🇦",
+        "points": 0.0,
+        "number": 18,
+        "nationality": "Canadian",
+        "team": "Aston Martin",
+        "points_finish_pct": 42.0,
+        "season_points_finish_pct": 20.8,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 3,
+        "podiums": 3,
+        "poles": 1,
+        "fastest_laps": 0,
+        "total_points": 311.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 9227,
+        "starts": 170,
+        "dnfs": 34,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 32,
+        "front_row_starts": 1,
+        "highest_finish": "3e (x3)",
+        "highest_grid": "1e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 350,
+        "age": 27,
+        "height": "1.82m",
+        "birth_place": "Montreal, Canada",
+        "partner": "Marilou Bélanger",
+        "children": "-",
+        "pets": "-",
+        "manager": "Steve Robertson",
+        "real_world_facts_en": [
+          "Raced with broken wrists.",
+          "Pole in wet Turkey 2020.",
+          "Has 3 podium finishes.",
+          "Has 1 pole position.",
+          "Carries car number #18."
+        ],
+        "real_world_facts_nl": [
+          "Reed race met gebroken polsen.",
+          "Pole in natte Turkije 2020.",
+          "Heeft 3 podiumplaatsen.",
+          "Heeft 1 poleposition.",
+          "Rijdt met startnummer #18."
+        ],
+        "points_per_season": {
+          "2025": 40.0,
+          "2024": 30.0,
+          "2023": 74.0,
+          "2022": 18.0,
+          "2021": 34.0,
+          "2026": 0.0
+        },
+        "debut_year": 2017,
+        "contract_until": "Rolling",
+        "previous_teams": [
+          "Various Teams - Karting (2008-2013)",
+          "Prema Powerteam - Italian F4 / Toyota Racing Series / FIA F3 European Championship (2014-2016)",
+          "Williams - Reserve / Academy (2016)",
+          "Williams - F1 (2017)",
+          "Racing Point / Force India - F1 (2019-2020)"
+        ],
+        "personal_sponsors": [
+          "Bombardier",
+          "Tag Heuer"
+        ],
+        "reserve_driver": null,
+        "merge_meta_2026": {
+          "schema": 1,
+          "baseline_season_year": 2025,
+          "baseline_is_synthetic_zero": false,
+          "events_scanned": [
+            "melbourne",
+            "shanghai",
+            "suzuka"
+          ],
+          "computed_at": "2026-03-29T13:36:23.610596Z"
+        }
+      }
+    }
+  ]
+}

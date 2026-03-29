@@ -1,0 +1,401 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "pierre-gasly",
+  "driver_name": "Pierre Gasly",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2019,
+      "record": {
+        "name": "Pierre Gasly",
+        "flag": "🇫🇷",
+        "points": 95.0,
+        "number": 10,
+        "nationality": "French",
+        "team": "Toro Rosso",
+        "points_finish_pct": 52.0,
+        "season_points_finish_pct": 60.0,
+        "wins": 0,
+        "podiums_2nd": 1,
+        "podiums_3rd": 0,
+        "podiums": 1,
+        "poles": 0,
+        "fastest_laps": 2,
+        "total_points": 124.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 2300,
+        "starts": 47,
+        "dnfs": 7,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 0,
+        "front_row_starts": 0,
+        "highest_finish": "2e (x1)",
+        "highest_grid": "4e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 100,
+        "age": 23,
+        "height": "1.77m",
+        "birth_place": "Rouen, France",
+        "partner": "Caterina Masetti Zannini",
+        "children": "-",
+        "pets": "-",
+        "manager": "Guillaume Le Goff",
+        "real_world_facts_en": [
+          "Was demoted from Red Bull to Toro Rosso halfway through the season.",
+          "Took a highly emotional podium (P2) in Brazil after a drag race to the line with Hamilton.",
+          "Has 1 podium finish.",
+          "Has set 2 fastest laps.",
+          "Carries car number #10."
+        ],
+        "real_world_facts_nl": [
+          "Werd halverwege het seizoen gedegradeerd van Red Bull naar Toro Rosso.",
+          "Pakte een zwaar emotioneel podium (P2) in Brazilië na een sprint richting de finish met Hamilton.",
+          "Heeft 1 podiumplaats.",
+          "Reed 2 snelste rondes.",
+          "Rijdt met startnummer #10."
+        ],
+        "points_per_season": {
+          "2019": 95.0,
+          "2018": 29.0,
+          "2017": 0.0
+        },
+        "debut_year": 2017,
+        "contract_until": "2020",
+        "previous_teams": [
+          "Various Teams - Karting (2006-2010)",
+          "R-ace GP - Formula Renault 2.0 Alps / Eurocup (2011-2013)",
+          "Arden International - Formula Renault 3.5 (2014)",
+          "DAMS - GP2 (2015)",
+          "Prema Racing - GP2 (2016)"
+        ],
+        "personal_sponsors": [
+          "Red Bull"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2020,
+      "record": {
+        "name": "Pierre Gasly",
+        "flag": "🇫🇷",
+        "points": 75.0,
+        "number": 10,
+        "nationality": "French",
+        "team": "AlphaTauri",
+        "points_finish_pct": 53.0,
+        "season_points_finish_pct": 65.0,
+        "wins": 1,
+        "podiums_2nd": 1,
+        "podiums_3rd": 0,
+        "podiums": 2,
+        "poles": 0,
+        "fastest_laps": 2,
+        "total_points": 199.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 3400,
+        "starts": 64,
+        "dnfs": 9,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 26,
+        "front_row_starts": 0,
+        "highest_finish": "1e (x1)",
+        "highest_grid": "4e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 150,
+        "age": 24,
+        "height": "1.77m",
+        "birth_place": "Rouen, France",
+        "partner": "-",
+        "children": "-",
+        "pets": "-",
+        "manager": "Guillaume Le Goff",
+        "real_world_facts_en": [
+          "Claimed a fairytale and unexpected victory at Monza.",
+          "The first French race winner in Formula 1 since Olivier Panis in 1996.",
+          "Has 1 Grand Prix victory.",
+          "Has 2 podium finishes.",
+          "Has set 2 fastest laps."
+        ],
+        "real_world_facts_nl": [
+          "Boekte een sprookjesachtige en onverwachte overwinning in Monza.",
+          "De eerste Franse racewinnaar in de Formule 1 sinds Olivier Panis in 1996.",
+          "Heeft 1 Grand Prix-zege.",
+          "Heeft 2 podiumplaatsen.",
+          "Reed 2 snelste rondes."
+        ],
+        "points_per_season": {
+          "2020": 75.0,
+          "2019": 95.0,
+          "2018": 29.0,
+          "2017": 0.0
+        },
+        "debut_year": 2017,
+        "contract_until": "2021",
+        "previous_teams": [
+          "Various Teams - Karting (2006-2010)",
+          "R-ace GP - Formula Renault 2.0 Alps / Eurocup (2011-2013)",
+          "Arden International - Formula Renault 3.5 (2014)",
+          "DAMS - GP2 (2015)",
+          "Prema Racing - GP2 (2016)",
+          "Toro Rosso - F1 (2017-2018)",
+          "Red Bull Racing - F1 (2019)"
+        ],
+        "personal_sponsors": [
+          "AlphaTauri",
+          "Red Bull"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2021,
+      "record": {
+        "name": "Pierre Gasly",
+        "flag": "🇫🇷",
+        "points": 110.0,
+        "number": 10,
+        "nationality": "French",
+        "team": "AlphaTauri",
+        "points_finish_pct": 55.0,
+        "season_points_finish_pct": 68.0,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 1,
+        "podiums": 1,
+        "poles": 0,
+        "fastest_laps": 1,
+        "total_points": 309.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 4600,
+        "starts": 86,
+        "dnfs": 11,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 26,
+        "front_row_starts": 1,
+        "highest_finish": "1e (x1)",
+        "highest_grid": "2e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 200,
+        "age": 25,
+        "height": "1.77m",
+        "birth_place": "Rouen, France",
+        "partner": "Katerina Berezhna",
+        "children": "-",
+        "pets": "-",
+        "manager": "Guillaume Le Goff",
+        "real_world_facts_en": [
+          "Had a tremendously strong 2021 and almost single-handedly carried AlphaTauri.",
+          "Stood on the podium on the streets of Baku.",
+          "Has 1 podium finish.",
+          "Has set 1 fastest lap.",
+          "Carries car number #10."
+        ],
+        "real_world_facts_nl": [
+          "Kende een ijzersterk 2021 en droeg AlphaTauri vrijwel in zijn eentje.",
+          "Stond op het podium in de straten van Baku.",
+          "Heeft 1 podiumplaats.",
+          "Reed 1 snelste ronde.",
+          "Rijdt met startnummer #10."
+        ],
+        "points_per_season": {
+          "2021": 110.0,
+          "2020": 75.0,
+          "2019": 95.0,
+          "2018": 29.0,
+          "2017": 0.0
+        },
+        "debut_year": 2017,
+        "contract_until": "2023",
+        "previous_teams": [
+          "Various Teams - Karting (2006-2010)",
+          "R-ace GP - Formula Renault 2.0 Alps / Eurocup (2011-2013)",
+          "Arden International - Formula Renault 3.5 (2014)",
+          "DAMS - GP2 (2015)",
+          "Prema Racing - GP2 (2016)",
+          "Toro Rosso - F1 (2017-2018)",
+          "Red Bull Racing - F1 (2019)"
+        ],
+        "personal_sponsors": [
+          "AlphaTauri",
+          "Crypto.com"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2025,
+      "record": {
+        "name": "Pierre Gasly",
+        "flag": "🇫🇷",
+        "points": 45.0,
+        "number": 10,
+        "nationality": "French",
+        "team": "Alpine",
+        "points_finish_pct": 54.0,
+        "season_points_finish_pct": 16.6,
+        "wins": 1,
+        "podiums_2nd": 1,
+        "podiums_3rd": 2,
+        "podiums": 4,
+        "poles": 0,
+        "fastest_laps": 3,
+        "total_points": 416.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 8641,
+        "starts": 154,
+        "dnfs": 24,
+        "dsqs": 1,
+        "dnqs": 0,
+        "laps_led": 26,
+        "front_row_starts": 1,
+        "highest_finish": "1e (x1)",
+        "highest_grid": "2e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 480,
+        "age": 30,
+        "height": "1.77m",
+        "birth_place": "Rouen, France",
+        "partner": "Kika Cerqueira Gomes",
+        "children": "-",
+        "pets": "-",
+        "manager": "Guillaume Le Goff",
+        "real_world_facts_en": [
+          "Won spectacular at Monza 2020.",
+          "Very resilient after demotion.",
+          "Has 1 Grand Prix victory.",
+          "Has 4 podium finishes.",
+          "Has set 3 fastest laps."
+        ],
+        "real_world_facts_nl": [
+          "Won spectaculair op Monza 2020.",
+          "Zeer veerkrachtig na demotie.",
+          "Heeft 1 Grand Prix-zege.",
+          "Heeft 4 podiumplaatsen.",
+          "Reed 3 snelste rondes."
+        ],
+        "points_per_season": {
+          "2025": 45.0,
+          "2024": 35.0,
+          "2023": 62.0,
+          "2022": 23.0,
+          "2021": 110.0
+        },
+        "debut_year": 2017,
+        "contract_until": "2026+",
+        "previous_teams": [
+          "Various Teams - Karting (2006-2010)",
+          "R-ace GP - Formula Renault 2.0 Alps / Eurocup (2011-2013)",
+          "Arden International - Formula Renault 3.5 (2014)",
+          "DAMS - GP2 (2015)",
+          "Prema Racing - GP2 (2016)",
+          "Toro Rosso - F1 (2017-2018)",
+          "Red Bull Racing - F1 (2019)",
+          "Toro Rosso / AlphaTauri - F1 (2019-2022)"
+        ],
+        "personal_sponsors": [
+          "AlphaTauri",
+          "Red Bull"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2026,
+      "record": {
+        "name": "Pierre Gasly",
+        "flag": "🇫🇷",
+        "points": 15.0,
+        "number": 10,
+        "nationality": "French",
+        "team": "Alpine",
+        "points_finish_pct": 54.0,
+        "season_points_finish_pct": 16.6,
+        "wins": 1,
+        "podiums_2nd": 1,
+        "podiums_3rd": 2,
+        "podiums": 4,
+        "poles": 0,
+        "fastest_laps": 3,
+        "total_points": 431.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 8807,
+        "starts": 157,
+        "dnfs": 24,
+        "dsqs": 1,
+        "dnqs": 0,
+        "laps_led": 26,
+        "front_row_starts": 1,
+        "highest_finish": "1e (x1)",
+        "highest_grid": "2e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 480,
+        "age": 30,
+        "height": "1.77m",
+        "birth_place": "Rouen, France",
+        "partner": "Kika Cerqueira Gomes",
+        "children": "-",
+        "pets": "-",
+        "manager": "Guillaume Le Goff",
+        "real_world_facts_en": [
+          "Won spectacular at Monza 2020.",
+          "Very resilient after demotion.",
+          "Has 1 Grand Prix victory.",
+          "Has 4 podium finishes.",
+          "Has set 3 fastest laps."
+        ],
+        "real_world_facts_nl": [
+          "Won spectaculair op Monza 2020.",
+          "Zeer veerkrachtig na demotie.",
+          "Heeft 1 Grand Prix-zege.",
+          "Heeft 4 podiumplaatsen.",
+          "Reed 3 snelste rondes."
+        ],
+        "points_per_season": {
+          "2025": 45.0,
+          "2024": 35.0,
+          "2023": 62.0,
+          "2022": 23.0,
+          "2021": 110.0,
+          "2026": 15.0
+        },
+        "debut_year": 2017,
+        "contract_until": "2026+",
+        "previous_teams": [
+          "Various Teams - Karting (2006-2010)",
+          "R-ace GP - Formula Renault 2.0 Alps / Eurocup (2011-2013)",
+          "Arden International - Formula Renault 3.5 (2014)",
+          "DAMS - GP2 (2015)",
+          "Prema Racing - GP2 (2016)",
+          "Toro Rosso - F1 (2017-2018)",
+          "Red Bull Racing - F1 (2019)",
+          "Toro Rosso / AlphaTauri - F1 (2019-2022)"
+        ],
+        "personal_sponsors": [
+          "AlphaTauri",
+          "Red Bull"
+        ],
+        "reserve_driver": null,
+        "merge_meta_2026": {
+          "schema": 1,
+          "baseline_season_year": 2025,
+          "baseline_is_synthetic_zero": false,
+          "events_scanned": [
+            "melbourne",
+            "shanghai",
+            "suzuka"
+          ],
+          "computed_at": "2026-03-29T13:36:23.634596Z"
+        }
+      }
+    }
+  ]
+}

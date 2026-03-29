@@ -1,0 +1,320 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "oscar-piastri",
+  "driver_name": "Oscar Piastri",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2023,
+      "record": {
+        "name": "Oscar Piastri",
+        "flag": "🇦🇺",
+        "points": 97.0,
+        "number": 81,
+        "nationality": "Australian",
+        "team": "McLaren",
+        "points_finish_pct": 54.0,
+        "season_points_finish_pct": 54.0,
+        "wins": 0,
+        "podiums_2nd": 1,
+        "podiums_3rd": 1,
+        "podiums": 2,
+        "poles": 0,
+        "fastest_laps": 2,
+        "total_points": 97.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 1150,
+        "starts": 22,
+        "dnfs": 3,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 22,
+        "front_row_starts": 1,
+        "highest_finish": "2e (x1)",
+        "highest_grid": "2e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 80,
+        "age": 22,
+        "height": "1.78m",
+        "birth_place": "Melbourne, Australia",
+        "partner": "Lily Zneimer",
+        "children": "-",
+        "pets": "-",
+        "manager": "Mark Webber",
+        "real_world_facts_en": [
+          "Highly impressive rookie season, including a Sprint win in Qatar.",
+          "Contract extended by McLaren right in his first year.",
+          "Has 2 podium finishes.",
+          "Has set 2 fastest laps.",
+          "Carries car number #81."
+        ],
+        "real_world_facts_nl": [
+          "Zeer indrukwekkend debuutseizoen, inclusief een Sprint-overwinning in Qatar.",
+          "Meteen in zijn eerste jaar verlengd bij McLaren.",
+          "Heeft 2 podiumplaatsen.",
+          "Reed 2 snelste rondes.",
+          "Rijdt met startnummer #81."
+        ],
+        "points_per_season": {
+          "2023": 97.0,
+          "2022": 0.0,
+          "2021": 0.0,
+          "2020": 0.0,
+          "2019": 0.0
+        },
+        "debut_year": 2023,
+        "contract_until": "2026",
+        "previous_teams": [
+          "Various Teams - Karting (2011-2016)",
+          "TRS Arden Junior Team - Formula 4 UAE (2017)",
+          "Arden Motorsport - British F4 (2018)",
+          "R-ace GP - Formula Renault Eurocup (2019)",
+          "Prema Racing - FIA F3 / F2 (2020-2021)"
+        ],
+        "personal_sponsors": [
+          "HP",
+          "GoPro"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2024,
+      "record": {
+        "name": "Oscar Piastri",
+        "flag": "🇦🇺",
+        "points": 250.0,
+        "number": 81,
+        "nationality": "Australian",
+        "team": "McLaren",
+        "points_finish_pct": 72.0,
+        "season_points_finish_pct": 85.0,
+        "wins": 2,
+        "podiums_2nd": 6,
+        "podiums_3rd": 4,
+        "podiums": 12,
+        "poles": 2,
+        "fastest_laps": 4,
+        "total_points": 400.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 2415,
+        "starts": 46,
+        "dnfs": 4,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 154,
+        "front_row_starts": 6,
+        "highest_finish": "1e (x2)",
+        "highest_grid": "1e (x2)",
+        "hat_tricks": 0,
+        "overtakes": 200,
+        "age": 23,
+        "height": "1.78m",
+        "birth_place": "Melbourne, Australia",
+        "partner": "Lily Zneimer",
+        "children": "-",
+        "pets": "-",
+        "manager": "Mark Webber",
+        "real_world_facts_en": [
+          "Won his first Grands Prix in 2024.",
+          "Known for his extremely calm team radio messages.",
+          "Has 2 Grand Prix victories.",
+          "Has 12 podium finishes.",
+          "Has 2 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Won zijn eerste Grands Prix in 2024.",
+          "Bekend om zijn extreem kalme boardradio's.",
+          "Heeft 2 Grand Prix-zeges.",
+          "Heeft 12 podiumplaatsen.",
+          "Heeft 2 polepositions."
+        ],
+        "points_per_season": {
+          "2024": 250.0,
+          "2023": 97.0,
+          "2022": 0.0,
+          "2021": 0.0,
+          "2020": 0.0
+        },
+        "debut_year": 2023,
+        "contract_until": "2026",
+        "previous_teams": [
+          "Various Teams - Karting (2011-2016)",
+          "TRS Arden Junior Team - Formula 4 UAE (2017)",
+          "Arden Motorsport - British F4 (2018)",
+          "R-ace GP - Formula Renault Eurocup (2019)",
+          "Prema Racing - FIA F3 / F2 (2020-2021)"
+        ],
+        "personal_sponsors": [
+          "HP",
+          "GoPro"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2025,
+      "record": {
+        "name": "Oscar Piastri",
+        "flag": "🇦🇺",
+        "points": 280.0,
+        "number": 81,
+        "nationality": "Australian",
+        "team": "McLaren",
+        "points_finish_pct": 75.0,
+        "season_points_finish_pct": 87.5,
+        "wins": 2,
+        "podiums_2nd": 8,
+        "podiums_3rd": 5,
+        "podiums": 18,
+        "poles": 4,
+        "fastest_laps": 6,
+        "total_points": 607.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 2415,
+        "starts": 46,
+        "dnfs": 4,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 154,
+        "front_row_starts": 8,
+        "highest_finish": "1e (x2)",
+        "highest_grid": "1e (x4)",
+        "hat_tricks": 0,
+        "overtakes": 200,
+        "age": 24,
+        "height": "1.78m",
+        "birth_place": "Melbourne, Australia",
+        "partner": "Lily Zneimer",
+        "children": "-",
+        "pets": "-",
+        "manager": "Mark Webber",
+        "real_world_facts_en": [
+          "Won Formula Renault, F3 and F2 back-to-back.",
+          "Managed by Mark Webber.",
+          "Has 2 Grand Prix victories.",
+          "Has 18 podium finishes.",
+          "Has 4 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Won Formule Renault, F3 en F2 back-to-back.",
+          "Gemanaged door Mark Webber.",
+          "Heeft 2 Grand Prix-zeges.",
+          "Heeft 18 podiumplaatsen.",
+          "Heeft 4 polepositions."
+        ],
+        "points_per_season": {
+          "2025": 280.0,
+          "2024": 250.0,
+          "2023": 97.0,
+          "2022": 0.0,
+          "2021": 0.0
+        },
+        "debut_year": 2023,
+        "contract_until": "2026",
+        "previous_teams": [
+          "Various Teams - Karting (2011-2016)",
+          "TRS Arden Junior Team - Formula 4 UAE (2017)",
+          "Arden Motorsport - British F4 (2018)",
+          "R-ace GP - Formula Renault Eurocup (2019)",
+          "Prema Racing - FIA F3 / F2 (2020-2021)"
+        ],
+        "personal_sponsors": [
+          "HP",
+          "GoPro"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2026,
+      "record": {
+        "name": "Oscar Piastri",
+        "flag": "🇦🇺",
+        "points": 21.0,
+        "number": 81,
+        "nationality": "Australian",
+        "team": "McLaren",
+        "points_finish_pct": 75.0,
+        "season_points_finish_pct": 87.5,
+        "wins": 2,
+        "podiums_2nd": 9,
+        "podiums_3rd": 5,
+        "podiums": 19,
+        "poles": 4,
+        "fastest_laps": 6,
+        "total_points": 628.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 2469,
+        "starts": 49,
+        "dnfs": 4,
+        "dsqs": 0,
+        "dnqs": 2,
+        "laps_led": 154,
+        "front_row_starts": 8,
+        "highest_finish": "1e (x2)",
+        "highest_grid": "1e (x4)",
+        "hat_tricks": 0,
+        "overtakes": 200,
+        "age": 24,
+        "height": "1.78m",
+        "birth_place": "Melbourne, Australia",
+        "partner": "Lily Zneimer",
+        "children": "-",
+        "pets": "-",
+        "manager": "Mark Webber",
+        "real_world_facts_en": [
+          "Won Formula Renault, F3 and F2 back-to-back.",
+          "Managed by Mark Webber.",
+          "Has 2 Grand Prix victories.",
+          "Has 18 podium finishes.",
+          "Has 4 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Won Formule Renault, F3 en F2 back-to-back.",
+          "Gemanaged door Mark Webber.",
+          "Heeft 2 Grand Prix-zeges.",
+          "Heeft 18 podiumplaatsen.",
+          "Heeft 4 polepositions."
+        ],
+        "points_per_season": {
+          "2025": 280.0,
+          "2024": 250.0,
+          "2023": 97.0,
+          "2022": 0.0,
+          "2021": 0.0,
+          "2026": 21.0
+        },
+        "debut_year": 2023,
+        "contract_until": "2026",
+        "previous_teams": [
+          "Various Teams - Karting (2011-2016)",
+          "TRS Arden Junior Team - Formula 4 UAE (2017)",
+          "Arden Motorsport - British F4 (2018)",
+          "R-ace GP - Formula Renault Eurocup (2019)",
+          "Prema Racing - FIA F3 / F2 (2020-2021)"
+        ],
+        "personal_sponsors": [
+          "HP",
+          "GoPro"
+        ],
+        "reserve_driver": null,
+        "merge_meta_2026": {
+          "schema": 1,
+          "baseline_season_year": 2025,
+          "baseline_is_synthetic_zero": false,
+          "events_scanned": [
+            "melbourne",
+            "shanghai",
+            "suzuka"
+          ],
+          "computed_at": "2026-03-29T13:36:23.632593Z"
+        }
+      }
+    }
+  ]
+}

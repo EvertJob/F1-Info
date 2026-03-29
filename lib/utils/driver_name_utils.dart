@@ -86,6 +86,35 @@ List<String> filterDriverNames(List<String> names, String query) {
   return (matched: matched, unmatched: unmatched);
 }
 
+/// URL slug: lowercase, non-alphanumeric → `-` (same rules as app routes).
+String slugifyForHubUrl(String value) {
+  final slug = value
+      .toLowerCase()
+      .trim()
+      .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+      .replaceAll(RegExp(r'-{2,}'), '-')
+      .replaceAll(RegExp(r'^-|-$'), '');
+  return slug.isEmpty ? 'item' : slug;
+}
+
+/// Candidate slugs for `assets/data/drivers/{slug}.json`.
+///
+/// 1) [slugifyForHubUrl] on the display name (e.g. "Sergio Pérez" → `sergio-p-rez`).
+/// 2) ASCII-folded name (e.g. `sergio-perez`) for bookmarks / manual URLs.
+List<String> driverJsonSlugCandidates(String displayName) {
+  final primary = slugifyForHubUrl(displayName);
+  final folded = normalizeForComparison(displayName);
+  final secondary = slugifyForHubUrl(folded);
+  final out = <String>[];
+  if (primary.isNotEmpty) {
+    out.add(primary);
+  }
+  if (secondary.isNotEmpty && secondary != primary) {
+    out.add(secondary);
+  }
+  return out;
+}
+
 /// Groups [names] by the first letter of the normalized name (a–z).
 /// Keys are lowercase letters; names preserve original formatting.
 Map<String, List<String>> groupDriverNamesByInitial(List<String> names) {

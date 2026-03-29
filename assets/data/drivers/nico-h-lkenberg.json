@@ -1,0 +1,182 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "nico-h-lkenberg",
+  "driver_name": "Nico Hülkenberg",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2025,
+      "record": {
+        "name": "Nico Hülkenberg",
+        "flag": "🇩🇪",
+        "points": 50.0,
+        "number": 27,
+        "nationality": "German",
+        "team": "Kick Sauber",
+        "points_finish_pct": 48.0,
+        "season_points_finish_pct": 41.6,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 0,
+        "podiums": 0,
+        "poles": 1,
+        "fastest_laps": 2,
+        "total_points": 581.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 13541,
+        "starts": 228,
+        "dnfs": 42,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 43,
+        "front_row_starts": 2,
+        "highest_finish": "4e (x3)",
+        "highest_grid": "1e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 700,
+        "age": 38,
+        "height": "1.84m",
+        "birth_place": "Emmerich, Germany",
+        "partner": "Egle Ruskyte",
+        "children": "Noemi Sky",
+        "pets": "Zeus (Dog)",
+        "manager": "Raoul Spanger",
+        "real_world_facts_en": [
+          "Most F1 starts without a podium.",
+          "Won Le Mans in 2015.",
+          "Has 1 pole position.",
+          "Has set 2 fastest laps.",
+          "Carries car number #27."
+        ],
+        "real_world_facts_nl": [
+          "Meeste F1 starts zonder podium.",
+          "Won Le Mans in 2015.",
+          "Heeft 1 poleposition.",
+          "Reed 2 snelste rondes.",
+          "Rijdt met startnummer #27."
+        ],
+        "points_per_season": {
+          "2025": 50.0,
+          "2024": 40.0,
+          "2023": 9.0,
+          "2022": 0.0,
+          "2021": 0.0
+        },
+        "debut_year": 2010,
+        "contract_until": "2026",
+        "previous_teams": [
+          "Various Teams - Karting (1997-2004)",
+          "Josef Kaufmann Racing - Formula BMW ADAC (2005)",
+          "ASM Formule 3 - A1 GP / Formula 3 Euro Series (2006)",
+          "ART Grand Prix - Formula 3 Euro Series / GP2 (2007-2009)",
+          "Williams - F1 (2010)",
+          "Force India - F1 (2011-2012, 2014-2016)",
+          "Sauber - F1 (2013)",
+          "Renault - F1 (2017-2019)",
+          "Racing Point - F1 (2020)",
+          "Aston Martin - F1 (2022)",
+          "Haas - F1 (2023-2024)"
+        ],
+        "personal_sponsors": [
+          "Dekra",
+          "Ravenol"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2026,
+      "record": {
+        "name": "Nico Hülkenberg",
+        "flag": "🇩🇪",
+        "points": 0.0,
+        "number": 27,
+        "nationality": "German",
+        "team": "Audi",
+        "points_finish_pct": 48.0,
+        "season_points_finish_pct": 41.6,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 0,
+        "podiums": 0,
+        "poles": 1,
+        "fastest_laps": 2,
+        "total_points": 581.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 13650,
+        "starts": 231,
+        "dnfs": 42,
+        "dsqs": 0,
+        "dnqs": 1,
+        "laps_led": 43,
+        "front_row_starts": 2,
+        "highest_finish": "4e (x3)",
+        "highest_grid": "1e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 700,
+        "age": 38,
+        "height": "1.84m",
+        "birth_place": "Emmerich, Germany",
+        "partner": "Egle Ruskyte",
+        "children": "Noemi Sky",
+        "pets": "Zeus (Dog)",
+        "manager": "Raoul Spanger",
+        "real_world_facts_en": [
+          "Most F1 starts without a podium.",
+          "Won Le Mans in 2015.",
+          "Has 1 pole position.",
+          "Has set 2 fastest laps.",
+          "Carries car number #27."
+        ],
+        "real_world_facts_nl": [
+          "Meeste F1 starts zonder podium.",
+          "Won Le Mans in 2015.",
+          "Heeft 1 poleposition.",
+          "Reed 2 snelste rondes.",
+          "Rijdt met startnummer #27."
+        ],
+        "points_per_season": {
+          "2025": 50.0,
+          "2024": 40.0,
+          "2023": 9.0,
+          "2022": 0.0,
+          "2021": 0.0,
+          "2026": 0.0
+        },
+        "debut_year": 2010,
+        "contract_until": "2026",
+        "previous_teams": [
+          "Various Teams - Karting (1997-2004)",
+          "Josef Kaufmann Racing - Formula BMW ADAC (2005)",
+          "ASM Formule 3 - A1 GP / Formula 3 Euro Series (2006)",
+          "ART Grand Prix - Formula 3 Euro Series / GP2 (2007-2009)",
+          "Williams - F1 (2010)",
+          "Force India - F1 (2011-2012, 2014-2016)",
+          "Sauber - F1 (2013)",
+          "Renault - F1 (2017-2019)",
+          "Racing Point - F1 (2020)",
+          "Aston Martin - F1 (2022)",
+          "Haas - F1 (2023-2024)"
+        ],
+        "personal_sponsors": [
+          "Dekra",
+          "Ravenol"
+        ],
+        "reserve_driver": null,
+        "merge_meta_2026": {
+          "schema": 1,
+          "baseline_season_year": 2025,
+          "baseline_is_synthetic_zero": false,
+          "events_scanned": [
+            "melbourne",
+            "shanghai",
+            "suzuka"
+          ],
+          "computed_at": "2026-03-29T13:36:23.628598Z"
+        }
+      }
+    }
+  ]
+}

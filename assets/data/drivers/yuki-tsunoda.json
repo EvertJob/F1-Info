@@ -1,0 +1,168 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "yuki-tsunoda",
+  "driver_name": "Yuki Tsunoda",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2025,
+      "record": {
+        "name": "Yuki Tsunoda",
+        "flag": "🇯🇵",
+        "points": 30.0,
+        "number": 22,
+        "nationality": "Japanese",
+        "team": "Racing Bulls",
+        "points_finish_pct": 38.0,
+        "season_points_finish_pct": 33.3,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 0,
+        "podiums": 0,
+        "poles": 0,
+        "fastest_laps": 1,
+        "total_points": 94.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 5214,
+        "starts": 90,
+        "dnfs": 14,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 0,
+        "front_row_starts": 0,
+        "highest_finish": "4e (x1)",
+        "highest_grid": "6e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 250,
+        "age": 25,
+        "height": "1.59m",
+        "birth_place": "Sagamihara, Japan",
+        "partner": "-",
+        "children": "-",
+        "pets": "-",
+        "manager": "Mario Miyakawa",
+        "real_world_facts_en": [
+          "Known for radio outbursts.",
+          "Heavily backed by Honda.",
+          "Has set 1 fastest lap.",
+          "Carries car number #22.",
+          "Made their F1 debut in 2021."
+        ],
+        "real_world_facts_nl": [
+          "Bekend om boordradio uitbarstingen.",
+          "Zwaar gesteund door Honda.",
+          "Reed 1 snelste ronde.",
+          "Rijdt met startnummer #22.",
+          "Maakte het F1-debuut in 2021."
+        ],
+        "points_per_season": {
+          "2025": 30.0,
+          "2024": 25.0,
+          "2023": 17.0,
+          "2022": 12.0,
+          "2021": 32.0
+        },
+        "debut_year": 2021,
+        "contract_until": "2025",
+        "previous_teams": [
+          "Various Teams - Karting (2010-2015)",
+          "HFDP / Team Mugen - Japanese F4 (2016-2018)",
+          "Jenzer Motorsport - FIA F3 (2019)",
+          "Carlin - F2 (2020)"
+        ],
+        "personal_sponsors": [
+          "Honda",
+          "Arai"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2026,
+      "record": {
+        "name": "Yuki Tsunoda",
+        "flag": "🇯🇵",
+        "points": 0.0,
+        "number": 22,
+        "nationality": "Japanese",
+        "team": "Racing Bulls",
+        "points_finish_pct": 38.0,
+        "season_points_finish_pct": 33.3,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 0,
+        "podiums": 0,
+        "poles": 0,
+        "fastest_laps": 1,
+        "total_points": 94.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 5214,
+        "starts": 90,
+        "dnfs": 14,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 0,
+        "front_row_starts": 0,
+        "highest_finish": "4e (x1)",
+        "highest_grid": "6e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 250,
+        "age": 25,
+        "height": "1.59m",
+        "birth_place": "Sagamihara, Japan",
+        "partner": "-",
+        "children": "-",
+        "pets": "-",
+        "manager": "Mario Miyakawa",
+        "real_world_facts_en": [
+          "Known for radio outbursts.",
+          "Heavily backed by Honda.",
+          "Has set 1 fastest lap.",
+          "Carries car number #22.",
+          "Made their F1 debut in 2021."
+        ],
+        "real_world_facts_nl": [
+          "Bekend om boordradio uitbarstingen.",
+          "Zwaar gesteund door Honda.",
+          "Reed 1 snelste ronde.",
+          "Rijdt met startnummer #22.",
+          "Maakte het F1-debuut in 2021."
+        ],
+        "points_per_season": {
+          "2025": 30.0,
+          "2024": 25.0,
+          "2023": 17.0,
+          "2022": 12.0,
+          "2021": 32.0,
+          "2026": 0.0
+        },
+        "debut_year": 2021,
+        "contract_until": "2026",
+        "previous_teams": [
+          "Various Teams - Karting (2010-2015)",
+          "HFDP / Team Mugen - Japanese F4 (2016-2018)",
+          "Jenzer Motorsport - FIA F3 (2019)",
+          "Carlin - F2 (2020)"
+        ],
+        "personal_sponsors": [
+          "Honda",
+          "Arai"
+        ],
+        "reserve_driver": null,
+        "merge_meta_2026": {
+          "schema": 1,
+          "baseline_season_year": 2025,
+          "baseline_is_synthetic_zero": false,
+          "events_scanned": [
+            "melbourne",
+            "shanghai",
+            "suzuka"
+          ],
+          "computed_at": "2026-03-29T13:36:23.647031Z"
+        }
+      }
+    }
+  ]
+}

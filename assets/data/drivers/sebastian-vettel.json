@@ -1,0 +1,329 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "sebastian-vettel",
+  "driver_name": "Sebastian Vettel",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2017,
+      "record": {
+        "name": "Sebastian Vettel",
+        "flag": "🇩🇪",
+        "points": 317.0,
+        "number": 5,
+        "nationality": "German",
+        "team": "Ferrari",
+        "points_finish_pct": 80.0,
+        "season_points_finish_pct": 85.0,
+        "wins": 47,
+        "podiums_2nd": 29,
+        "podiums_3rd": 23,
+        "podiums": 99,
+        "poles": 50,
+        "fastest_laps": 33,
+        "total_points": 2425.0,
+        "championships": 4,
+        "championship_years": [
+          2010,
+          2011,
+          2012,
+          2013
+        ],
+        "laps_raced": 11500,
+        "starts": 198,
+        "dnfs": 30,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 2900,
+        "front_row_starts": 75,
+        "highest_finish": "1e (x47)",
+        "highest_grid": "1e (x50)",
+        "hat_tricks": 8,
+        "overtakes": 650,
+        "age": 30,
+        "height": "1.75m",
+        "birth_place": "Heppenheim, Germany",
+        "partner": "Hanna Prater",
+        "children": "Emilie, Matilda",
+        "pets": "-",
+        "manager": "-",
+        "real_world_facts_en": [
+          "Had the infamous \"Baku clash\" where he deliberately drove into Hamilton.",
+          "Led the championship for a long time, but lost it after a crash in Singapore.",
+          "Won 4 world titles, most recently in 2013.",
+          "Has 47 Grand Prix victories.",
+          "Has 99 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "Kende de beruchte \"Baku clash\" waar hij opzettelijk tegen Hamilton aanreed.",
+          "Leidde het kampioenschap lang, maar verloor het na een crash in Singapore.",
+          "Werd 4 keer wereldkampioen, meest recent in 2013.",
+          "Heeft 47 Grand Prix-zeges.",
+          "Heeft 99 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2017": 317.0,
+          "2016": 212.0,
+          "2015": 278.0,
+          "2014": 167.0,
+          "2013": 397.0
+        },
+        "debut_year": 2007,
+        "contract_until": "2020",
+        "previous_teams": [
+          "Various Teams - Karting (1995-2002)",
+          "Mücke Motorsport - Formula BMW / Formula 3 Euro Series (2003-2006)",
+          "BMW Sauber - F1 (2007)",
+          "Toro Rosso - F1 (2007-2008)",
+          "Red Bull Racing - F1 (2009-2014)"
+        ],
+        "personal_sponsors": [
+          "Arai",
+          "Kaspersky"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2018,
+      "record": {
+        "name": "Sebastian Vettel",
+        "flag": "🇩🇪",
+        "points": 320.0,
+        "number": 5,
+        "nationality": "German",
+        "team": "Ferrari",
+        "points_finish_pct": 78.0,
+        "season_points_finish_pct": 85.0,
+        "wins": 52,
+        "podiums_2nd": 32,
+        "podiums_3rd": 27,
+        "podiums": 111,
+        "poles": 55,
+        "fastest_laps": 36,
+        "total_points": 2745.0,
+        "championships": 4,
+        "championship_years": [
+          2010,
+          2011,
+          2012,
+          2013
+        ],
+        "laps_raced": 12800,
+        "starts": 219,
+        "dnfs": 33,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 3350,
+        "front_row_starts": 80,
+        "highest_finish": "1e (x52)",
+        "highest_grid": "1e (x55)",
+        "hat_tricks": 8,
+        "overtakes": 700,
+        "age": 31,
+        "height": "1.75m",
+        "birth_place": "Heppenheim, Germany",
+        "partner": "Hanna Prater",
+        "children": "Emilie, Matilda",
+        "pets": "-",
+        "manager": "-",
+        "real_world_facts_en": [
+          "Led the championship until a fatal crash in the rain at his home race (Hockenheim).",
+          "Won the British Grand Prix at Silverstone in spectacular fashion.",
+          "Won 4 world titles, most recently in 2013.",
+          "Has 52 Grand Prix victories.",
+          "Has 111 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "Leidde het kampioenschap tot een fatale crash in de regen in zijn thuisrace (Hockenheim).",
+          "Won op spectaculaire wijze de Britse Grand Prix op Silverstone.",
+          "Werd 4 keer wereldkampioen, meest recent in 2013.",
+          "Heeft 52 Grand Prix-zeges.",
+          "Heeft 111 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2018": 320.0,
+          "2017": 317.0,
+          "2016": 212.0,
+          "2015": 278.0,
+          "2014": 167.0
+        },
+        "debut_year": 2007,
+        "contract_until": "2020",
+        "previous_teams": [
+          "Various Teams - Karting (1995-2002)",
+          "Mücke Motorsport - Formula BMW / Formula 3 Euro Series (2003-2006)",
+          "BMW Sauber - F1 (2007)",
+          "Toro Rosso - F1 (2007-2008)",
+          "Red Bull Racing - F1 (2009-2014)"
+        ],
+        "personal_sponsors": [
+          "Arai",
+          "Kaspersky"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2019,
+      "record": {
+        "name": "Sebastian Vettel",
+        "flag": "🇩🇪",
+        "points": 240.0,
+        "number": 5,
+        "nationality": "German",
+        "team": "Ferrari",
+        "points_finish_pct": 77.0,
+        "season_points_finish_pct": 75.0,
+        "wins": 53,
+        "podiums_2nd": 35,
+        "podiums_3rd": 32,
+        "podiums": 120,
+        "poles": 57,
+        "fastest_laps": 38,
+        "total_points": 2985.0,
+        "championships": 4,
+        "championship_years": [
+          2010,
+          2011,
+          2012,
+          2013
+        ],
+        "laps_raced": 14000,
+        "starts": 240,
+        "dnfs": 35,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 3495,
+        "front_row_starts": 85,
+        "highest_finish": "1e (x53)",
+        "highest_grid": "1e (x57)",
+        "hat_tricks": 8,
+        "overtakes": 750,
+        "age": 32,
+        "height": "1.75m",
+        "birth_place": "Heppenheim, Germany",
+        "partner": "Hanna Prater",
+        "children": "Emilie, Matilda, Son",
+        "pets": "-",
+        "manager": "-",
+        "real_world_facts_en": [
+          "Won his only race of the season strategically in Singapore.",
+          "Had a hugely controversial time penalty and swapped the P1/P2 boards in Canada.",
+          "Won 4 world titles, most recently in 2013.",
+          "Has 53 Grand Prix victories.",
+          "Has 120 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "Won zijn enige race van het seizoen strategisch in Singapore.",
+          "Had een enorme controversiële tijdstraf en ruilde de bordjes om in Canada.",
+          "Werd 4 keer wereldkampioen, meest recent in 2013.",
+          "Heeft 53 Grand Prix-zeges.",
+          "Heeft 120 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2019": 240.0,
+          "2018": 320.0,
+          "2017": 317.0,
+          "2016": 212.0,
+          "2015": 278.0
+        },
+        "debut_year": 2007,
+        "contract_until": "2020",
+        "previous_teams": [
+          "Various Teams - Karting (1995-2002)",
+          "Mücke Motorsport - Formula BMW / Formula 3 Euro Series (2003-2006)",
+          "BMW Sauber - F1 (2007)",
+          "Toro Rosso - F1 (2007-2008)",
+          "Red Bull Racing - F1 (2009-2014)"
+        ],
+        "personal_sponsors": [
+          "Arai",
+          "BWT"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2022,
+      "record": {
+        "name": "Sebastian Vettel",
+        "flag": "🇩🇪",
+        "points": 37.0,
+        "number": 5,
+        "nationality": "German",
+        "team": "Aston Martin",
+        "points_finish_pct": 74.0,
+        "season_points_finish_pct": 45.0,
+        "wins": 53,
+        "podiums_2nd": 36,
+        "podiums_3rd": 33,
+        "podiums": 122,
+        "poles": 57,
+        "fastest_laps": 38,
+        "total_points": 3098.0,
+        "championships": 4,
+        "championship_years": [
+          2010,
+          2011,
+          2012,
+          2013
+        ],
+        "laps_raced": 16200,
+        "starts": 299,
+        "dnfs": 39,
+        "dsqs": 1,
+        "dnqs": 0,
+        "laps_led": 3499,
+        "front_row_starts": 86,
+        "highest_finish": "1e (x53)",
+        "highest_grid": "1e (x57)",
+        "hat_tricks": 8,
+        "overtakes": 800,
+        "age": 35,
+        "height": "1.75m",
+        "birth_place": "Heppenheim, Germany",
+        "partner": "Hanna Prater",
+        "children": "Emilie, Matilda, Son",
+        "pets": "-",
+        "manager": "-",
+        "real_world_facts_en": [
+          "2022 was the final season of the four-time world champion.",
+          "Campaigned heavily for climate and human rights this year.",
+          "Won 4 world titles, most recently in 2013.",
+          "Has 53 Grand Prix victories.",
+          "Has 122 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "2022 was het laatste seizoen van de viervoudig wereldkampioen.",
+          "Zette zich in dit jaar veel in voor klimaat- en mensenrechten.",
+          "Werd 4 keer wereldkampioen, meest recent in 2013.",
+          "Heeft 53 Grand Prix-zeges.",
+          "Heeft 122 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2022": 37.0,
+          "2021": 43.0,
+          "2020": 33.0,
+          "2019": 240.0,
+          "2018": 320.0
+        },
+        "debut_year": 2007,
+        "contract_until": "2022",
+        "previous_teams": [
+          "Various Teams - Karting (1995-2002)",
+          "Mücke Motorsport - Formula BMW / Formula 3 Euro Series (2003-2006)",
+          "BMW Sauber - F1 (2007)",
+          "Toro Rosso - F1 (2007-2008)",
+          "Red Bull Racing - F1 (2009-2014)",
+          "Ferrari - F1 (2015-2020)"
+        ],
+        "personal_sponsors": [
+          "Arai",
+          "BWT"
+        ],
+        "reserve_driver": null
+      }
+    }
+  ]
+}

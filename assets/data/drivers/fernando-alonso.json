@@ -1,0 +1,425 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "fernando-alonso",
+  "driver_name": "Fernando Alonso",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2018,
+      "record": {
+        "name": "Fernando Alonso",
+        "flag": "🇪🇸",
+        "points": 50.0,
+        "number": 14,
+        "nationality": "Spanish",
+        "team": "McLaren",
+        "points_finish_pct": 74.0,
+        "season_points_finish_pct": 55.0,
+        "wins": 32,
+        "podiums_2nd": 37,
+        "podiums_3rd": 28,
+        "podiums": 97,
+        "poles": 22,
+        "fastest_laps": 23,
+        "total_points": 1899.0,
+        "championships": 2,
+        "championship_years": [
+          2005,
+          2006
+        ],
+        "laps_raced": 16500,
+        "starts": 311,
+        "dnfs": 64,
+        "dsqs": 0,
+        "dnqs": 1,
+        "laps_led": 1765,
+        "front_row_starts": 41,
+        "highest_finish": "1e (x32)",
+        "highest_grid": "1e (x22)",
+        "hat_tricks": 5,
+        "overtakes": 1200,
+        "age": 37,
+        "height": "1.71m",
+        "birth_place": "Oviedo, Spain",
+        "partner": "Linda Morselli",
+        "children": "-",
+        "pets": "-",
+        "manager": "Luis Garcia Abad",
+        "real_world_facts_en": [
+          "Said goodbye to Formula 1 at the end of 2018 (he would return in 2021).",
+          "Won the 24 Hours of Le Mans with Toyota in that same year.",
+          "Won 2 world titles, most recently in 2006.",
+          "Has 32 Grand Prix victories.",
+          "Has 97 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "Nam eind 2018 afscheid van de Formule 1 (hij zou in 2021 weer terugkeren).",
+          "Won in datzelfde jaar de 24 uur van Le Mans met Toyota.",
+          "Werd 2 keer wereldkampioen, meest recent in 2006.",
+          "Heeft 32 Grand Prix-zeges.",
+          "Heeft 97 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2018": 50.0,
+          "2017": 17.0,
+          "2016": 54.0,
+          "2015": 11.0,
+          "2014": 161.0
+        },
+        "debut_year": 2001,
+        "contract_until": "2018",
+        "previous_teams": [
+          "Various Teams - Karting (1988-1999)",
+          "Campos Motorsport - Euro Open by Nissan (1999-2000)",
+          "Team Astromega - Formula 3000 (2000)",
+          "Minardi - F1 (2001)",
+          "Renault - F1 (2003-2006, 2008-2009)"
+        ],
+        "personal_sponsors": [
+          "Kimoa",
+          "Citi"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2022,
+      "record": {
+        "name": "Fernando Alonso",
+        "flag": "🇪🇸",
+        "points": 81.0,
+        "number": 14,
+        "nationality": "Spanish",
+        "team": "Alpine",
+        "points_finish_pct": 75.0,
+        "season_points_finish_pct": 63.0,
+        "wins": 32,
+        "podiums_2nd": 37,
+        "podiums_3rd": 29,
+        "podiums": 98,
+        "poles": 22,
+        "fastest_laps": 23,
+        "total_points": 2061.0,
+        "championships": 2,
+        "championship_years": [
+          2005,
+          2006
+        ],
+        "laps_raced": 18400,
+        "starts": 355,
+        "dnfs": 71,
+        "dsqs": 0,
+        "dnqs": 1,
+        "laps_led": 1765,
+        "front_row_starts": 41,
+        "highest_finish": "1e (x32)",
+        "highest_grid": "1e (x22)",
+        "hat_tricks": 5,
+        "overtakes": 1350,
+        "age": 41,
+        "height": "1.71m",
+        "birth_place": "Oviedo, Spain",
+        "partner": "Andrea Schlager",
+        "children": "-",
+        "pets": "-",
+        "manager": "Flavio Briatore",
+        "real_world_facts_en": [
+          "Suffered an enormous amount of mechanical bad luck in 2022 with Alpine.",
+          "Announced a surprising transfer to Aston Martin during the summer break.",
+          "Won 2 world titles, most recently in 2006.",
+          "Has 32 Grand Prix victories.",
+          "Has 98 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "Had enorm veel mechanische pech in 2022 bij Alpine.",
+          "Kondigde in de zomerstop een verrassende transfer naar Aston Martin aan.",
+          "Werd 2 keer wereldkampioen, meest recent in 2006.",
+          "Heeft 32 Grand Prix-zeges.",
+          "Heeft 98 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2022": 81.0,
+          "2021": 81.0,
+          "2018": 50.0,
+          "2017": 17.0,
+          "2016": 54.0
+        },
+        "debut_year": 2001,
+        "contract_until": "2022",
+        "previous_teams": [
+          "Various Teams - Karting (1988-1999)",
+          "Campos Motorsport - Euro Open by Nissan (1999-2000)",
+          "Team Astromega - Formula 3000 (2000)",
+          "Minardi - F1 (2001)",
+          "Renault - F1 (2003-2006, 2008-2009)",
+          "McLaren - F1 (2007, 2015-2018)",
+          "Ferrari - F1 (2010-2014)"
+        ],
+        "personal_sponsors": [
+          "Kimoa",
+          "Finetwork",
+          "Citi"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2023,
+      "record": {
+        "name": "Fernando Alonso",
+        "flag": "🇪🇸",
+        "points": 206.0,
+        "number": 14,
+        "nationality": "Spanish",
+        "team": "Aston Martin",
+        "points_finish_pct": 75.0,
+        "season_points_finish_pct": 86.0,
+        "wins": 32,
+        "podiums_2nd": 38,
+        "podiums_3rd": 36,
+        "podiums": 106,
+        "poles": 22,
+        "fastest_laps": 24,
+        "total_points": 2267.0,
+        "championships": 2,
+        "championship_years": [
+          2005,
+          2006
+        ],
+        "laps_raced": 19500,
+        "starts": 377,
+        "dnfs": 73,
+        "dsqs": 0,
+        "dnqs": 1,
+        "laps_led": 1770,
+        "front_row_starts": 41,
+        "highest_finish": "1e (x32)",
+        "highest_grid": "1e (x22)",
+        "hat_tricks": 5,
+        "overtakes": 1450,
+        "age": 42,
+        "height": "1.71m",
+        "birth_place": "Oviedo, Spain",
+        "partner": "Melissa Jimenez",
+        "children": "-",
+        "pets": "-",
+        "manager": "Flavio Briatore",
+        "real_world_facts_en": [
+          "Scored 8 podiums in his debut year for Aston Martin.",
+          "Made the nickname \"El Nano\" wildly popular again.",
+          "Won 2 world titles, most recently in 2006.",
+          "Has 32 Grand Prix victories.",
+          "Has 106 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "Pakte 8 podiums in zijn debuutjaar voor Aston Martin.",
+          "Kreeg de bijnaam \"El Nano\" weer helemaal populair.",
+          "Werd 2 keer wereldkampioen, meest recent in 2006.",
+          "Heeft 32 Grand Prix-zeges.",
+          "Heeft 106 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2023": 206.0,
+          "2022": 81.0,
+          "2021": 81.0,
+          "2018": 50.0,
+          "2017": 17.0
+        },
+        "debut_year": 2001,
+        "contract_until": "2024",
+        "previous_teams": [
+          "Various Teams - Karting (1988-1999)",
+          "Campos Motorsport - Euro Open by Nissan (1999-2000)",
+          "Team Astromega - Formula 3000 (2000)",
+          "Minardi - F1 (2001)",
+          "Renault - F1 (2003-2006, 2008-2009)",
+          "McLaren - F1 (2007, 2015-2018)",
+          "Ferrari - F1 (2010-2014)",
+          "Alpine - F1 (2021-2022)"
+        ],
+        "personal_sponsors": [
+          "Kimoa",
+          "Finetwork",
+          "Citi"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2025,
+      "record": {
+        "name": "Fernando Alonso",
+        "flag": "🇪🇸",
+        "points": 150.0,
+        "number": 14,
+        "nationality": "Spanish",
+        "team": "Aston Martin",
+        "points_finish_pct": 75.3,
+        "season_points_finish_pct": 45.8,
+        "wins": 32,
+        "podiums_2nd": 40,
+        "podiums_3rd": 34,
+        "podiums": 106,
+        "poles": 22,
+        "fastest_laps": 24,
+        "total_points": 2385.0,
+        "championships": 2,
+        "championship_years": [
+          2005,
+          2006
+        ],
+        "laps_raced": 20145,
+        "starts": 402,
+        "dnfs": 75,
+        "dsqs": 0,
+        "dnqs": 1,
+        "laps_led": 1773,
+        "front_row_starts": 42,
+        "highest_finish": "1e (x32)",
+        "highest_grid": "1e (x22)",
+        "hat_tricks": 5,
+        "overtakes": 1500,
+        "age": 44,
+        "height": "1.71m",
+        "birth_place": "Oviedo, Spain",
+        "partner": "Melissa Jimenez",
+        "children": "-",
+        "pets": "-",
+        "manager": "Flavio Briatore",
+        "real_world_facts_en": [
+          "Most F1 starts in history.",
+          "Won Le Mans twice.",
+          "Won 2 world titles, most recently in 2006.",
+          "Has 32 Grand Prix victories.",
+          "Has 106 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "Meeste F1 starts ooit.",
+          "Won Le Mans twee keer.",
+          "Werd 2 keer wereldkampioen, meest recent in 2006.",
+          "Heeft 32 Grand Prix-zeges.",
+          "Heeft 106 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2025": 150.0,
+          "2024": 100.0,
+          "2023": 206.0,
+          "2022": 81.0,
+          "2021": 81.0
+        },
+        "debut_year": 2001,
+        "contract_until": "2026",
+        "previous_teams": [
+          "Various Teams - Karting (1988-1999)",
+          "Campos Motorsport - Euro Open by Nissan (1999-2000)",
+          "Team Astromega - Formula 3000 (2000)",
+          "Minardi - F1 (2001)",
+          "Renault - F1 (2003-2006, 2008-2009)",
+          "McLaren - F1 (2007, 2015-2018)",
+          "Ferrari - F1 (2010-2014)",
+          "Alpine - F1 (2021-2022)"
+        ],
+        "personal_sponsors": [
+          "Kimoa",
+          "Finetwork",
+          "Citi"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2026,
+      "record": {
+        "name": "Fernando Alonso",
+        "flag": "🇪🇸",
+        "points": 0.0,
+        "number": 14,
+        "nationality": "Spanish",
+        "team": "Aston Martin",
+        "points_finish_pct": 75.3,
+        "season_points_finish_pct": 45.8,
+        "wins": 32,
+        "podiums_2nd": 40,
+        "podiums_3rd": 34,
+        "podiums": 106,
+        "poles": 22,
+        "fastest_laps": 24,
+        "total_points": 2385.0,
+        "championships": 2,
+        "championship_years": [
+          2005,
+          2006
+        ],
+        "laps_raced": 20250,
+        "starts": 405,
+        "dnfs": 77,
+        "dsqs": 0,
+        "dnqs": 1,
+        "laps_led": 1773,
+        "front_row_starts": 42,
+        "highest_finish": "1e (x32)",
+        "highest_grid": "1e (x22)",
+        "hat_tricks": 5,
+        "overtakes": 1500,
+        "age": 44,
+        "height": "1.71m",
+        "birth_place": "Oviedo, Spain",
+        "partner": "Melissa Jimenez",
+        "children": "-",
+        "pets": "-",
+        "manager": "Flavio Briatore",
+        "real_world_facts_en": [
+          "Most F1 starts in history.",
+          "Won Le Mans twice.",
+          "Won 2 world titles, most recently in 2006.",
+          "Has 32 Grand Prix victories.",
+          "Has 106 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "Meeste F1 starts ooit.",
+          "Won Le Mans twee keer.",
+          "Werd 2 keer wereldkampioen, meest recent in 2006.",
+          "Heeft 32 Grand Prix-zeges.",
+          "Heeft 106 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2025": 150.0,
+          "2024": 100.0,
+          "2023": 206.0,
+          "2022": 81.0,
+          "2021": 81.0,
+          "2026": 0.0
+        },
+        "debut_year": 2001,
+        "contract_until": "2026",
+        "previous_teams": [
+          "Various Teams - Karting (1988-1999)",
+          "Campos Motorsport - Euro Open by Nissan (1999-2000)",
+          "Team Astromega - Formula 3000 (2000)",
+          "Minardi - F1 (2001)",
+          "Renault - F1 (2003-2006, 2008-2009)",
+          "McLaren - F1 (2007, 2015-2018)",
+          "Ferrari - F1 (2010-2014)",
+          "Alpine - F1 (2021-2022)"
+        ],
+        "personal_sponsors": [
+          "Kimoa",
+          "Finetwork",
+          "Citi"
+        ],
+        "reserve_driver": null,
+        "merge_meta_2026": {
+          "schema": 1,
+          "baseline_season_year": 2025,
+          "baseline_is_synthetic_zero": false,
+          "events_scanned": [
+            "melbourne",
+            "shanghai",
+            "suzuka"
+          ],
+          "computed_at": "2026-03-29T13:36:23.588818Z"
+        }
+      }
+    }
+  ]
+}

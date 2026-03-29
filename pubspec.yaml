@@ -72,6 +72,7 @@ dependencies:
   flutter_staggered_grid_view: ^0.7.0
   font_awesome_flutter: 10.12.0
   args: ^2.7.0
+  html: ^0.15.4
   
 
 dev_dependencies:
@@ -156,6 +157,8 @@ flutter:
     - assets/data/2026/suzuka/
     - assets/data/results/
     - assets/data/circuits/
+    # Per-coureur export uit f1_data.dart (tool/export_driver_json_from_f1_data.dart).
+    - assets/data/drivers/
     # Submap staat niet automatisch in de bundle; nodig voor *.geojson op web.
     - assets/data/circuits/geojson/
     - assets/data/circuits/specs_2026/

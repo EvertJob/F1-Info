@@ -993,6 +993,12 @@ abstract class AppLocalizations {
   /// **'Championships'**
   String get championships;
 
+  /// No description provided for @championship_leader_pill.
+  ///
+  /// In en, this message translates to:
+  /// **'Championship leader'**
+  String get championship_leader_pill;
+
   /// No description provided for @calendar_prefs_section_title.
   ///
   /// In en, this message translates to:

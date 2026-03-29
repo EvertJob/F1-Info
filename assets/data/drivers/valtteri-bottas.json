@@ -1,0 +1,472 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "valtteri-bottas",
+  "driver_name": "Valtteri Bottas",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2017,
+      "record": {
+        "name": "Valtteri Bottas",
+        "flag": "🇫🇮",
+        "points": 305.0,
+        "number": 77,
+        "nationality": "Finnish",
+        "team": "Mercedes",
+        "points_finish_pct": 70.0,
+        "season_points_finish_pct": 85.0,
+        "wins": 3,
+        "podiums_2nd": 9,
+        "podiums_3rd": 10,
+        "podiums": 22,
+        "poles": 4,
+        "fastest_laps": 2,
+        "total_points": 716.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 5200,
+        "starts": 97,
+        "dnfs": 11,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 150,
+        "front_row_starts": 6,
+        "highest_finish": "1e (x3)",
+        "highest_grid": "1e (x4)",
+        "hat_tricks": 0,
+        "overtakes": 250,
+        "age": 28,
+        "height": "1.73m",
+        "birth_place": "Nastola, Finland",
+        "partner": "Emilia Pikkarainen",
+        "children": "-",
+        "pets": "-",
+        "manager": "Didier Coton",
+        "real_world_facts_en": [
+          "Unexpectedly replaced Nico Rosberg at Mercedes after his sudden retirement.",
+          "Won his very first Formula 1 race in Russia 2017.",
+          "Has 3 Grand Prix victories.",
+          "Has 22 podium finishes.",
+          "Has 4 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Vervong Nico Rosberg onverwachts bij Mercedes na diens plotselinge pensioen.",
+          "Won in Rusland 2017 zijn allereerste Formule 1-race.",
+          "Heeft 3 Grand Prix-zeges.",
+          "Heeft 22 podiumplaatsen.",
+          "Heeft 4 polepositions."
+        ],
+        "points_per_season": {
+          "2017": 305.0,
+          "2016": 85.0,
+          "2015": 136.0,
+          "2014": 186.0,
+          "2013": 4.0
+        },
+        "debut_year": 2013,
+        "contract_until": "2018",
+        "previous_teams": [
+          "Various Teams - Karting (2000-2007)",
+          "Motopark Academy - Formula Renault NEC / Eurocup (2008-2009)",
+          "ART Grand Prix - GP3 (2010)",
+          "Williams - Reserve / Academy (2011-2012)",
+          "Williams - F1 (2013-2016)"
+        ],
+        "personal_sponsors": [
+          "Wihuri",
+          "Konecranes"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2018,
+      "record": {
+        "name": "Valtteri Bottas",
+        "flag": "🇫🇮",
+        "points": 247.0,
+        "number": 77,
+        "nationality": "Finnish",
+        "team": "Mercedes",
+        "points_finish_pct": 73.0,
+        "season_points_finish_pct": 80.0,
+        "wins": 3,
+        "podiums_2nd": 14,
+        "podiums_3rd": 13,
+        "podiums": 30,
+        "poles": 6,
+        "fastest_laps": 10,
+        "total_points": 963.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 6500,
+        "starts": 118,
+        "dnfs": 12,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 200,
+        "front_row_starts": 16,
+        "highest_finish": "1e (x3)",
+        "highest_grid": "1e (x6)",
+        "hat_tricks": 0,
+        "overtakes": 300,
+        "age": 29,
+        "height": "1.73m",
+        "birth_place": "Nastola, Finland",
+        "partner": "Emilia Pikkarainen",
+        "children": "-",
+        "pets": "-",
+        "manager": "Didier Coton",
+        "real_world_facts_en": [
+          "Was called the \"wingman\" by team boss Toto Wolff, which hit Bottas hard.",
+          "Had to obey team orders in Russia and give up his win to Hamilton.",
+          "Has 3 Grand Prix victories.",
+          "Has 30 podium finishes.",
+          "Has 6 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Werd de \"wingman\" genoemd door teambaas Toto Wolff, wat Bottas zwaar viel.",
+          "Moest in Rusland gehoorzamen aan teamorders en zijn zege afstaan aan Hamilton.",
+          "Heeft 3 Grand Prix-zeges.",
+          "Heeft 30 podiumplaatsen.",
+          "Heeft 6 polepositions."
+        ],
+        "points_per_season": {
+          "2018": 247.0,
+          "2017": 305.0,
+          "2016": 85.0,
+          "2015": 136.0,
+          "2014": 186.0
+        },
+        "debut_year": 2013,
+        "contract_until": "2019",
+        "previous_teams": [
+          "Various Teams - Karting (2000-2007)",
+          "Motopark Academy - Formula Renault NEC / Eurocup (2008-2009)",
+          "ART Grand Prix - GP3 (2010)",
+          "Williams - Reserve / Academy (2011-2012)",
+          "Williams - F1 (2013-2016)"
+        ],
+        "personal_sponsors": [
+          "Wihuri",
+          "Konecranes"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2019,
+      "record": {
+        "name": "Valtteri Bottas",
+        "flag": "🇫🇮",
+        "points": 326.0,
+        "number": 77,
+        "nationality": "Finnish",
+        "team": "Mercedes",
+        "points_finish_pct": 75.0,
+        "season_points_finish_pct": 85.0,
+        "wins": 7,
+        "podiums_2nd": 22,
+        "podiums_3rd": 16,
+        "podiums": 45,
+        "poles": 11,
+        "fastest_laps": 13,
+        "total_points": 1289.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 8000,
+        "starts": 139,
+        "dnfs": 14,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 300,
+        "front_row_starts": 25,
+        "highest_finish": "1e (x7)",
+        "highest_grid": "1e (x11)",
+        "hat_tricks": 1,
+        "overtakes": 350,
+        "age": 30,
+        "height": "1.73m",
+        "birth_place": "Nastola, Finland",
+        "partner": "Emilia Pikkarainen",
+        "children": "-",
+        "pets": "-",
+        "manager": "Didier Coton",
+        "real_world_facts_en": [
+          "Started the year fiercely with the \"Bottas 2.0\" version, winning in Australia.",
+          "Statistically had his best ever Formula 1 season up to that point.",
+          "Has 7 Grand Prix victories.",
+          "Has 45 podium finishes.",
+          "Has 11 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Begon het jaar ongenaakbaar met de \"Bottas 2.0\" versie en won in Australië.",
+          "Kende statistisch gezien zijn allerbeste seizoen in de Formule 1 tot dan toe.",
+          "Heeft 7 Grand Prix-zeges.",
+          "Heeft 45 podiumplaatsen.",
+          "Heeft 11 polepositions."
+        ],
+        "points_per_season": {
+          "2019": 326.0,
+          "2018": 247.0,
+          "2017": 305.0,
+          "2016": 85.0,
+          "2015": 136.0
+        },
+        "debut_year": 2013,
+        "contract_until": "2020",
+        "previous_teams": [
+          "Various Teams - Karting (2000-2007)",
+          "Motopark Academy - Formula Renault NEC / Eurocup (2008-2009)",
+          "ART Grand Prix - GP3 (2010)",
+          "Williams - Reserve / Academy (2011-2012)",
+          "Williams - F1 (2013-2016)"
+        ],
+        "personal_sponsors": [
+          "Polar",
+          "Abloy"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2020,
+      "record": {
+        "name": "Valtteri Bottas",
+        "flag": "🇫🇮",
+        "points": 223.0,
+        "number": 77,
+        "nationality": "Finnish",
+        "team": "Mercedes",
+        "points_finish_pct": 76.0,
+        "season_points_finish_pct": 82.0,
+        "wins": 9,
+        "podiums_2nd": 28,
+        "podiums_3rd": 19,
+        "podiums": 56,
+        "poles": 16,
+        "fastest_laps": 15,
+        "total_points": 1512.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 9200,
+        "starts": 156,
+        "dnfs": 16,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 600,
+        "front_row_starts": 35,
+        "highest_finish": "1e (x9)",
+        "highest_grid": "1e (x16)",
+        "hat_tricks": 2,
+        "overtakes": 400,
+        "age": 31,
+        "height": "1.73m",
+        "birth_place": "Nastola, Finland",
+        "partner": "Tiffany Cromwell",
+        "children": "-",
+        "pets": "-",
+        "manager": "Didier Coton",
+        "real_world_facts_en": [
+          "Won the very first race of the delayed 2020 season in Austria.",
+          "Suffered a lot of bad luck with punctures and pitstop blunders this season.",
+          "Has 9 Grand Prix victories.",
+          "Has 56 podium finishes.",
+          "Has 16 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Won de allereerste race van het uitgestelde 2020 seizoen in Oostenrijk.",
+          "Had veel pech met lekke banden en pitstop-blunders in dit seizoen.",
+          "Heeft 9 Grand Prix-zeges.",
+          "Heeft 56 podiumplaatsen.",
+          "Heeft 16 polepositions."
+        ],
+        "points_per_season": {
+          "2020": 223.0,
+          "2019": 326.0,
+          "2018": 247.0,
+          "2017": 305.0,
+          "2016": 85.0
+        },
+        "debut_year": 2013,
+        "contract_until": "2021",
+        "previous_teams": [
+          "Various Teams - Karting (2000-2007)",
+          "Motopark Academy - Formula Renault NEC / Eurocup (2008-2009)",
+          "ART Grand Prix - GP3 (2010)",
+          "Williams - Reserve / Academy (2011-2012)",
+          "Williams - F1 (2013-2016)"
+        ],
+        "personal_sponsors": [
+          "Polar",
+          "Abloy"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2021,
+      "record": {
+        "name": "Valtteri Bottas",
+        "flag": "🇫🇮",
+        "points": 226.0,
+        "number": 77,
+        "nationality": "Finnish",
+        "team": "Mercedes",
+        "points_finish_pct": 75.0,
+        "season_points_finish_pct": 68.0,
+        "wins": 1,
+        "podiums_2nd": 1,
+        "podiums_3rd": 9,
+        "podiums": 11,
+        "poles": 4,
+        "fastest_laps": 4,
+        "total_points": 1738.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 10500,
+        "starts": 178,
+        "dnfs": 19,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 700,
+        "front_row_starts": 45,
+        "highest_finish": "1e (x10)",
+        "highest_grid": "1e (x20)",
+        "hat_tricks": 2,
+        "overtakes": 500,
+        "age": 32,
+        "height": "1.73m",
+        "birth_place": "Nastola, Finland",
+        "partner": "Tiffany Cromwell",
+        "children": "-",
+        "pets": "-",
+        "manager": "Didier Coton",
+        "real_world_facts_en": [
+          "Secured the constructors' title with Mercedes for the fifth consecutive year.",
+          "Drove his final season for Mercedes in 2021.",
+          "Has 1 Grand Prix victory.",
+          "Has 11 podium finishes.",
+          "Has 4 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Pakte met Mercedes voor het vijfde jaar op rij de constructeurstitel.",
+          "Reed in 2021 zijn laatste seizoen in dienst van Mercedes.",
+          "Heeft 1 Grand Prix-zege.",
+          "Heeft 11 podiumplaatsen.",
+          "Heeft 4 polepositions."
+        ],
+        "points_per_season": {
+          "2021": 226.0,
+          "2020": 223.0,
+          "2019": 326.0,
+          "2018": 247.0,
+          "2017": 305.0
+        },
+        "debut_year": 2013,
+        "contract_until": "2021",
+        "previous_teams": [
+          "Various Teams - Karting (2000-2007)",
+          "Motopark Academy - Formula Renault NEC / Eurocup (2008-2009)",
+          "ART Grand Prix - GP3 (2010)",
+          "Williams - Reserve / Academy (2011-2012)",
+          "Williams - F1 (2013-2016)"
+        ],
+        "personal_sponsors": [
+          "Polar",
+          "Abloy"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2026,
+      "record": {
+        "name": "Valtteri Bottas",
+        "flag": "🇫🇮",
+        "points": 0.0,
+        "number": 77,
+        "nationality": "Finnish",
+        "team": "Cadillac",
+        "points_finish_pct": 70.0,
+        "season_points_finish_pct": 15.0,
+        "wins": 1,
+        "podiums_2nd": 1,
+        "podiums_3rd": 9,
+        "podiums": 11,
+        "poles": 4,
+        "fastest_laps": 4,
+        "total_points": 1738.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 10622,
+        "starts": 181,
+        "dnfs": 20,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 700,
+        "front_row_starts": 45,
+        "highest_finish": "1e (x10)",
+        "highest_grid": "1e (x20)",
+        "hat_tricks": 2,
+        "overtakes": 900,
+        "age": 36,
+        "height": "1.73m",
+        "birth_place": "Nastola, Finland",
+        "partner": "Tiffany Cromwell",
+        "children": "-",
+        "pets": "-",
+        "manager": "Didier Coton",
+        "real_world_facts_en": [
+          "Five constructors titles with Mercedes.",
+          "Brings humor and experience to Cadillac.",
+          "Has 10 Grand Prix victories.",
+          "Has 67 podium finishes.",
+          "Has 20 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Vijf constructeurstitels met Mercedes.",
+          "Brengt humor en ervaring naar Cadillac.",
+          "Heeft 10 Grand Prix-zeges.",
+          "Heeft 67 podiumplaatsen.",
+          "Heeft 20 polepositions."
+        ],
+        "points_per_season": {
+          "2021": 226.0,
+          "2020": 223.0,
+          "2019": 326.0,
+          "2018": 247.0,
+          "2017": 305.0,
+          "2026": 0.0
+        },
+        "debut_year": 2013,
+        "contract_until": "2026",
+        "previous_teams": [
+          "Various Teams - Karting (2000-2007)",
+          "Motopark Academy - Formula Renault NEC / Eurocup (2008-2009)",
+          "ART Grand Prix - GP3 (2010)",
+          "Williams - Reserve / Academy (2011-2012)",
+          "Williams - F1 (2013-2016)",
+          "Mercedes - F1 (2017-2021)",
+          "Alfa Romeo / Sauber - F1 (2022-2024)"
+        ],
+        "personal_sponsors": [
+          "Wihuri",
+          "Abloy"
+        ],
+        "reserve_driver": null,
+        "merge_meta_2026": {
+          "schema": 1,
+          "baseline_season_year": 2021,
+          "baseline_is_synthetic_zero": false,
+          "events_scanned": [
+            "melbourne",
+            "shanghai",
+            "suzuka"
+          ],
+          "computed_at": "2026-03-29T13:36:23.644596Z"
+        }
+      }
+    }
+  ]
+}

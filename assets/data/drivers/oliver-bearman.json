@@ -1,0 +1,166 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "oliver-bearman",
+  "driver_name": "Oliver Bearman",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2025,
+      "record": {
+        "name": "Oliver Bearman",
+        "flag": "🇬🇧",
+        "points": 40.0,
+        "number": 87,
+        "nationality": "British",
+        "team": "Haas F1 Team",
+        "points_finish_pct": 40.0,
+        "season_points_finish_pct": 40.0,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 0,
+        "podiums": 0,
+        "poles": 0,
+        "fastest_laps": 0,
+        "total_points": 47.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 1289,
+        "starts": 25,
+        "dnfs": 3,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 0,
+        "front_row_starts": 0,
+        "highest_finish": "7e (x2)",
+        "highest_grid": "8e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 25,
+        "age": 20,
+        "height": "1.84m",
+        "birth_place": "Chelmsford, UK",
+        "partner": "Estelle Ogilvy",
+        "children": "-",
+        "pets": "-",
+        "manager": "Harry Soden",
+        "real_world_facts_en": [
+          "Scored immediately in F1 debut at 18.",
+          "Part of the Ferrari Driver Academy.",
+          "Carries car number #87.",
+          "Made their F1 debut in 2024.",
+          "Birthplace: Chelmsford, UK."
+        ],
+        "real_world_facts_nl": [
+          "Scoorde direct in F1 debuut op 18-jarige leeftijd.",
+          "Deel van de Ferrari Driver Academy.",
+          "Rijdt met startnummer #87.",
+          "Maakte het F1-debuut in 2024.",
+          "Geboorteplaats: Chelmsford, UK."
+        ],
+        "points_per_season": {
+          "2025": 40.0,
+          "2024": 7.0,
+          "2023": 0.0,
+          "2022": 0.0,
+          "2021": 0.0
+        },
+        "debut_year": 2024,
+        "contract_until": "2026",
+        "previous_teams": [
+          "Various Teams - Karting (2013-2020)",
+          "Van Amersfoort Racing - Italian F4 / ADAC F4 (2021)",
+          "Prema Racing - FIA F3 / F2 (2022-2024)",
+          "Ferrari - Reserve / Academy (2024)"
+        ],
+        "personal_sponsors": [
+          "Richard Mille"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2026,
+      "record": {
+        "name": "Oliver Bearman",
+        "flag": "🇬🇧",
+        "points": 17.0,
+        "number": 87,
+        "nationality": "British",
+        "team": "Haas F1 Team",
+        "points_finish_pct": 40.0,
+        "season_points_finish_pct": 40.0,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 0,
+        "podiums": 0,
+        "poles": 0,
+        "fastest_laps": 0,
+        "total_points": 64.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 1422,
+        "starts": 28,
+        "dnfs": 4,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 0,
+        "front_row_starts": 0,
+        "highest_finish": "5e (x1)",
+        "highest_grid": "8e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 25,
+        "age": 20,
+        "height": "1.84m",
+        "birth_place": "Chelmsford, UK",
+        "partner": "Estelle Ogilvy",
+        "children": "-",
+        "pets": "-",
+        "manager": "Harry Soden",
+        "real_world_facts_en": [
+          "Scored immediately in F1 debut at 18.",
+          "Part of the Ferrari Driver Academy.",
+          "Carries car number #87.",
+          "Made their F1 debut in 2024.",
+          "Birthplace: Chelmsford, UK."
+        ],
+        "real_world_facts_nl": [
+          "Scoorde direct in F1 debuut op 18-jarige leeftijd.",
+          "Deel van de Ferrari Driver Academy.",
+          "Rijdt met startnummer #87.",
+          "Maakte het F1-debuut in 2024.",
+          "Geboorteplaats: Chelmsford, UK."
+        ],
+        "points_per_season": {
+          "2025": 40.0,
+          "2024": 7.0,
+          "2023": 0.0,
+          "2022": 0.0,
+          "2021": 0.0,
+          "2026": 17.0
+        },
+        "debut_year": 2024,
+        "contract_until": "2026",
+        "previous_teams": [
+          "Various Teams - Karting (2013-2020)",
+          "Van Amersfoort Racing - Italian F4 / ADAC F4 (2021)",
+          "Prema Racing - FIA F3 / F2 (2022-2024)",
+          "Ferrari - Reserve / Academy (2024)"
+        ],
+        "personal_sponsors": [
+          "Richard Mille"
+        ],
+        "reserve_driver": null,
+        "merge_meta_2026": {
+          "schema": 1,
+          "baseline_season_year": 2025,
+          "baseline_is_synthetic_zero": false,
+          "events_scanned": [
+            "melbourne",
+            "shanghai",
+            "suzuka"
+          ],
+          "computed_at": "2026-03-29T13:36:23.630596Z"
+        }
+      }
+    }
+  ]
+}

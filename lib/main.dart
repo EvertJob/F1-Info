@@ -3057,15 +3057,7 @@ final Map<String, EngineSupplier> engineSuppliers = {
   ),
 };
 
-String _slugify(String value) {
-  final slug = value
-      .toLowerCase()
-      .trim()
-      .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
-      .replaceAll(RegExp(r'-{2,}'), '-')
-      .replaceAll(RegExp(r'^-|-$'), '');
-  return slug.isEmpty ? 'item' : slug;
-}
+String _slugify(String value) => slugifyForHubUrl(value);
 
 String _raceSlug(Race race) => _slugify(
   race.name.replaceAll(RegExp(r'\s+Grand Prix$', caseSensitive: false), ''),
@@ -3169,6 +3161,9 @@ Driver? _findDriverBySlug(String slug) {
         continue;
       }
       if (_driverSlug(driver) == slug) {
+        return driver;
+      }
+      if (driverJsonSlugCandidates(driver.name).contains(slug)) {
         return driver;
       }
     }
@@ -6187,6 +6182,40 @@ int raceRoundFor(Race race) {
 
   final fallbackIndex = races.indexOf(race);
   return fallbackIndex == -1 ? 1 : fallbackIndex + 1;
+}
+
+/// Placeholder GPs still in [raceList] but off the real calendar (e.g. 2026).
+bool isCancelledGrandPrix(Race race) {
+  return race.name == 'Bahrain Grand Prix' ||
+      race.name == 'Saudi Arabian Grand Prix';
+}
+
+/// Home / AI “next race”: ongoing window, else earliest future race, skipping [isCancelledGrandPrix].
+Race nextRaceAfterNowSkippingCancelled(
+  List<Race> raceList, [
+  DateTime? reference,
+]) {
+  final now = reference ?? DateTime.now();
+  bool ok(Race r) => !isCancelledGrandPrix(r);
+  final ongoing = raceList.where((r) {
+    if (!ok(r)) return false;
+    final isToday = r.date.year == now.year &&
+        r.date.month == now.month &&
+        r.date.day == now.day;
+    final isFinished = r.date.isBefore(now);
+    final isOngoing = isToday &&
+        !isFinished &&
+        (now.difference(r.date).inHours.abs() <= 4);
+    return isOngoing;
+  }).toList();
+  if (ongoing.isNotEmpty) {
+    return ongoing.first;
+  }
+  try {
+    return raceList.firstWhere((r) => r.date.isAfter(now) && ok(r));
+  } catch (_) {
+    return raceList.lastWhere(ok, orElse: () => raceList.last);
+  }
 }
 
 List<Map<String, dynamic>>? _jsonDecodedToMapList(
@@ -9495,26 +9524,7 @@ class _CircuitsViewState extends State<CircuitsView> {
     super.dispose();
   }
 
-  Race _nextRace() {
-    final now = DateTime.now();
-    // Zoek eerst een race die vandaag is en 'Ongoing' is
-    final ongoing = races.where((r) {
-      final isToday = r.date.year == now.year && r.date.month == now.month && r.date.day == now.day;
-      final isFinished = r.date.isBefore(now);
-      // 4 uur window voor 'Ongoing' (zoals in _buildCalendarRaceCard)
-      final isOngoing = isToday && !isFinished && (now.difference(r.date).inHours.abs() <= 4);
-      return isOngoing;
-    }).toList();
-    if (ongoing.isNotEmpty) {
-      return ongoing.first;
-    }
-    // Anders: eerstvolgende race in de toekomst
-    try {
-      return races.firstWhere((r) => r.date.isAfter(now));
-    } catch (e) {
-      return races.last;
-    }
-  }
+  Race _nextRace() => nextRaceAfterNowSkippingCancelled(races);
 
   Race? _latestCompletedRace() {
     final list = _lastNCompletedRaces(1);
@@ -9685,10 +9695,7 @@ class _CircuitsViewState extends State<CircuitsView> {
   }
 
   /// Placeholder “cancelled” races (not on calendar when user hides them).
-  bool _isCancelledGrandPrix(Race race) {
-    return race.name == 'Bahrain Grand Prix' ||
-        race.name == 'Saudi Arabian Grand Prix';
-  }
+  bool _isCancelledGrandPrix(Race race) => isCancelledGrandPrix(race);
 
   List<Race> _summerBreakRaces() {
     final hungarianIndex = races.indexWhere(
@@ -10050,7 +10057,7 @@ class _CircuitsViewState extends State<CircuitsView> {
 
     final theme = Theme.of(context);
     final tokens = _themeTokens(context);
-    final isCancelled = race.name == 'Bahrain Grand Prix' || race.name == 'Saudi Arabian Grand Prix';
+    final isCancelled = isCancelledGrandPrix(race);
     // statusChip variable removed (no longer used)
 
     final hasResults = _hasResultsForRace(race);
@@ -10266,7 +10273,7 @@ class _CircuitsViewState extends State<CircuitsView> {
           height: 30,
           color: onBlueBackground ? Colors.white24 : tokens.outline.withValues(alpha: 0.75),
         ),
-        if (upcoming.name == 'Bahrain Grand Prix' || upcoming.name == 'Saudi Arabian Grand Prix')
+        if (isCancelledGrandPrix(upcoming))
           const SizedBox.shrink()
         else if (timeStrNext.isEmpty)
           _buildCircuitPodiumPreview(
@@ -10293,7 +10300,7 @@ class _CircuitsViewState extends State<CircuitsView> {
     Race upcoming,
     String timeStrNext,
   ) {
-    final isCancelled = upcoming.name == 'Bahrain Grand Prix' || upcoming.name == 'Saudi Arabian Grand Prix';
+    final isCancelled = isCancelledGrandPrix(upcoming);
     final isRainy = liveRain > 30;
     final isCloudy = !isRainy && liveRain > 10;
 
@@ -10337,7 +10344,7 @@ class _CircuitsViewState extends State<CircuitsView> {
         now.month == race.date.month &&
         now.day == race.date.day &&
         (now.difference(race.date).inHours.abs() <= 4); // 4 hour window for 'Ongoing'
-    final isCancelled = race.name == 'Bahrain Grand Prix' || race.name == 'Saudi Arabian Grand Prix';
+    final isCancelled = isCancelledGrandPrix(race);
     final tStr = _timeUntil(race.date, context);
     final showDesktopExtras =
       MediaQuery.of(context).size.width >= _desktopCircuitsBreakpoint;
@@ -11483,16 +11490,31 @@ class _StandingsViewState extends State<StandingsView> {
     );
   }
 
-  Widget _buildDesktopStandingsHeader(BuildContext context, bool isDriver) {
+  Widget _buildDesktopStandingsHeader(
+    BuildContext context,
+    bool isDriver, {
+    required F1UiTheme f1Ui,
+    required bool compact,
+  }) {
     final theme = Theme.of(context);
     final tokens = _themeTokens(context);
+    final headerRadius = (f1Ui.cardBorderRadius * 0.65).clamp(10.0, 16.0);
+    final labelSize = compact ? 10.0 : 11.0;
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 10, 16, 8),
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      margin: EdgeInsets.fromLTRB(
+        16,
+        f1Ui.cardPadding.top * 0.5,
+        16,
+        f1Ui.cardPadding.bottom * 0.4,
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: f1Ui.cardPadding.left,
+        vertical: (f1Ui.cardPadding.top * 0.6).clamp(8.0, 14.0),
+      ),
       decoration: BoxDecoration(
         color: tokens.panelStrong,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(headerRadius),
         border: Border.all(color: tokens.outline.withValues(alpha: 0.7)),
       ),
       child: Row(
@@ -11502,7 +11524,7 @@ class _StandingsViewState extends State<StandingsView> {
             child: Text(
               'POS',
               style: TextStyle(
-                fontSize: 11,
+                fontSize: labelSize,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.1,
                 color: theme.colorScheme.onSurfaceVariant,
@@ -11514,7 +11536,7 @@ class _StandingsViewState extends State<StandingsView> {
             child: Text(
               isDriver ? 'DRIVER' : 'TEAM',
               style: TextStyle(
-                fontSize: 11,
+                fontSize: labelSize,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.1,
                 color: theme.colorScheme.onSurfaceVariant,
@@ -11526,7 +11548,7 @@ class _StandingsViewState extends State<StandingsView> {
             child: Text(
               isDriver ? 'TEAM / TITLES' : 'PRINCIPAL / TITLES',
               style: TextStyle(
-                fontSize: 11,
+                fontSize: labelSize,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.1,
                 color: theme.colorScheme.onSurfaceVariant,
@@ -11539,7 +11561,7 @@ class _StandingsViewState extends State<StandingsView> {
               'POINTS',
               textAlign: TextAlign.right,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: labelSize,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.1,
                 color: theme.colorScheme.onSurfaceVariant,
@@ -11557,6 +11579,8 @@ class _StandingsViewState extends State<StandingsView> {
     required dynamic item,
     required int index,
     required bool isDriver,
+    required F1UiTheme f1Ui,
+    required bool compact,
   }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -11586,16 +11610,26 @@ class _StandingsViewState extends State<StandingsView> {
       );
     }
 
+    final radius = f1Ui.cardBorderRadius;
+    final rowPadH = f1Ui.cardPadding.left;
+    final rowPadV = (f1Ui.cardPadding.top * 0.6).clamp(8.0, 14.0);
+    final posSize = compact ? 16.0 : 18.0;
+    final nameSize = compact ? 12.0 : 13.0;
+    final metaSize = compact ? 10.0 : 11.0;
+    final pointsSize = compact ? 16.0 : 18.0;
+    final flagSize = compact ? 16.0 : 18.0;
+    final iconSize = compact ? 16.0 : 18.0;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(radius),
           onTap: () => _handleStandingsTap(item, widget.isDriverView),
           child: F1Module(
             fillWidth: true,
-            borderRadius: 20,
+            borderRadius: radius,
             backgroundColor: isSelected
                 ? F1TeamSchemes.getTeamColor(teamName).withValues(alpha: 0.16)
                 : theme.colorScheme.surface,
@@ -11603,19 +11637,14 @@ class _StandingsViewState extends State<StandingsView> {
             borderColor: isSelected
                 ? F1TeamSchemes.getTeamColor(teamName)
                 : null,
-            boxShadow: isDark
-                ? null
-                : [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+            boxShadow: isDark ? null : f1Ui.moduleShadow,
             child: F1Hoverable(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(radius),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                padding: EdgeInsets.symmetric(
+                  horizontal: rowPadH,
+                  vertical: rowPadV,
+                ),
                 child: Row(
             children: [
               SizedBox(
@@ -11623,7 +11652,7 @@ class _StandingsViewState extends State<StandingsView> {
                 child: Text(
                   '${index + 1}',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: posSize,
                     fontWeight: FontWeight.w800,
                     color: isDark ? Colors.white38 : Colors.black38,
                   ),
@@ -11636,7 +11665,7 @@ class _StandingsViewState extends State<StandingsView> {
                     _buildFlagHero(
                       tag: heroTag,
                       flag: flag,
-                      fontSize: 18,
+                      fontSize: flagSize,
                       textAlign: TextAlign.left,
                     ),
                     const SizedBox(width: 10),
@@ -11646,7 +11675,7 @@ class _StandingsViewState extends State<StandingsView> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: nameSize,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.9,
                           color: theme.colorScheme.onSurface,
@@ -11666,12 +11695,12 @@ class _StandingsViewState extends State<StandingsView> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: metaSize,
                         fontWeight: FontWeight.w700,
                         color: F1TeamSchemes.getTeamColor(teamName),
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    SizedBox(height: compact ? 2 : 3),
                     Tooltip(
                       message: tertiaryLabel,
                       waitDuration: const Duration(milliseconds: 400),
@@ -11680,7 +11709,7 @@ class _StandingsViewState extends State<StandingsView> {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: metaSize,
                           height: 1.25,
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -11696,7 +11725,7 @@ class _StandingsViewState extends State<StandingsView> {
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    fontSize: 18,
+                    fontSize: pointsSize,
                     color: theme.colorScheme.primary,
                   ),
                 ),
@@ -11708,14 +11737,14 @@ class _StandingsViewState extends State<StandingsView> {
                         isSelected
                             ? Icons.check_circle
                             : Icons.radio_button_unchecked,
-                        size: 18,
+                        size: iconSize,
                         color: isSelected
                             ? F1TeamSchemes.getTeamColor(teamName)
                             : theme.colorScheme.onSurfaceVariant,
                       )
                     : Icon(
                         Icons.chevron_right_rounded,
-                        size: 18,
+                        size: iconSize,
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
               ),
@@ -11734,6 +11763,8 @@ class _StandingsViewState extends State<StandingsView> {
     required dynamic item,
     required int index,
     required bool isDriver,
+    required F1UiTheme f1Ui,
+    required bool compact,
   }) {
 
     final theme = Theme.of(context);
@@ -11760,12 +11791,21 @@ class _StandingsViewState extends State<StandingsView> {
       );
     }
 
+    final radius = f1Ui.cardBorderRadius;
+    final outerV = (f1Ui.cardPadding.top * 0.35).clamp(4.0, 8.0);
+    final tileV = (f1Ui.cardPadding.top * 0.45).clamp(4.0, 12.0);
+    final posFont = compact ? 14.0 : 16.0;
+    final nameFont = compact ? 12.0 : 13.0;
+    final ptsFont = compact ? 11.0 : 12.0;
+    final flagFont = compact ? 12.0 : 14.0;
+    final titlesFont = compact ? 9.0 : 10.0;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: outerV),
       child: F1Module(
         fillWidth: true,
         padding: EdgeInsets.zero,
-        borderRadius: 20,
+        borderRadius: radius,
         backgroundColor: isSelected
             ? F1TeamSchemes.getTeamColor(teamName).withValues(alpha: 0.16)
             : theme.colorScheme.surface,
@@ -11774,6 +11814,14 @@ class _StandingsViewState extends State<StandingsView> {
             ? F1TeamSchemes.getTeamColor(teamName)
             : null,
         child: ListTile(
+        dense: compact,
+        visualDensity:
+            compact ? VisualDensity.compact : VisualDensity.standard,
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: f1Ui.cardPadding.left,
+          vertical: tileV,
+        ),
+        minVerticalPadding: compact ? 0 : 4,
         isThreeLine: isDriver && driverTitlesLine.isNotEmpty,
         onTap: () => _handleStandingsTap(item, widget.isDriverView),
         leading: Text(
@@ -11781,7 +11829,7 @@ class _StandingsViewState extends State<StandingsView> {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: isDark ? Colors.white24 : Colors.black26,
-            fontSize: 16,
+            fontSize: posFont,
           ),
         ),
         title: Column(
@@ -11792,7 +11840,7 @@ class _StandingsViewState extends State<StandingsView> {
                 _buildFlagHero(
                   tag: heroTag,
                   flag: flag,
-                  fontSize: 14,
+                  fontSize: flagFont,
                   textAlign: TextAlign.left,
                 ),
                 const SizedBox(width: 10),
@@ -11801,7 +11849,7 @@ class _StandingsViewState extends State<StandingsView> {
                     name.toUpperCase(),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 13,
+                      fontSize: nameFont,
                       letterSpacing: 1,
                       color: isDark ? Colors.white : Colors.black,
                     ),
@@ -11811,7 +11859,7 @@ class _StandingsViewState extends State<StandingsView> {
             ),
             if (isDriver && driverTitlesLine.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: 4.0),
+                padding: EdgeInsets.only(top: compact ? 2.0 : 4.0),
                 child: Tooltip(
                   message: driverTitlesLine,
                   waitDuration: const Duration(milliseconds: 400),
@@ -11819,8 +11867,8 @@ class _StandingsViewState extends State<StandingsView> {
                     driverTitlesLine,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 10,
+                    style: TextStyle(
+                      fontSize: titlesFont,
                       height: 1.25,
                       fontWeight: FontWeight.bold,
                       color: Colors.amber,
@@ -11834,7 +11882,7 @@ class _StandingsViewState extends State<StandingsView> {
           '${_formatPoints(points)} ${context.l10n.pts}',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 12,
+            fontSize: ptsFont,
             color: theme.colorScheme.primary,
           ),
         ),
@@ -11843,8 +11891,18 @@ class _StandingsViewState extends State<StandingsView> {
     );
   }
 
-  Widget _buildList(bool isDriver) {
+  /// Vertical gap between standings rows; mirrors calendar list spacing.
+  double _standingsInterRowGap(F1UiTheme f1Ui) =>
+      f1Ui.cardPadding.top.clamp(8.0, 22.0);
+
+  Widget _buildList(
+    bool isDriver, {
+    required F1UiTheme f1Ui,
+    required bool compact,
+  }) {
     final items = _standingsItems(isDriver);
+    final rowGap = _standingsInterRowGap(f1Ui);
+    final listPadV = f1Ui.cardPadding.top.clamp(8.0, 14.0);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -11853,34 +11911,42 @@ class _StandingsViewState extends State<StandingsView> {
         if (!isDesktop) {
           return ListView.separated(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: listPadV),
             itemCount: items.length,
-            separatorBuilder: (context, index) =>
-                const SizedBox(height: 12),
+            separatorBuilder: (context, index) => SizedBox(height: rowGap),
             itemBuilder: (context, index) => _buildMobileStandingsRow(
               context,
               item: items[index],
               index: index,
               isDriver: isDriver,
+              f1Ui: f1Ui,
+              compact: compact,
             ),
           );
         }
 
         return ListView.separated(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: listPadV),
           itemCount: items.length + 1,
           separatorBuilder: (context, index) =>
-              SizedBox(height: index == 0 ? 0 : 12),
+              SizedBox(height: index == 0 ? 0 : rowGap),
           itemBuilder: (context, index) {
             if (index == 0) {
-              return _buildDesktopStandingsHeader(context, isDriver);
+              return _buildDesktopStandingsHeader(
+                context,
+                isDriver,
+                f1Ui: f1Ui,
+                compact: compact,
+              );
             }
             return _buildDesktopStandingsRow(
               context,
               item: items[index - 1],
               index: index - 1,
               isDriver: isDriver,
+              f1Ui: f1Ui,
+              compact: compact,
             );
           },
         );
@@ -11890,6 +11956,10 @@ class _StandingsViewState extends State<StandingsView> {
 
   @override
   Widget build(BuildContext context) {
+    final displaySettings = context.watch<DisplaySettingsController>();
+    final f1Ui = Theme.of(context).extension<F1UiTheme>() ??
+        F1UiTheme.fromSettings(displaySettings.settings);
+    final compact = displaySettings.settings.compact;
 
     final isDriverView = widget.isDriverView;
     final desktopShell = _isDesktopShellLayout(context);
@@ -11997,7 +12067,11 @@ class _StandingsViewState extends State<StandingsView> {
                 Expanded(
                   child: RefreshIndicator(
                     onRefresh: _refreshStandings,
-                    child: _buildList(widget.isDriverView),
+                    child: _buildList(
+                      widget.isDriverView,
+                      f1Ui: f1Ui,
+                      compact: compact,
+                    ),
                   ),
                 ),
               ],
@@ -12655,11 +12729,6 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                                 0.0,
                                 constraints.maxWidth - 24,
                               );
-                              final labelWidth = rounds.isEmpty
-                                  ? 24.0
-                                  : (chartWidth / rounds.length)
-                                        .clamp(18.0, 42.0)
-                                        .toDouble();
 
                               return Padding(
                                 padding: const EdgeInsets.fromLTRB(
@@ -12726,13 +12795,25 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                                                 ),
                                               ),
                                               const SizedBox(height: 6),
-                                              Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: rounds
-                                                    .map(
-                                                      (round) => SizedBox(
-                                                        width: labelWidth,
+                                              SizedBox(
+                                                height: 36,
+                                                width: chartWidth,
+                                                child: Stack(
+                                                  clipBehavior: Clip.none,
+                                                  children: [
+                                                    for (var i = 0;
+                                                        i < rounds.length;
+                                                        i++)
+                                                      Positioned(
+                                                        left:
+                                                            _standingsChartRoundAxisX(
+                                                                  i,
+                                                                  chartWidth,
+                                                                  rounds.length,
+                                                                ) -
+                                                                28,
+                                                        width: 56,
+                                                        top: 0,
                                                         child: Transform.rotate(
                                                           angle: -0.8,
                                                           alignment: Alignment
@@ -12740,7 +12821,7 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                                                           child: Text(
                                                             _roundShortLabel(
                                                               data,
-                                                              round,
+                                                              rounds[i],
                                                             ),
                                                             textAlign: TextAlign
                                                                 .center,
@@ -12756,8 +12837,8 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
                                                           ),
                                                         ),
                                                       ),
-                                                    )
-                                                    .toList(growable: false),
+                                                  ],
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -12797,6 +12878,22 @@ class _DriverStandingsChartSheetState extends State<DriverStandingsChartSheet> {
       ),
     );
   }
+}
+
+/// Horizontal position of round [index] on the chart, matching
+/// [_DriverStandingsChartPainter] / [_TeamStandingsChartPainter] (12px insets).
+double _standingsChartRoundAxisX(
+  int index,
+  double layoutWidth,
+  int roundCount,
+) {
+  if (roundCount <= 0 || layoutWidth <= 0) {
+    return 0;
+  }
+  const leftInset = 12.0;
+  final internal = math.max(0.0, layoutWidth - leftInset * 2);
+  final steps = math.max(1, roundCount - 1);
+  return leftInset + (internal / steps) * index;
 }
 
 class _DriverStandingsChartPainter extends CustomPainter {
@@ -13428,11 +13525,6 @@ class _TeamStandingsChartSheetState extends State<TeamStandingsChartSheet> {
                                 0.0,
                                 constraints.maxWidth - 24,
                               );
-                              final labelWidth = rounds.isEmpty
-                                  ? 24.0
-                                  : (chartWidth / rounds.length)
-                                        .clamp(18.0, 42.0)
-                                        .toDouble();
 
                               return Padding(
                                 padding: const EdgeInsets.fromLTRB(
@@ -13499,13 +13591,25 @@ class _TeamStandingsChartSheetState extends State<TeamStandingsChartSheet> {
                                                 ),
                                               ),
                                               const SizedBox(height: 6),
-                                              Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: rounds
-                                                    .map(
-                                                      (round) => SizedBox(
-                                                        width: labelWidth,
+                                              SizedBox(
+                                                height: 36,
+                                                width: chartWidth,
+                                                child: Stack(
+                                                  clipBehavior: Clip.none,
+                                                  children: [
+                                                    for (var i = 0;
+                                                        i < rounds.length;
+                                                        i++)
+                                                      Positioned(
+                                                        left:
+                                                            _standingsChartRoundAxisX(
+                                                                  i,
+                                                                  chartWidth,
+                                                                  rounds.length,
+                                                                ) -
+                                                                28,
+                                                        width: 56,
+                                                        top: 0,
                                                         child: Transform.rotate(
                                                           angle: -0.8,
                                                           alignment: Alignment
@@ -13513,7 +13617,7 @@ class _TeamStandingsChartSheetState extends State<TeamStandingsChartSheet> {
                                                           child: Text(
                                                             _roundShortLabel(
                                                               data,
-                                                              round,
+                                                              rounds[i],
                                                             ),
                                                             textAlign: TextAlign
                                                                 .center,
@@ -13529,8 +13633,8 @@ class _TeamStandingsChartSheetState extends State<TeamStandingsChartSheet> {
                                                           ),
                                                         ),
                                                       ),
-                                                    )
-                                                    .toList(growable: false),
+                                                  ],
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -19436,10 +19540,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
       } else if (lower.contains('next weekend') ||
           lower.contains('show next weekend') ||
           lower.contains('weekend hub')) {
-        final nextRace = races.firstWhere(
-          (race) => race.date.isAfter(DateTime.now()),
-          orElse: () => races.last,
-        );
+        final nextRace = nextRaceAfterNowSkippingCancelled(races);
         _response = context.l10n.ai_next_weekend(
           nextRace.name,
           '${nextRace.date.day}-${nextRace.date.month}-${nextRace.date.year}',
@@ -19627,10 +19728,7 @@ class _AIAssistantSheetState extends State<AIAssistantSheet> {
           (lower.contains('next weekend') ||
               lower.contains('volgend weekend') ||
               lower.contains('upcoming race'))) {
-        final nextRace = races.firstWhere(
-          (race) => race.date.isAfter(DateTime.now()),
-          orElse: () => races.last,
-        );
+        final nextRace = nextRaceAfterNowSkippingCancelled(races);
         _response = context.l10n.ai_next_weekend_weather(
           nextRace.name,
           '${nextRace.weather.temperature}',
@@ -19896,12 +19994,141 @@ class _DriverDetailViewState extends State<DriverDetailView> {
   late ScrollController _scrollController;
   bool _showFullTitle = false;
   bool _showAllDnfs = false;
+  late Driver _detailDriver;
+  bool _isChampionshipLeader = false;
 
   @override
   void initState() {
     super.initState();
+    _detailDriver = widget.driver;
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
+    _loadHubDriverJson();
+  }
+
+  @override
+  void didUpdateWidget(covariant DriverDetailView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.driver.name != widget.driver.name ||
+        oldWidget.driver.number != widget.driver.number) {
+      _detailDriver = widget.driver;
+      _loadHubDriverJson();
+    }
+  }
+
+  /// True if [name] is among the driver(s) with the highest points in bundled
+  /// `drivers_standings_{year}.json` for the current calendar year.
+  Future<void> _refreshChampionshipLeaderStatus() async {
+    final year = DateTime.now().year;
+    final paths = F1AssetResolver.driversStandingsCandidatePaths(year);
+    var leader = false;
+    for (final path in paths) {
+      if (!await F1AssetResolver.bundleHasAsset(rootBundle, path)) {
+        continue;
+      }
+      try {
+        final raw = await rootBundle.loadString(path);
+        final dynamic doc = json.decode(raw);
+        final list = doc is Map ? doc['standings'] : null;
+        if (list is! List || list.isEmpty) {
+          break;
+        }
+        var maxPts = double.negativeInfinity;
+        final leaders = <String>[];
+        for (final row in list) {
+          if (row is! Map) {
+            continue;
+          }
+          final p = row['points'];
+          final nm = row['driver']?.toString().trim() ?? '';
+          if (p is! num || nm.isEmpty) {
+            continue;
+          }
+          final pd = p.toDouble();
+          if (pd > maxPts) {
+            maxPts = pd;
+            leaders
+              ..clear()
+              ..add(nm);
+          } else if ((pd - maxPts).abs() < 1e-9) {
+            leaders.add(nm);
+          }
+        }
+        if (maxPts.isFinite && leaders.isNotEmpty) {
+          final my = normalizeForComparison(_detailDriver.name);
+          leader = leaders.any((n) => normalizeForComparison(n) == my);
+        }
+        break;
+      } catch (_) {
+        continue;
+      }
+    }
+    if (mounted) {
+      setState(() => _isChampionshipLeader = leader);
+    }
+  }
+
+  Future<void> _loadHubDriverJson() async {
+    final paths = F1AssetResolver.hubDriverExportAssetPaths(widget.driver.name);
+    for (final path in paths) {
+      if (!await F1AssetResolver.bundleHasAsset(rootBundle, path)) {
+        continue;
+      }
+      try {
+        final raw = await rootBundle.loadString(path);
+        final dynamic doc = json.decode(raw);
+        if (doc is! Map<String, dynamic>) {
+          continue;
+        }
+        final rec = latestHubDriverRecordFromExportDoc(doc);
+        if (rec == null) {
+          continue;
+        }
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          _detailDriver = driverFromHubExportJsonRecord(rec);
+        });
+        await _refreshChampionshipLeaderStatus();
+        return;
+      } catch (_) {
+        continue;
+      }
+    }
+    await _refreshChampionshipLeaderStatus();
+  }
+
+  Widget _buildChampionshipLeaderPill(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: scheme.primaryContainer,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: scheme.primary.withValues(alpha: 0.35),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.emoji_events, size: 16, color: scheme.primary),
+            const SizedBox(width: 6),
+            Text(
+              context.l10n.championship_leader_pill,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.3,
+                color: scheme.onPrimaryContainer,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -20075,7 +20302,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
   }
 
   List<String> _buildDriverTimelineEntries() {
-    final history = List<String>.from(widget.driver.previousTeams);
+    final history = List<String>.from(_detailDriver.previousTeams);
     if (history.isEmpty) return history;
 
     String currentYears = 'Present';
@@ -20088,7 +20315,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
       }
     } catch (_) {}
 
-    history.add('${widget.driver.team} - F1 ($currentYears)');
+    history.add('${_detailDriver.team} - F1 ($currentYears)');
     return history;
   }
 
@@ -20244,7 +20471,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
   }
 
   List<MapEntry<int, double>> _sortedPointsTimelineEntries() {
-    final entries = widget.driver.pointsPerSeason.entries
+    final entries = _detailDriver.pointsPerSeason.entries
         .map(
           (entry) => MapEntry(
             int.tryParse(entry.key.toString()) ?? 0,
@@ -20341,7 +20568,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
 
   Widget _buildRecentFormTrend() {
     final theme = Theme.of(context);
-    final entryGroups = _buildDriverRecentFormEntries(widget.driver.name);
+    final entryGroups = _buildDriverRecentFormEntries(_detailDriver.name);
 
     if (entryGroups.isEmpty) {
       return Padding(
@@ -20403,12 +20630,12 @@ class _DriverDetailViewState extends State<DriverDetailView> {
                               decoration: BoxDecoration(
                                 color: entry.isDnf
                                     ? const Color(0xFFE53935)
-                                    : F1TeamSchemes.getTeamColor(widget.driver.team),
+                                    : F1TeamSchemes.getTeamColor(_detailDriver.team),
                                 borderRadius: BorderRadius.circular(8),
                                 boxShadow: [
                                   BoxShadow(
                                     color: F1TeamSchemes.getTeamColor(
-                                      widget.driver.team,
+                                      _detailDriver.team,
                                     ).withValues(alpha: 0.25),
                                     blurRadius: 8,
                                   ),
@@ -20528,13 +20755,13 @@ class _DriverDetailViewState extends State<DriverDetailView> {
         Localizations.localeOf(context).languageCode == 'nl' ||
             Localizations.localeOf(context).languageCode == 'de';
     final List<String> facts = isDutch
-        ? widget.driver.realWorldFactsNl
-        : widget.driver.realWorldFactsEn;
-    final List<int> driverHistory = _getDriverHistory(widget.driver.name);
+        ? _detailDriver.realWorldFactsNl
+        : _detailDriver.realWorldFactsEn;
+    final List<int> driverHistory = _getDriverHistory(_detailDriver.name);
 
-    String title = widget.driver.name.toUpperCase();
+    String title = _detailDriver.name.toUpperCase();
     if (_showFullTitle) {
-      title = "${widget.driver.flag} $title - #${widget.driver.number}";
+      title = "${_detailDriver.flag} $title - #${_detailDriver.number}";
     }
 
     final expPrefs = context.watch<DetailExpansionPrefsNotifier>();
@@ -20566,7 +20793,7 @@ style: TextStyle(
             padding: const EdgeInsets.only(bottom: 8.0),
             child: _buildHistoryChart(
               driverHistory,
-              F1TeamSchemes.getTeamColor(widget.driver.team),
+              F1TeamSchemes.getTeamColor(_detailDriver.team),
             ),
           ),
         ],
@@ -20594,7 +20821,7 @@ style: TextStyle(
         ),
         children: [_buildRecentFormTrend()],
       )),
-      if (widget.driver.previousTeams.isNotEmpty)
+      if (_detailDriver.previousTeams.isNotEmpty)
         _detailOverviewSectionCard(
           context,
           child: ExpansionTile(
@@ -20711,31 +20938,31 @@ style: TextStyle(
             ),
         ),
         children: [
-          _statTile(context.l10n.age, widget.driver.age, Icons.cake),
+          _statTile(context.l10n.age, _detailDriver.age, Icons.cake),
           _statTile(
             context.l10n.height,
-            widget.driver.height,
+            _detailDriver.height,
             Icons.height,
           ),
           _statTile(
             context.l10n.birth_place,
-            widget.driver.birthPlace,
+            _detailDriver.birthPlace,
             Icons.location_on,
           ),
           _statTile(
             context.l10n.partner,
-            widget.driver.partner,
+            _detailDriver.partner,
             Icons.favorite,
           ),
           _statTile(
             context.l10n.children,
-            widget.driver.children,
+            _detailDriver.children,
             Icons.child_care,
           ),
-          _statTile(context.l10n.pets, widget.driver.pets, Icons.pets),
+          _statTile(context.l10n.pets, _detailDriver.pets, Icons.pets),
           _statTile(
             context.l10n.manager,
-            widget.driver.manager,
+            _detailDriver.manager,
             Icons.work,
           ),
           const SizedBox(height: 8),
@@ -20765,17 +20992,17 @@ style: TextStyle(
         children: [
           _statTile(
             context.l10n.nationality,
-            l10nNationality(context.l10n, widget.driver.nationality),
+            l10nNationality(context.l10n, _detailDriver.nationality),
             Icons.public,
           ),
           _statTile(
             context.l10n.f1_debut,
-            widget.driver.debutYear,
+            _detailDriver.debutYear,
             Icons.start,
           ),
           _statTile(
             context.l10n.contract_until,
-            widget.driver.contractUntil,
+            _detailDriver.contractUntil,
             Icons.edit_document,
           ),
           const SizedBox(height: 8),
@@ -20805,43 +21032,43 @@ style: TextStyle(
         children: [
           _statTile(
             context.l10n.championships,
-            widget.driver.championships,
+            _detailDriver.championships,
             Icons.workspace_premium,
           ),
           _statTile(
             context.l10n.wins,
-            widget.driver.wins,
+            _detailDriver.wins,
             Icons.emoji_events,
           ),
           _statTile(
             context.l10n.podiums,
-            widget.driver.podiums,
+            _detailDriver.podiums,
             Icons.leaderboard,
           ),
-          _statTile(context.l10n.poles, widget.driver.poles, Icons.flag),
+          _statTile(context.l10n.poles, _detailDriver.poles, Icons.flag),
           _statTile(
             context.l10n.fastest_laps,
-            widget.driver.fastestLaps,
+            _detailDriver.fastestLaps,
             Icons.timer,
           ),
           _statTile(
             context.l10n.highest_finish,
-            widget.driver.highestFinish,
+            _detailDriver.highestFinish,
             Icons.military_tech,
           ),
           _statTile(
             context.l10n.highest_grid,
-            widget.driver.highestGrid,
+            _detailDriver.highestGrid,
             Icons.grid_3x3,
           ),
           _statTile(
             context.l10n.hat_tricks,
-            widget.driver.hatTricks,
+            _detailDriver.hatTricks,
             Icons.auto_awesome,
           ),
           _statTile(
             context.l10n.front_row_starts,
-            widget.driver.frontRowStarts,
+            _detailDriver.frontRowStarts,
             Icons.looks_two,
           ),
           Theme(
@@ -20877,7 +21104,7 @@ style: TextStyle(
                     ],
                   ),
                   Text(
-                    widget.driver.totalPoints.toString(),
+                    _detailDriver.totalPoints.toString(),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
@@ -20891,7 +21118,7 @@ style: TextStyle(
           ),
           _statTile(
             context.l10n.overtakes,
-            widget.driver.overtakes,
+            _detailDriver.overtakes,
             Icons.compare_arrows,
           ),
           const SizedBox(height: 8),
@@ -20921,22 +21148,22 @@ style: TextStyle(
         children: [
           _statTile(
             context.l10n.starts,
-            widget.driver.starts,
+            _detailDriver.starts,
             Icons.traffic,
           ),
           _statTile(
             context.l10n.laps_led,
-            widget.driver.lapsLed,
+            _detailDriver.lapsLed,
             Icons.looks_one,
           ),
-          _statTile(context.l10n.dnf, widget.driver.dnfs, Icons.car_crash),
-          _statTile(context.l10n.dsqs, widget.driver.dsqs, Icons.block),
+          _statTile(context.l10n.dnf, _detailDriver.dnfs, Icons.car_crash),
+          _statTile(context.l10n.dsqs, _detailDriver.dsqs, Icons.block),
           _statTile(
             context.l10n.dnqs,
-            widget.driver.dnqs,
+            _detailDriver.dnqs,
             Icons.cancel_schedule_send,
           ),
-          if (widget.driver.dnfs > 0)
+          if (_detailDriver.dnfs > 0)
             Theme(
               data: Theme.of(
                 context,
@@ -20969,7 +21196,7 @@ style: TextStyle(
                       ],
                     ),
                     Text(
-                      widget.driver.dnfs.toString(),
+                      _detailDriver.dnfs.toString(),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
@@ -21006,7 +21233,7 @@ style: TextStyle(
             ),
         ),
         children: [
-          ...widget.driver.personalSponsors.map(
+          ..._detailDriver.personalSponsors.map(
             (s) => _statTile(s, '', Icons.business_center),
           ),
           const SizedBox(height: 8),
@@ -21064,18 +21291,22 @@ style: TextStyle(
                 Center(
                   child: _buildFlagHero(
                     tag: widget.heroTag,
-                    flag: widget.driver.flag,
+                    flag: _detailDriver.flag,
                     fontSize: 64,
                   ),
                 ),
+                if (_isChampionshipLeader) ...[
+                  const SizedBox(height: 8),
+                  Center(child: _buildChampionshipLeaderPill(context)),
+                ],
                 const SizedBox(height: 10),
                 Text(
-                  "#${widget.driver.number}",
+                  "#${_detailDriver.number}",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: F1TeamSchemes.getTeamColor(widget.driver.team),
+                    color: F1TeamSchemes.getTeamColor(_detailDriver.team),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -21094,7 +21325,7 @@ style: TextStyle(
   Widget _buildDnfTimeline() {
     final theme = Theme.of(context);
     final tokens = _themeTokens(context);
-    final allEntries = _getDnfEntries(widget.driver.name);
+    final allEntries = _getDnfEntries(_detailDriver.name);
     final visibleEntries = _showAllDnfs || allEntries.length <= 5
         ? allEntries
         : allEntries.take(5).toList();

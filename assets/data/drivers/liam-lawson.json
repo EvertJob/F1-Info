@@ -1,0 +1,245 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "liam-lawson",
+  "driver_name": "Liam Lawson",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2024,
+      "record": {
+        "name": "Liam Lawson",
+        "flag": "🇳🇿",
+        "points": 4.0,
+        "number": 30,
+        "nationality": "New Zealander",
+        "team": "Racing Bulls",
+        "points_finish_pct": 40.0,
+        "season_points_finish_pct": 50.0,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 0,
+        "podiums": 0,
+        "poles": 0,
+        "fastest_laps": 0,
+        "total_points": 6.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 650,
+        "starts": 11,
+        "dnfs": 1,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 0,
+        "front_row_starts": 0,
+        "highest_finish": "9e (x2)",
+        "highest_grid": "10e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 20,
+        "age": 22,
+        "height": "1.74m",
+        "birth_place": "Hastings, New Zealand",
+        "partner": "Charlotte Miller",
+        "children": "-",
+        "pets": "-",
+        "manager": "Red Bull",
+        "real_world_facts_en": [
+          "Replaced Daniel Ricciardo in the final stages of the 2024 season.",
+          "Proved to be a tough racer in battles with e.g. Perez.",
+          "Carries car number #30.",
+          "Made their F1 debut in 2023.",
+          "Birthplace: Hastings, New Zealand."
+        ],
+        "real_world_facts_nl": [
+          "Vervong Daniel Ricciardo in de laatste fase van het 2024 seizoen.",
+          "Toonde zich een harde racer in gevechten met o.a. Perez.",
+          "Rijdt met startnummer #30.",
+          "Maakte het F1-debuut in 2023.",
+          "Geboorteplaats: Hastings, New Zealand."
+        ],
+        "points_per_season": {
+          "2024": 4.0,
+          "2023": 2.0,
+          "2022": 0.0,
+          "2021": 0.0,
+          "2020": 0.0
+        },
+        "debut_year": 2023,
+        "contract_until": "2024",
+        "previous_teams": [
+          "Various Teams - Karting (2009-2016)",
+          "M2 Competition - Formula Ford / Toyota Racing Series / Euroformula (2017-2020)",
+          "Hitech Grand Prix - FIA F3 / DTM (2021)",
+          "Carlin - F2 (2022)",
+          "AlphaTauri / RB - F1 (2023-2024)"
+        ],
+        "personal_sponsors": [
+          "Red Bull",
+          "Rodin Cars"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2025,
+      "record": {
+        "name": "Liam Lawson",
+        "flag": "🇳🇿",
+        "points": 30.0,
+        "number": 30,
+        "nationality": "New Zealander",
+        "team": "Racing Bulls",
+        "points_finish_pct": 30.0,
+        "season_points_finish_pct": 29.1,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 0,
+        "podiums": 0,
+        "poles": 0,
+        "fastest_laps": 0,
+        "total_points": 40.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 1453,
+        "starts": 29,
+        "dnfs": 2,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 0,
+        "front_row_starts": 0,
+        "highest_finish": "9e (x1)",
+        "highest_grid": "10e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 30,
+        "age": 24,
+        "height": "1.74m",
+        "birth_place": "Hastings, New Zealand",
+        "partner": "Charlotte Miller",
+        "children": "-",
+        "pets": "-",
+        "manager": "Red Bull",
+        "real_world_facts_en": [
+          "Very strong substitute in 2023 and 2024.",
+          "Narrowly missed Super Formula title.",
+          "Carries car number #30.",
+          "Made their F1 debut in 2023.",
+          "Birthplace: Hastings, New Zealand."
+        ],
+        "real_world_facts_nl": [
+          "IJzersterke invaller in 2023 en 2024.",
+          "Miste nipt de Super Formula titel.",
+          "Rijdt met startnummer #30.",
+          "Maakte het F1-debuut in 2023.",
+          "Geboorteplaats: Hastings, New Zealand."
+        ],
+        "points_per_season": {
+          "2025": 30.0,
+          "2024": 6.0,
+          "2023": 2.0,
+          "2022": 0.0,
+          "2021": 0.0
+        },
+        "debut_year": 2023,
+        "contract_until": "2025",
+        "previous_teams": [
+          "Various Teams - Karting (2009-2016)",
+          "M2 Competition - Formula Ford / Toyota Racing Series / Euroformula (2017-2020)",
+          "Hitech Grand Prix - FIA F3 / DTM (2021)",
+          "Carlin - F2 (2022)",
+          "AlphaTauri / RB - F1 (2023-2024)"
+        ],
+        "personal_sponsors": [
+          "Red Bull",
+          "Rodin Cars"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2026,
+      "record": {
+        "name": "Liam Lawson",
+        "flag": "🇳🇿",
+        "points": 10.0,
+        "number": 30,
+        "nationality": "New Zealander",
+        "team": "Racing Bulls",
+        "points_finish_pct": 30.0,
+        "season_points_finish_pct": 29.1,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 0,
+        "podiums": 0,
+        "poles": 0,
+        "fastest_laps": 0,
+        "total_points": 50.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 1619,
+        "starts": 32,
+        "dnfs": 2,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 0,
+        "front_row_starts": 0,
+        "highest_finish": "7e (x1)",
+        "highest_grid": "8e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 30,
+        "age": 24,
+        "height": "1.74m",
+        "birth_place": "Hastings, New Zealand",
+        "partner": "Charlotte Miller",
+        "children": "-",
+        "pets": "-",
+        "manager": "Red Bull",
+        "real_world_facts_en": [
+          "Very strong substitute in 2023.",
+          "Narrowly missed Super Formula title.",
+          "Carries car number #30.",
+          "Made their F1 debut in 2023.",
+          "Birthplace: Hastings, New Zealand."
+        ],
+        "real_world_facts_nl": [
+          "IJzersterke invaller in 2023.",
+          "Miste nipt de Super Formula titel.",
+          "Rijdt met startnummer #30.",
+          "Maakte het F1-debuut in 2023.",
+          "Geboorteplaats: Hastings, New Zealand."
+        ],
+        "points_per_season": {
+          "2025": 30.0,
+          "2024": 6.0,
+          "2023": 2.0,
+          "2022": 0.0,
+          "2021": 0.0,
+          "2026": 10.0
+        },
+        "debut_year": 2023,
+        "contract_until": "2026",
+        "previous_teams": [
+          "Various Teams - Karting (2009-2016)",
+          "M2 Competition - Formula Ford / Toyota Racing Series / Euroformula (2017-2020)",
+          "Hitech Grand Prix - FIA F3 / DTM (2021)",
+          "Carlin - F2 (2022)",
+          "AlphaTauri / RB - F1 (2023-2024)"
+        ],
+        "personal_sponsors": [
+          "Red Bull",
+          "Rodin Cars"
+        ],
+        "reserve_driver": null,
+        "merge_meta_2026": {
+          "schema": 1,
+          "baseline_season_year": 2025,
+          "baseline_is_synthetic_zero": false,
+          "events_scanned": [
+            "melbourne",
+            "shanghai",
+            "suzuka"
+          ],
+          "computed_at": "2026-03-29T13:36:23.622599Z"
+        }
+      }
+    }
+  ]
+}

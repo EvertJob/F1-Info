@@ -1,0 +1,160 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "kimi-r-ikk-nen",
+  "driver_name": "Kimi Räikkönen",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2017,
+      "record": {
+        "name": "Kimi Räikkönen",
+        "flag": "🇫🇮",
+        "points": 205.0,
+        "number": 7,
+        "nationality": "Finnish",
+        "team": "Ferrari",
+        "points_finish_pct": 75.0,
+        "season_points_finish_pct": 75.0,
+        "wins": 20,
+        "podiums_2nd": 35,
+        "podiums_3rd": 36,
+        "podiums": 91,
+        "poles": 17,
+        "fastest_laps": 45,
+        "total_points": 1565.0,
+        "championships": 1,
+        "championship_years": [
+          2007
+        ],
+        "laps_raced": 14500,
+        "starts": 271,
+        "dnfs": 64,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 1100,
+        "front_row_starts": 41,
+        "highest_finish": "1e (x20)",
+        "highest_grid": "1e (x17)",
+        "hat_tricks": 2,
+        "overtakes": 750,
+        "age": 38,
+        "height": "1.75m",
+        "birth_place": "Espoo, Finland",
+        "partner": "Minttu Virtanen",
+        "children": "Robin, Rianna",
+        "pets": "-",
+        "manager": "Steve Robertson",
+        "real_world_facts_en": [
+          "Took pole position in Monaco 2017 in phenomenal fashion.",
+          "Was praised for his no-nonsense radio messages.",
+          "Won 1 world title, most recently in 2007.",
+          "Has 20 Grand Prix victories.",
+          "Has 91 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "Pakte in Monaco 2017 op fenomenale wijze pole position.",
+          "Werd geroemd om zijn no-nonsense radioberichten.",
+          "Werd 1 keer wereldkampioen, meest recent in 2007.",
+          "Heeft 20 Grand Prix-zeges.",
+          "Heeft 91 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2017": 205.0,
+          "2016": 186.0,
+          "2015": 150.0,
+          "2014": 55.0,
+          "2013": 183.0
+        },
+        "debut_year": 2001,
+        "contract_until": "2018",
+        "previous_teams": [
+          "Various Teams - Karting (1987-1999)",
+          "Haywood Racing / Manor Motorsport - Formula Renault UK (2000)",
+          "Sauber - F1 (2001)",
+          "McLaren - F1 (2002-2006)"
+        ],
+        "personal_sponsors": [
+          "Singha",
+          "Oakley"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2018,
+      "record": {
+        "name": "Kimi Räikkönen",
+        "flag": "🇫🇮",
+        "points": 251.0,
+        "number": 7,
+        "nationality": "Finnish",
+        "team": "Ferrari",
+        "points_finish_pct": 72.0,
+        "season_points_finish_pct": 80.0,
+        "wins": 21,
+        "podiums_2nd": 37,
+        "podiums_3rd": 45,
+        "podiums": 103,
+        "poles": 18,
+        "fastest_laps": 46,
+        "total_points": 1816.0,
+        "championships": 1,
+        "championship_years": [
+          2007
+        ],
+        "laps_raced": 16000,
+        "starts": 292,
+        "dnfs": 68,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 1150,
+        "front_row_starts": 44,
+        "highest_finish": "1e (x21)",
+        "highest_grid": "1e (x18)",
+        "hat_tricks": 2,
+        "overtakes": 800,
+        "age": 39,
+        "height": "1.75m",
+        "birth_place": "Espoo, Finland",
+        "partner": "Minttu Virtanen",
+        "children": "Robin, Rianna",
+        "pets": "-",
+        "manager": "Steve Robertson",
+        "real_world_facts_en": [
+          "Took his first victory in 113 races in Austin, Texas.",
+          "Set the fastest Formula 1 lap ever recorded (in km/h) at Monza.",
+          "Won 1 world title, most recently in 2007.",
+          "Has 21 Grand Prix victories.",
+          "Has 103 podium finishes."
+        ],
+        "real_world_facts_nl": [
+          "Pakte in Austin, Texas zijn eerste overwinning in 113 races tijd.",
+          "Zette in Monza de snelste Formule 1-ronde ooit gereden neer (in km/u).",
+          "Werd 1 keer wereldkampioen, meest recent in 2007.",
+          "Heeft 21 Grand Prix-zeges.",
+          "Heeft 103 podiumplaatsen."
+        ],
+        "points_per_season": {
+          "2018": 251.0,
+          "2017": 205.0,
+          "2016": 186.0,
+          "2015": 150.0,
+          "2014": 55.0
+        },
+        "debut_year": 2001,
+        "contract_until": "2018",
+        "previous_teams": [
+          "Various Teams - Karting (1987-1999)",
+          "Haywood Racing / Manor Motorsport - Formula Renault UK (2000)",
+          "Sauber - F1 (2001)",
+          "McLaren - F1 (2002-2006)"
+        ],
+        "personal_sponsors": [
+          "Singha",
+          "Oakley"
+        ],
+        "reserve_driver": null
+      }
+    }
+  ]
+}

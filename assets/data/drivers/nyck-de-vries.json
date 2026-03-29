@@ -1,0 +1,83 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "nyck-de-vries",
+  "driver_name": "Nyck de Vries",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2023,
+      "record": {
+        "name": "Nyck de Vries",
+        "flag": "🇳🇱",
+        "points": 0.0,
+        "number": 21,
+        "nationality": "Dutch",
+        "team": "AlphaTauri",
+        "points_finish_pct": 10.0,
+        "season_points_finish_pct": 0.0,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 0,
+        "podiums": 0,
+        "poles": 0,
+        "fastest_laps": 0,
+        "total_points": 2.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 550,
+        "starts": 11,
+        "dnfs": 2,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 0,
+        "front_row_starts": 0,
+        "highest_finish": "9e (x1)",
+        "highest_grid": "8e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 30,
+        "age": 28,
+        "height": "1.67m",
+        "birth_place": "Sneek, Netherlands",
+        "partner": "Eva Bruggenwirth",
+        "children": "-",
+        "pets": "-",
+        "manager": "Guillaume Le Goff",
+        "real_world_facts_en": [
+          "Was dismissed after 10 races in 2023 due to poor results.",
+          "Scored points immediately during his substitute drive for Williams in 2022.",
+          "Carries car number #21.",
+          "Made their F1 debut in 2022.",
+          "Birthplace: Sneek, Netherlands."
+        ],
+        "real_world_facts_nl": [
+          "Kreeg na 10 races in 2023 ontslag wegens tegenvallende resultaten.",
+          "Scoorde direct punten tijdens zijn invalbeurt voor Williams in 2022.",
+          "Rijdt met startnummer #21.",
+          "Maakte het F1-debuut in 2022.",
+          "Geboorteplaats: Sneek, Netherlands."
+        ],
+        "points_per_season": {
+          "2023": 0.0,
+          "2022": 2.0,
+          "2021": 0.0,
+          "2020": 0.0,
+          "2019": 0.0
+        },
+        "debut_year": 2022,
+        "contract_until": "N.A.",
+        "previous_teams": [
+          "Various Teams - Karting (2003-2010)",
+          "R-ace GP - Formula Renault 2.0 Eurocup (2012)",
+          "Koiranen GP - Formula Renault 2.0 Eurocup / Alps (2013)",
+          "DAMS - Formula Renault 3.5 / GP3 (2014-2016)",
+          "Racing Engineering / ART Grand Prix - Formula 2 (2017-2019)",
+          "Mercedes - Formula E (2019-2022)"
+        ],
+        "personal_sponsors": [
+          "Tommy Hilfiger"
+        ],
+        "reserve_driver": null
+      }
+    }
+  ]
+}

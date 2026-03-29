@@ -1,0 +1,394 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "george-russell",
+  "driver_name": "George Russell",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2022,
+      "record": {
+        "name": "George Russell",
+        "flag": "🇬🇧",
+        "points": 275.0,
+        "number": 63,
+        "nationality": "British",
+        "team": "Mercedes",
+        "points_finish_pct": 60.0,
+        "season_points_finish_pct": 90.0,
+        "wins": 1,
+        "podiums_2nd": 2,
+        "podiums_3rd": 5,
+        "podiums": 8,
+        "poles": 1,
+        "fastest_laps": 4,
+        "total_points": 294.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 5200,
+        "starts": 82,
+        "dnfs": 14,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 50,
+        "front_row_starts": 2,
+        "highest_finish": "1e (x1)",
+        "highest_grid": "1e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 200,
+        "age": 24,
+        "height": "1.85m",
+        "birth_place": "King's Lynn, UK",
+        "partner": "Carmen Montero Mundt",
+        "children": "-",
+        "pets": "-",
+        "manager": "Harry Soden",
+        "real_world_facts_en": [
+          "Achieved his very first Grand Prix victory in Brazil 2022.",
+          "Finished above teammate Hamilton in his first year at Mercedes.",
+          "Has 1 Grand Prix victory.",
+          "Has 8 podium finishes.",
+          "Has 1 pole position."
+        ],
+        "real_world_facts_nl": [
+          "Behaalde in Brazilië 2022 zijn allereerste Grand Prix-overwinning.",
+          "Eindigde in zijn eerste jaar bij Mercedes boven teamgenoot Hamilton.",
+          "Heeft 1 Grand Prix-zege.",
+          "Heeft 8 podiumplaatsen.",
+          "Heeft 1 poleposition."
+        ],
+        "points_per_season": {
+          "2022": 275.0,
+          "2021": 16.0,
+          "2020": 3.0,
+          "2019": 0.0
+        },
+        "debut_year": 2019,
+        "contract_until": "2025",
+        "previous_teams": [
+          "Various Teams - Karting (2006-2013)",
+          "Lanan Racing - BRDC F4 (2014)",
+          "Carlin - Formula Renault / GP3 (2015-2017)",
+          "ART Grand Prix - F2 (2018)",
+          "Williams - F1 (2019-2021)"
+        ],
+        "personal_sponsors": [
+          "Puma",
+          "Alpinestars"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2023,
+      "record": {
+        "name": "George Russell",
+        "flag": "🇬🇧",
+        "points": 175.0,
+        "number": 63,
+        "nationality": "British",
+        "team": "Mercedes",
+        "points_finish_pct": 62.0,
+        "season_points_finish_pct": 77.0,
+        "wins": 1,
+        "podiums_2nd": 3,
+        "podiums_3rd": 7,
+        "podiums": 11,
+        "poles": 1,
+        "fastest_laps": 6,
+        "total_points": 469.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 6300,
+        "starts": 104,
+        "dnfs": 16,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 100,
+        "front_row_starts": 4,
+        "highest_finish": "1e (x1)",
+        "highest_grid": "1e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 280,
+        "age": 25,
+        "height": "1.85m",
+        "birth_place": "King's Lynn, UK",
+        "partner": "Carmen Montero Mundt",
+        "children": "-",
+        "pets": "-",
+        "manager": "Harry Soden",
+        "real_world_facts_en": [
+          "Threw away a podium in Singapore 2023 on the very last lap.",
+          "Struggled to match teammate Hamilton's race pace.",
+          "Has 1 Grand Prix victory.",
+          "Has 11 podium finishes.",
+          "Has 1 pole position."
+        ],
+        "real_world_facts_nl": [
+          "Gooide een podium in Singapore 2023 weg in de allerlaatste ronde.",
+          "Had moeite om het teamgenoot Hamilton bij te benen in de races.",
+          "Heeft 1 Grand Prix-zege.",
+          "Heeft 11 podiumplaatsen.",
+          "Heeft 1 poleposition."
+        ],
+        "points_per_season": {
+          "2023": 175.0,
+          "2022": 275.0,
+          "2021": 16.0,
+          "2020": 3.0,
+          "2019": 0.0
+        },
+        "debut_year": 2019,
+        "contract_until": "2025",
+        "previous_teams": [
+          "Various Teams - Karting (2006-2013)",
+          "Lanan Racing - BRDC F4 (2014)",
+          "Carlin - Formula Renault / GP3 (2015-2017)",
+          "ART Grand Prix - F2 (2018)",
+          "Williams - F1 (2019-2021)"
+        ],
+        "personal_sponsors": [
+          "Puma",
+          "Alpinestars"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2024,
+      "record": {
+        "name": "George Russell",
+        "flag": "🇬🇧",
+        "points": 205.0,
+        "number": 63,
+        "nationality": "British",
+        "team": "Mercedes",
+        "points_finish_pct": 65.0,
+        "season_points_finish_pct": 80.0,
+        "wins": 2,
+        "podiums_2nd": 5,
+        "podiums_3rd": 10,
+        "podiums": 17,
+        "poles": 4,
+        "fastest_laps": 8,
+        "total_points": 788.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 7512,
+        "starts": 128,
+        "dnfs": 18,
+        "dsqs": 1,
+        "dnqs": 0,
+        "laps_led": 210,
+        "front_row_starts": 10,
+        "highest_finish": "1e (x2)",
+        "highest_grid": "1e (x4)",
+        "hat_tricks": 0,
+        "overtakes": 350,
+        "age": 26,
+        "height": "1.85m",
+        "birth_place": "King's Lynn, UK",
+        "partner": "Carmen Montero Mundt",
+        "children": "-",
+        "pets": "-",
+        "manager": "Harry Soden",
+        "real_world_facts_en": [
+          "Disqualified after winning Spa in 2024 due to an underweight car.",
+          "Fought for the number 1 status at Mercedes.",
+          "Has 2 Grand Prix victories.",
+          "Has 17 podium finishes.",
+          "Has 4 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Werd in 2024 gediskwalificeerd na winst in Spa wegens te lichte auto.",
+          "Ging de strijd aan om de nummer 1 status bij Mercedes.",
+          "Heeft 2 Grand Prix-zeges.",
+          "Heeft 17 podiumplaatsen.",
+          "Heeft 4 polepositions."
+        ],
+        "points_per_season": {
+          "2024": 205.0,
+          "2023": 175.0,
+          "2022": 275.0,
+          "2021": 16.0,
+          "2020": 3.0
+        },
+        "debut_year": 2019,
+        "contract_until": "2027",
+        "previous_teams": [
+          "Various Teams - Karting (2006-2013)",
+          "Lanan Racing - BRDC F4 (2014)",
+          "Carlin - Formula Renault / GP3 (2015-2017)",
+          "ART Grand Prix - F2 (2018)",
+          "Williams - F1 (2019-2021)"
+        ],
+        "personal_sponsors": [
+          "Puma",
+          "Alpinestars"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2025,
+      "record": {
+        "name": "George Russell",
+        "flag": "🇬🇧",
+        "points": 250.0,
+        "number": 63,
+        "nationality": "British",
+        "team": "Mercedes",
+        "points_finish_pct": 65.4,
+        "season_points_finish_pct": 83.3,
+        "wins": 2,
+        "podiums_2nd": 5,
+        "podiums_3rd": 10,
+        "podiums": 19,
+        "poles": 4,
+        "fastest_laps": 8,
+        "total_points": 788.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 7512,
+        "starts": 128,
+        "dnfs": 18,
+        "dsqs": 1,
+        "dnqs": 0,
+        "laps_led": 210,
+        "front_row_starts": 10,
+        "highest_finish": "1e (x2)",
+        "highest_grid": "1e (x4)",
+        "hat_tricks": 0,
+        "overtakes": 350,
+        "age": 28,
+        "height": "1.85m",
+        "birth_place": "King's Lynn, UK",
+        "partner": "Carmen Montero Mundt",
+        "children": "-",
+        "pets": "-",
+        "manager": "Harry Soden",
+        "real_world_facts_en": [
+          "Nickname \"Mr. Saturday\".",
+          "Director of the GPDA.",
+          "Has 2 Grand Prix victories.",
+          "Has 19 podium finishes.",
+          "Has 4 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Bijnaam \"Mr. Saturday\".",
+          "Directeur van de GPDA.",
+          "Heeft 2 Grand Prix-zeges.",
+          "Heeft 19 podiumplaatsen.",
+          "Heeft 4 polepositions."
+        ],
+        "points_per_season": {
+          "2025": 250.0,
+          "2024": 200.0,
+          "2023": 175.0,
+          "2022": 275.0,
+          "2021": 16.0
+        },
+        "debut_year": 2019,
+        "contract_until": "2025",
+        "previous_teams": [
+          "Various Teams - Karting (2006-2013)",
+          "Lanan Racing - BRDC F4 (2014)",
+          "Carlin - Formula Renault / GP3 (2015-2017)",
+          "ART Grand Prix - F2 (2018)",
+          "Williams - F1 (2019-2021)"
+        ],
+        "personal_sponsors": [
+          "Puma",
+          "Alpinestars"
+        ],
+        "reserve_driver": "Frederik Vesti"
+      }
+    },
+    {
+      "season_year": 2026,
+      "record": {
+        "name": "George Russell",
+        "flag": "🇬🇧",
+        "points": 63.0,
+        "number": 63,
+        "nationality": "British",
+        "team": "Mercedes",
+        "points_finish_pct": 65.4,
+        "season_points_finish_pct": 83.3,
+        "wins": 3,
+        "podiums_2nd": 6,
+        "podiums_3rd": 10,
+        "podiums": 21,
+        "poles": 5,
+        "fastest_laps": 8,
+        "total_points": 851.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 7679,
+        "starts": 131,
+        "dnfs": 18,
+        "dsqs": 1,
+        "dnqs": 0,
+        "laps_led": 210,
+        "front_row_starts": 10,
+        "highest_finish": "1e (x3)",
+        "highest_grid": "1e (x5)",
+        "hat_tricks": 0,
+        "overtakes": 350,
+        "age": 28,
+        "height": "1.85m",
+        "birth_place": "King's Lynn, UK",
+        "partner": "Carmen Montero Mundt",
+        "children": "-",
+        "pets": "-",
+        "manager": "Harry Soden",
+        "real_world_facts_en": [
+          "Nickname \"Mr. Saturday\".",
+          "Director of the GPDA.",
+          "Has 2 Grand Prix victories.",
+          "Has 19 podium finishes.",
+          "Has 4 pole positions."
+        ],
+        "real_world_facts_nl": [
+          "Bijnaam \"Mr. Saturday\".",
+          "Directeur van de GPDA.",
+          "Heeft 2 Grand Prix-zeges.",
+          "Heeft 19 podiumplaatsen.",
+          "Heeft 4 polepositions."
+        ],
+        "points_per_season": {
+          "2025": 250.0,
+          "2024": 200.0,
+          "2023": 175.0,
+          "2022": 275.0,
+          "2021": 16.0,
+          "2026": 63.0
+        },
+        "debut_year": 2019,
+        "contract_until": "2025",
+        "previous_teams": [
+          "Various Teams - Karting (2006-2013)",
+          "Lanan Racing - BRDC F4 (2014)",
+          "Carlin - Formula Renault / GP3 (2015-2017)",
+          "ART Grand Prix - F2 (2018)",
+          "Williams - F1 (2019-2021)"
+        ],
+        "personal_sponsors": [
+          "Puma",
+          "Alpinestars"
+        ],
+        "reserve_driver": "Frederik Vesti",
+        "merge_meta_2026": {
+          "schema": 1,
+          "baseline_season_year": 2025,
+          "baseline_is_synthetic_zero": false,
+          "events_scanned": [
+            "melbourne",
+            "shanghai",
+            "suzuka"
+          ],
+          "computed_at": "2026-03-29T13:36:23.598063Z"
+        }
+      }
+    }
+  ]
+}

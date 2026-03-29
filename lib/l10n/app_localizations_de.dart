@@ -498,6 +498,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get championships => 'Weltmeistertitel';
 
   @override
+  String get championship_leader_pill => 'WM-Führender';
+
+  @override
   String get calendar_prefs_section_title => 'Kalender';
 
   @override

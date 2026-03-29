@@ -1,0 +1,172 @@
+{
+  "schema": "f1_hub_driver_export_v1",
+  "slug": "franco-colapinto",
+  "driver_name": "Franco Colapinto",
+  "source": "lib/f1_data.dart → driversData",
+  "seasons": [
+    {
+      "season_year": 2024,
+      "record": {
+        "name": "Franco Colapinto",
+        "flag": "🇦🇷",
+        "points": 12.0,
+        "number": 43,
+        "nationality": "Argentine",
+        "team": "Williams",
+        "points_finish_pct": 60.0,
+        "season_points_finish_pct": 60.0,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 0,
+        "podiums": 0,
+        "poles": 0,
+        "fastest_laps": 0,
+        "total_points": 12.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 450,
+        "starts": 9,
+        "dnfs": 1,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 0,
+        "front_row_starts": 0,
+        "highest_finish": "8e (x1)",
+        "highest_grid": "9e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 15,
+        "age": 21,
+        "height": "1.76m",
+        "birth_place": "Buenos Aires, Argentina",
+        "partner": "-",
+        "children": "-",
+        "pets": "-",
+        "manager": "Bullet Sports Management",
+        "real_world_facts_en": [
+          "Replaced Logan Sargeant mid-2024 and impressed immediately.",
+          "First Argentine points scorer since Reutemann in 1982.",
+          "Carries car number #43.",
+          "Made their F1 debut in 2024.",
+          "Birthplace: Buenos Aires, Argentina."
+        ],
+        "real_world_facts_nl": [
+          "Vervong Logan Sargeant halverwege 2024 en maakte direct indruk.",
+          "Eerste Argentijnse puntenscoorder sinds Reutemann in 1982.",
+          "Rijdt met startnummer #43.",
+          "Maakte het F1-debuut in 2024.",
+          "Geboorteplaats: Buenos Aires, Argentina."
+        ],
+        "points_per_season": {
+          "2024": 12.0,
+          "2023": 0.0,
+          "2022": 0.0,
+          "2021": 0.0,
+          "2020": 0.0
+        },
+        "debut_year": 2024,
+        "contract_until": "2024",
+        "previous_teams": [
+          "Various Teams - Karting (2013-2018)",
+          "FA Racing by Drivex - Spanish F4 (2019)",
+          "MP Motorsport - Formula Renault Eurocup / Toyota Racing Series (2020)",
+          "Van Amersfoort Racing - Formula Regional Europe (2021)",
+          "MP Motorsport - FIA F3 / F2 (2022-2023)"
+        ],
+        "personal_sponsors": [
+          "Globant",
+          "Mercado Libre",
+          "Bizarrap"
+        ],
+        "reserve_driver": null
+      }
+    },
+    {
+      "season_year": 2026,
+      "record": {
+        "name": "Franco Colapinto",
+        "flag": "🇦🇷",
+        "points": 1.0,
+        "number": 43,
+        "nationality": "Argentine",
+        "team": "Alpine",
+        "points_finish_pct": 0.0,
+        "season_points_finish_pct": 0.0,
+        "wins": 0,
+        "podiums_2nd": 0,
+        "podiums_3rd": 0,
+        "podiums": 0,
+        "poles": 0,
+        "fastest_laps": 0,
+        "total_points": 13.0,
+        "championships": 0,
+        "championship_years": [],
+        "laps_raced": 614,
+        "starts": 12,
+        "dnfs": 1,
+        "dsqs": 0,
+        "dnqs": 0,
+        "laps_led": 0,
+        "front_row_starts": 0,
+        "highest_finish": "8e (x1)",
+        "highest_grid": "9e (x1)",
+        "hat_tricks": 0,
+        "overtakes": 10,
+        "age": 22,
+        "height": "1.76m",
+        "birth_place": "Buenos Aires, Argentina",
+        "partner": "-",
+        "children": "-",
+        "pets": "-",
+        "manager": "Bullet Sports",
+        "real_world_facts_en": [
+          "Sparked F1 mania in Argentina.",
+          "Huge fanatic fanbase.",
+          "Carries car number #43.",
+          "Made their F1 debut in 2024.",
+          "Birthplace: Buenos Aires, Argentina."
+        ],
+        "real_world_facts_nl": [
+          "Zorgde voor F1 gekte in Argentinië.",
+          "Enorme fanatieke fanbase.",
+          "Rijdt met startnummer #43.",
+          "Maakte het F1-debuut in 2024.",
+          "Geboorteplaats: Buenos Aires, Argentina."
+        ],
+        "points_per_season": {
+          "2024": 12.0,
+          "2023": 0.0,
+          "2022": 0.0,
+          "2021": 0.0,
+          "2020": 0.0,
+          "2026": 1.0
+        },
+        "debut_year": 2024,
+        "contract_until": "2026",
+        "previous_teams": [
+          "Various Teams - Karting (2013-2018)",
+          "FA Racing by Drivex - Spanish F4 (2019)",
+          "MP Motorsport - Formula Renault Eurocup / Toyota Racing Series (2020)",
+          "Van Amersfoort Racing - Formula Regional Europe (2021)",
+          "MP Motorsport - FIA F3 / F2 (2022-2023)",
+          "Williams - Driver Academy / Reserve (2023-2024)"
+        ],
+        "personal_sponsors": [
+          "Visit Argentina",
+          "YPF"
+        ],
+        "reserve_driver": null,
+        "merge_meta_2026": {
+          "schema": 1,
+          "baseline_season_year": 2024,
+          "baseline_is_synthetic_zero": false,
+          "events_scanned": [
+            "melbourne",
+            "shanghai",
+            "suzuka"
+          ],
+          "computed_at": "2026-03-29T13:36:23.592334Z"
+        }
+      }
+    }
+  ]
+}

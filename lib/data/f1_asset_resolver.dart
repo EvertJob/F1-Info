@@ -1,6 +1,8 @@
 import 'package:flutter/services.dart'
     show AssetBundle, AssetManifest, rootBundle;
 
+import '../utils/driver_name_utils.dart' show driverJsonSlugCandidates;
+
 /// Resolves bundled OpenF1 JSON paths: `assets/data/{year}/{venue}/{session}_{kind}.json`.
 ///
 /// Venue folder names follow OpenF1 `circuit_short_name` sanitization (see `fetch_session_data.dart`).
@@ -133,6 +135,13 @@ abstract final class F1AssetResolver {
 
   static String teamsStandingsPath(int year) =>
       'assets/data/$year/teams_standings_$year.json';
+
+  /// `assets/data/drivers/{slug}.json` — tries diacritic slug then ASCII (e.g. Pérez).
+  static List<String> hubDriverExportAssetPaths(String displayName) {
+    return driverJsonSlugCandidates(displayName)
+        .map((slug) => 'assets/data/drivers/$slug.json')
+        .toList();
+  }
 
   static List<String> driversStandingsCandidatePaths(int year) => [
         driversStandingsPath(year),

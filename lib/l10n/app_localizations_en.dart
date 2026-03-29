@@ -498,6 +498,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get championships => 'Championships';
 
   @override
+  String get championship_leader_pill => 'Championship leader';
+
+  @override
   String get calendar_prefs_section_title => 'Calendar';
 
   @override
