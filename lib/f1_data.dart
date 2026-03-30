@@ -2556,11 +2556,6 @@ String driverStandingsTitlesLine(Driver d) {
   return '${d.championships} Titles (${d.championshipYears.join(', ')})';
 }
 
-String driverStandingsTitlesLineDesktop(Driver d) {
-  final line = driverStandingsTitlesLine(d);
-  return line.isEmpty ? 'No titles' : line;
-}
-
 final List<Driver> drivers2026 = [
   Driver(
     name: 'Max Verstappen',
@@ -3217,56 +3212,6 @@ final List<Driver> drivers2026 = [
     contractUntil: 'Rolling',
     previousTeams: ['Williams (2017-2018)', 'Racing Point (2019-2020)'],
     personalSponsors: ['Bombardier', 'Tag Heuer'],
-  ),
-  Driver(
-    name: 'Yuki Tsunoda',
-    flag: '🇯🇵',
-    points: 0,
-    number: 22,
-    nationality: 'Japanese',
-    team: 'Racing Bulls',
-    pointsFinishPct: 38.0,
-    seasonPointsFinishPct: 33.3,
-    wins: 0,
-    podiums2nd: 0,
-    podiums3rd: 0,
-    podiums: 0,
-    poles: 0,
-    fastestLaps: 1,
-    totalPoints: 94.0,
-    championships: 0,
-    championshipYears: [],
-    lapsRaced: 5214,
-    starts: 90,
-    dnfs: 14,
-    dsqs: 0,
-    dnqs: 0,
-    lapsLed: 0,
-    frontRowStarts: 0,
-    highestFinish: '4e (x1)',
-    highestGrid: '6e (x1)',
-    hatTricks: 0,
-    overtakes: 250,
-    age: 25,
-    height: '1.59m',
-    birthPlace: 'Sagamihara, Japan',
-    partner: '-',
-    children: '-',
-    pets: '-',
-    manager: 'Mario Miyakawa',
-    realWorldFactsNl: [
-      'Bekend om boordradio uitbarstingen.',
-      'Zwaar gesteund door Honda.',
-    ],
-    realWorldFactsEn: [
-      'Known for radio outbursts.',
-      'Heavily backed by Honda.',
-    ],
-    pointsPerSeason: {2025: 30, 2024: 25, 2023: 17, 2022: 12, 2021: 32},
-    debutYear: 2021,
-    contractUntil: '2026',
-    previousTeams: ['AlphaTauri (2021-2023)'],
-    personalSponsors: ['Honda', 'Arai'],
   ),
   Driver(
     name: 'Kimi Antonelli',

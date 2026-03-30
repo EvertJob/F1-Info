@@ -711,6 +711,8 @@
   "loading": "Laden",
   "logged_in": "Je bent ingelogd",
   "login": "Inloggen",
+  "login_register_menu": "Inloggen / Registreren",
+  "login_page_title": "Inloggen",
   "logout": "Uitloggen",
   "manager": "Manager",
   "max_g_force": "Max G-kracht",
@@ -1079,5 +1081,108 @@
   "recent_form_total_podiums": "Totaal podiums (race + sprint)",
   "recent_form_expand_tooltip": "Volledig seizoen openen",
   "recent_form_close": "Sluiten",
-  "recent_form_no_data": "Nog geen vormdata voor dit seizoen."
+  "recent_form_no_data": "Nog geen vormdata voor dit seizoen.",
+  "simulator_nav": "Simulator",
+  "simulator_title": "Kampioenschapssimulator",
+  "simulator_timeline": "Tijdlijn",
+  "simulator_podium_hint": "Sleep een coureur naar P1–P3. Andere plekken schuiven op.",
+  "simulator_standings": "Seizoensstand",
+  "simulator_actual": "Werkelijk",
+  "simulator_prediction": "Jouw keuze",
+  "simulator_accuracy": "Podium-nauwkeurigheid",
+  "simulator_magic_clinch": "Voorsprong > punten te gaan (alleen GP-bovengrens)",
+  "simulator_consensus_stub": "Officiële kampioenschapspunten van races met uitslag dit seizoen (geen projecties).",
+  "simulator_sync_cloud": "Voorspellingen naar cloud syncen",
+  "simulator_sync_cloud_done": "Voorspellingen opgeslagen op je account.",
+  "simulator_sync_cloud_nothing_to_sync": "Niets om te uploaden — zet P1–P3 voor minstens één race.",
+  "simulator_sync_cloud_not_signed_in": "Log in om voorspellingen in de cloud op te slaan.",
+  "simulator_sync_cloud_read_only": "Alleen-lezen — cloudsynchronisatie uit.",
+  "simulator_sync_cloud_failed": "Cloudsync mislukt: {detail}",
+  "@simulator_sync_cloud_failed": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "simulator_snapshot_tooltip": "Standen delen als afbeelding",
+  "simulator_snapshot_copied_hint": "Afbeelding klaar — gebruik het deelscherm van je apparaat.",
+  "simulator_share_readonly_tooltip": "Deel alleen-lezen link",
+  "simulator_share_readonly_subject": "F1 Hub — kampioenschapssimulator (alleen lezen)",
+  "simulator_share_readonly_snackbar": "Link klaar — gebruik het deelscherm van je apparaat.",
+  "simulator_share_readonly_need_login": "Log in om je alleen-lezen simulatorlink te delen.",
+  "simulator_prediction_by": "Voorspelling van @{username}",
+  "@simulator_prediction_by": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "simulator_p1_accuracy_percent": "P1-nauwkeurigheid: {pct}%",
+  "@simulator_p1_accuracy_percent": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "simulator_clinch_in": "Titel kan vallen in: {venue}",
+  "@simulator_clinch_in": {
+    "placeholders": {
+      "venue": {
+        "type": "String"
+      }
+    }
+  },
+  "simulator_steward_title": "Steward-rooster",
+  "simulator_steward_hint": "Straffen en DNF herschikken het veld; punten werken de projectie bij.",
+  "simulator_sync_official": "Voltooide races gelijk aan officiële uitslag",
+  "simulator_sync_official_done": "Voltooide races zijn bijgewerkt naar het officiële podium.",
+  "simulator_save_draft": "Concept opslaan",
+  "simulator_undo": "Ongedaan",
+  "simulator_readonly_banner": "Alleen-lezen gedeelde weergave",
+  "simulator_share_stub_title": "Gedeelde voorspellingen",
+  "simulator_share_empty": "Geen voorspellingen in de cloud voor \"{username}\". Die persoon moet ingelogd zijn, de kampioenschapssimulator invullen en naar de server synchroniseren.",
+  "@simulator_share_empty": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "simulator_share_error_load": "Gedeelde voorspellingen laden is mislukt. Gebruik je eigen Supabase? Voer sql/add_simulator_share_rpcs.sql uit (functie get_shared_predictions) en probeer opnieuw.",
+  "simulator_share_local_preview": "Alleen voorbeeld vanaf dit apparaat — open de simulator ingelogd zodat je keuzes naar de cloud gaan voor anderen.",
+  "simulator_steward_coming": "Stewards (straffen / status) — volgende iteratie",
+  "simulator_round": "R{round}",
+  "@simulator_round": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "simulator_open_full_grid": "Volledig rooster openen",
+  "simulator_full_grid_title": "Volledig rooster — 22 coureurs",
+  "simulator_tab_grand_prix": "Grand Prix",
+  "simulator_tab_sprint": "Sprint",
+  "simulator_session_locked": "Bewerken geblokkeerd — sessie binnen 15 minuten",
+  "simulator_race_cancelled": "Geannuleerd — geen punten",
+  "simulator_dns": "DNS",
+  "simulator_dnf": "DNF",
+  "simulator_dsq": "DSQ",
+  "simulator_stats_line": "{predPts} ptn · Rooster {gridPct}% · P1 {p1Pct}%",
+  "@simulator_stats_line": {
+    "placeholders": {
+      "predPts": {
+        "type": "int"
+      },
+      "gridPct": {
+        "type": "int"
+      },
+      "p1Pct": {
+        "type": "int"
+      }
+    }
+  }
 }

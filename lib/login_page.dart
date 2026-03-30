@@ -25,7 +25,7 @@ final class LoggedInNotifier {
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
-  /// Builds the redirect URL for OAuth (GitHub). For Flutter Web, uses hash routing.
+  /// Builds the redirect URL for OAuth (e.g. Google, GitHub). For Flutter Web, uses hash routing.
   static String _oauthRedirectUrl() {
     if (kIsWeb) {
       final base = Uri.base;
@@ -41,10 +41,25 @@ class LoginPage extends StatelessWidget {
     context.go('/circuits');
   }
 
+  void _goBack(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/circuits');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final redirectTo = _oauthRedirectUrl();
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+          onPressed: () => _goBack(context),
+        ),
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -55,13 +70,16 @@ class LoginPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  context.l10n.login,
+                  context.l10n.login_page_title,
                   style: Theme.of(context).textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
                 SupaSocialsAuth(
-                  socialProviders: const [OAuthProvider.github],
+                  socialProviders: const [
+                    OAuthProvider.google,
+                    OAuthProvider.github,
+                  ],
                   redirectUrl: redirectTo,
                   onSuccess: (_) => _onAuthSuccess(context),
                   onError: (err) {

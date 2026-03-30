@@ -1319,6 +1319,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get login => 'Inloggen';
 
   @override
+  String get login_register_menu => 'Inloggen / Registreren';
+
+  @override
+  String get login_page_title => 'Inloggen';
+
+  @override
   String get logout => 'Uitloggen';
 
   @override
@@ -2299,4 +2305,162 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get recent_form_no_data => 'Nog geen vormdata voor dit seizoen.';
+
+  @override
+  String get simulator_nav => 'Simulator';
+
+  @override
+  String get simulator_title => 'Kampioenschapssimulator';
+
+  @override
+  String get simulator_timeline => 'Tijdlijn';
+
+  @override
+  String get simulator_podium_hint => 'Sleep een coureur naar P1–P3. Andere plekken schuiven op.';
+
+  @override
+  String get simulator_standings => 'Seizoensstand';
+
+  @override
+  String get simulator_actual => 'Werkelijk';
+
+  @override
+  String get simulator_prediction => 'Jouw keuze';
+
+  @override
+  String get simulator_accuracy => 'Podium-nauwkeurigheid';
+
+  @override
+  String get simulator_magic_clinch => 'Voorsprong > punten te gaan (alleen GP-bovengrens)';
+
+  @override
+  String get simulator_consensus_stub => 'Officiële kampioenschapspunten van races met uitslag dit seizoen (geen projecties).';
+
+  @override
+  String get simulator_sync_cloud => 'Voorspellingen naar cloud syncen';
+
+  @override
+  String get simulator_sync_cloud_done => 'Voorspellingen opgeslagen op je account.';
+
+  @override
+  String get simulator_sync_cloud_nothing_to_sync => 'Niets om te uploaden — zet P1–P3 voor minstens één race.';
+
+  @override
+  String get simulator_sync_cloud_not_signed_in => 'Log in om voorspellingen in de cloud op te slaan.';
+
+  @override
+  String get simulator_sync_cloud_read_only => 'Alleen-lezen — cloudsynchronisatie uit.';
+
+  @override
+  String simulator_sync_cloud_failed(String detail) {
+    return 'Cloudsync mislukt: $detail';
+  }
+
+  @override
+  String get simulator_snapshot_tooltip => 'Standen delen als afbeelding';
+
+  @override
+  String get simulator_snapshot_copied_hint => 'Afbeelding klaar — gebruik het deelscherm van je apparaat.';
+
+  @override
+  String get simulator_share_readonly_tooltip => 'Deel alleen-lezen link';
+
+  @override
+  String get simulator_share_readonly_subject => 'F1 Hub — kampioenschapssimulator (alleen lezen)';
+
+  @override
+  String get simulator_share_readonly_snackbar => 'Link klaar — gebruik het deelscherm van je apparaat.';
+
+  @override
+  String get simulator_share_readonly_need_login => 'Log in om je alleen-lezen simulatorlink te delen.';
+
+  @override
+  String simulator_prediction_by(String username) {
+    return 'Voorspelling van @$username';
+  }
+
+  @override
+  String simulator_p1_accuracy_percent(int pct) {
+    return 'P1-nauwkeurigheid: $pct%';
+  }
+
+  @override
+  String simulator_clinch_in(String venue) {
+    return 'Titel kan vallen in: $venue';
+  }
+
+  @override
+  String get simulator_steward_title => 'Steward-rooster';
+
+  @override
+  String get simulator_steward_hint => 'Straffen en DNF herschikken het veld; punten werken de projectie bij.';
+
+  @override
+  String get simulator_sync_official => 'Voltooide races gelijk aan officiële uitslag';
+
+  @override
+  String get simulator_sync_official_done => 'Voltooide races zijn bijgewerkt naar het officiële podium.';
+
+  @override
+  String get simulator_save_draft => 'Concept opslaan';
+
+  @override
+  String get simulator_undo => 'Ongedaan';
+
+  @override
+  String get simulator_readonly_banner => 'Alleen-lezen gedeelde weergave';
+
+  @override
+  String get simulator_share_stub_title => 'Gedeelde voorspellingen';
+
+  @override
+  String simulator_share_empty(String username) {
+    return 'Geen voorspellingen in de cloud voor \"$username\". Die persoon moet ingelogd zijn, de kampioenschapssimulator invullen en naar de server synchroniseren.';
+  }
+
+  @override
+  String get simulator_share_error_load => 'Gedeelde voorspellingen laden is mislukt. Gebruik je eigen Supabase? Voer sql/add_simulator_share_rpcs.sql uit (functie get_shared_predictions) en probeer opnieuw.';
+
+  @override
+  String get simulator_share_local_preview => 'Alleen voorbeeld vanaf dit apparaat — open de simulator ingelogd zodat je keuzes naar de cloud gaan voor anderen.';
+
+  @override
+  String get simulator_steward_coming => 'Stewards (straffen / status) — volgende iteratie';
+
+  @override
+  String simulator_round(int round) {
+    return 'R$round';
+  }
+
+  @override
+  String get simulator_open_full_grid => 'Volledig rooster openen';
+
+  @override
+  String get simulator_full_grid_title => 'Volledig rooster — 22 coureurs';
+
+  @override
+  String get simulator_tab_grand_prix => 'Grand Prix';
+
+  @override
+  String get simulator_tab_sprint => 'Sprint';
+
+  @override
+  String get simulator_session_locked => 'Bewerken geblokkeerd — sessie binnen 15 minuten';
+
+  @override
+  String get simulator_race_cancelled => 'Geannuleerd — geen punten';
+
+  @override
+  String get simulator_dns => 'DNS';
+
+  @override
+  String get simulator_dnf => 'DNF';
+
+  @override
+  String get simulator_dsq => 'DSQ';
+
+  @override
+  String simulator_stats_line(int predPts, int gridPct, int p1Pct) {
+    return '$predPts ptn · Rooster $gridPct% · P1 $p1Pct%';
+  }
 }

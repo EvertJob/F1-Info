@@ -644,6 +644,8 @@
   "loading": "Loading",
   "logged_in": "You are logged in",
   "login": "Login",
+  "login_register_menu": "Login / Register",
+  "login_page_title": "Sign in",
   "logout": "Logout",
   "manager": "Manager",
   "max_g_force": "Max G-Force",
@@ -1071,5 +1073,108 @@
   "recent_form_total_podiums": "Total Podiums (Race + Sprint)",
   "recent_form_expand_tooltip": "Open full season view",
   "recent_form_close": "Close",
-  "recent_form_no_data": "No form data for this season yet."
+  "recent_form_no_data": "No form data for this season yet.",
+  "simulator_nav": "Simulator",
+  "simulator_title": "Championship Simulator",
+  "simulator_timeline": "Timeline",
+  "simulator_podium_hint": "Drag a driver onto P1–P3. Drops bump other slots.",
+  "simulator_standings": "Season standings",
+  "simulator_actual": "Actual",
+  "simulator_prediction": "Your pick",
+  "simulator_accuracy": "Podium accuracy",
+  "simulator_magic_clinch": "Title gap > points left (GP-only bound)",
+  "simulator_consensus_stub": "Official championship points from races with results this season (no projections).",
+  "simulator_sync_cloud": "Sync predictions to cloud",
+  "simulator_sync_cloud_done": "Predictions saved to your account.",
+  "simulator_sync_cloud_nothing_to_sync": "Nothing to upload — set P1–P3 for at least one race.",
+  "simulator_sync_cloud_not_signed_in": "Sign in to save predictions to the cloud.",
+  "simulator_sync_cloud_read_only": "Read-only — cloud sync is disabled.",
+  "simulator_sync_cloud_failed": "Cloud sync failed: {detail}",
+  "@simulator_sync_cloud_failed": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "simulator_snapshot_tooltip": "Share standings image",
+  "simulator_snapshot_copied_hint": "Image ready — use your device share sheet.",
+  "simulator_share_readonly_tooltip": "Share read-only link",
+  "simulator_share_readonly_subject": "F1 Hub — championship simulator (read-only)",
+  "simulator_share_readonly_snackbar": "Link ready — use your device share sheet.",
+  "simulator_share_readonly_need_login": "Sign in to share your read-only simulator link.",
+  "simulator_prediction_by": "Prediction by @{username}",
+  "@simulator_prediction_by": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "simulator_p1_accuracy_percent": "P1 accuracy: {pct}%",
+  "@simulator_p1_accuracy_percent": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "simulator_clinch_in": "Title could be decided at: {venue}",
+  "@simulator_clinch_in": {
+    "placeholders": {
+      "venue": {
+        "type": "String"
+      }
+    }
+  },
+  "simulator_steward_title": "Steward grid",
+  "simulator_steward_hint": "Penalties and DNFs re-sort the field; points update the projection.",
+  "simulator_sync_official": "Sync finished races to official results",
+  "simulator_sync_official_done": "Finished races now match official podiums.",
+  "simulator_save_draft": "Save draft",
+  "simulator_undo": "Undo",
+  "simulator_readonly_banner": "Read-only shared view",
+  "simulator_share_stub_title": "Shared predictions",
+  "simulator_share_empty": "No cloud predictions for \"{username}\". That person needs to sign in, fill the championship simulator, and let it sync to the server.",
+  "@simulator_share_empty": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "simulator_share_error_load": "Could not load shared predictions. If you use your own Supabase project, run sql/add_simulator_share_rpcs.sql (function get_shared_predictions) and try again.",
+  "simulator_share_local_preview": "Preview from this device only — open the simulator while signed in so picks sync to the cloud for others.",
+  "simulator_steward_coming": "Steward desk (penalties / status) — next iteration",
+  "simulator_round": "R{round}",
+  "@simulator_round": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "simulator_open_full_grid": "Open full grid",
+  "simulator_full_grid_title": "Full grid — 22 drivers",
+  "simulator_tab_grand_prix": "Grand Prix",
+  "simulator_tab_sprint": "Sprint",
+  "simulator_session_locked": "Editing locked — session within 15 minutes",
+  "simulator_race_cancelled": "Cancelled — no points",
+  "simulator_dns": "DNS",
+  "simulator_dnf": "DNF",
+  "simulator_dsq": "DSQ",
+  "simulator_stats_line": "{predPts} pts · Grid {gridPct}% · P1 {p1Pct}%",
+  "@simulator_stats_line": {
+    "placeholders": {
+      "predPts": {
+        "type": "int"
+      },
+      "gridPct": {
+        "type": "int"
+      },
+      "p1Pct": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -711,6 +711,8 @@
   "loading": "Chargement",
   "logged_in": "Vous êtes connecté",
   "login": "Connexion",
+  "login_register_menu": "Connexion / Inscription",
+  "login_page_title": "Connexion",
   "logout": "Déconnexion",
   "manager": "Manager",
   "max_g_force": "G max",
@@ -1079,5 +1081,108 @@
   "recent_form_total_podiums": "Podiums totaux (course + sprint)",
   "recent_form_expand_tooltip": "Ouvrir la saison complète",
   "recent_form_close": "Fermer",
-  "recent_form_no_data": "Pas encore de données de forme pour cette saison."
+  "recent_form_no_data": "Pas encore de données de forme pour cette saison.",
+  "simulator_nav": "Simulateur",
+  "simulator_title": "Simulateur de championnat",
+  "simulator_timeline": "Chronologie",
+  "simulator_podium_hint": "Glissez un pilote sur P1–P3. Les autres places bougent.",
+  "simulator_standings": "Classement du championnat",
+  "simulator_actual": "Réel",
+  "simulator_prediction": "Votre choix",
+  "simulator_accuracy": "Précision podium",
+  "simulator_magic_clinch": "Écart > points restants (borne GP seulement)",
+  "simulator_consensus_stub": "Points officiels du championnat sur les courses disputées cette saison (sans projections).",
+  "simulator_sync_cloud": "Synchroniser les pronos dans le cloud",
+  "simulator_sync_cloud_done": "Pronostics enregistrés sur votre compte.",
+  "simulator_sync_cloud_nothing_to_sync": "Rien à envoyer — définissez P1–P3 pour au moins une course.",
+  "simulator_sync_cloud_not_signed_in": "Connectez-vous pour enregistrer les pronos dans le cloud.",
+  "simulator_sync_cloud_read_only": "Lecture seule — synchronisation cloud désactivée.",
+  "simulator_sync_cloud_failed": "Échec de la synchro cloud : {detail}",
+  "@simulator_sync_cloud_failed": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "simulator_snapshot_tooltip": "Partager le classement en image",
+  "simulator_snapshot_copied_hint": "Image prête — utilisez le partage de l’appareil.",
+  "simulator_share_readonly_tooltip": "Partager le lien en lecture seule",
+  "simulator_share_readonly_subject": "F1 Hub — simulateur de championnat (lecture seule)",
+  "simulator_share_readonly_snackbar": "Lien prêt — utilisez le partage de l’appareil.",
+  "simulator_share_readonly_need_login": "Connectez-vous pour partager votre lien simulateur en lecture seule.",
+  "simulator_prediction_by": "Pronostic de @{username}",
+  "@simulator_prediction_by": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "simulator_p1_accuracy_percent": "Précision P1 : {pct} %",
+  "@simulator_p1_accuracy_percent": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "simulator_clinch_in": "Le titre pourrait se jouer à : {venue}",
+  "@simulator_clinch_in": {
+    "placeholders": {
+      "venue": {
+        "type": "String"
+      }
+    }
+  },
+  "simulator_steward_title": "Grille des stewards",
+  "simulator_steward_hint": "Pénalités et DNF reclassent le plateau ; les points mettent à jour la projection.",
+  "simulator_sync_official": "Aligner les courses terminées sur les résultats officiels",
+  "simulator_sync_official_done": "Les courses terminées correspondent au podium officiel.",
+  "simulator_save_draft": "Enregistrer le brouillon",
+  "simulator_undo": "Annuler",
+  "simulator_readonly_banner": "Vue partagée en lecture seule",
+  "simulator_share_stub_title": "Prédictions partagées",
+  "simulator_share_empty": "Aucune prédiction cloud pour « {username} ». Cette personne doit être connectée, remplir le simulateur de championnat et synchroniser avec le serveur.",
+  "@simulator_share_empty": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "simulator_share_error_load": "Impossible de charger les prédictions partagées. Avec votre propre Supabase : exécutez sql/add_simulator_share_rpcs.sql (get_shared_predictions) puis réessayez.",
+  "simulator_share_local_preview": "Aperçu sur cet appareil uniquement — ouvrez le simulateur connecté pour synchroniser les choix vers le cloud.",
+  "simulator_steward_coming": "Stewards (pénalités / statut) — itération suivante",
+  "simulator_round": "R{round}",
+  "@simulator_round": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "simulator_open_full_grid": "Ouvrir la grille complète",
+  "simulator_full_grid_title": "Grille complète — 22 pilotes",
+  "simulator_tab_grand_prix": "Grand Prix",
+  "simulator_tab_sprint": "Sprint",
+  "simulator_session_locked": "Édition verrouillée — session dans moins de 15 minutes",
+  "simulator_race_cancelled": "Annulé — pas de points",
+  "simulator_dns": "DNS",
+  "simulator_dnf": "DNF",
+  "simulator_dsq": "DSQ",
+  "simulator_stats_line": "{predPts} pts · Grille {gridPct}% · P1 {p1Pct}%",
+  "@simulator_stats_line": {
+    "placeholders": {
+      "predPts": {
+        "type": "int"
+      },
+      "gridPct": {
+        "type": "int"
+      },
+      "p1Pct": {
+        "type": "int"
+      }
+    }
+  }
 }

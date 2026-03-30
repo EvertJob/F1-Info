@@ -34,6 +34,8 @@ import 'display_settings.dart';
 import 'display_settings_controller.dart';
 import 'web_url_strategy.dart';
 import 'theme/f1_ui_theme.dart';
+import 'theme/hub_list_card_style.dart';
+import 'widgets/hub_list_row_shell.dart';
 import 'utils/driver_name_utils.dart';
 import 'package:f1/utils/l10n_extension.dart';
 import 'utils/l10n_lookups.dart';
@@ -51,6 +53,11 @@ import 'orbit/orbit_page.dart';
 import 'orbit/orbit_paths.dart';
 import 'widgets/news_settings.dart';
 import 'coach_corner_data.dart';
+import 'paddock_user_preferences.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'simulator/championship_simulator_page.dart';
+import 'simulator/simulator_grid_config.dart';
+import 'simulator/simulator_models.dart';
 part 'f1_data.dart';
 part 'widgets/my_paddock_widget.dart';
 part 'widgets/recent_form_trend_card.dart';
@@ -3236,6 +3243,76 @@ String _loginPath() => '/login';
 String _livePath() => '/live';
 String _profilePath() => '/profile';
 String _myPaddockPath() => '/my-paddock';
+String _simulatorPath() => '/simulator';
+
+List<SimulatorRoundInput> _simulatorRoundInputs() {
+  final out = <SimulatorRoundInput>[];
+  for (var i = 0; i < races.length; i++) {
+    final r = races[i];
+    final key = SessionDataManager().raceResultsKeyFor(r);
+    final cached = SessionDataManager().raceResultsCache[key];
+    final hasData = cached != null && cached.isNotEmpty;
+    final actualRows = (cached == null || cached.isEmpty)
+        ? const <SimulatorResultRowLite>[]
+        : cached
+            .map(
+              (row) => SimulatorResultRowLite(
+                driver: row.driver,
+                finish: row.finish,
+                pointsRaw: row.points,
+              ),
+            )
+            .toList();
+    final sprintKey = '${r.country}_Sprint_${r.date.year}';
+    final sprintCached = SessionDataManager().raceResultsCache[sprintKey];
+    final sprintRows = (sprintCached == null || sprintCached.isEmpty)
+        ? const <SimulatorResultRowLite>[]
+        : sprintCached
+            .map(
+              (row) => SimulatorResultRowLite(
+                driver: row.driver,
+                finish: row.finish,
+                pointsRaw: row.points,
+              ),
+            )
+            .toList();
+    final cid = r.circuitAssetId.trim().isNotEmpty
+        ? r.circuitAssetId.trim()
+        : 'round_${i + 1}';
+    out.add(
+      SimulatorRoundInput(
+        circuitId: cid,
+        roundIndex: i + 1,
+        displayName: r.circuitDisplayName.trim().isNotEmpty
+            ? r.circuitDisplayName
+            : r.name,
+        grandPrixName: r.name,
+        date: r.date,
+        hasSprint: r.hasSprint,
+        hasActualResults: hasData,
+        actualRows: actualRows,
+        sprintActualRows: sprintRows,
+        grandPrixStartUtc: r.date.toUtc(),
+        sprintRaceStartUtc: r.hasSprint ? r.sprintRace.toUtc() : null,
+        isCancelled: false,
+      ),
+    );
+  }
+  return out;
+}
+
+List<SimulatorDriverRef> _simulatorDriverRefs() {
+  return drivers2026
+      .take(kSimulatorGridSize)
+      .map(
+        (d) => SimulatorDriverRef(
+          number: d.number,
+          name: d.name,
+          team: d.team,
+        ),
+      )
+      .toList();
+}
 
 const String _kGithubHelpIssuesUrl =
     'https://github.com/EvertJob/F1-Info/issues/new/choose';
@@ -3318,6 +3395,9 @@ void main() async {
           create: (context) => DisplaySettingsController(
             context.read<DetailExpansionPrefsNotifier>(),
           ),
+        ),
+        ChangeNotifierProvider<PaddockUserPreferencesNotifier>(
+          create: (_) => PaddockUserPreferencesNotifier(),
         ),
       ],
       child: const F1HubApp(),
@@ -3837,6 +3917,20 @@ class _F1HubAppState extends State<F1HubApp> {
           StatefulShellBranch(
             routes: [
               GoRoute(
+                path: _simulatorPath(),
+                builder: (context, state) => ListenableBuilder(
+                  listenable: SessionDataManager(),
+                  builder: (context, _) => ChampionshipSimulatorPage(
+                    roundInputs: _simulatorRoundInputs(),
+                    driverRefs: _simulatorDriverRefs(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
                 path: _profilePath(),
                 builder: (context, state) =>
                     ProfileScreen(settingsMenu: _buildSettingsMenu(context)),
@@ -3852,6 +3946,20 @@ class _F1HubAppState extends State<F1HubApp> {
             ],
           ),
         ],
+      ),
+      GoRoute(
+        path: '/s/:username',
+        builder: (context, state) {
+          final raw = state.pathParameters['username'] ?? '';
+          return ListenableBuilder(
+            listenable: SessionDataManager(),
+            builder: (context, _) => SharedChampionshipPredictionsPage(
+              username: Uri.decodeComponent(raw),
+              roundInputs: _simulatorRoundInputs(),
+              driverRefs: _simulatorDriverRefs(),
+            ),
+          );
+        },
       ),
       GoRoute(
         path: _loginPath(),
@@ -8456,7 +8564,7 @@ class RailAccountMenuButton extends StatelessWidget {
           icon: _buildGlyphIcon('⚙', size: 20),
           tooltip: isLoggedIn
               ? menuButtonContext.l10n.profile
-              : menuButtonContext.l10n.login,
+              : menuButtonContext.l10n.login_register_menu,
           onSelected: (value) async {
             switch (value) {
               case 'login':
@@ -8486,7 +8594,7 @@ class RailAccountMenuButton extends StatelessWidget {
                   children: [
                     _buildGlyphIcon('🔐', size: 18),
                     const SizedBox(width: 12),
-                    Text(menuButtonContext.l10n.login),
+                    Text(menuButtonContext.l10n.login_register_menu),
                   ],
                 ),
               ),
@@ -8794,7 +8902,7 @@ class AppSettingsMenuButton extends StatelessWidget {
                   children: [
                     _buildGlyphIcon('🔐', size: 18),
                     const SizedBox(width: 12),
-                    Text(menuButtonContext.l10n.login),
+                    Text(menuButtonContext.l10n.login_register_menu),
                   ],
                 ),
               ),
@@ -9155,12 +9263,17 @@ class MainNavigation extends StatelessWidget {
         label: Text(context.l10n.orbit_nav.toUpperCase()),
       ),
       NavigationRailDestination(
+        icon: _buildGlyphIcon('📊', size: 20),
+        selectedIcon: _buildGlyphIcon('📊', size: 20),
+        label: Text(context.l10n.simulator_nav.toUpperCase()),
+      ),
+      NavigationRailDestination(
         icon: _buildGlyphIcon('👤', size: 20),
         selectedIcon: _buildGlyphIcon('👤', size: 20),
         label: Text(context.l10n.profile.toUpperCase()),
       ),
     ];
-    final railDestinations = destinations.sublist(0, 5);
+    final railDestinations = destinations.sublist(0, 6);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -9202,7 +9315,7 @@ class MainNavigation extends StatelessWidget {
             children: [
               Expanded(
                 child: _F1NavRail(
-                  selectedIndex: navigationShell.currentIndex < 5
+                  selectedIndex: navigationShell.currentIndex < 6
                       ? navigationShell.currentIndex
                       : null,
                   extended: constraints.maxWidth >= 1320,
@@ -9373,6 +9486,10 @@ class MainNavigation extends StatelessWidget {
                                   label: context.l10n.orbit_nav.toUpperCase(),
                                 ),
                                 BottomNavigationBarItem(
+                                  icon: _buildGlyphIcon('📊', size: 20),
+                                  label: context.l10n.simulator_nav.toUpperCase(),
+                                ),
+                                BottomNavigationBarItem(
                                   icon: _buildGlyphIcon('👤', size: 20),
                                   label: context.l10n.profile.toUpperCase(),
                                 ),
@@ -9436,6 +9553,13 @@ class MyPaddockScreen extends StatelessWidget {
     final desktopShell = _isDesktopShellLayout(context);
     final scheme = Theme.of(context).colorScheme;
 
+    final ambientGlow = scheme.primary.withValues(alpha: 0.13);
+    final shellBase = Color.lerp(
+      scheme.surfaceContainerLow,
+      scheme.primary,
+      0.04,
+    )!;
+
     return Scaffold(
       backgroundColor: desktopShell ? Colors.transparent : null,
       appBar: AppBar(
@@ -9447,18 +9571,33 @@ class MyPaddockScreen extends StatelessWidget {
         actions: _desktopAwareSettingsActions(context, settingsMenu),
       ),
       body: user != null
-          ? SafeArea(
-              top: false,
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 900),
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-                    children: const [MyPaddockWidget()],
+          ? Stack(
+              fit: StackFit.expand,
+              children: [
+                if (!desktopShell)
+                  DecoratedBox(
+                    decoration: BoxDecoration(color: shellBase),
+                    child: CustomPaint(
+                      painter: _AmbientGlowPainter(
+                        topLeftGlow: ambientGlow,
+                        bottomRightGlow: ambientGlow,
+                      ),
+                    ),
+                  ),
+                SafeArea(
+                  top: false,
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1280),
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(0, 12, 0, 32),
+                        children: const [MyPaddockWidget()],
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             )
           : Center(
               child: ConstrainedBox(
@@ -9826,11 +9965,9 @@ class _CircuitsViewState extends State<CircuitsView> {
         .toList();
   }
 
-  /// Vertical gap between calendar rows (races and summer-break banner), tied to [F1UiTheme.cardPadding].
-  double _calendarInterRowGap(BuildContext context) {
-    final ui = Theme.of(context).extension<F1UiTheme>() ?? F1UiTheme.fallback();
-    return ui.cardPadding.top.clamp(8.0, 22.0);
-  }
+  /// Vertical gap between calendar rows (parity with standings hub lists).
+  double _calendarInterRowGap(BuildContext context) =>
+      HubListCardStyle.listRowSeparatorHeight;
 
   Widget _buildCalendarSeparator(BuildContext context) {
     return SizedBox(height: _calendarInterRowGap(context));
@@ -9931,7 +10068,12 @@ class _CircuitsViewState extends State<CircuitsView> {
 
     return Container(
       height: headerHeight,
-      margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+      margin: const EdgeInsets.fromLTRB(
+        HubListCardStyle.shellHorizontalMargin,
+        10,
+        HubListCardStyle.shellHorizontalMargin,
+        0,
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 18),
       decoration: BoxDecoration(
         color: tokens.panelStrong,
@@ -10019,7 +10161,6 @@ class _CircuitsViewState extends State<CircuitsView> {
   }) {
     final calendarRaces = _calendarRacesList(context);
     final rowGap = _calendarInterRowGap(context);
-    const sepFixed = 12.0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -10030,10 +10171,10 @@ class _CircuitsViewState extends State<CircuitsView> {
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.zero,
           itemCount: calendarRaces.length,
           separatorBuilder: (context, index) {
-            final gap = SizedBox(height: sepFixed.clamp(12.0, 16.0));
+            final gap = SizedBox(height: HubListCardStyle.listRowSeparatorHeight);
             if (index < calendarRaces.length - 1 &&
                 _hasSummerBreakAfter(calendarRaces[index])) {
               return Column(
@@ -10085,6 +10226,7 @@ class _CircuitsViewState extends State<CircuitsView> {
     }
     if (isFinished && hasResults) {
       return Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Row(
@@ -10107,8 +10249,8 @@ class _CircuitsViewState extends State<CircuitsView> {
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          if (race.date.year != 2026)
+          if (race.date.year != 2026) ...[
+            const SizedBox(height: 6),
             Text(
               _getPodiumString(race),
               maxLines: 2,
@@ -10121,6 +10263,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.86),
               ),
             ),
+          ],
         ],
       );
     } else if (!isCancelled && (isOngoing || (isToday && !hasResults))) {
@@ -10341,9 +10484,12 @@ class _CircuitsViewState extends State<CircuitsView> {
   }
 
   Widget _buildCalendarRaceCard(BuildContext context, Race race) {
-
     final theme = Theme.of(context);
     final tokens = _themeTokens(context);
+    final prefs = context.watch<DisplaySettingsController>().settings;
+    final titleFs = HubListCardStyle.titleFontSize(prefs);
+    final subFs = HubListCardStyle.subtitleFontSize(prefs);
+    final flagCalendar = prefs.compact ? 22.0 : 26.0;
     final now = DateTime.now();
     final isFinished = race.date.isBefore(now);
     final isOngoing = !isFinished &&
@@ -10354,182 +10500,109 @@ class _CircuitsViewState extends State<CircuitsView> {
     final isCancelled = isCancelledGrandPrix(race);
     final tStr = _timeUntil(race.date, context);
     final showDesktopExtras =
-      MediaQuery.of(context).size.width >= _desktopCircuitsBreakpoint;
+        MediaQuery.of(context).size.width >= _desktopCircuitsBreakpoint;
 
     if (showDesktopExtras) {
       final lastWinner = _recentPreviousWinners(race, count: 1);
-      return Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => context.push(_circuitJsonDetailPath(race)),
-          borderRadius: BorderRadius.circular(20),
-          child: F1Module(
-            fillWidth: true,
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-            borderRadius: 20,
-            backgroundColor: theme.colorScheme.surface,
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 5,
-                  child: Row(
-                    children: [
-                      _buildFlagHero(
-                        tag: _raceFlagHeroTag(race, source: 'calendar'),
-                        flag: race.flag,
-                        fontSize: 28,
-                      ),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              race.circuitDisplayName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 14,
-                                color: theme.colorScheme.onSurface,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              l10nGrandPrix(context.l10n, race.name),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
+      return HubListRowShell(
+        onTap: () => context.push(_circuitJsonDetailPath(race)),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              flex: 5,
+              child: Row(
+                children: [
+                  _buildFlagHero(
+                    tag: _raceFlagHeroTag(race, source: 'calendar'),
+                    flag: race.flag,
+                    fontSize: flagCalendar,
+                  ),
+                  SizedBox(width: prefs.compact ? 12 : 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          race.circuitDisplayName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: titleFs,
+                            color: theme.colorScheme.onSurface,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: Text(
-                    l10nCountry(context.l10n, race.country),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
+                        SizedBox(height: prefs.compact ? 2 : 4),
+                        Text(
+                          l10nGrandPrix(context.l10n, race.name),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: subFs,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    _calendarDateLabel(race.date),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: Text(
-                    lastWinner.isEmpty ? '-' : lastWinner.first,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: _buildDesktopCalendarStatusCell(
-                      context,
-                      race,
-                      isFinished,
-                      isOngoing,
-                      tStr,
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+            Expanded(
+              flex: 3,
+              child: Text(
+                l10nCountry(context.l10n, race.country),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: subFs,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: Text(
+                _calendarDateLabel(race.date),
+                style: TextStyle(
+                  fontSize: subFs,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: Text(
+                lastWinner.isEmpty ? '-' : lastWinner.first,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: subFs,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: _buildDesktopCalendarStatusCell(
+                  context,
+                  race,
+                  isFinished,
+                  isOngoing,
+                  tStr,
+                ),
+              ),
+            ),
+          ],
         ),
       );
-    }
-
-    final favoritesMobile = context.watch<ProfileFavoritesNotifier>().value;
-    final isFavoriteCircuitMobile = favoritesMobile.favoriteCircuit != null &&
-        race.name == favoritesMobile.favoriteCircuit;
-
-    Widget buildMobileStatusWidget() {
-      final hasResults = _hasResultsForRace(race);
-      final isToday = DateTime.now().year == race.date.year &&
-          DateTime.now().month == race.date.month &&
-          DateTime.now().day == race.date.day;
-      if (race.date.year == 2026) {
-        if (isCancelled) {
-          return Text(context.l10n.calendar_race_status_cancelled,
-              style: TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  color: tokens.statusError,
-                  fontFamily: 'TitilliumWeb'));
-        } else if (isOngoing || (isToday && !hasResults)) {
-          return Text(context.l10n.calendar_race_status_ongoing,
-              style: TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  color: tokens.statusWarning,
-                  fontFamily: 'TitilliumWeb'));
-        } else if (isFinished && hasResults) {
-          return _buildCircuitPodiumPreview(context, race);
-        } else if (isFinished && !hasResults) {
-          return Text(context.l10n.calendar_race_status_ended,
-              style: TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  color: tokens.statusSuccess,
-                  fontFamily: 'TitilliumWeb'));
-        } else {
-          return Text(tStr,
-              style: TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
-                  fontFamily: 'TitilliumWeb'));
-        }
-      } else {
-        if (isFinished && hasResults) {
-          return _buildCircuitPodiumPreview(context, race);
-        } else if (isCancelled) {
-          return Text(context.l10n.calendar_race_status_cancelled,
-              style: TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  color: tokens.statusError));
-        } else if (isOngoing || (isToday && !hasResults)) {
-          return Text(context.l10n.calendar_race_status_ongoing,
-              style: TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  color: tokens.statusWarning));
-        } else {
-          return Text(tStr,
-              style: TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary));
-        }
-      }
     }
 
     final statusWidget = () {
@@ -10594,79 +10667,76 @@ class _CircuitsViewState extends State<CircuitsView> {
       }
     }();
 
-    final card = Padding(
-      padding: isFavoriteCircuitMobile
-          ? EdgeInsets.zero
-          : const EdgeInsets.only(bottom: 12),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => context.push(_circuitJsonDetailPath(race)),
-          borderRadius: BorderRadius.circular(20),
-          child: F1Module(
-            fillWidth: true,
-            padding: const EdgeInsets.all(12),
-            borderRadius: 20,
-            backgroundColor: theme.colorScheme.surface,
+    return HubListRowShell(
+      onTap: () => context.push(_circuitJsonDetailPath(race)),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _buildFlagHero(
+            tag: _raceFlagHeroTag(race, source: 'calendar'),
+            flag: race.flag,
+            fontSize: flagCalendar,
+          ),
+          SizedBox(width: prefs.compact ? 8 : 10),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildFlagHero(
-                      tag: _raceFlagHeroTag(race, source: 'calendar'),
-                      flag: race.flag,
-                      fontSize: 32,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            race.circuitDisplayName,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            l10nGrandPrix(context.l10n, race.name),
-                            style: TextStyle(
-                              color: theme.colorScheme.onSurfaceVariant,
-                              fontSize: 11,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${race.date.day}-${race.date.month}-${race.date.year}',
-                            style: TextStyle(
-                              color: theme.colorScheme.onSurfaceVariant
-                                  .withValues(alpha: 0.85),
-                              fontSize: 10,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                Text(
+                  race.circuitDisplayName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: titleFs,
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: statusWidget,
+                SizedBox(height: prefs.compact ? 1 : 2),
+                Text(
+                  l10nGrandPrix(context.l10n, race.name),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontSize: subFs,
+                  ),
                 ),
+                if (!prefs.compact) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    '${race.date.day}-${race.date.month}-${race.date.year}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurfaceVariant
+                          .withValues(alpha: 0.85),
+                      fontSize: subFs - 2,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
-        ),
+          Flexible(
+            flex: 2,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 160),
+                  child: statusWidget,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
-    return card;
   }
 
   Widget _buildCompletedRaceBackground(BuildContext context) {
@@ -10679,6 +10749,10 @@ class _CircuitsViewState extends State<CircuitsView> {
 
   Widget _buildSummerBreakCard(BuildContext context) {
     final theme = Theme.of(context);
+    final prefs = context.watch<DisplaySettingsController>().settings;
+    final titleFs = HubListCardStyle.titleFontSize(prefs);
+    final subFs = HubListCardStyle.subtitleFontSize(prefs);
+    final flagSize = prefs.compact ? 22.0 : 26.0;
     final showDesktopLayout =
         MediaQuery.of(context).size.width >= _desktopCircuitsBreakpoint;
     final breakRaces = _summerBreakRaces();
@@ -10696,23 +10770,46 @@ class _CircuitsViewState extends State<CircuitsView> {
         ? '${_calendarDateLabel(startRace.date)} - ${_calendarDateLabel(endRace.date)}'
         : context.l10n.summer_break_subtitle;
 
+    Widget summerBreakPill() {
+      final padH = prefs.compact ? 8.0 : 10.0;
+      final padV = prefs.compact ? 4.0 : 6.0;
+      final chipFs = prefs.compact ? 9.0 : 10.0;
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: padH, vertical: padV),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.secondary.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: theme.colorScheme.secondary.withValues(alpha: 0.24),
+          ),
+        ),
+        child: Text(
+          context.l10n.summer_break,
+          style: TextStyle(
+            fontSize: chipFs,
+            fontWeight: FontWeight.w800,
+            color: theme.colorScheme.secondary,
+          ),
+        ),
+      );
+    }
+
     if (showDesktopLayout) {
-      return F1Module(
-        fillWidth: true,
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-        borderRadius: 20,
-        backgroundColor: theme.colorScheme.surface,
+      return HubListRowShell(
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               flex: 5,
               child: Row(
                 children: [
-                  _buildSummerBreakFlag(context, size: 42),
-                  const SizedBox(width: 12),
+                  _buildSummerBreakFlag(context, size: flagSize),
+                  SizedBox(width: prefs.compact ? 12 : 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           context.l10n.summer_break,
@@ -10720,17 +10817,17 @@ class _CircuitsViewState extends State<CircuitsView> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
-                            fontSize: 14,
+                            fontSize: titleFs,
                             color: theme.colorScheme.onSurface,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: prefs.compact ? 2 : 4),
                         Text(
                           context.l10n.summer_break_subtitle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: subFs,
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
@@ -10745,8 +10842,10 @@ class _CircuitsViewState extends State<CircuitsView> {
               flex: 2,
               child: Text(
                 dateLabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: subFs,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -10756,7 +10855,7 @@ class _CircuitsViewState extends State<CircuitsView> {
               child: Text(
                 '-',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: subFs,
                   fontWeight: FontWeight.w600,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -10767,40 +10866,17 @@ class _CircuitsViewState extends State<CircuitsView> {
               child: Align(
                 alignment: Alignment.centerRight,
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.secondary.withValues(
-                          alpha: 0.10,
-                        ),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: theme.colorScheme.secondary.withValues(
-                            alpha: 0.24,
-                          ),
-                        ),
-                      ),
-                      child: Text(
-                        context.l10n.summer_break,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: theme.colorScheme.secondary,
-                        ),
-                      ),
-                    ),
+                    summerBreakPill(),
                     if (breakLabel.isNotEmpty) ...[
-                      const SizedBox(height: 6),
+                      SizedBox(height: prefs.compact ? 4 : 6),
                       Text(
                         breakLabel,
                         textAlign: TextAlign.right,
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: prefs.compact ? 10.0 : 11.0,
                           fontWeight: FontWeight.w600,
                           color: theme.colorScheme.onSurface.withValues(
                             alpha: 0.78,
@@ -10817,58 +10893,81 @@ class _CircuitsViewState extends State<CircuitsView> {
       );
     }
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            _buildSummerBreakFlag(context, size: 54),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.summer_break,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onSurface,
-                    ),
+    return HubListRowShell(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _buildSummerBreakFlag(context, size: flagSize),
+          SizedBox(width: prefs.compact ? 8 : 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  context.l10n.summer_break,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: titleFs,
+                    color: theme.colorScheme.onSurface,
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    dateLabel,
-                    style: TextStyle(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontSize: 11,
-                    ),
+                ),
+                SizedBox(height: prefs.compact ? 1 : 2),
+                Text(
+                  dateLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: subFs,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    context.l10n.summer_break_subtitle,
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+                ),
+                SizedBox(height: prefs.compact ? 1 : 2),
+                Text(
+                  context.l10n.summer_break_subtitle,
+                  maxLines: prefs.compact ? 1 : 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: subFs - 2,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            if (breakLabel.isNotEmpty) ...[
-              const SizedBox(width: 8),
-              Text(
-                breakLabel,
-                style: TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
+          ),
+          Flexible(
+            flex: 2,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    summerBreakPill(),
+                    if (breakLabel.isNotEmpty) ...[
+                      SizedBox(height: prefs.compact ? 3 : 4),
+                      Text(
+                        breakLabel,
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          fontSize: prefs.compact ? 9.0 : 10.0,
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-            ],
-          ],
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -11051,9 +11150,9 @@ class _CircuitsViewState extends State<CircuitsView> {
                     child: ListView.separated(
                       physics: const AlwaysScrollableScrollPhysics(),
                       padding: EdgeInsets.fromLTRB(
-                        16,
+                        0,
                         desktopShell ? 16 : 16,
-                        16,
+                        0,
                         16,
                       ),
                       separatorBuilder: (context, index) => SizedBox(
@@ -11063,7 +11162,9 @@ class _CircuitsViewState extends State<CircuitsView> {
                       itemBuilder: (context, index) {
                   switch (index) {
                     case 0:
-                      return LayoutBuilder(
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: LayoutBuilder(
                         builder: (context, constraints) {
                           final w = constraints.maxWidth;
                           final isDesktop =
@@ -11112,6 +11213,7 @@ class _CircuitsViewState extends State<CircuitsView> {
                             ],
                           );
                         },
+                      ),
                       );
                     case 1:
                       return Builder(
@@ -11127,17 +11229,20 @@ class _CircuitsViewState extends State<CircuitsView> {
                           if (user != null && effective.cardDisabled) {
                             return const SizedBox.shrink();
                           }
-                          return _AIStrategistCard(
-                            race: upcoming,
-                            strategistPrefs: effective,
-                            onTap: () async {
-                              await showModalBottomSheet<void>(
-                                context: context,
-                                isScrollControlled: true,
-                                showDragHandle: true,
-                                builder: (_) => const AIAssistantSheet(),
-                              );
-                            },
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: _AIStrategistCard(
+                              race: upcoming,
+                              strategistPrefs: effective,
+                              onTap: () async {
+                                await showModalBottomSheet<void>(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  showDragHandle: true,
+                                  builder: (_) => const AIAssistantSheet(),
+                                );
+                              },
+                            ),
                           );
                         },
                       );
@@ -11146,7 +11251,10 @@ class _CircuitsViewState extends State<CircuitsView> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _sectionHeader("2026 Calendar", "📅"),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: _sectionHeader("2026 Calendar", "📅"),
+                          ),
                           LayoutBuilder(
                             builder: (context, constraints) {
                               final isDesktop =
@@ -11586,8 +11694,8 @@ class _StandingsViewState extends State<StandingsView> {
     required dynamic item,
     required int index,
     required bool isDriver,
-    required F1UiTheme f1Ui,
     required bool compact,
+    required DisplaySettings displayPrefs,
   }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -11605,7 +11713,7 @@ class _StandingsViewState extends State<StandingsView> {
         ? driver!.team.toUpperCase()
         : team!.principalName.toUpperCase();
     final tertiaryLabel = isDriver
-        ? driverStandingsTitlesLineDesktop(driver!)
+        ? driverStandingsTitlesLine(driver!)
         : 'CC ${team!.ccWins}  DC ${team.dcWins}';
 
     if (kDebugMode && isDriver) {
@@ -11617,150 +11725,124 @@ class _StandingsViewState extends State<StandingsView> {
       );
     }
 
-    final radius = f1Ui.cardBorderRadius;
-    final rowPadH = f1Ui.cardPadding.left;
-    final rowPadV = (f1Ui.cardPadding.top * 0.6).clamp(8.0, 14.0);
-    final posSize = compact ? 16.0 : 18.0;
-    final nameSize = compact ? 12.0 : 13.0;
-    final metaSize = compact ? 10.0 : 11.0;
-    final pointsSize = compact ? 16.0 : 18.0;
-    final flagSize = compact ? 16.0 : 18.0;
-    final iconSize = compact ? 16.0 : 18.0;
+    final titleFs = HubListCardStyle.titleFontSize(displayPrefs);
+    final subFs = HubListCardStyle.subtitleFontSize(displayPrefs);
+    final posSize = compact ? 15.0 : 17.0;
+    final flagSize = displayPrefs.compact ? 18.0 : 20.0;
+    final iconSize = displayPrefs.compact ? 16.0 : 18.0;
+    final teamTint = F1TeamSchemes.getTeamColor(teamName);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(radius),
-          onTap: () => _handleStandingsTap(item, widget.isDriverView),
-          child: F1Module(
-            fillWidth: true,
-            borderRadius: radius,
-            backgroundColor: isSelected
-                ? F1TeamSchemes.getTeamColor(teamName).withValues(alpha: 0.16)
-                : theme.colorScheme.surface,
-            showFadingBorder: true,
-            borderColor: isSelected
-                ? F1TeamSchemes.getTeamColor(teamName)
-                : null,
-            boxShadow: isDark ? null : f1Ui.moduleShadow,
-            child: F1Hoverable(
-              borderRadius: BorderRadius.circular(radius),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: rowPadH,
-                  vertical: rowPadV,
-                ),
-                child: Row(
-            children: [
-              SizedBox(
-                width: 52,
-                child: Text(
-                  '${index + 1}',
-                  style: TextStyle(
-                    fontSize: posSize,
-                    fontWeight: FontWeight.w800,
-                    color: isDark ? Colors.white38 : Colors.black38,
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 5,
-                child: Row(
-                  children: [
-                    _buildFlagHero(
-                      tag: heroTag,
-                      flag: flag,
-                      fontSize: flagSize,
-                      textAlign: TextAlign.left,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        name.toUpperCase(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: nameSize,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.9,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 4,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      secondaryLabel,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: metaSize,
-                        fontWeight: FontWeight.w700,
-                        color: F1TeamSchemes.getTeamColor(teamName),
-                      ),
-                    ),
-                    SizedBox(height: compact ? 2 : 3),
-                    Tooltip(
-                      message: tertiaryLabel,
-                      waitDuration: const Duration(milliseconds: 400),
-                      child: Text(
-                        tertiaryLabel,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: metaSize,
-                          height: 1.25,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                width: 96,
-                child: Text(
-                  _formatPoints(points),
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: pointsSize,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: 30,
-                child: _isCompareMode
-                    ? Icon(
-                        isSelected
-                            ? Icons.check_circle
-                            : Icons.radio_button_unchecked,
-                        size: iconSize,
-                        color: isSelected
-                            ? F1TeamSchemes.getTeamColor(teamName)
-                            : theme.colorScheme.onSurfaceVariant,
-                      )
-                    : Icon(
-                        Icons.chevron_right_rounded,
-                        size: iconSize,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-              ),
-            ],
-                ),
+    return HubListRowShell(
+      onTap: () => _handleStandingsTap(item, widget.isDriverView),
+      selectionTint: isSelected ? teamTint.withValues(alpha: 0.16) : null,
+      selectionBorder: isSelected ? teamTint : null,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 52,
+            child: Text(
+              '${index + 1}',
+              style: TextStyle(
+                fontSize: posSize,
+                fontWeight: FontWeight.w800,
+                color: isDark ? Colors.white38 : Colors.black38,
               ),
             ),
           ),
-        ),
+          Expanded(
+            flex: 5,
+            child: Row(
+              children: [
+                _buildFlagHero(
+                  tag: heroTag,
+                  flag: flag,
+                  fontSize: flagSize,
+                  textAlign: TextAlign.left,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    name.toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: titleFs,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.9,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  secondaryLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: titleFs,
+                    fontWeight: FontWeight.w700,
+                    color: teamTint,
+                  ),
+                ),
+                if (!isDriver || tertiaryLabel.isNotEmpty) ...[
+                  SizedBox(height: compact ? 2 : 3),
+                  Tooltip(
+                    message: tertiaryLabel,
+                    waitDuration: const Duration(milliseconds: 400),
+                    child: Text(
+                      tertiaryLabel,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: subFs,
+                        height: 1.25,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          SizedBox(
+            width: 96,
+            child: Text(
+              _formatPoints(points),
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: titleFs,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 30,
+            child: _isCompareMode
+                ? Icon(
+                    isSelected
+                        ? Icons.check_circle
+                        : Icons.radio_button_unchecked,
+                    size: iconSize,
+                    color: isSelected ? teamTint : theme.colorScheme.onSurfaceVariant,
+                  )
+                : Icon(
+                    Icons.chevron_right_rounded,
+                    size: iconSize,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+          ),
+        ],
       ),
     );
   }
@@ -11770,10 +11852,9 @@ class _StandingsViewState extends State<StandingsView> {
     required dynamic item,
     required int index,
     required bool isDriver,
-    required F1UiTheme f1Ui,
     required bool compact,
+    required DisplaySettings displayPrefs,
   }) {
-
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final name = isDriver ? (item as Driver).name : (item as Team).name;
@@ -11787,6 +11868,10 @@ class _StandingsViewState extends State<StandingsView> {
         _isCompareMode && _selectedForComparison.contains(item);
     final driverTitlesLine =
         isDriver ? driverStandingsTitlesLine(item as Driver) : '';
+    final teamPrincipal = isDriver
+        ? null
+        : (item as Team).principalName.toUpperCase();
+    final teamTint = F1TeamSchemes.getTeamColor(teamName);
 
     if (kDebugMode && isDriver) {
       final d = item as Driver;
@@ -11798,117 +11883,110 @@ class _StandingsViewState extends State<StandingsView> {
       );
     }
 
-    final radius = f1Ui.cardBorderRadius;
-    final outerV = (f1Ui.cardPadding.top * 0.35).clamp(4.0, 8.0);
-    final tileV = (f1Ui.cardPadding.top * 0.45).clamp(4.0, 12.0);
-    final posFont = compact ? 14.0 : 16.0;
-    final nameFont = compact ? 12.0 : 13.0;
-    final ptsFont = compact ? 11.0 : 12.0;
-    final flagFont = compact ? 12.0 : 14.0;
-    final titlesFont = compact ? 9.0 : 10.0;
+    final titleFs = HubListCardStyle.titleFontSize(displayPrefs);
+    final subFs = HubListCardStyle.subtitleFontSize(displayPrefs);
+    final posSize = compact ? 15.0 : 17.0;
+    final flagSize = displayPrefs.compact ? 18.0 : 20.0;
+    final titlesFont = subFs - 1;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: outerV),
-      child: F1Module(
-        fillWidth: true,
-        padding: EdgeInsets.zero,
-        borderRadius: radius,
-        backgroundColor: isSelected
-            ? F1TeamSchemes.getTeamColor(teamName).withValues(alpha: 0.16)
-            : theme.colorScheme.surface,
-        showFadingBorder: true,
-        borderColor: isSelected
-            ? F1TeamSchemes.getTeamColor(teamName)
-            : null,
-        child: ListTile(
-        dense: compact,
-        visualDensity:
-            compact ? VisualDensity.compact : VisualDensity.standard,
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: f1Ui.cardPadding.left,
-          vertical: tileV,
-        ),
-        minVerticalPadding: compact ? 0 : 4,
-        isThreeLine: isDriver && driverTitlesLine.isNotEmpty,
-        onTap: () => _handleStandingsTap(item, widget.isDriverView),
-        leading: Text(
-          '${index + 1}',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white24 : Colors.black26,
-            fontSize: posFont,
+    return HubListRowShell(
+      onTap: () => _handleStandingsTap(item, widget.isDriverView),
+      selectionTint: isSelected ? teamTint.withValues(alpha: 0.16) : null,
+      selectionBorder: isSelected ? teamTint : null,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 36,
+            child: Text(
+              '${index + 1}',
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                color: isDark ? Colors.white24 : Colors.black26,
+                fontSize: posSize,
+              ),
+            ),
           ),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+          _buildFlagHero(
+            tag: heroTag,
+            flag: flag,
+            fontSize: flagSize,
+            textAlign: TextAlign.left,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                _buildFlagHero(
-                  tag: heroTag,
-                  flag: flag,
-                  fontSize: flagFont,
-                  textAlign: TextAlign.left,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    name.toUpperCase(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: nameFont,
-                      letterSpacing: 1,
-                      color: isDark ? Colors.white : Colors.black,
-                    ),
+                Text(
+                  name.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: titleFs,
+                    letterSpacing: 0.6,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
-              ],
-            ),
-            if (isDriver && driverTitlesLine.isNotEmpty)
-              Padding(
-                padding: EdgeInsets.only(top: compact ? 2.0 : 4.0),
-                child: Tooltip(
-                  message: driverTitlesLine,
-                  waitDuration: const Duration(milliseconds: 400),
-                  child: Text(
-                    driverTitlesLine,
-                    maxLines: 2,
+                if (teamPrincipal != null) ...[
+                  SizedBox(height: compact ? 1 : 2),
+                  Text(
+                    teamPrincipal,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: titlesFont,
-                      height: 1.25,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.amber,
+                      fontSize: titleFs,
+                      fontWeight: FontWeight.w700,
+                      color: teamTint,
                     ),
                   ),
-                ),
-              ),
-          ],
-        ),
-        trailing: Text(
-          '${_formatPoints(points)} ${context.l10n.pts}',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: ptsFont,
-            color: theme.colorScheme.primary,
+                ],
+                if (isDriver && driverTitlesLine.isNotEmpty) ...[
+                  SizedBox(height: compact ? 1 : 2),
+                  Tooltip(
+                    message: driverTitlesLine,
+                    waitDuration: const Duration(milliseconds: 400),
+                    child: Text(
+                      driverTitlesLine,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: titlesFont,
+                        height: 1.2,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.amber,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
+          const SizedBox(width: 6),
+          Text(
+            '${_formatPoints(points)} ${context.l10n.pts}',
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: subFs,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ],
       ),
-    ),
     );
   }
-
-  /// Vertical gap between standings rows; mirrors calendar list spacing.
-  double _standingsInterRowGap(F1UiTheme f1Ui) =>
-      f1Ui.cardPadding.top.clamp(8.0, 22.0);
 
   Widget _buildList(
     bool isDriver, {
     required F1UiTheme f1Ui,
     required bool compact,
+    required DisplaySettings displayPrefs,
   }) {
     final items = _standingsItems(isDriver);
-    final rowGap = _standingsInterRowGap(f1Ui);
+    final rowGap = HubListCardStyle.listRowSeparatorHeight;
     final listPadV = f1Ui.cardPadding.top.clamp(8.0, 14.0);
 
     return LayoutBuilder(
@@ -11918,7 +11996,7 @@ class _StandingsViewState extends State<StandingsView> {
         if (!isDesktop) {
           return ListView.separated(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: listPadV),
+            padding: EdgeInsets.symmetric(vertical: listPadV),
             itemCount: items.length,
             separatorBuilder: (context, index) => SizedBox(height: rowGap),
             itemBuilder: (context, index) => _buildMobileStandingsRow(
@@ -11926,15 +12004,15 @@ class _StandingsViewState extends State<StandingsView> {
               item: items[index],
               index: index,
               isDriver: isDriver,
-              f1Ui: f1Ui,
               compact: compact,
+              displayPrefs: displayPrefs,
             ),
           );
         }
 
         return ListView.separated(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: listPadV),
+          padding: EdgeInsets.symmetric(vertical: listPadV),
           itemCount: items.length + 1,
           separatorBuilder: (context, index) =>
               SizedBox(height: index == 0 ? 0 : rowGap),
@@ -11952,8 +12030,8 @@ class _StandingsViewState extends State<StandingsView> {
               item: items[index - 1],
               index: index - 1,
               isDriver: isDriver,
-              f1Ui: f1Ui,
               compact: compact,
+              displayPrefs: displayPrefs,
             );
           },
         );
@@ -12078,6 +12156,7 @@ class _StandingsViewState extends State<StandingsView> {
                       widget.isDriverView,
                       f1Ui: f1Ui,
                       compact: compact,
+                      displayPrefs: displaySettings.settings,
                     ),
                   ),
                 ),
@@ -25044,6 +25123,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   List<String> _teamNames = [];
   List<String> _driverNames = [];
+  String? _avatarUrl;
 
   @override
   void initState() {
@@ -25054,10 +25134,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadData() async {
     final teams = await ProfileFavoritesService.instance.loadTeamNames();
     final drivers = await ProfileFavoritesService.instance.loadDriverNames();
+    String? avatarUrl;
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      try {
+        final row = await Supabase.instance.client
+            .from('profiles')
+            .select('avatar_url')
+            .eq('id', user.id)
+            .maybeSingle();
+        if (row != null) {
+          final raw = row['avatar_url'];
+          if (raw is String && raw.trim().isNotEmpty) {
+            avatarUrl = raw.trim();
+          }
+        }
+      } catch (_) {
+        // RLS or network: keep placeholder avatar
+      }
+    }
     if (mounted) {
       setState(() {
         _teamNames = teams;
         _driverNames = drivers;
+        _avatarUrl = avatarUrl;
       });
     }
   }
@@ -25123,6 +25223,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             children: [
                               _ProfileUserCard(
                                 email: user.email ?? user.phone ?? '',
+                                avatarUrl: _avatarUrl,
                               ),
                               const SizedBox(height: 16),
                               ListTile(
@@ -25497,30 +25598,83 @@ class _ProfileFavoritesCard extends StatelessWidget {
 }
 
 class _ProfileUserCard extends StatelessWidget {
-  final String email;
+  static const double _avatarSize = 56;
 
-  const _ProfileUserCard({required this.email});
+  final String email;
+  final String? avatarUrl;
+
+  const _ProfileUserCard({
+    required this.email,
+    this.avatarUrl,
+  });
+
+  Widget _placeholderAvatar(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return CircleAvatar(
+      radius: _avatarSize / 2,
+      backgroundColor: scheme.primaryContainer,
+      child: Icon(
+        Icons.person,
+        color: scheme.onPrimaryContainer,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final url = avatarUrl?.trim();
+    final hasUrl = url != null && url.isNotEmpty;
+
     return _profileSectionCard(
       context,
       child: Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              child: Icon(Icons.person, color: Theme.of(context).colorScheme.onPrimaryContainer),
+        children: [
+          SizedBox(
+            width: _avatarSize,
+            height: _avatarSize,
+            child: hasUrl
+                ? ClipOval(
+                    child: Image.network(
+                      url,
+                      width: _avatarSize,
+                      height: _avatarSize,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          _placeholderAvatar(context),
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;
+                        }
+                        return CircleAvatar(
+                          radius: _avatarSize / 2,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primaryContainer,
+                          child: SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  )
+                : _placeholderAvatar(context),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              email,
+              style: Theme.of(context).textTheme.titleMedium,
+              overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                email,
-                style: Theme.of(context).textTheme.titleMedium,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 }

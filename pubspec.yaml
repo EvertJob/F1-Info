@@ -73,6 +73,7 @@ dependencies:
   font_awesome_flutter: 10.12.0
   args: ^2.7.0
   html: ^0.15.4
+  share_plus: ^10.1.4
   
 
 dev_dependencies:
@@ -176,6 +177,28 @@ flutter:
     - assets/tires/F1_tire_Pirelli_Cinturato_Green.svg
     - assets/tires/F1_tire_Pirelli_Cinturato_Blue.svg
     - assets/images/
+    - assets/images/drivers/george-russell.png
+    - assets/images/drivers/kimi-antonelli.png
+    - assets/images/drivers/charles-leclerc.png
+    - assets/images/drivers/lewis-hamilton.png
+    - assets/images/drivers/lando-norris.png
+    - assets/images/drivers/oscar-piastri.png
+    - assets/images/drivers/oliver-bearman.png
+    - assets/images/drivers/esteban-ocon.png
+    - assets/images/drivers/pierre-gasly.png
+    - assets/images/drivers/franco-colapinto.png
+    - assets/images/drivers/max-verstappen.png
+    - assets/images/drivers/isack-hadjar.png
+    - assets/images/drivers/liam-lawson.png
+    - assets/images/drivers/arvid-lindblad.png
+    - assets/images/drivers/nico-hulkenberg.png
+    - assets/images/drivers/gabriel-bortoleto.png
+    - assets/images/drivers/carlos-sainz.png
+    - assets/images/drivers/alexander-albon.png
+    - assets/images/drivers/sergio-perez.png
+    - assets/images/drivers/valtteri-bottas.png
+    - assets/images/drivers/fernando-alonso.png
+    - assets/images/drivers/lance-stroll.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

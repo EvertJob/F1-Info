@@ -1319,6 +1319,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get login => 'Connexion';
 
   @override
+  String get login_register_menu => 'Connexion / Inscription';
+
+  @override
+  String get login_page_title => 'Connexion';
+
+  @override
   String get logout => 'Déconnexion';
 
   @override
@@ -2299,4 +2305,162 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get recent_form_no_data => 'Pas encore de données de forme pour cette saison.';
+
+  @override
+  String get simulator_nav => 'Simulateur';
+
+  @override
+  String get simulator_title => 'Simulateur de championnat';
+
+  @override
+  String get simulator_timeline => 'Chronologie';
+
+  @override
+  String get simulator_podium_hint => 'Glissez un pilote sur P1–P3. Les autres places bougent.';
+
+  @override
+  String get simulator_standings => 'Classement du championnat';
+
+  @override
+  String get simulator_actual => 'Réel';
+
+  @override
+  String get simulator_prediction => 'Votre choix';
+
+  @override
+  String get simulator_accuracy => 'Précision podium';
+
+  @override
+  String get simulator_magic_clinch => 'Écart > points restants (borne GP seulement)';
+
+  @override
+  String get simulator_consensus_stub => 'Points officiels du championnat sur les courses disputées cette saison (sans projections).';
+
+  @override
+  String get simulator_sync_cloud => 'Synchroniser les pronos dans le cloud';
+
+  @override
+  String get simulator_sync_cloud_done => 'Pronostics enregistrés sur votre compte.';
+
+  @override
+  String get simulator_sync_cloud_nothing_to_sync => 'Rien à envoyer — définissez P1–P3 pour au moins une course.';
+
+  @override
+  String get simulator_sync_cloud_not_signed_in => 'Connectez-vous pour enregistrer les pronos dans le cloud.';
+
+  @override
+  String get simulator_sync_cloud_read_only => 'Lecture seule — synchronisation cloud désactivée.';
+
+  @override
+  String simulator_sync_cloud_failed(String detail) {
+    return 'Échec de la synchro cloud : $detail';
+  }
+
+  @override
+  String get simulator_snapshot_tooltip => 'Partager le classement en image';
+
+  @override
+  String get simulator_snapshot_copied_hint => 'Image prête — utilisez le partage de l’appareil.';
+
+  @override
+  String get simulator_share_readonly_tooltip => 'Partager le lien en lecture seule';
+
+  @override
+  String get simulator_share_readonly_subject => 'F1 Hub — simulateur de championnat (lecture seule)';
+
+  @override
+  String get simulator_share_readonly_snackbar => 'Lien prêt — utilisez le partage de l’appareil.';
+
+  @override
+  String get simulator_share_readonly_need_login => 'Connectez-vous pour partager votre lien simulateur en lecture seule.';
+
+  @override
+  String simulator_prediction_by(String username) {
+    return 'Pronostic de @$username';
+  }
+
+  @override
+  String simulator_p1_accuracy_percent(int pct) {
+    return 'Précision P1 : $pct %';
+  }
+
+  @override
+  String simulator_clinch_in(String venue) {
+    return 'Le titre pourrait se jouer à : $venue';
+  }
+
+  @override
+  String get simulator_steward_title => 'Grille des stewards';
+
+  @override
+  String get simulator_steward_hint => 'Pénalités et DNF reclassent le plateau ; les points mettent à jour la projection.';
+
+  @override
+  String get simulator_sync_official => 'Aligner les courses terminées sur les résultats officiels';
+
+  @override
+  String get simulator_sync_official_done => 'Les courses terminées correspondent au podium officiel.';
+
+  @override
+  String get simulator_save_draft => 'Enregistrer le brouillon';
+
+  @override
+  String get simulator_undo => 'Annuler';
+
+  @override
+  String get simulator_readonly_banner => 'Vue partagée en lecture seule';
+
+  @override
+  String get simulator_share_stub_title => 'Prédictions partagées';
+
+  @override
+  String simulator_share_empty(String username) {
+    return 'Aucune prédiction cloud pour « $username ». Cette personne doit être connectée, remplir le simulateur de championnat et synchroniser avec le serveur.';
+  }
+
+  @override
+  String get simulator_share_error_load => 'Impossible de charger les prédictions partagées. Avec votre propre Supabase : exécutez sql/add_simulator_share_rpcs.sql (get_shared_predictions) puis réessayez.';
+
+  @override
+  String get simulator_share_local_preview => 'Aperçu sur cet appareil uniquement — ouvrez le simulateur connecté pour synchroniser les choix vers le cloud.';
+
+  @override
+  String get simulator_steward_coming => 'Stewards (pénalités / statut) — itération suivante';
+
+  @override
+  String simulator_round(int round) {
+    return 'R$round';
+  }
+
+  @override
+  String get simulator_open_full_grid => 'Ouvrir la grille complète';
+
+  @override
+  String get simulator_full_grid_title => 'Grille complète — 22 pilotes';
+
+  @override
+  String get simulator_tab_grand_prix => 'Grand Prix';
+
+  @override
+  String get simulator_tab_sprint => 'Sprint';
+
+  @override
+  String get simulator_session_locked => 'Édition verrouillée — session dans moins de 15 minutes';
+
+  @override
+  String get simulator_race_cancelled => 'Annulé — pas de points';
+
+  @override
+  String get simulator_dns => 'DNS';
+
+  @override
+  String get simulator_dnf => 'DNF';
+
+  @override
+  String get simulator_dsq => 'DSQ';
+
+  @override
+  String simulator_stats_line(int predPts, int gridPct, int p1Pct) {
+    return '$predPts pts · Grille $gridPct% · P1 $p1Pct%';
+  }
 }

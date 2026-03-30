@@ -1319,6 +1319,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get login => 'Login';
 
   @override
+  String get login_register_menu => 'Login / Register';
+
+  @override
+  String get login_page_title => 'Sign in';
+
+  @override
   String get logout => 'Logout';
 
   @override
@@ -2299,4 +2305,162 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recent_form_no_data => 'No form data for this season yet.';
+
+  @override
+  String get simulator_nav => 'Simulator';
+
+  @override
+  String get simulator_title => 'Championship Simulator';
+
+  @override
+  String get simulator_timeline => 'Timeline';
+
+  @override
+  String get simulator_podium_hint => 'Drag a driver onto P1–P3. Drops bump other slots.';
+
+  @override
+  String get simulator_standings => 'Season standings';
+
+  @override
+  String get simulator_actual => 'Actual';
+
+  @override
+  String get simulator_prediction => 'Your pick';
+
+  @override
+  String get simulator_accuracy => 'Podium accuracy';
+
+  @override
+  String get simulator_magic_clinch => 'Title gap > points left (GP-only bound)';
+
+  @override
+  String get simulator_consensus_stub => 'Official championship points from races with results this season (no projections).';
+
+  @override
+  String get simulator_sync_cloud => 'Sync predictions to cloud';
+
+  @override
+  String get simulator_sync_cloud_done => 'Predictions saved to your account.';
+
+  @override
+  String get simulator_sync_cloud_nothing_to_sync => 'Nothing to upload — set P1–P3 for at least one race.';
+
+  @override
+  String get simulator_sync_cloud_not_signed_in => 'Sign in to save predictions to the cloud.';
+
+  @override
+  String get simulator_sync_cloud_read_only => 'Read-only — cloud sync is disabled.';
+
+  @override
+  String simulator_sync_cloud_failed(String detail) {
+    return 'Cloud sync failed: $detail';
+  }
+
+  @override
+  String get simulator_snapshot_tooltip => 'Share standings image';
+
+  @override
+  String get simulator_snapshot_copied_hint => 'Image ready — use your device share sheet.';
+
+  @override
+  String get simulator_share_readonly_tooltip => 'Share read-only link';
+
+  @override
+  String get simulator_share_readonly_subject => 'F1 Hub — championship simulator (read-only)';
+
+  @override
+  String get simulator_share_readonly_snackbar => 'Link ready — use your device share sheet.';
+
+  @override
+  String get simulator_share_readonly_need_login => 'Sign in to share your read-only simulator link.';
+
+  @override
+  String simulator_prediction_by(String username) {
+    return 'Prediction by @$username';
+  }
+
+  @override
+  String simulator_p1_accuracy_percent(int pct) {
+    return 'P1 accuracy: $pct%';
+  }
+
+  @override
+  String simulator_clinch_in(String venue) {
+    return 'Title could be decided at: $venue';
+  }
+
+  @override
+  String get simulator_steward_title => 'Steward grid';
+
+  @override
+  String get simulator_steward_hint => 'Penalties and DNFs re-sort the field; points update the projection.';
+
+  @override
+  String get simulator_sync_official => 'Sync finished races to official results';
+
+  @override
+  String get simulator_sync_official_done => 'Finished races now match official podiums.';
+
+  @override
+  String get simulator_save_draft => 'Save draft';
+
+  @override
+  String get simulator_undo => 'Undo';
+
+  @override
+  String get simulator_readonly_banner => 'Read-only shared view';
+
+  @override
+  String get simulator_share_stub_title => 'Shared predictions';
+
+  @override
+  String simulator_share_empty(String username) {
+    return 'No cloud predictions for \"$username\". That person needs to sign in, fill the championship simulator, and let it sync to the server.';
+  }
+
+  @override
+  String get simulator_share_error_load => 'Could not load shared predictions. If you use your own Supabase project, run sql/add_simulator_share_rpcs.sql (function get_shared_predictions) and try again.';
+
+  @override
+  String get simulator_share_local_preview => 'Preview from this device only — open the simulator while signed in so picks sync to the cloud for others.';
+
+  @override
+  String get simulator_steward_coming => 'Steward desk (penalties / status) — next iteration';
+
+  @override
+  String simulator_round(int round) {
+    return 'R$round';
+  }
+
+  @override
+  String get simulator_open_full_grid => 'Open full grid';
+
+  @override
+  String get simulator_full_grid_title => 'Full grid — 22 drivers';
+
+  @override
+  String get simulator_tab_grand_prix => 'Grand Prix';
+
+  @override
+  String get simulator_tab_sprint => 'Sprint';
+
+  @override
+  String get simulator_session_locked => 'Editing locked — session within 15 minutes';
+
+  @override
+  String get simulator_race_cancelled => 'Cancelled — no points';
+
+  @override
+  String get simulator_dns => 'DNS';
+
+  @override
+  String get simulator_dnf => 'DNF';
+
+  @override
+  String get simulator_dsq => 'DSQ';
+
+  @override
+  String simulator_stats_line(int predPts, int gridPct, int p1Pct) {
+    return '$predPts pts · Grid $gridPct% · P1 $p1Pct%';
+  }
 }

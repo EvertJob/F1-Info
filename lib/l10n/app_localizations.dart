@@ -2619,6 +2619,18 @@ abstract class AppLocalizations {
   /// **'Login'**
   String get login;
 
+  /// No description provided for @login_register_menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Login / Register'**
+  String get login_register_menu;
+
+  /// No description provided for @login_page_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get login_page_title;
+
   /// No description provided for @logout.
   ///
   /// In en, this message translates to:
@@ -4526,6 +4538,294 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No form data for this season yet.'**
   String get recent_form_no_data;
+
+  /// No description provided for @simulator_nav.
+  ///
+  /// In en, this message translates to:
+  /// **'Simulator'**
+  String get simulator_nav;
+
+  /// No description provided for @simulator_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Championship Simulator'**
+  String get simulator_title;
+
+  /// No description provided for @simulator_timeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline'**
+  String get simulator_timeline;
+
+  /// No description provided for @simulator_podium_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag a driver onto P1–P3. Drops bump other slots.'**
+  String get simulator_podium_hint;
+
+  /// No description provided for @simulator_standings.
+  ///
+  /// In en, this message translates to:
+  /// **'Season standings'**
+  String get simulator_standings;
+
+  /// No description provided for @simulator_actual.
+  ///
+  /// In en, this message translates to:
+  /// **'Actual'**
+  String get simulator_actual;
+
+  /// No description provided for @simulator_prediction.
+  ///
+  /// In en, this message translates to:
+  /// **'Your pick'**
+  String get simulator_prediction;
+
+  /// No description provided for @simulator_accuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'Podium accuracy'**
+  String get simulator_accuracy;
+
+  /// No description provided for @simulator_magic_clinch.
+  ///
+  /// In en, this message translates to:
+  /// **'Title gap > points left (GP-only bound)'**
+  String get simulator_magic_clinch;
+
+  /// No description provided for @simulator_consensus_stub.
+  ///
+  /// In en, this message translates to:
+  /// **'Official championship points from races with results this season (no projections).'**
+  String get simulator_consensus_stub;
+
+  /// No description provided for @simulator_sync_cloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync predictions to cloud'**
+  String get simulator_sync_cloud;
+
+  /// No description provided for @simulator_sync_cloud_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Predictions saved to your account.'**
+  String get simulator_sync_cloud_done;
+
+  /// No description provided for @simulator_sync_cloud_nothing_to_sync.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to upload — set P1–P3 for at least one race.'**
+  String get simulator_sync_cloud_nothing_to_sync;
+
+  /// No description provided for @simulator_sync_cloud_not_signed_in.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to save predictions to the cloud.'**
+  String get simulator_sync_cloud_not_signed_in;
+
+  /// No description provided for @simulator_sync_cloud_read_only.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only — cloud sync is disabled.'**
+  String get simulator_sync_cloud_read_only;
+
+  /// No description provided for @simulator_sync_cloud_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud sync failed: {detail}'**
+  String simulator_sync_cloud_failed(String detail);
+
+  /// No description provided for @simulator_snapshot_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Share standings image'**
+  String get simulator_snapshot_tooltip;
+
+  /// No description provided for @simulator_snapshot_copied_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Image ready — use your device share sheet.'**
+  String get simulator_snapshot_copied_hint;
+
+  /// No description provided for @simulator_share_readonly_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Share read-only link'**
+  String get simulator_share_readonly_tooltip;
+
+  /// No description provided for @simulator_share_readonly_subject.
+  ///
+  /// In en, this message translates to:
+  /// **'F1 Hub — championship simulator (read-only)'**
+  String get simulator_share_readonly_subject;
+
+  /// No description provided for @simulator_share_readonly_snackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Link ready — use your device share sheet.'**
+  String get simulator_share_readonly_snackbar;
+
+  /// No description provided for @simulator_share_readonly_need_login.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to share your read-only simulator link.'**
+  String get simulator_share_readonly_need_login;
+
+  /// No description provided for @simulator_prediction_by.
+  ///
+  /// In en, this message translates to:
+  /// **'Prediction by @{username}'**
+  String simulator_prediction_by(String username);
+
+  /// No description provided for @simulator_p1_accuracy_percent.
+  ///
+  /// In en, this message translates to:
+  /// **'P1 accuracy: {pct}%'**
+  String simulator_p1_accuracy_percent(int pct);
+
+  /// No description provided for @simulator_clinch_in.
+  ///
+  /// In en, this message translates to:
+  /// **'Title could be decided at: {venue}'**
+  String simulator_clinch_in(String venue);
+
+  /// No description provided for @simulator_steward_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Steward grid'**
+  String get simulator_steward_title;
+
+  /// No description provided for @simulator_steward_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalties and DNFs re-sort the field; points update the projection.'**
+  String get simulator_steward_hint;
+
+  /// No description provided for @simulator_sync_official.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync finished races to official results'**
+  String get simulator_sync_official;
+
+  /// No description provided for @simulator_sync_official_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished races now match official podiums.'**
+  String get simulator_sync_official_done;
+
+  /// No description provided for @simulator_save_draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Save draft'**
+  String get simulator_save_draft;
+
+  /// No description provided for @simulator_undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get simulator_undo;
+
+  /// No description provided for @simulator_readonly_banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only shared view'**
+  String get simulator_readonly_banner;
+
+  /// No description provided for @simulator_share_stub_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared predictions'**
+  String get simulator_share_stub_title;
+
+  /// No description provided for @simulator_share_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No cloud predictions for \"{username}\". That person needs to sign in, fill the championship simulator, and let it sync to the server.'**
+  String simulator_share_empty(String username);
+
+  /// No description provided for @simulator_share_error_load.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load shared predictions. If you use your own Supabase project, run sql/add_simulator_share_rpcs.sql (function get_shared_predictions) and try again.'**
+  String get simulator_share_error_load;
+
+  /// No description provided for @simulator_share_local_preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview from this device only — open the simulator while signed in so picks sync to the cloud for others.'**
+  String get simulator_share_local_preview;
+
+  /// No description provided for @simulator_steward_coming.
+  ///
+  /// In en, this message translates to:
+  /// **'Steward desk (penalties / status) — next iteration'**
+  String get simulator_steward_coming;
+
+  /// No description provided for @simulator_round.
+  ///
+  /// In en, this message translates to:
+  /// **'R{round}'**
+  String simulator_round(int round);
+
+  /// No description provided for @simulator_open_full_grid.
+  ///
+  /// In en, this message translates to:
+  /// **'Open full grid'**
+  String get simulator_open_full_grid;
+
+  /// No description provided for @simulator_full_grid_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Full grid — 22 drivers'**
+  String get simulator_full_grid_title;
+
+  /// No description provided for @simulator_tab_grand_prix.
+  ///
+  /// In en, this message translates to:
+  /// **'Grand Prix'**
+  String get simulator_tab_grand_prix;
+
+  /// No description provided for @simulator_tab_sprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sprint'**
+  String get simulator_tab_sprint;
+
+  /// No description provided for @simulator_session_locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Editing locked — session within 15 minutes'**
+  String get simulator_session_locked;
+
+  /// No description provided for @simulator_race_cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled — no points'**
+  String get simulator_race_cancelled;
+
+  /// No description provided for @simulator_dns.
+  ///
+  /// In en, this message translates to:
+  /// **'DNS'**
+  String get simulator_dns;
+
+  /// No description provided for @simulator_dnf.
+  ///
+  /// In en, this message translates to:
+  /// **'DNF'**
+  String get simulator_dnf;
+
+  /// No description provided for @simulator_dsq.
+  ///
+  /// In en, this message translates to:
+  /// **'DSQ'**
+  String get simulator_dsq;
+
+  /// No description provided for @simulator_stats_line.
+  ///
+  /// In en, this message translates to:
+  /// **'{predPts} pts · Grid {gridPct}% · P1 {p1Pct}%'**
+  String simulator_stats_line(int predPts, int gridPct, int p1Pct);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
