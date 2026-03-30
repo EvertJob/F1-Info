@@ -2307,10 +2307,10 @@ class AppLocalizationsNl extends AppLocalizations {
   String get recent_form_no_data => 'Nog geen vormdata voor dit seizoen.';
 
   @override
-  String get simulator_nav => 'Simulator';
+  String get simulator_nav => 'Gedeelde stand';
 
   @override
-  String get simulator_title => 'Kampioenschapssimulator';
+  String get simulator_title => 'Gedeelde stand';
 
   @override
   String get simulator_timeline => 'Tijdlijn';
@@ -2366,13 +2366,13 @@ class AppLocalizationsNl extends AppLocalizations {
   String get simulator_share_readonly_tooltip => 'Deel alleen-lezen link';
 
   @override
-  String get simulator_share_readonly_subject => 'F1 Hub — kampioenschapssimulator (alleen lezen)';
+  String get simulator_share_readonly_subject => 'F1 Hub — gedeelde stand (alleen lezen)';
 
   @override
   String get simulator_share_readonly_snackbar => 'Link klaar — gebruik het deelscherm van je apparaat.';
 
   @override
-  String get simulator_share_readonly_need_login => 'Log in om je alleen-lezen simulatorlink te delen.';
+  String get simulator_share_readonly_need_login => 'Log in om je alleen-lezen link naar de gedeelde stand te delen.';
 
   @override
   String simulator_prediction_by(String username) {
@@ -2415,14 +2415,14 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String simulator_share_empty(String username) {
-    return 'Geen voorspellingen in de cloud voor \"$username\". Die persoon moet ingelogd zijn, de kampioenschapssimulator invullen en naar de server synchroniseren.';
+    return 'Geen voorspellingen in de cloud voor \"$username\". Die persoon moet ingelogd zijn, Gedeelde stand invullen en naar de server synchroniseren.';
   }
 
   @override
   String get simulator_share_error_load => 'Gedeelde voorspellingen laden is mislukt. Gebruik je eigen Supabase? Voer sql/add_simulator_share_rpcs.sql uit (functie get_shared_predictions) en probeer opnieuw.';
 
   @override
-  String get simulator_share_local_preview => 'Alleen voorbeeld vanaf dit apparaat — open de simulator ingelogd zodat je keuzes naar de cloud gaan voor anderen.';
+  String get simulator_share_local_preview => 'Alleen voorbeeld vanaf dit apparaat — open Gedeelde stand ingelogd zodat je keuzes naar de cloud gaan voor anderen.';
 
   @override
   String get simulator_steward_coming => 'Stewards (straffen / status) — volgende iteratie';

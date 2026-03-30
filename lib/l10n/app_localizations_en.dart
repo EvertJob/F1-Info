@@ -2307,10 +2307,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recent_form_no_data => 'No form data for this season yet.';
 
   @override
-  String get simulator_nav => 'Simulator';
+  String get simulator_nav => 'Shared Standing';
 
   @override
-  String get simulator_title => 'Championship Simulator';
+  String get simulator_title => 'Shared Standing';
 
   @override
   String get simulator_timeline => 'Timeline';
@@ -2366,13 +2366,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get simulator_share_readonly_tooltip => 'Share read-only link';
 
   @override
-  String get simulator_share_readonly_subject => 'F1 Hub — championship simulator (read-only)';
+  String get simulator_share_readonly_subject => 'F1 Hub — Shared Standing (read-only)';
 
   @override
   String get simulator_share_readonly_snackbar => 'Link ready — use your device share sheet.';
 
   @override
-  String get simulator_share_readonly_need_login => 'Sign in to share your read-only simulator link.';
+  String get simulator_share_readonly_need_login => 'Sign in to share your read-only Shared Standing link.';
 
   @override
   String simulator_prediction_by(String username) {
@@ -2415,14 +2415,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String simulator_share_empty(String username) {
-    return 'No cloud predictions for \"$username\". That person needs to sign in, fill the championship simulator, and let it sync to the server.';
+    return 'No cloud predictions for \"$username\". That person needs to sign in, fill Shared Standing, and let it sync to the server.';
   }
 
   @override
   String get simulator_share_error_load => 'Could not load shared predictions. If you use your own Supabase project, run sql/add_simulator_share_rpcs.sql (function get_shared_predictions) and try again.';
 
   @override
-  String get simulator_share_local_preview => 'Preview from this device only — open the simulator while signed in so picks sync to the cloud for others.';
+  String get simulator_share_local_preview => 'Preview from this device only — open Shared Standing while signed in so picks sync to the cloud for others.';
 
   @override
   String get simulator_steward_coming => 'Steward desk (penalties / status) — next iteration';

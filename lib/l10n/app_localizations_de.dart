@@ -2307,10 +2307,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get recent_form_no_data => 'Noch keine Formdaten für diese Saison.';
 
   @override
-  String get simulator_nav => 'Simulator';
+  String get simulator_nav => 'Geteilte Wertung';
 
   @override
-  String get simulator_title => 'Meisterschafts-Simulator';
+  String get simulator_title => 'Geteilte Wertung';
 
   @override
   String get simulator_timeline => 'Zeitleiste';
@@ -2366,13 +2366,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get simulator_share_readonly_tooltip => 'Nur-Lese-Link teilen';
 
   @override
-  String get simulator_share_readonly_subject => 'F1 Hub — Meisterschafts-Simulator (nur lesen)';
+  String get simulator_share_readonly_subject => 'F1 Hub — geteilte Wertung (nur lesen)';
 
   @override
   String get simulator_share_readonly_snackbar => 'Link fertig — Teilen-Dialog deines Geräts nutzen.';
 
   @override
-  String get simulator_share_readonly_need_login => 'Zum Teilen des Nur-Lese-Links anmelden.';
+  String get simulator_share_readonly_need_login => 'Zum Teilen des Nur-Lese-Links zur geteilten Wertung anmelden.';
 
   @override
   String simulator_prediction_by(String username) {
@@ -2415,14 +2415,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String simulator_share_empty(String username) {
-    return 'Keine Cloud-Tipps für „$username“. Diese Person muss angemeldet sein, den Meisterschafts-Simulator ausfüllen und mit dem Server synchronisieren.';
+    return 'Keine Cloud-Tipps für „$username“. Diese Person muss angemeldet sein, die geteilte Wertung ausfüllen und mit dem Server synchronisieren.';
   }
 
   @override
   String get simulator_share_error_load => 'Geteilte Tipps konnten nicht geladen werden. Mit eigenem Supabase: sql/add_simulator_share_rpcs.sql ausführen (get_shared_predictions) und erneut versuchen.';
 
   @override
-  String get simulator_share_local_preview => 'Nur Vorschau auf diesem Gerät — Simulator angemeldet öffnen, damit Tipps in die Cloud synchronisiert werden.';
+  String get simulator_share_local_preview => 'Nur Vorschau auf diesem Gerät — geteilte Wertung angemeldet öffnen, damit Tipps in die Cloud synchronisiert werden.';
 
   @override
   String get simulator_steward_coming => 'Stewards (Strafen / Status) — nächste Iteration';

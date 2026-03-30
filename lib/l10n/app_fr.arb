@@ -1082,8 +1082,8 @@
   "recent_form_expand_tooltip": "Ouvrir la saison complète",
   "recent_form_close": "Fermer",
   "recent_form_no_data": "Pas encore de données de forme pour cette saison.",
-  "simulator_nav": "Simulateur",
-  "simulator_title": "Simulateur de championnat",
+  "simulator_nav": "Classement partagé",
+  "simulator_title": "Classement partagé",
   "simulator_timeline": "Chronologie",
   "simulator_podium_hint": "Glissez un pilote sur P1–P3. Les autres places bougent.",
   "simulator_standings": "Classement du championnat",
@@ -1108,9 +1108,9 @@
   "simulator_snapshot_tooltip": "Partager le classement en image",
   "simulator_snapshot_copied_hint": "Image prête — utilisez le partage de l’appareil.",
   "simulator_share_readonly_tooltip": "Partager le lien en lecture seule",
-  "simulator_share_readonly_subject": "F1 Hub — simulateur de championnat (lecture seule)",
+  "simulator_share_readonly_subject": "F1 Hub — classement partagé (lecture seule)",
   "simulator_share_readonly_snackbar": "Lien prêt — utilisez le partage de l’appareil.",
-  "simulator_share_readonly_need_login": "Connectez-vous pour partager votre lien simulateur en lecture seule.",
+  "simulator_share_readonly_need_login": "Connectez-vous pour partager votre lien du classement partagé en lecture seule.",
   "simulator_prediction_by": "Pronostic de @{username}",
   "@simulator_prediction_by": {
     "placeholders": {
@@ -1143,7 +1143,7 @@
   "simulator_undo": "Annuler",
   "simulator_readonly_banner": "Vue partagée en lecture seule",
   "simulator_share_stub_title": "Prédictions partagées",
-  "simulator_share_empty": "Aucune prédiction cloud pour « {username} ». Cette personne doit être connectée, remplir le simulateur de championnat et synchroniser avec le serveur.",
+  "simulator_share_empty": "Aucune prédiction cloud pour « {username} ». Cette personne doit être connectée, remplir le classement partagé et synchroniser avec le serveur.",
   "@simulator_share_empty": {
     "placeholders": {
       "username": {
@@ -1152,7 +1152,7 @@
     }
   },
   "simulator_share_error_load": "Impossible de charger les prédictions partagées. Avec votre propre Supabase : exécutez sql/add_simulator_share_rpcs.sql (get_shared_predictions) puis réessayez.",
-  "simulator_share_local_preview": "Aperçu sur cet appareil uniquement — ouvrez le simulateur connecté pour synchroniser les choix vers le cloud.",
+  "simulator_share_local_preview": "Aperçu sur cet appareil uniquement — ouvrez le classement partagé connecté pour synchroniser les choix vers le cloud.",
   "simulator_steward_coming": "Stewards (pénalités / statut) — itération suivante",
   "simulator_round": "R{round}",
   "@simulator_round": {

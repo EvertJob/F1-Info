@@ -1082,8 +1082,8 @@
   "recent_form_expand_tooltip": "Vollständige Saisonansicht",
   "recent_form_close": "Schließen",
   "recent_form_no_data": "Noch keine Formdaten für diese Saison.",
-  "simulator_nav": "Simulator",
-  "simulator_title": "Meisterschafts-Simulator",
+  "simulator_nav": "Geteilte Wertung",
+  "simulator_title": "Geteilte Wertung",
   "simulator_timeline": "Zeitleiste",
   "simulator_podium_hint": "Fahrer auf P1–P3 ziehen. Andere Plätze rutschen nach.",
   "simulator_standings": "Saisonstand",
@@ -1108,9 +1108,9 @@
   "simulator_snapshot_tooltip": "Tabelle als Bild teilen",
   "simulator_snapshot_copied_hint": "Bild fertig — Teilen-Dialog deines Geräts nutzen.",
   "simulator_share_readonly_tooltip": "Nur-Lese-Link teilen",
-  "simulator_share_readonly_subject": "F1 Hub — Meisterschafts-Simulator (nur lesen)",
+  "simulator_share_readonly_subject": "F1 Hub — geteilte Wertung (nur lesen)",
   "simulator_share_readonly_snackbar": "Link fertig — Teilen-Dialog deines Geräts nutzen.",
-  "simulator_share_readonly_need_login": "Zum Teilen des Nur-Lese-Links anmelden.",
+  "simulator_share_readonly_need_login": "Zum Teilen des Nur-Lese-Links zur geteilten Wertung anmelden.",
   "simulator_prediction_by": "Tipp von @{username}",
   "@simulator_prediction_by": {
     "placeholders": {
@@ -1143,7 +1143,7 @@
   "simulator_undo": "Rückgängig",
   "simulator_readonly_banner": "Nur-Lese-Ansicht (geteilt)",
   "simulator_share_stub_title": "Geteilte Tipps",
-  "simulator_share_empty": "Keine Cloud-Tipps für „{username}“. Diese Person muss angemeldet sein, den Meisterschafts-Simulator ausfüllen und mit dem Server synchronisieren.",
+  "simulator_share_empty": "Keine Cloud-Tipps für „{username}“. Diese Person muss angemeldet sein, die geteilte Wertung ausfüllen und mit dem Server synchronisieren.",
   "@simulator_share_empty": {
     "placeholders": {
       "username": {
@@ -1152,7 +1152,7 @@
     }
   },
   "simulator_share_error_load": "Geteilte Tipps konnten nicht geladen werden. Mit eigenem Supabase: sql/add_simulator_share_rpcs.sql ausführen (get_shared_predictions) und erneut versuchen.",
-  "simulator_share_local_preview": "Nur Vorschau auf diesem Gerät — Simulator angemeldet öffnen, damit Tipps in die Cloud synchronisiert werden.",
+  "simulator_share_local_preview": "Nur Vorschau auf diesem Gerät — geteilte Wertung angemeldet öffnen, damit Tipps in die Cloud synchronisiert werden.",
   "simulator_steward_coming": "Stewards (Strafen / Status) — nächste Iteration",
   "simulator_round": "R{round}",
   "@simulator_round": {

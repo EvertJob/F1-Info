@@ -45,4 +45,4 @@ If you are a master predictor and get everything right on a Sprint weekend, here
 * **Cancelled Races:** If a race is cancelled (e.g., due to weather), that round scores **0 points** for everyone to keep the championship fair.
 * **Live Accuracy:** Your "Season Accuracy %" and total points are updated live in the App Bar as soon as the official results are processed.
 
-**Do you have what it takes to be the #1 Predictor of 2026? Start building your grid now in the Simulator!**
+**Do you have what it takes to be the #1 Predictor of 2026? Start building your grid now in Shared Standing!**

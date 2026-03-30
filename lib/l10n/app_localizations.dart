@@ -4542,13 +4542,13 @@ abstract class AppLocalizations {
   /// No description provided for @simulator_nav.
   ///
   /// In en, this message translates to:
-  /// **'Simulator'**
+  /// **'Shared Standing'**
   String get simulator_nav;
 
   /// No description provided for @simulator_title.
   ///
   /// In en, this message translates to:
-  /// **'Championship Simulator'**
+  /// **'Shared Standing'**
   String get simulator_title;
 
   /// No description provided for @simulator_timeline.
@@ -4656,7 +4656,7 @@ abstract class AppLocalizations {
   /// No description provided for @simulator_share_readonly_subject.
   ///
   /// In en, this message translates to:
-  /// **'F1 Hub — championship simulator (read-only)'**
+  /// **'F1 Hub — Shared Standing (read-only)'**
   String get simulator_share_readonly_subject;
 
   /// No description provided for @simulator_share_readonly_snackbar.
@@ -4668,7 +4668,7 @@ abstract class AppLocalizations {
   /// No description provided for @simulator_share_readonly_need_login.
   ///
   /// In en, this message translates to:
-  /// **'Sign in to share your read-only simulator link.'**
+  /// **'Sign in to share your read-only Shared Standing link.'**
   String get simulator_share_readonly_need_login;
 
   /// No description provided for @simulator_prediction_by.
@@ -4740,7 +4740,7 @@ abstract class AppLocalizations {
   /// No description provided for @simulator_share_empty.
   ///
   /// In en, this message translates to:
-  /// **'No cloud predictions for \"{username}\". That person needs to sign in, fill the championship simulator, and let it sync to the server.'**
+  /// **'No cloud predictions for \"{username}\". That person needs to sign in, fill Shared Standing, and let it sync to the server.'**
   String simulator_share_empty(String username);
 
   /// No description provided for @simulator_share_error_load.
@@ -4752,7 +4752,7 @@ abstract class AppLocalizations {
   /// No description provided for @simulator_share_local_preview.
   ///
   /// In en, this message translates to:
-  /// **'Preview from this device only — open the simulator while signed in so picks sync to the cloud for others.'**
+  /// **'Preview from this device only — open Shared Standing while signed in so picks sync to the cloud for others.'**
   String get simulator_share_local_preview;
 
   /// No description provided for @simulator_steward_coming.

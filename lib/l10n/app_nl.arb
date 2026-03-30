@@ -1082,8 +1082,8 @@
   "recent_form_expand_tooltip": "Volledig seizoen openen",
   "recent_form_close": "Sluiten",
   "recent_form_no_data": "Nog geen vormdata voor dit seizoen.",
-  "simulator_nav": "Simulator",
-  "simulator_title": "Kampioenschapssimulator",
+  "simulator_nav": "Gedeelde stand",
+  "simulator_title": "Gedeelde stand",
   "simulator_timeline": "Tijdlijn",
   "simulator_podium_hint": "Sleep een coureur naar P1–P3. Andere plekken schuiven op.",
   "simulator_standings": "Seizoensstand",
@@ -1108,9 +1108,9 @@
   "simulator_snapshot_tooltip": "Standen delen als afbeelding",
   "simulator_snapshot_copied_hint": "Afbeelding klaar — gebruik het deelscherm van je apparaat.",
   "simulator_share_readonly_tooltip": "Deel alleen-lezen link",
-  "simulator_share_readonly_subject": "F1 Hub — kampioenschapssimulator (alleen lezen)",
+  "simulator_share_readonly_subject": "F1 Hub — gedeelde stand (alleen lezen)",
   "simulator_share_readonly_snackbar": "Link klaar — gebruik het deelscherm van je apparaat.",
-  "simulator_share_readonly_need_login": "Log in om je alleen-lezen simulatorlink te delen.",
+  "simulator_share_readonly_need_login": "Log in om je alleen-lezen link naar de gedeelde stand te delen.",
   "simulator_prediction_by": "Voorspelling van @{username}",
   "@simulator_prediction_by": {
     "placeholders": {
@@ -1143,7 +1143,7 @@
   "simulator_undo": "Ongedaan",
   "simulator_readonly_banner": "Alleen-lezen gedeelde weergave",
   "simulator_share_stub_title": "Gedeelde voorspellingen",
-  "simulator_share_empty": "Geen voorspellingen in de cloud voor \"{username}\". Die persoon moet ingelogd zijn, de kampioenschapssimulator invullen en naar de server synchroniseren.",
+  "simulator_share_empty": "Geen voorspellingen in de cloud voor \"{username}\". Die persoon moet ingelogd zijn, Gedeelde stand invullen en naar de server synchroniseren.",
   "@simulator_share_empty": {
     "placeholders": {
       "username": {
@@ -1152,7 +1152,7 @@
     }
   },
   "simulator_share_error_load": "Gedeelde voorspellingen laden is mislukt. Gebruik je eigen Supabase? Voer sql/add_simulator_share_rpcs.sql uit (functie get_shared_predictions) en probeer opnieuw.",
-  "simulator_share_local_preview": "Alleen voorbeeld vanaf dit apparaat — open de simulator ingelogd zodat je keuzes naar de cloud gaan voor anderen.",
+  "simulator_share_local_preview": "Alleen voorbeeld vanaf dit apparaat — open Gedeelde stand ingelogd zodat je keuzes naar de cloud gaan voor anderen.",
   "simulator_steward_coming": "Stewards (straffen / status) — volgende iteratie",
   "simulator_round": "R{round}",
   "@simulator_round": {

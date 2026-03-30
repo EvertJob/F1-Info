@@ -2307,10 +2307,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get recent_form_no_data => 'Pas encore de données de forme pour cette saison.';
 
   @override
-  String get simulator_nav => 'Simulateur';
+  String get simulator_nav => 'Classement partagé';
 
   @override
-  String get simulator_title => 'Simulateur de championnat';
+  String get simulator_title => 'Classement partagé';
 
   @override
   String get simulator_timeline => 'Chronologie';
@@ -2366,13 +2366,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get simulator_share_readonly_tooltip => 'Partager le lien en lecture seule';
 
   @override
-  String get simulator_share_readonly_subject => 'F1 Hub — simulateur de championnat (lecture seule)';
+  String get simulator_share_readonly_subject => 'F1 Hub — classement partagé (lecture seule)';
 
   @override
   String get simulator_share_readonly_snackbar => 'Lien prêt — utilisez le partage de l’appareil.';
 
   @override
-  String get simulator_share_readonly_need_login => 'Connectez-vous pour partager votre lien simulateur en lecture seule.';
+  String get simulator_share_readonly_need_login => 'Connectez-vous pour partager votre lien du classement partagé en lecture seule.';
 
   @override
   String simulator_prediction_by(String username) {
@@ -2415,14 +2415,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String simulator_share_empty(String username) {
-    return 'Aucune prédiction cloud pour « $username ». Cette personne doit être connectée, remplir le simulateur de championnat et synchroniser avec le serveur.';
+    return 'Aucune prédiction cloud pour « $username ». Cette personne doit être connectée, remplir le classement partagé et synchroniser avec le serveur.';
   }
 
   @override
   String get simulator_share_error_load => 'Impossible de charger les prédictions partagées. Avec votre propre Supabase : exécutez sql/add_simulator_share_rpcs.sql (get_shared_predictions) puis réessayez.';
 
   @override
-  String get simulator_share_local_preview => 'Aperçu sur cet appareil uniquement — ouvrez le simulateur connecté pour synchroniser les choix vers le cloud.';
+  String get simulator_share_local_preview => 'Aperçu sur cet appareil uniquement — ouvrez le classement partagé connecté pour synchroniser les choix vers le cloud.';
 
   @override
   String get simulator_steward_coming => 'Stewards (pénalités / statut) — itération suivante';
