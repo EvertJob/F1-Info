@@ -3245,6 +3245,12 @@ String _profilePath() => '/profile';
 String _myPaddockPath() => '/my-paddock';
 String _simulatorPath() => '/simulator';
 
+/// Simulator: voided weekends — no results, no points; random decorative podium only.
+const _kSimulatorVoidedCircuitIds = <String>{
+  'bahrain_international',
+  'jeddah_corniche',
+};
+
 List<SimulatorRoundInput> _simulatorRoundInputs() {
   final out = <SimulatorRoundInput>[];
   for (var i = 0; i < races.length; i++) {
@@ -3279,6 +3285,7 @@ List<SimulatorRoundInput> _simulatorRoundInputs() {
     final cid = r.circuitAssetId.trim().isNotEmpty
         ? r.circuitAssetId.trim()
         : 'round_${i + 1}';
+    final voided = _kSimulatorVoidedCircuitIds.contains(cid);
     out.add(
       SimulatorRoundInput(
         circuitId: cid,
@@ -3288,13 +3295,14 @@ List<SimulatorRoundInput> _simulatorRoundInputs() {
             : r.name,
         grandPrixName: r.name,
         date: r.date,
-        hasSprint: r.hasSprint,
-        hasActualResults: hasData,
-        actualRows: actualRows,
-        sprintActualRows: sprintRows,
+        hasSprint: voided ? false : r.hasSprint,
+        hasActualResults: voided ? false : hasData,
+        actualRows: voided ? const <SimulatorResultRowLite>[] : actualRows,
+        sprintActualRows: voided ? const <SimulatorResultRowLite>[] : sprintRows,
         grandPrixStartUtc: r.date.toUtc(),
-        sprintRaceStartUtc: r.hasSprint ? r.sprintRace.toUtc() : null,
-        isCancelled: false,
+        sprintRaceStartUtc:
+            voided ? null : (r.hasSprint ? r.sprintRace.toUtc() : null),
+        isCancelled: voided,
       ),
     );
   }

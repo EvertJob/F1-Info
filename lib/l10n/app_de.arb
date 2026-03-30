@@ -1168,6 +1168,7 @@
   "simulator_tab_sprint": "Sprint",
   "simulator_session_locked": "Bearbeitung gesperrt — Session in unter 15 Minuten",
   "simulator_race_cancelled": "Abgesagt — keine Punkte",
+  "simulator_cancelled_no_points_banner": "Dieser Grand Prix ist abgesagt — zählt nicht für Vorhersagepunkte. P1–P3 sind zufällig (nur Anzeige).",
   "simulator_dns": "DNS",
   "simulator_dnf": "DNF",
   "simulator_dsq": "DSQ",

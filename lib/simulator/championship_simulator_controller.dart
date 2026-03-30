@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' show Random;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -142,12 +143,21 @@ class ChampionshipSimulatorController extends ChangeNotifier {
 
   void _initPredictionsFromActual() {
     for (final r in _rounds) {
-      if (r.hasActualResults) {
+      if (r.isCancelled) {
+        _predictionPodiums[r.circuitId] = _randomPodiumForCancelledCircuit(r.circuitId);
+      } else if (r.hasActualResults) {
         _predictionPodiums[r.circuitId] = _topThreeDriverNames(r.actualRows);
       } else {
         _predictionPodiums[r.circuitId] = _defaultPodiumGuess();
       }
     }
+  }
+
+  /// Stable shuffle per [circuitId] so voided races keep the same decorative podium.
+  List<String> _randomPodiumForCancelledCircuit(String circuitId) {
+    final rng = Random(circuitId.hashCode ^ 0xf1062026);
+    final names = _drivers.map((d) => d.name).toList()..shuffle(rng);
+    return names.take(3).toList(growable: false);
   }
 
   List<String> _defaultFullGridOrder() {
@@ -459,11 +469,13 @@ class ChampionshipSimulatorController extends ChangeNotifier {
         !r.isCancelled;
   }
 
+  /// Hub cap for a weekend (starter rounds / display). Uses [SimulatorRoundInput.hasSprint]
+  /// (calendar), not [SimulatorRoundInput.sprintActualRows]: sprint result cache may load
+  /// later than the GP, but the weekend still counts as GP+sprint (250) not GP-only (175).
+  /// First three 2026 rounds are three Grands Prix with one sprint weekend (China): 250+175+175 = 600.
   int _maxWeekendScoreForRound(SimulatorRoundInput r) {
     if (r.isCancelled || !r.hasActualResults) return 0;
-    return hubMaxWeekendScore(
-      hasSprintResults: r.hasSprint && r.sprintActualRows.isNotEmpty,
-    );
+    return hubMaxWeekendScore(hasSprintResults: r.hasSprint);
   }
 
   static const HubWeekendScore _kZeroHubWeekend = HubWeekendScore(
@@ -756,7 +768,7 @@ class ChampionshipSimulatorController extends ChangeNotifier {
   void assignPodiumSlot(String circuitId, int slotIndex, String driverName) {
     if (readOnly || slotIndex < 0 || slotIndex > 2) return;
     final ro = _roundForCircuitId(circuitId);
-    if (ro != null && ro.hasActualResults) return;
+    if (ro != null && (ro.hasActualResults || ro.isCancelled)) return;
     _pushUndo();
     final list = List<String>.from(
       _predictionPodiums[circuitId] ?? _defaultPodiumGuess(),
@@ -789,7 +801,7 @@ class ChampionshipSimulatorController extends ChangeNotifier {
   void swapPodiumSlots(String circuitId, int a, int b) {
     if (readOnly || a == b) return;
     final ro = _roundForCircuitId(circuitId);
-    if (ro != null && ro.hasActualResults) return;
+    if (ro != null && (ro.hasActualResults || ro.isCancelled)) return;
     final list = podiumForCircuit(circuitId);
     if (a < 0 || b < 0 || a > 2 || b > 2) return;
     _pushUndo();
@@ -811,6 +823,7 @@ class ChampionshipSimulatorController extends ChangeNotifier {
 
   void reorderGpRaceOrder(String circuitId, int oldIndex, int newIndex) {
     if (readOnly) return;
+    if (_roundForCircuitId(circuitId)?.isCancelled == true) return;
     _pushUndo();
     final list = List<String>.from(gpRaceOrderForCircuit(circuitId));
     if (oldIndex < 0 ||
@@ -832,6 +845,7 @@ class ChampionshipSimulatorController extends ChangeNotifier {
 
   void reorderSprintRaceOrder(String circuitId, int oldIndex, int newIndex) {
     if (readOnly) return;
+    if (_roundForCircuitId(circuitId)?.isCancelled == true) return;
     _pushUndo();
     final list = List<String>.from(sprintRaceOrderForCircuit(circuitId));
     if (oldIndex < 0 ||
@@ -881,6 +895,7 @@ class ChampionshipSimulatorController extends ChangeNotifier {
 
   void toggleGpDns(String circuitId, String driverName) {
     if (readOnly) return;
+    if (_circuitIsCancelled(circuitId)) return;
     _pushUndo();
     _ensureDnsDsqMaps(circuitId);
     final c = canonicalSimulatorDriverName(driverName, _drivers);
@@ -900,6 +915,7 @@ class ChampionshipSimulatorController extends ChangeNotifier {
 
   void toggleGpDsq(String circuitId, String driverName) {
     if (readOnly) return;
+    if (_circuitIsCancelled(circuitId)) return;
     _pushUndo();
     _ensureDnsDsqMaps(circuitId);
     final c = canonicalSimulatorDriverName(driverName, _drivers);
@@ -919,6 +935,7 @@ class ChampionshipSimulatorController extends ChangeNotifier {
 
   void toggleSprintDnf(String circuitId, String driverName) {
     if (readOnly) return;
+    if (_circuitIsCancelled(circuitId)) return;
     _pushUndo();
     _ensureDnsDsqMaps(circuitId);
     final c = canonicalSimulatorDriverName(driverName, _drivers);
@@ -935,6 +952,7 @@ class ChampionshipSimulatorController extends ChangeNotifier {
 
   void toggleSprintDns(String circuitId, String driverName) {
     if (readOnly) return;
+    if (_circuitIsCancelled(circuitId)) return;
     _pushUndo();
     _ensureDnsDsqMaps(circuitId);
     final c = canonicalSimulatorDriverName(driverName, _drivers);
@@ -953,6 +971,7 @@ class ChampionshipSimulatorController extends ChangeNotifier {
 
   void toggleSprintDsq(String circuitId, String driverName) {
     if (readOnly) return;
+    if (_circuitIsCancelled(circuitId)) return;
     _pushUndo();
     _ensureDnsDsqMaps(circuitId);
     final c = canonicalSimulatorDriverName(driverName, _drivers);
@@ -971,6 +990,7 @@ class ChampionshipSimulatorController extends ChangeNotifier {
 
   void togglePenaltySeconds(String circuitId, String driverName, int delta) {
     if (readOnly || delta == 0) return;
+    if (_circuitIsCancelled(circuitId)) return;
     _pushUndo();
     _ensureStewardMaps(circuitId);
     final canon = canonicalSimulatorDriverName(driverName, _drivers);
@@ -989,6 +1009,7 @@ class ChampionshipSimulatorController extends ChangeNotifier {
 
   void toggleDnf(String circuitId, String driverName) {
     if (readOnly) return;
+    if (_circuitIsCancelled(circuitId)) return;
     _pushUndo();
     _ensureStewardMaps(circuitId);
     final canon = canonicalSimulatorDriverName(driverName, _drivers);
@@ -1009,6 +1030,7 @@ class ChampionshipSimulatorController extends ChangeNotifier {
 
   void clearStewardForCircuit(String circuitId) {
     if (readOnly) return;
+    if (_circuitIsCancelled(circuitId)) return;
     _pushUndo();
     _penaltySeconds[circuitId]?.clear();
     _dnfDrivers[circuitId]?.clear();
@@ -1237,6 +1259,9 @@ class ChampionshipSimulatorController extends ChangeNotifier {
     }
     return null;
   }
+
+  bool _circuitIsCancelled(String circuitId) =>
+      _roundForCircuitId(circuitId)?.isCancelled == true;
 
   void resyncCompletedRoundsFromActual() {
     if (readOnly) return;

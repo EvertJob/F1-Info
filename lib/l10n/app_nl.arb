@@ -1168,6 +1168,7 @@
   "simulator_tab_sprint": "Sprint",
   "simulator_session_locked": "Bewerken geblokkeerd — sessie binnen 15 minuten",
   "simulator_race_cancelled": "Geannuleerd — geen punten",
+  "simulator_cancelled_no_points_banner": "Deze Grand Prix is geannuleerd — telt niet mee voor voorspellingspunten. P1–P3 zijn willekeurig (alleen ter weergave).",
   "simulator_dns": "DNS",
   "simulator_dnf": "DNF",
   "simulator_dsq": "DSQ",

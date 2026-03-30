@@ -4803,6 +4803,12 @@ abstract class AppLocalizations {
   /// **'Cancelled — no points'**
   String get simulator_race_cancelled;
 
+  /// No description provided for @simulator_cancelled_no_points_banner.
+  ///
+  /// In en, this message translates to:
+  /// **'This Grand Prix is cancelled — it does not count toward prediction points. P1–P3 are random (display only).'**
+  String get simulator_cancelled_no_points_banner;
+
   /// No description provided for @simulator_dns.
   ///
   /// In en, this message translates to:

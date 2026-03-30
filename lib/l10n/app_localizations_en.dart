@@ -2451,6 +2451,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get simulator_race_cancelled => 'Cancelled — no points';
 
   @override
+  String get simulator_cancelled_no_points_banner => 'This Grand Prix is cancelled — it does not count toward prediction points. P1–P3 are random (display only).';
+
+  @override
   String get simulator_dns => 'DNS';
 
   @override

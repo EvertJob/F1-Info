@@ -570,15 +570,53 @@ class _PodiumSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
     final round = controller.selectedRound;
     final circuitId = round.circuitId;
     final pod = controller.podiumForCircuit(circuitId);
     final act = controller.actualTopThree(round);
-    final podiumInteractive = !readOnly && !round.hasActualResults;
+    final podiumInteractive =
+        !readOnly && !round.hasActualResults && !round.isCancelled;
 
     final podiumCard = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (round.isCancelled) ...[
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: scheme.errorContainer.withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: scheme.error.withValues(alpha: 0.4),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    color: scheme.onErrorContainer,
+                    size: 22,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      l10n.simulator_cancelled_no_points_banner,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: scheme.onErrorContainer,
+                            fontWeight: FontWeight.w600,
+                            height: 1.35,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1089,7 +1127,7 @@ class _StewardStrip extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final cid = controller.selectedCircuitId;
     final round = controller.selectedRound;
-    if (round.hasActualResults) {
+    if (round.hasActualResults || round.isCancelled) {
       return const SizedBox.shrink();
     }
 
@@ -1464,7 +1502,7 @@ class _CircuitStatusTrailingState extends State<_CircuitStatusTrailing> {
     final r = widget.round;
     if (r.isCancelled) {
       return Tooltip(
-        message: context.l10n.simulator_race_cancelled,
+        message: context.l10n.simulator_cancelled_no_points_banner,
         child: Icon(Icons.cancel_outlined, color: scheme.error, size: 22),
       );
     }
