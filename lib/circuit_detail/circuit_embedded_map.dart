@@ -65,36 +65,18 @@ LatLngBounds _ensureMinBoundsSpan(LatLngBounds b) {
   return LatLngBounds(LatLng(south, west), LatLng(north, east));
 }
 
-/// Intersects [track] with [pan] so the fit camera never targets area outside pan limits.
-LatLngBounds _intersectBounds(LatLngBounds track, LatLngBounds pan) {
-  final south = math.max(track.south, pan.south);
-  final north = math.min(track.north, pan.north);
-  final west = math.max(track.west, pan.west);
-  final east = math.min(track.east, pan.east);
-  if (south >= north || west >= east) {
-    return pan;
-  }
-  return LatLngBounds(LatLng(south, west), LatLng(north, east));
-}
-
-/// Embedded Orbit-style [FlutterMap] for [CircuitPage]: bounded pan, zoom limits, styled tiles.
+/// Embedded Orbit-style [FlutterMap] for [CircuitPage]: styled tiles, fit-to-track on open.
 class CircuitEmbeddedMap extends StatefulWidget {
   const CircuitEmbeddedMap({
     super.key,
     required this.placement,
-    required this.title,
     required this.circuitId,
     this.height = 232,
-    this.onBack,
   });
 
   final CircuitMapPlacement placement;
-  final String title;
   final String circuitId;
   final double height;
-
-  /// Terug in de glazen header (i.p.v. losse app bar) — dichter bij de titel, minder “loze” ruimte.
-  final VoidCallback? onBack;
 
   @override
   State<CircuitEmbeddedMap> createState() => _CircuitEmbeddedMapState();
@@ -102,9 +84,9 @@ class CircuitEmbeddedMap extends StatefulWidget {
 
 class _CircuitEmbeddedMapState extends State<CircuitEmbeddedMap>
     with SingleTickerProviderStateMixin {
-  /// Ruim bereik: ver uitzoomen (context) en tot OSM max detail inzoomen.
-  static const double _minZoom = 10;
-  static const double _maxZoom = 19;
+  /// Ruim zoombereik; tegels schalen boven [TileLayer.maxNativeZoom].
+  static const double _minZoom = 1;
+  static const double _maxZoom = 22;
 
   static const EdgeInsets _kFitPadding = EdgeInsets.all(50);
 
@@ -222,7 +204,6 @@ class _CircuitEmbeddedMapState extends State<CircuitEmbeddedMap>
   }
 
   CameraFit? _trackCameraFit() {
-    final p = widget.placement;
     final segments = _activeTrackSegments();
     if (segments == null || segments.isEmpty) {
       return null;
@@ -236,7 +217,6 @@ class _CircuitEmbeddedMapState extends State<CircuitEmbeddedMap>
     if (flat.length < 2) return null;
     var bounds = LatLngBounds.fromPoints(flat);
     bounds = _ensureMinBoundsSpan(bounds);
-    bounds = _intersectBounds(bounds, p.panBounds);
     return CameraFit.bounds(
       bounds: bounds,
       padding: _kFitPadding,
@@ -268,13 +248,13 @@ class _CircuitEmbeddedMapState extends State<CircuitEmbeddedMap>
     if (animated) {
       await _animatedMap.animateTo(
         dest: p.center,
-        zoom: 15.4,
+        zoom: 12,
         curve: Curves.easeOutExpo,
         duration: _kCircuitMapAnimDuration,
         cancelPreviousAnimations: true,
       );
     } else {
-      _animatedMap.mapController.move(p.center, 15.4);
+      _animatedMap.mapController.move(p.center, 12);
     }
   }
 
@@ -475,7 +455,8 @@ class _CircuitEmbeddedMapState extends State<CircuitEmbeddedMap>
         showDetailsOverlays && _detailsOverlay!.corners.isNotEmpty;
     final l10n = context.l10n;
     final mapH = _effectiveMapHeight(context);
-    final zoomColumnTop = _hasDetailsAsset ? 118.0 : 52.0;
+    // Geen glazen titelbalk meer: zoomknoppen onder expand / track-toggle.
+    final zoomColumnTop = _hasDetailsAsset ? 100.0 : 56.0;
 
     return SizedBox(
       height: mapH,
@@ -560,18 +541,6 @@ class _CircuitEmbeddedMapState extends State<CircuitEmbeddedMap>
                       ),
                     ),
                 ],
-              ),
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              top: 0,
-              child: _GlassMapHeader(
-                title: widget.title,
-                borderRadius: radius,
-                motionReduced: motionReduced,
-                onBack: widget.onBack,
-                titleTrailingReserve: 44,
               ),
             ),
             Positioned(
@@ -927,109 +896,6 @@ class _MapChromeButton extends StatelessWidget {
             child: Icon(icon, size: 23, color: iconColor),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _GlassMapHeader extends StatelessWidget {
-  const _GlassMapHeader({
-    required this.title,
-    required this.borderRadius,
-    required this.motionReduced,
-    this.onBack,
-    this.titleTrailingReserve = 0,
-  });
-
-  final String title;
-  final double borderRadius;
-  final bool motionReduced;
-  final VoidCallback? onBack;
-
-  /// Ruimte rechts zodat de titel niet onder de vergroten-knop schuift.
-  final double titleTrailingReserve;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final blur = motionReduced ? 0.0 : 18.0;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(borderRadius),
-      ),
-      child: Stack(
-        fit: StackFit.passthrough,
-        children: [
-          BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-            child: const SizedBox(height: 52, width: double.infinity),
-          ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.white.withValues(alpha: 0.42),
-                  Colors.white.withValues(alpha: 0.14),
-                  Colors.white.withValues(alpha: 0.02),
-                  Colors.transparent,
-                ],
-                stops: const [0, 0.35, 0.65, 1],
-              ),
-              border: Border(
-                bottom: BorderSide(
-                  color: scheme.outline.withValues(alpha: 0.12),
-                  width: 0.9,
-                ),
-              ),
-            ),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(4, 8, 8 + titleTrailingReserve, 12),
-              child: Row(
-                children: [
-                  if (onBack != null)
-                    IconButton(
-                      visualDensity: VisualDensity.compact,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 40,
-                        minHeight: 40,
-                      ),
-                      icon: Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        color: scheme.primary,
-                        size: 20,
-                      ),
-                      onPressed: onBack,
-                      tooltip: MaterialLocalizations.of(
-                        context,
-                      ).backButtonTooltip,
-                    ),
-                  Expanded(
-                    child: Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: scheme.primary,
-                        letterSpacing: 0.15,
-                        shadows: [
-                          Shadow(
-                            color: Colors.white.withValues(alpha: 0.55),
-                            blurRadius: 8,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

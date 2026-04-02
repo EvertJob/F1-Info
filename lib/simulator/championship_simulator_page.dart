@@ -1,22 +1,29 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:f1/l10n/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../theme/f1_team_schemes.dart';
+import '../theme/hub_mobile_tuning.dart';
+import '../theme/hub_visual_language.dart';
+import '../widgets/hub_asset_image_chain.dart';
+import '../widgets/hub_glass_chart_loading.dart';
+import '../widgets/hub_interactive_glass.dart';
 import '../util/share_og_meta.dart';
 import '../utils/l10n_extension.dart';
 import 'championship_simulator_controller.dart';
 import 'simulator_ambient.dart';
-import 'simulator_glass.dart';
 import 'simulator_grid_config.dart';
 import 'simulator_models.dart';
 import 'simulator_sync_service.dart';
+import 'simulator_team_trend_chart.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// Read-only simulator deep link for [shareHandle], matching web [HashUrlStrategy].
 String simulatorReadOnlyShareUrlForHandle(String shareHandle) {
@@ -82,6 +89,7 @@ class _ChampionshipSimulatorPageState extends State<ChampionshipSimulatorPage> {
   late final ChampionshipSimulatorController _controller;
   final GlobalKey _standingsCaptureKey = GlobalKey();
   StreamSubscription<AuthState>? _authSub;
+  int _simMainTab = 0;
 
   @override
   void initState() {
@@ -123,14 +131,9 @@ class _ChampionshipSimulatorPageState extends State<ChampionshipSimulatorPage> {
     super.dispose();
   }
 
-  void _showFullGridDialog(BuildContext context) {
+  void _openFullGridTab() {
     if (widget.readOnly) return;
-    showDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      barrierColor: Colors.black.withValues(alpha: 0.48),
-      builder: (ctx) => _FullGridDialog(controller: _controller),
-    );
+    setState(() => _simMainTab = 1);
   }
 
   String _shareHandle() {
@@ -226,6 +229,38 @@ class _ChampionshipSimulatorPageState extends State<ChampionshipSimulatorPage> {
     return ListenableBuilder(
       listenable: _controller,
       builder: (context, _) {
+        if (_controller.rounds.isEmpty || _controller.drivers.isEmpty) {
+          return SimulatorAmbientBackdrop(
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: SafeArea(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+                      sliver: SliverToBoxAdapter(
+                        child: HubVisualLanguage.glassPanel(
+                          context: context,
+                          topAccent: HubVisualLanguage.f1DefaultAccent,
+                          padding: const EdgeInsets.all(24),
+                          child: Text(
+                            l10n.simulator_calendar_unavailable,
+                            textAlign: TextAlign.center,
+                            style: HubVisualLanguage.titilliumSecondary(
+                              context,
+                              fontSize: 15,
+                              opacity: 0.88,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
         final acc = _controller.seasonP1AccuracyPercent();
         final accLabel = l10n.simulator_p1_accuracy_percent(acc.round());
         final statsLine = l10n.simulator_stats_line(
@@ -235,199 +270,866 @@ class _ChampionshipSimulatorPageState extends State<ChampionshipSimulatorPage> {
         );
         final signedIn =
             Supabase.instance.client.auth.currentUser != null;
+        final seasonYear = widget.roundInputs.first.date.year;
         return SimulatorAmbientBackdrop(
           child: Scaffold(
             backgroundColor: Colors.transparent,
-            appBar: AppBar(
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(l10n.simulator_title),
-                  Text(
-                    accLabel,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              actions: [
-                if (!widget.readOnly) ...[
-                  if (signedIn)
-                    IconButton(
-                      tooltip: l10n.simulator_share_readonly_tooltip,
-                      onPressed: _shareReadOnlySimulatorLink,
-                      icon: const Icon(Icons.link_rounded),
-                    ),
-                  IconButton(
-                    tooltip: l10n.simulator_snapshot_tooltip,
-                    onPressed: _captureStandingsSnapshot,
-                    icon: const Icon(Icons.photo_camera_outlined),
-                  ),
-                  IconButton(
-                    tooltip: l10n.simulator_sync_official,
-                    onPressed: () {
-                      _controller.resyncCompletedRoundsFromActual();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.simulator_sync_official_done)),
-                      );
-                    },
-                    icon: const Icon(Icons.sync_rounded),
-                  ),
-                  IconButton(
-                    tooltip: l10n.simulator_undo,
-                    onPressed:
-                        _controller.canUndo ? () => _controller.undo() : null,
-                    icon: const Icon(Icons.undo_rounded),
-                  ),
-                  TextButton(
-                    onPressed: () async {
-                      await _controller.persistDraft();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(l10n.simulator_save_draft)),
-                        );
-                      }
-                    },
-                    child: Text(l10n.simulator_save_draft),
-                  ),
-                ],
-              ],
-            ),
-            body: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (widget.bannerUsername != null &&
-                    widget.bannerUsername!.trim().isNotEmpty)
-                  Material(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .primaryContainer
-                        .withValues(alpha: 0.45),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            '${l10n.simulator_readonly_banner} · @${widget.bannerUsername}',
-                            style: Theme.of(context).textTheme.labelMedium,
-                          ),
-                          if (widget.sharedPreviewFromLocalDraft) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              l10n.simulator_share_local_preview,
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                  ),
+            body: SafeArea(
+              top: false,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final w = constraints.maxWidth;
+                  final h = constraints.maxHeight;
+                  if (!w.isFinite || !h.isFinite || w <= 0 || h <= 0) {
+                    return const SizedBox.shrink();
+                  }
+                  final topPad = MediaQuery.paddingOf(context).top;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (widget.bannerUsername != null &&
+                          widget.bannerUsername!.trim().isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                          child: HubVisualLanguage.glassPanel(
+                            context: context,
+                            topAccent:
+                                Theme.of(context).colorScheme.tertiary,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
                             ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                Expanded(
-                  child: SafeArea(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final wide = constraints.maxWidth >= 960;
-                        final pad = const EdgeInsets.symmetric(horizontal: 16);
-                        if (wide) {
-                          return Padding(
-                            padding: pad,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Expanded(
-                                  flex: 5,
-                                  child: _TimelinePanel(controller: _controller),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  flex: 6,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                                    children: [
-                                      Expanded(
-                                        child: _PodiumSection(
-                                          controller: _controller,
-                                          readOnly: widget.readOnly,
-                                          expandGlass: true,
-                                          onOpenFullGrid: widget.readOnly ||
-                                                  _controller.selectedRound.isCancelled
-                                              ? null
-                                              : () => _showFullGridDialog(context),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      _StewardStrip(controller: _controller),
-                                    ],
+                                Text(
+                                  '${l10n.simulator_readonly_banner} · @${widget.bannerUsername}',
+                                  style: GoogleFonts.titilliumWeb(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  flex: 5,
-                                  child: _StandingsPanel(
-                                    controller: _controller,
-                                    captureKey: _standingsCaptureKey,
-                                    watermarkLine:
-                                        'f1hub.app · ${l10n.simulator_prediction_by(_watermarkHandle())} · $statsLine',
-                                    clinchCaption: _clinchCaption(),
+                                if (widget.sharedPreviewFromLocalDraft) ...[
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    l10n.simulator_share_local_preview,
+                                    style: HubVisualLanguage.titilliumSecondary(
+                                      context,
+                                      fontSize: 12,
+                                    ),
                                   ),
-                                ),
+                                ],
                               ],
                             ),
-                          );
-                        }
-                        return ListView.separated(
-                          padding: pad.copyWith(bottom: 24),
-                          itemCount: 4,
-                          separatorBuilder: (_, __) => const SizedBox(height: 16),
-                          itemBuilder: (context, i) {
-                            return switch (i) {
-                              0 => _TimelinePanel(
-                                    controller: _controller,
-                                    listHeight: 300,
+                          ),
+                        ),
+                      Expanded(
+                        child: CustomScrollView(
+                          slivers: [
+                            SliverPadding(
+                              padding: EdgeInsets.fromLTRB(
+                                16,
+                                topPad + 8,
+                                16,
+                                0,
+                              ),
+                              sliver: SliverList(
+                                delegate: SliverChildListDelegate([
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 32,
+                                      bottom: 20,
+                                    ),
+                                    child: _SimulatorBackRow(
+                                      label: l10n.simulator_back_to_dashboard,
+                                      onPressed: () =>
+                                          context.go('/circuits'),
+                                    ),
                                   ),
-                              1 => _PodiumSection(
-                                    controller: _controller,
+                                  _SimulatorHeroCard(
+                                    l10n: l10n,
+                                    title: l10n.simulator_title,
+                                    seasonLine:
+                                        l10n.simulator_hero_season(seasonYear),
+                                    accLabel: accLabel,
+                                    accent: Theme.of(context)
+                                        .colorScheme
+                                        .primary,
                                     readOnly: widget.readOnly,
-                                    expandGlass: false,
-                                    onOpenFullGrid: widget.readOnly ||
-                                            _controller.selectedRound.isCancelled
+                                    signedIn: signedIn,
+                                    onShareLink: signedIn
+                                        ? _shareReadOnlySimulatorLink
+                                        : null,
+                                    onSnapshot: _captureStandingsSnapshot,
+                                    onSyncOfficial: () {
+                                      _controller
+                                          .resyncCompletedRoundsFromActual();
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            l10n.simulator_sync_official_done,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    onUndo: _controller.canUndo
+                                        ? () => _controller.undo()
+                                        : null,
+                                    onSimulate: widget.readOnly
                                         ? null
-                                        : () => _showFullGridDialog(context),
+                                        : () async {
+                                            await _controller.persistDraft();
+                                            if (context.mounted) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    l10n.simulator_save_draft,
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          },
+                                    simulateLabel: l10n.simulator_simulate,
                                   ),
-                              2 => _StewardStrip(controller: _controller),
-                              _ => _StandingsPanel(
-                                    controller: _controller,
-                                    listHeight: 340,
-                                    captureKey: _standingsCaptureKey,
-                                    watermarkLine:
-                                        'f1hub.app · ${l10n.simulator_prediction_by(_watermarkHandle())} · $statsLine',
-                                    clinchCaption: _clinchCaption(),
+                                  const SizedBox(height: 20),
+                                  _SimulatorGlassTabs(
+                                    labels: [
+                                      l10n.simulator_tab_predictions,
+                                      l10n.simulator_tab_full_grid,
+                                      l10n.simulator_tab_steward,
+                                    ],
+                                    index: _simMainTab,
+                                    onChanged: (i) =>
+                                        setState(() => _simMainTab = i),
                                   ),
-                            };
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ],
+                                  const SizedBox(height: 16),
+                                ]),
+                              ),
+                            ),
+                            SliverFillRemaining(
+                              hasScrollBody:
+                                  _simMainTab == 0 && w < 960,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                                child: _SimulatorTabViewport(
+                                  tab: _simMainTab,
+                                  wide: w >= 960,
+                                  controller: _controller,
+                                  readOnly: widget.readOnly,
+                                  statsLine: statsLine,
+                                  watermarkHandle: _watermarkHandle(),
+                                  captureKey: _standingsCaptureKey,
+                                  clinchCaption: _clinchCaption(),
+                                  onOpenFullGrid: widget.readOnly ||
+                                          _controller.selectedRound.isCancelled
+                                      ? null
+                                      : _openFullGridTab,
+                                  l10n: l10n,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         );
       },
     );
   }
+}
+
+/// Back navigation — Titillium, hub spacing (extra top/bottom vs circuit spec).
+class _SimulatorBackRow extends StatelessWidget {
+  const _SimulatorBackRow({
+    required this.label,
+    required this.onPressed,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final muted = scheme.onSurface.withValues(alpha: 0.55);
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: TextButton.icon(
+        onPressed: onPressed,
+        icon: Icon(Icons.arrow_back_rounded, size: 20, color: muted),
+        label: Text(
+          label,
+          style: GoogleFonts.titilliumWeb(
+            color: muted,
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            height: 1.2,
+          ),
+        ),
+        style: TextButton.styleFrom(
+          foregroundColor: muted,
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+      ),
+    );
+  }
+}
+
+class _SimulatorHeroCard extends StatelessWidget {
+  const _SimulatorHeroCard({
+    required this.l10n,
+    required this.title,
+    required this.seasonLine,
+    required this.accLabel,
+    required this.accent,
+    required this.readOnly,
+    required this.signedIn,
+    required this.onShareLink,
+    required this.onSnapshot,
+    required this.onSyncOfficial,
+    required this.onUndo,
+    required this.onSimulate,
+    required this.simulateLabel,
+  });
+
+  final AppLocalizations l10n;
+  final String title;
+  final String seasonLine;
+  final String accLabel;
+  final Color accent;
+  final bool readOnly;
+  final bool signedIn;
+  final VoidCallback? onShareLink;
+  final VoidCallback onSnapshot;
+  final VoidCallback onSyncOfficial;
+  final VoidCallback? onUndo;
+  final VoidCallback? onSimulate;
+  final String simulateLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return HubVisualLanguage.glassPanel(
+      context: context,
+      topAccent: accent,
+      accentGlow: accent,
+      accentGlowOpacity: 0.09,
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            title,
+            style: HubVisualLanguage.f1Wide(
+              context,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            seasonLine,
+            style: HubVisualLanguage.titilliumSecondary(
+              context,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              opacity: 0.88,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            accLabel,
+            style: HubVisualLanguage.titilliumSecondary(
+              context,
+              fontSize: 13,
+            ),
+          ),
+          if (!readOnly) ...[
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 4,
+              runSpacing: 4,
+              children: [
+                if (signedIn)
+                  IconButton(
+                    style: HubMobileTuning.iconButtonTouchTarget(context),
+                    tooltip: l10n.simulator_share_readonly_tooltip,
+                    onPressed: onShareLink,
+                    icon: const Icon(Icons.link_rounded, size: 22),
+                  ),
+                IconButton(
+                  style: HubMobileTuning.iconButtonTouchTarget(context),
+                  tooltip: l10n.simulator_snapshot_tooltip,
+                  onPressed: onSnapshot,
+                  icon: const Icon(Icons.photo_camera_outlined, size: 22),
+                ),
+                IconButton(
+                  style: HubMobileTuning.iconButtonTouchTarget(context),
+                  tooltip: l10n.simulator_sync_official,
+                  onPressed: onSyncOfficial,
+                  icon: const Icon(Icons.sync_rounded, size: 22),
+                ),
+                IconButton(
+                  style: HubMobileTuning.iconButtonTouchTarget(context),
+                  tooltip: l10n.simulator_undo,
+                  onPressed: onUndo,
+                  icon: const Icon(Icons.undo_rounded, size: 22),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _SimulatorPrimaryGlassButton(
+              label: simulateLabel,
+              accent: accent,
+              onPressed: onSimulate,
+            ),
+          ] else ...[
+            const SizedBox(height: 14),
+            IconButton(
+              style: HubMobileTuning.iconButtonTouchTarget(context),
+              tooltip: l10n.simulator_snapshot_tooltip,
+              onPressed: onSnapshot,
+              icon: const Icon(Icons.photo_camera_outlined, size: 22),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _SimulatorPrimaryGlassButton extends StatelessWidget {
+  const _SimulatorPrimaryGlassButton({
+    required this.label,
+    required this.accent,
+    required this.onPressed,
+  });
+
+  final String label;
+  final Color accent;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: onPressed == null ? 0.5 : 1,
+      child: HubInteractiveGlass(
+        borderRadius: 14,
+        onTap: onPressed,
+        child: HubVisualLanguage.glassPanel(
+          context: context,
+          topAccent: accent,
+          topAccentHeight: 5,
+          accentGlow: accent,
+          padding: EdgeInsets.zero,
+          child: SizedBox(
+            height: 48,
+            width: double.infinity,
+            child: Center(
+              child: Text(
+                label,
+                style: HubVisualLanguage.f1Wide(context, fontSize: 13),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SimulatorGlassTabs extends StatelessWidget {
+  const _SimulatorGlassTabs({
+    required this.labels,
+    required this.index,
+    required this.onChanged,
+  });
+
+  final List<String> labels;
+  final int index;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(999),
+        child: Row(
+          children: [
+            for (var i = 0; i < labels.length; i++)
+              Expanded(
+                child: _SimulatorGlassTabPill(
+                  label: labels[i],
+                  selected: index == i,
+                  onTap: () => onChanged(i),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SimulatorGlassTabPill extends StatelessWidget {
+  const _SimulatorGlassTabPill({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected
+          ? Colors.white.withValues(alpha: 0.1)
+          : Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+          child: Center(
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.titilliumWeb(
+                fontSize: 11.5,
+                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                letterSpacing: 0.35,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SimulatorTabViewport extends StatelessWidget {
+  const _SimulatorTabViewport({
+    required this.tab,
+    required this.wide,
+    required this.controller,
+    required this.readOnly,
+    required this.statsLine,
+    required this.watermarkHandle,
+    required this.captureKey,
+    required this.clinchCaption,
+    required this.onOpenFullGrid,
+    required this.l10n,
+  });
+
+  final int tab;
+  final bool wide;
+  final ChampionshipSimulatorController controller;
+  final bool readOnly;
+  final String statsLine;
+  final String watermarkHandle;
+  final GlobalKey captureKey;
+  final String? clinchCaption;
+  final VoidCallback? onOpenFullGrid;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final wm = l10n.simulator_prediction_by(watermarkHandle);
+    final watermarkLine = 'f1hub.app · $wm · $statsLine';
+    return switch (tab) {
+      0 => wide
+          ? Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  flex: 5,
+                  child: _TimelinePanel(controller: controller),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  flex: 6,
+                  child: _PredictionsMidColumn(
+                    controller: controller,
+                    readOnly: readOnly,
+                    onOpenFullGrid: onOpenFullGrid,
+                    l10n: l10n,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  flex: 5,
+                  child: _StandingsPanel(
+                    controller: controller,
+                    captureKey: captureKey,
+                    watermarkLine: watermarkLine,
+                    clinchCaption: clinchCaption,
+                  ),
+                ),
+              ],
+            )
+          : ListView.separated(
+              padding: EdgeInsets.zero,
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: 4,
+              separatorBuilder: (_, _) => const SizedBox(height: 16),
+              itemBuilder: (context, i) {
+                return switch (i) {
+                  0 => _TimelinePanel(
+                        controller: controller,
+                        listHeight: 300,
+                      ),
+                  1 => _PodiumSection(
+                        controller: controller,
+                        readOnly: readOnly,
+                        expandGlass: false,
+                        onOpenFullGrid: onOpenFullGrid,
+                      ),
+                  2 => _SimulatorTeamChartSection(
+                        controller: controller,
+                        l10n: l10n,
+                      ),
+                  _ => _StandingsPanel(
+                        controller: controller,
+                        listHeight: 340,
+                        captureKey: captureKey,
+                        watermarkLine: watermarkLine,
+                        clinchCaption: clinchCaption,
+                      ),
+                };
+              },
+            ),
+      1 => _FullGridTabPane(
+            controller: controller,
+            readOnly: readOnly,
+          ),
+      _ => _StewardTabPane(
+            controller: controller,
+            l10n: l10n,
+          ),
+    };
+  }
+}
+
+class _PredictionsMidColumn extends StatelessWidget {
+  const _PredictionsMidColumn({
+    required this.controller,
+    required this.readOnly,
+    required this.onOpenFullGrid,
+    required this.l10n,
+  });
+
+  final ChampionshipSimulatorController controller;
+  final bool readOnly;
+  final VoidCallback? onOpenFullGrid;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _PodiumSection(
+                  controller: controller,
+                  readOnly: readOnly,
+                  expandGlass: false,
+                  onOpenFullGrid: onOpenFullGrid,
+                ),
+                const SizedBox(height: 16),
+                _SimulatorTeamChartSection(
+                  controller: controller,
+                  l10n: l10n,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SimulatorTeamChartSection extends StatelessWidget {
+  const _SimulatorTeamChartSection({
+    required this.controller,
+    required this.l10n,
+  });
+
+  final ChampionshipSimulatorController controller;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final series = controller.officialTeamStandingSeries();
+    final scheme = Theme.of(context).colorScheme;
+    return HubVisualLanguage.glassPanel(
+      context: context,
+      topAccent: scheme.primary,
+      accentGlow: scheme.primary,
+      padding: const EdgeInsets.all(16),
+      child: SimulatorTeamTrendChart(
+        series: series,
+        title: l10n.simulator_chart_team_title,
+        hint: l10n.simulator_chart_team_hint,
+        emptyMessage: l10n.simulator_chart_empty,
+        height: 200,
+        compact: true,
+        onOpenFullscreen: series.isEmpty
+            ? null
+            : () => SimulatorTeamTrendChart.openFullscreenIfNeeded(
+                  context,
+                  series: series,
+                  l10n: l10n,
+                  topAccent: scheme.primary,
+                ),
+      ),
+    );
+  }
+}
+
+class _StewardTabPane extends StatelessWidget {
+  const _StewardTabPane({
+    required this.controller,
+    required this.l10n,
+  });
+
+  final ChampionshipSimulatorController controller;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final round = controller.selectedRound;
+    if (round.hasActualResults || round.isCancelled) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            l10n.simulator_steward_hint,
+            textAlign: TextAlign.center,
+            style: HubVisualLanguage.titilliumSecondary(
+              context,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      );
+    }
+    return HubVisualLanguage.glassPanel(
+      context: context,
+      topAccent: Theme.of(context).colorScheme.primary,
+      accentGlow: Theme.of(context).colorScheme.primary,
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: _StewardStrip(
+              controller: controller,
+              wrapInGlass: false,
+              expandVertical: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FullGridTabPane extends StatefulWidget {
+  const _FullGridTabPane({
+    required this.controller,
+    required this.readOnly,
+  });
+
+  final ChampionshipSimulatorController controller;
+  final bool readOnly;
+
+  @override
+  State<_FullGridTabPane> createState() => _FullGridTabPaneState();
+}
+
+class _FullGridTabPaneState extends State<_FullGridTabPane>
+    with SingleTickerProviderStateMixin {
+  TabController? _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncTabController();
+  }
+
+  @override
+  void didUpdateWidget(covariant _FullGridTabPane oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final oldS = oldWidget.controller.selectedRound.hasSprint;
+    final nu = widget.controller.selectedRound.hasSprint;
+    if (oldS != nu) {
+      _tabController?.dispose();
+      _tabController = null;
+      _syncTabController();
+    }
+  }
+
+  void _syncTabController() {
+    _tabController?.dispose();
+    final len = widget.controller.selectedRound.hasSprint ? 2 : 1;
+    _tabController = TabController(length: len, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final r = widget.controller.selectedRound;
+    final hasSprint = r.hasSprint;
+    final tc = _tabController;
+    if (tc == null) return const SizedBox.shrink();
+
+    return HubVisualLanguage.glassPanel(
+      context: context,
+      topAccent: Theme.of(context).colorScheme.primary,
+      padding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 12, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.simulator_full_grid_title,
+                    style: GoogleFonts.titilliumWeb(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 4),
+            child: Text(
+              r.displayName,
+              style: HubVisualLanguage.titilliumSecondary(
+                context,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                opacity: 0.9,
+              ),
+            ),
+          ),
+          if (r.isCancelled)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                l10n.simulator_race_cancelled,
+                style: GoogleFonts.titilliumWeb(
+                  color: Theme.of(context).colorScheme.error,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          if (!r.isCancelled && hasSprint)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+              child: _simNestedGlassPanel(
+                child: TabBar(
+                  controller: tc,
+                  dividerColor: Colors.transparent,
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  indicator: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: 0.28),
+                  ),
+                  labelColor: Theme.of(context).colorScheme.onSurface,
+                  unselectedLabelColor:
+                      Theme.of(context).colorScheme.onSurfaceVariant,
+                  labelStyle: GoogleFonts.titilliumWeb(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                  ),
+                  tabs: [
+                    Tab(text: l10n.simulator_tab_grand_prix),
+                    Tab(text: l10n.simulator_tab_sprint),
+                  ],
+                ),
+              ),
+            ),
+          Expanded(
+            child: r.isCancelled
+                ? const SizedBox.shrink()
+                : hasSprint
+                    ? TabBarView(
+                        controller: tc,
+                        children: [
+                          _FullGridReorderList(
+                            controller: widget.controller,
+                            sprint: false,
+                          ),
+                          _FullGridReorderList(
+                            controller: widget.controller,
+                            sprint: true,
+                          ),
+                        ],
+                      )
+                    : _FullGridReorderList(
+                        controller: widget.controller,
+                        sprint: false,
+                      ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Widget _simNestedGlassPanel({required Widget child}) {
+  return DecoratedBox(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(
+        color: Colors.white.withValues(alpha: 0.08),
+      ),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(6),
+      child: child,
+    ),
+  );
 }
 
 class _TimelinePanel extends StatelessWidget {
@@ -446,13 +1148,16 @@ class _TimelinePanel extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final magicIdx = controller.magicNumberClinchRoundIndex();
 
+    final narrowTimeline =
+        MediaQuery.sizeOf(context).width < HubMobileTuning.narrowLayoutWidth;
+
     final list = ListView.separated(
       shrinkWrap: listHeight != null,
       physics: listHeight != null
           ? const ClampingScrollPhysics()
           : null,
       itemCount: controller.rounds.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
         final r = controller.rounds[index];
         final sel = controller.selectedRoundIndex == index;
@@ -476,22 +1181,63 @@ class _TimelinePanel extends StatelessWidget {
             ),
           );
         }
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 240),
-          curve: Curves.easeOutCubic,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: sel
+
+        final trailIcon = Icon(
+          r.isCancelled
+              ? Icons.cancel_outlined
+              : r.hasActualResults
+                  ? Icons.verified_rounded
+                  : Icons.edit_note_rounded,
+          size: 22,
+          color: r.isCancelled
+              ? scheme.error
+              : r.hasActualResults
                   ? scheme.primary
-                  : scheme.outline.withValues(alpha: 0.35),
-              width: sel ? 2 : 1,
+                  : scheme.onSurfaceVariant,
+        );
+
+        Widget tileBody;
+        if (narrowTimeline) {
+          tileBody = Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    if (splitBadge != null) ...[
+                      splitBadge,
+                      const SizedBox(width: 8),
+                    ],
+                    const Spacer(),
+                    trailIcon,
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  r.displayName,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '${l10n.simulator_round(r.roundIndex)} · ${r.grandPrixName}',
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    height: 1.25,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ),
-            color: magic
-                ? scheme.primary.withValues(alpha: 0.12)
-                : scheme.surface.withValues(alpha: 0.2),
-          ),
-          child: ListTile(
+          );
+        } else {
+          tileBody = ListTile(
             dense: true,
             leading: splitBadge,
             title: Text(
@@ -505,42 +1251,58 @@ class _TimelinePanel extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(fontSize: 11, color: scheme.onSurfaceVariant),
             ),
-            trailing: Icon(
-              r.isCancelled
-                  ? Icons.cancel_outlined
-                  : r.hasActualResults
-                      ? Icons.verified_rounded
-                      : Icons.edit_note_rounded,
-              size: 20,
-              color: r.isCancelled
-                  ? scheme.error
-                  : r.hasActualResults
-                      ? scheme.primary
-                      : scheme.onSurfaceVariant,
+            trailing: trailIcon,
+            onTap: null,
+          );
+        }
+
+        return HubInteractiveGlass(
+          borderRadius: 14,
+          onTap: () => controller.selectRound(index),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 240),
+            curve: Curves.easeOutCubic,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: sel
+                    ? scheme.primary
+                    : scheme.outline.withValues(alpha: 0.35),
+                width: sel ? 2 : 1,
+              ),
+              color: magic
+                  ? scheme.primary.withValues(alpha: 0.12)
+                  : scheme.surface.withValues(alpha: 0.2),
             ),
-            onTap: () => controller.selectRound(index),
+            child: tileBody,
           ),
         );
       },
     );
 
-    return SimulatorGlassPanel(
+    return HubVisualLanguage.glassPanel(
+      context: context,
+      topAccent: scheme.primary,
+      accentGlow: scheme.primary,
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
             l10n.simulator_timeline,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.6,
-                ),
+            style: GoogleFonts.titilliumWeb(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
+            ),
           ),
           const SizedBox(height: 10),
           Text(
             l10n.simulator_magic_clinch,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
+            style: HubVisualLanguage.titilliumSecondary(
+              context,
+              fontSize: 12,
+            ),
           ),
           const SizedBox(height: 12),
           if (listHeight != null)
@@ -665,15 +1427,26 @@ class _PodiumSection extends StatelessWidget {
       ],
     );
 
-    /// Scroll buiten [SimulatorGlassPanel]: anders vult [Expanded] het paneel over de
-    /// hele kolomhoogte en zit de fading border onderaan het scherm i.p.v. onder de kaart.
+    /// Scroll buiten het glaspaneel: anders vult [Expanded] de kolom tot onderaan het scherm.
     final Widget glass = expandGlass
         ? Expanded(
             child: SingleChildScrollView(
-              child: SimulatorGlassPanel(child: podiumCard),
+              child: HubVisualLanguage.glassPanel(
+                context: context,
+                topAccent: scheme.primary,
+                accentGlow: scheme.primary,
+                padding: const EdgeInsets.all(16),
+                child: podiumCard,
+              ),
             ),
           )
-        : SimulatorGlassPanel(child: podiumCard);
+        : HubVisualLanguage.glassPanel(
+            context: context,
+            topAccent: scheme.primary,
+            accentGlow: scheme.primary,
+            padding: const EdgeInsets.all(16),
+            child: podiumCard,
+          );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -715,7 +1488,10 @@ class _SplitActualPredictionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final scheme = Theme.of(context).colorScheme;
-    return SimulatorGlassPanel(
+    return HubVisualLanguage.glassPanel(
+      context: context,
+      topAccent: scheme.primary,
+      accentGlow: scheme.primary,
       padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -725,52 +1501,84 @@ class _SplitActualPredictionCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   l10n.simulator_accuracy,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                  style: GoogleFonts.titilliumWeb(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
               if (!readOnly)
-                Chip(
-                  label: Text(
-                    '${(podiumAccuracyPercentOverride ?? _accuracy(actual, predicted, roster)).toStringAsFixed(0)}%',
-                    style: const TextStyle(fontWeight: FontWeight.w800),
+                Tooltip(
+                  message: l10n.simulator_probability,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.08),
+                      ),
+                      color: scheme.primary.withValues(alpha: 0.12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      child: Text(
+                        '${(podiumAccuracyPercentOverride ?? _accuracy(actual, predicted, roster)).toStringAsFixed(0)}%',
+                        style: GoogleFonts.titilliumWeb(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
                   ),
-                  backgroundColor: scheme.primary.withValues(alpha: 0.15),
                 ),
             ],
           ),
           const SizedBox(height: 10),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _MiniPodiumColumn(
-                  title: l10n.simulator_actual,
-                  names: [
-                    for (final n in actual)
-                      canonicalSimulatorDriverName(n, roster),
+          LayoutBuilder(
+            builder: (context, c) {
+              final stack = c.maxWidth < 420;
+              final actualCol = _MiniPodiumColumn(
+                title: l10n.simulator_actual,
+                names: [
+                  for (final n in actual)
+                    canonicalSimulatorDriverName(n, roster),
+                ],
+                icon: Icons.flag_circle_outlined,
+              );
+              final predCol = _MiniPodiumColumn(
+                title: l10n.simulator_prediction,
+                names: [
+                  for (final n in predicted)
+                    canonicalSimulatorDriverName(n, roster),
+                ],
+                icon: Icons.psychology_alt_outlined,
+              );
+              if (stack) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    actualCol,
+                    const SizedBox(height: 14),
+                    predCol,
                   ],
-                  icon: Icons.flag_circle_outlined,
-                ),
-              ),
-              Container(
-                width: 1,
-                height: 72,
-                margin: const EdgeInsets.symmetric(horizontal: 8),
-                color: scheme.outline.withValues(alpha: 0.3),
-              ),
-              Expanded(
-                child: _MiniPodiumColumn(
-                  title: l10n.simulator_prediction,
-                  names: [
-                    for (final n in predicted)
-                      canonicalSimulatorDriverName(n, roster),
-                  ],
-                  icon: Icons.psychology_alt_outlined,
-                ),
-              ),
-            ],
+                );
+              }
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: actualCol),
+                  Container(
+                    width: 1,
+                    height: 72,
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                    color: scheme.outline.withValues(alpha: 0.1),
+                  ),
+                  Expanded(child: predCol),
+                ],
+              );
+            },
           ),
         ],
       ),
@@ -855,28 +1663,28 @@ class _DriverPalette extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: controller.drivers.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (context, i) {
           final d = controller.drivers[i];
-          final path = simulatorDriverPortraitPath(d.name, controller.drivers);
+          final paths =
+              simulatorDriverPortraitPathCandidates(d.name, controller.drivers);
           final child = Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ClipOval(
-                child: Image.asset(
-                  path,
-                  width: 52,
-                  height: 52,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => CircleAvatar(
-                    radius: 26,
-                    backgroundColor: scheme.surfaceContainerHighest,
-                    child: Text(
-                      d.name.isNotEmpty ? d.name[0] : '?',
-                      style: TextStyle(
-                        color: scheme.onSurface,
-                        fontWeight: FontWeight.w800,
-                      ),
+              HubAssetImageChain(
+                paths: paths,
+                width: 52,
+                height: 52,
+                fit: BoxFit.cover,
+                clipOval: true,
+                fallback: CircleAvatar(
+                  radius: 26,
+                  backgroundColor: scheme.surfaceContainerHighest,
+                  child: Text(
+                    d.name.isNotEmpty ? d.name[0] : '?',
+                    style: TextStyle(
+                      color: scheme.onSurface,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
@@ -902,16 +1710,15 @@ class _DriverPalette extends StatelessWidget {
             feedback: Material(
               elevation: 8,
               borderRadius: BorderRadius.circular(40),
-              child: ClipOval(
-                child: Image.asset(
-                  path,
-                  width: 56,
-                  height: 56,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => CircleAvatar(
-                    radius: 28,
-                    child: Text(d.name.isNotEmpty ? d.name[0] : '?'),
-                  ),
+              child: HubAssetImageChain(
+                paths: paths,
+                width: 56,
+                height: 56,
+                fit: BoxFit.cover,
+                clipOval: true,
+                fallback: CircleAvatar(
+                  radius: 28,
+                  child: Text(d.name.isNotEmpty ? d.name[0] : '?'),
                 ),
               ),
             ),
@@ -941,23 +1748,43 @@ class _PodiumRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        for (var slot = 0; slot < 3; slot++)
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: _PodiumSlotTile(
-                slot: slot,
-                labels: labels,
-                rawName: slot < drivers.length ? drivers[slot] : '',
-                roster: roster,
-                readOnly: readOnly,
-                onAssign: onAssign,
+    return LayoutBuilder(
+      builder: (context, c) {
+        final stack = c.maxWidth < 600;
+        Widget tile(int slot) {
+          return _PodiumSlotTile(
+            slot: slot,
+            labels: labels,
+            rawName: slot < drivers.length ? drivers[slot] : '',
+            roster: roster,
+            readOnly: readOnly,
+            onAssign: onAssign,
+          );
+        }
+
+        if (stack) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var slot = 0; slot < 3; slot++) ...[
+                if (slot > 0) const SizedBox(height: 12),
+                tile(slot),
+              ],
+            ],
+          );
+        }
+        return Row(
+          children: [
+            for (var slot = 0; slot < 3; slot++)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: tile(slot),
+                ),
               ),
-            ),
-          ),
-      ],
+          ],
+        );
+      },
     );
   }
 }
@@ -985,9 +1812,9 @@ class _PodiumSlotTile extends StatelessWidget {
     final displayName = rawName.isEmpty
         ? ''
         : canonicalSimulatorDriverName(rawName, roster);
-    final portraitPath = displayName.isEmpty
-        ? ''
-        : simulatorDriverPortraitPath(displayName, roster);
+    final portraitPaths = displayName.isEmpty
+        ? const <String>[]
+        : simulatorDriverPortraitPathCandidates(displayName, roster);
 
     Widget slotBody(bool elevated) {
       return AnimatedContainer(
@@ -1015,12 +1842,14 @@ class _PodiumSlotTile extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             if (displayName.isNotEmpty)
-              Image.asset(
-                portraitPath,
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter,
-                errorBuilder: (_, __, ___) => ColoredBox(
-                  color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              Positioned.fill(
+                child: HubAssetImageChain(
+                  paths: portraitPaths,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
+                  fallback: ColoredBox(
+                    color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  ),
                 ),
               ),
             if (displayName.isNotEmpty)
@@ -1117,9 +1946,16 @@ class _PodiumSlotTile extends StatelessWidget {
 }
 
 class _StewardStrip extends StatelessWidget {
-  const _StewardStrip({required this.controller});
+  const _StewardStrip({
+    required this.controller,
+    this.wrapInGlass = true,
+    this.expandVertical = false,
+  });
 
   final ChampionshipSimulatorController controller;
+  final bool wrapInGlass;
+  /// When true, the driver list fills remaining height (e.g. steward tab).
+  final bool expandVertical;
 
   @override
   Widget build(BuildContext context) {
@@ -1135,189 +1971,194 @@ class _StewardStrip extends StatelessWidget {
       listenable: controller,
       builder: (context, _) {
         final standings = controller.stewardStandingsForCircuit(cid);
-        return SimulatorGlassPanel(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.simulator_steward_title,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
+        final listView = ListView.separated(
+          itemCount: standings.length,
+          separatorBuilder: (_, _) => const SizedBox(height: 16),
+          itemBuilder: (context, i) {
+            final s = standings[i];
+            final paths = simulatorDriverPortraitPathCandidates(
+              s.driver.name,
+              controller.drivers,
+            );
+            final stripe = F1TeamSchemes.getTeamColor(s.driver.team);
+            final initials = s.driver.name.isNotEmpty
+                ? s.driver.name
+                    .split(' ')
+                    .where((e) => e.isNotEmpty)
+                    .map((e) => e[0])
+                    .take(2)
+                    .join()
+                : '?';
+            return HubInteractiveGlass(
+              key: ValueKey(
+                '${s.driver.name}_${s.finishRank}_${s.virtualMillis}',
               ),
-              const SizedBox(height: 4),
-              Text(
-                l10n.simulator_steward_hint,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                height: 220,
-                child: ListView.builder(
-                  itemCount: standings.length,
-                  itemBuilder: (context, i) {
-                    final s = standings[i];
-                    final path =
-                        simulatorDriverPortraitPath(s.driver.name, controller.drivers);
-                    final stripe = F1TeamSchemes.getTeamColor(s.driver.team);
-                    final initials = s.driver.name.isNotEmpty
-                        ? s.driver.name
-                            .split(' ')
-                            .where((e) => e.isNotEmpty)
-                            .map((e) => e[0])
-                            .take(2)
-                            .join()
-                        : '?';
-                    return AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 260),
-                      transitionBuilder: (child, anim) => SlideTransition(
-                        position: Tween<Offset>(
-                          begin: const Offset(0.03, 0),
-                          end: Offset.zero,
-                        ).animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
-                        child: FadeTransition(opacity: anim, child: child),
+              borderRadius: 12,
+              onTap: null,
+              child: Material(
+                color: scheme.surfaceContainerHighest.withValues(
+                  alpha: Theme.of(context).brightness == Brightness.dark
+                      ? 0.35
+                      : 0.5,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 22,
+                        child: Text(
+                          '${s.finishRank}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: scheme.primary,
+                            fontSize: 11,
+                          ),
+                        ),
                       ),
-                      child: KeyedSubtree(
-                        key: ValueKey('${s.driver.name}_${s.finishRank}_${s.virtualMillis}'),
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Material(
-                            color: scheme.surfaceContainerHighest.withValues(
-                              alpha: Theme.of(context).brightness == Brightness.dark
-                                  ? 0.35
-                                  : 0.5,
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 6,
-                              ),
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    width: 22,
-                                    child: Text(
-                                      '${s.finishRank}',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w800,
-                                        color: scheme.primary,
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    width: 3,
-                                    height: 36,
-                                    decoration: BoxDecoration(
-                                      color: stripe,
-                                      borderRadius: BorderRadius.circular(2),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  ClipOval(
-                                    child: Image.asset(
-                                      path,
-                                      width: 36,
-                                      height: 36,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => CircleAvatar(
-                                        radius: 18,
-                                        backgroundColor:
-                                            scheme.surfaceContainerHighest,
-                                        child: Text(
-                                          initials,
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          s.driver.name,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                        Text(
-                                          s.isDnf
-                                              ? 'DNF'
-                                              : '+${s.penaltySeconds}s · GP ${s.weekendGpPoints}${round.hasSprint ? ' · SP ${s.weekendSprintPoints}' : ''}',
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            color: scheme.onSurfaceVariant,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  if (!controller.readOnly) ...[
-                                    IconButton(
-                                      visualDensity: VisualDensity.compact,
-                                      padding: EdgeInsets.zero,
-                                      constraints: const BoxConstraints(
-                                        minWidth: 30,
-                                        minHeight: 32,
-                                      ),
-                                      tooltip: '+5s',
-                                      onPressed: () => controller.togglePenaltySeconds(
-                                            cid,
-                                            s.driver.name,
-                                            5,
-                                          ),
-                                      icon: const Icon(Icons.exposure_plus_1, size: 18),
-                                    ),
-                                    IconButton(
-                                      visualDensity: VisualDensity.compact,
-                                      padding: EdgeInsets.zero,
-                                      constraints: const BoxConstraints(
-                                        minWidth: 30,
-                                        minHeight: 32,
-                                      ),
-                                      tooltip: '+10s',
-                                      onPressed: () => controller.togglePenaltySeconds(
-                                            cid,
-                                            s.driver.name,
-                                            10,
-                                          ),
-                                      icon: const Icon(Icons.add_alarm, size: 18),
-                                    ),
-                                    FilterChip(
-                                      label: const Text('DNF', style: TextStyle(fontSize: 10)),
-                                      selected: s.isDnf,
-                                      visualDensity: VisualDensity.compact,
-                                      onSelected: (_) => controller.toggleDnf(
-                                            cid,
-                                            s.driver.name,
-                                          ),
-                                    ),
-                                  ],
-                                ],
-                              ),
+                      Container(
+                        width: 3,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: stripe,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      HubAssetImageChain(
+                        paths: paths,
+                        width: 36,
+                        height: 36,
+                        fit: BoxFit.cover,
+                        clipOval: true,
+                        fallback: CircleAvatar(
+                          radius: 18,
+                          backgroundColor: scheme.surfaceContainerHighest,
+                          child: Text(
+                            initials,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
                         ),
                       ),
-                    );
-                  },
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              s.driver.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                            Text(
+                              s.isDnf
+                                  ? 'DNF'
+                                  : '+${s.penaltySeconds}s · GP ${s.weekendGpPoints}${round.hasSprint ? ' · SP ${s.weekendSprintPoints}' : ''}',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: scheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (!controller.readOnly) ...[
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 30,
+                            minHeight: 32,
+                          ),
+                          tooltip: '+5s',
+                          onPressed: () => controller.togglePenaltySeconds(
+                                cid,
+                                s.driver.name,
+                                5,
+                              ),
+                          icon: const Icon(Icons.exposure_plus_1, size: 18),
+                        ),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 30,
+                            minHeight: 32,
+                          ),
+                          tooltip: '+10s',
+                          onPressed: () => controller.togglePenaltySeconds(
+                                cid,
+                                s.driver.name,
+                                10,
+                              ),
+                          icon: const Icon(Icons.add_alarm, size: 18),
+                        ),
+                        FilterChip(
+                          label:
+                              const Text('DNF', style: TextStyle(fontSize: 10)),
+                          selected: s.isDnf,
+                          visualDensity: VisualDensity.compact,
+                          onSelected: (_) => controller.toggleDnf(
+                                cid,
+                                s.driver.name,
+                              ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ),
-            ],
-          ),
+            );
+          },
         );
+        final listBlock = expandVertical
+            ? Expanded(child: listView)
+            : SizedBox(height: 220, child: listView);
+
+        final inner = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.simulator_steward_title,
+                style: GoogleFonts.titilliumWeb(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                l10n.simulator_steward_hint,
+                style: HubVisualLanguage.titilliumSecondary(
+                  context,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 10),
+              listBlock,
+            ],
+        );
+
+        if (wrapInGlass) {
+          return HubVisualLanguage.glassPanel(
+            context: context,
+            topAccent: scheme.primary,
+            accentGlow: scheme.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: inner,
+          );
+        }
+        return inner;
       },
     );
   }
@@ -1350,21 +2191,20 @@ class _StandingsPanel extends StatelessWidget {
           ? const ClampingScrollPhysics()
           : null,
       itemCount: board.length.clamp(0, 22),
-      separatorBuilder: (_, __) => const SizedBox(height: 6),
+      separatorBuilder: (_, _) => const SizedBox(height: 16),
       itemBuilder: (context, i) {
         final e = board[i];
-        return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 280),
-          switchInCurve: Curves.easeOutCubic,
-          switchOutCurve: Curves.easeInCubic,
+        return HubInteractiveGlass(
+          key: ValueKey('${e.key}_${e.value}'),
+          borderRadius: 14,
+          onTap: null,
           child: Container(
-            key: ValueKey('${e.key}_${e.value}'),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: scheme.surface.withValues(alpha: 0.25),
+              borderRadius: BorderRadius.circular(14),
+              color: scheme.surface.withValues(alpha: 0.18),
               border: Border.all(
-                color: scheme.outline.withValues(alpha: 0.2),
+                color: scheme.outline.withValues(alpha: 0.18),
               ),
             ),
             child: Row(
@@ -1373,9 +2213,10 @@ class _StandingsPanel extends StatelessWidget {
                   width: 28,
                   child: Text(
                     '${i + 1}',
-                    style: TextStyle(
+                    style: GoogleFonts.titilliumWeb(
                       fontWeight: FontWeight.w800,
                       color: scheme.primary,
+                      fontSize: 13,
                     ),
                   ),
                 ),
@@ -1384,11 +2225,18 @@ class _StandingsPanel extends StatelessWidget {
                     e.key,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.titilliumWeb(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
                 Text(
                   '${e.value}',
-                  style: const TextStyle(fontWeight: FontWeight.w700),
+                  style: GoogleFonts.titilliumWeb(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
@@ -1427,16 +2275,18 @@ class _StandingsPanel extends StatelessWidget {
       children: [
         Text(
           l10n.simulator_standings,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+          style: GoogleFonts.titilliumWeb(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+          ),
         ),
         const SizedBox(height: 6),
         Text(
           l10n.simulator_consensus_stub,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
+          style: HubVisualLanguage.titilliumSecondary(
+            context,
+            fontSize: 12,
+          ),
         ),
         const SizedBox(height: 12),
         if (listHeight != null)
@@ -1451,7 +2301,13 @@ class _StandingsPanel extends StatelessWidget {
         ? RepaintBoundary(key: captureKey, child: column)
         : column;
 
-    return SimulatorGlassPanel(child: wrapped);
+    return HubVisualLanguage.glassPanel(
+      context: context,
+      topAccent: scheme.primary,
+      accentGlow: scheme.primary,
+      padding: const EdgeInsets.all(16),
+      child: wrapped,
+    );
   }
 }
 
@@ -1514,131 +2370,6 @@ class _CircuitStatusTrailingState extends State<_CircuitStatusTrailing> {
       );
     }
     return const SizedBox.shrink();
-  }
-}
-
-class _FullGridDialog extends StatefulWidget {
-  const _FullGridDialog({required this.controller});
-
-  final ChampionshipSimulatorController controller;
-
-  @override
-  State<_FullGridDialog> createState() => _FullGridDialogState();
-}
-
-class _FullGridDialogState extends State<_FullGridDialog>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    final hasSprint = widget.controller.selectedRound.hasSprint;
-    _tabController = TabController(length: hasSprint ? 2 : 1, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return Dialog(
-      insetPadding: EdgeInsets.zero,
-      backgroundColor: Colors.transparent,
-      child: ListenableBuilder(
-        listenable: widget.controller,
-        builder: (context, _) {
-          final r = widget.controller.selectedRound;
-          final hasSprint = r.hasSprint;
-          return SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: SimulatorGlassPanel(
-                padding: EdgeInsets.zero,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.close_rounded),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                          Expanded(
-                            child: Text(
-                              l10n.simulator_full_grid_title,
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                      child: Text(
-                        r.displayName,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
-                    ),
-                    if (r.isCancelled)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: Text(
-                          l10n.simulator_race_cancelled,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    if (!r.isCancelled && hasSprint)
-                      TabBar(
-                        controller: _tabController,
-                        tabs: [
-                          Tab(text: l10n.simulator_tab_grand_prix),
-                          Tab(text: l10n.simulator_tab_sprint),
-                        ],
-                      ),
-                    Expanded(
-                      child: r.isCancelled
-                          ? const SizedBox.shrink()
-                          : hasSprint
-                              ? TabBarView(
-                                  controller: _tabController,
-                                  children: [
-                                    _FullGridReorderList(
-                                      controller: widget.controller,
-                                      sprint: false,
-                                    ),
-                                    _FullGridReorderList(
-                                      controller: widget.controller,
-                                      sprint: true,
-                                    ),
-                                  ],
-                                )
-                              : _FullGridReorderList(
-                                  controller: widget.controller,
-                                  sprint: false,
-                                ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
   }
 }
 
@@ -1732,22 +2463,29 @@ class _FullGridReorderListState extends State<_FullGridReorderList> {
               final display = name.trim().isEmpty
                   ? ''
                   : canonicalSimulatorDriverName(name, c.drivers);
-              final path =
-                  display.isEmpty ? '' : simulatorDriverPortraitPath(display, c.drivers);
+              final paths = display.isEmpty
+                  ? const <String>[]
+                  : simulatorDriverPortraitPathCandidates(display, c.drivers);
 
               return Padding(
                 key: ValueKey('${widget.sprint}_${index}_$display'),
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Material(
-                  color: scheme.surfaceContainerHighest.withValues(
-                    alpha: Theme.of(context).brightness == Brightness.dark
-                        ? 0.35
-                        : 0.5,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                    child: Row(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: HubInteractiveGlass(
+                  borderRadius: 12,
+                  onTap: null,
+                  child: Material(
+                    color: scheme.surfaceContainerHighest.withValues(
+                      alpha: Theme.of(context).brightness == Brightness.dark
+                          ? 0.35
+                          : 0.5,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 5,
+                      ),
+                      child: Row(
                       children: [
                         SizedBox(
                           width: 30,
@@ -1760,20 +2498,19 @@ class _FullGridReorderListState extends State<_FullGridReorderList> {
                             ),
                           ),
                         ),
-                        if (path.isNotEmpty)
-                          ClipOval(
-                            child: Image.asset(
-                              path,
-                              width: 40,
-                              height: 40,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => CircleAvatar(
-                                radius: 20,
-                                backgroundColor: scheme.surfaceContainerHighest,
-                                child: Text(
-                                  display.isNotEmpty ? display[0] : '?',
-                                  style: const TextStyle(fontWeight: FontWeight.w800),
-                                ),
+                        if (paths.isNotEmpty)
+                          HubAssetImageChain(
+                            paths: paths,
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                            clipOval: true,
+                            fallback: CircleAvatar(
+                              radius: 20,
+                              backgroundColor: scheme.surfaceContainerHighest,
+                              child: Text(
+                                display.isNotEmpty ? display[0] : '?',
+                                style: const TextStyle(fontWeight: FontWeight.w800),
                               ),
                             ),
                           )
@@ -1812,6 +2549,7 @@ class _FullGridReorderListState extends State<_FullGridReorderList> {
                       ],
                     ),
                   ),
+                ),
                 ),
               );
             },
@@ -1932,10 +2670,10 @@ class _SharedChampionshipPredictionsPageState
     _future = SimulatorSyncService.instance.pullPredictionsByUsername(widget.username);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
       setSimulatorShareOgMeta(
-        title: 'F1 Hub — ${widget.username}',
-        description:
-            'Bekijk de 2026 F1-voorspelling van ${widget.username} op F1 Hub.',
+        title: l10n.simulator_share_og_title(widget.username),
+        description: l10n.simulator_share_og_description(widget.username),
       );
     });
   }
@@ -1954,14 +2692,43 @@ class _SharedChampionshipPredictionsPageState
       builder: (context, snap) {
         if (snap.connectionState != ConnectionState.done) {
           return Scaffold(
-            body: Center(
+            body: SafeArea(
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 16),
-                  Text(l10n.simulator_share_stub_title),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 24),
+                    child: Text(
+                      l10n.simulator_share_stub_title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                    ),
+                  ),
+                  const Expanded(child: HubGlassPageLoadingPlaceholder()),
                 ],
+              ),
+            ),
+          );
+        }
+        if (snap.hasError) {
+          final scheme = Theme.of(context).colorScheme;
+          return Scaffold(
+            appBar: AppBar(title: Text(l10n.simulator_share_stub_title)),
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Center(
+                  child: SelectableText(
+                    kDebugMode
+                        ? '${l10n.simulator_share_error_load}\n\n${snap.error}'
+                        : l10n.simulator_share_error_load,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: scheme.onSurface,
+                          height: 1.45,
+                        ),
+                  ),
+                ),
               ),
             ),
           );
@@ -1969,8 +2736,11 @@ class _SharedChampionshipPredictionsPageState
         final result = snap.data;
         final rows = result?.rows ?? const <Map<String, dynamic>>[];
         if (rows.isEmpty) {
-          final body = result?.backendError != null
-              ? l10n.simulator_share_error_load
+          final err = result?.backendError;
+          final body = err != null
+              ? (err == SimulatorSyncService.backendErrorTimedOut
+                  ? l10n.simulator_network_timeout
+                  : l10n.simulator_share_error_load)
               : l10n.simulator_share_empty(widget.username);
           final scheme = Theme.of(context).colorScheme;
           final textStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(

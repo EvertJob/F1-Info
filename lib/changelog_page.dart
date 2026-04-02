@@ -26,13 +26,13 @@ class ChangelogPage extends StatelessWidget {
         MediaQuery.sizeOf(context).width >= _desktopShellBreakpoint;
 
     return Scaffold(
-      backgroundColor: desktopShell ? Colors.transparent : null,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text(context.l10n.changelog),
-        backgroundColor: desktopShell ? Colors.transparent : null,
-        elevation: desktopShell ? 0 : null,
-        scrolledUnderElevation: desktopShell ? 0 : null,
-        foregroundColor: desktopShell ? scheme.onSurface : null,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        foregroundColor: scheme.onSurface,
         actions: desktopShell
             ? const <Widget>[]
             : <Widget>[settingsMenu],

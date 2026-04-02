@@ -1,4 +1,4 @@
-﻿{
+{
     "circuit_id":  "monza_circuit",
     "name":  "Autodromo Nazionale Monza",
     "location":  "Monza, Italy",
@@ -16,8 +16,13 @@
                                                "elevation_sea_level_m":  162,
                                                "max_elevation_change_m":  12.8,
                                                "tyre_physics":  {
-                                                                    "asphalt_grip_score":  4,
-                                                                    "lateral_stress_score":  6
+                                                                    "traction_score":  3,
+                                                                    "tyre_stress_score":  3,
+                                                                    "asphalt_grip_score":  3,
+                                                                    "braking_score":  3,
+                                                                    "asphalt_abrasion_score":  3,
+                                                                    "lateral_score":  3,
+                                                                    "track_evolution_score":  3
                                                                 },
                                                "tyre_working_window_c":  115,
                                                "wind_sensitivity_sector":  "S2",

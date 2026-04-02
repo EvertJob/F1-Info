@@ -50,8 +50,8 @@ class F1UiTheme extends ThemeExtension<F1UiTheme> {
   factory F1UiTheme.standard({bool compact = false}) {
     return F1UiTheme(
       cardPadding: EdgeInsets.all(compact ? 14 : 20),
-      cardBorderRadius: compact ? 18 : 22,
-      glassBlur: compact ? 20 : 28,
+      cardBorderRadius: compact ? 16 : 20,
+      glassBlur: compact ? 14 : 18,
       moduleShadow: [
         BoxShadow(
           color: Colors.black.withValues(alpha: 0.12),

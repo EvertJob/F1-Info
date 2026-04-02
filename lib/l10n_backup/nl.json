@@ -1,8 +1,6 @@
 {
   "appTitle": "F1 Hub",
-  "newsTitle": "F1 Nieuws",
   "loading": "Laden...",
   "loadError": "Fout bij laden: {error}",
-  "refresh": "Vernieuwen",
-  "noNews": "Geen nieuws gevonden."
+  "refresh": "Vernieuwen"
 }

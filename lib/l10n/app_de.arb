@@ -282,9 +282,11 @@
   "best_tyre_combination": "Beste Reifenkombination",
   "cfield_air_pressure_hpa": "Luftdruck",
   "cfield_asphalt_grip_score": "Asphalt-Grip-Score",
+  "cfield_asphalt_abrasion_score": "Asphalt-Abrasion",
   "cfield_avg_g_force": "Durchschnittliche G-Kraft",
   "cfield_avg_time_2024_2025": "Ø Rundenzeit (2024–25)",
   "cfield_brake_cooling_requirement_score": "Bremskühlungs-Anforderung",
+  "cfield_braking_score": "Bremsbelastung",
   "cfield_circuit_director": "Streckendirektor",
   "cfield_circuit_owner": "Streckenbesitzer",
   "cfield_contract_until": "Vertrag bis",
@@ -303,7 +305,13 @@
   "cfield_local_time_zone": "Lokale Zeitzone",
   "cfield_longitude": "Längengrad",
   "cfield_lap_record_detail": "Rundenrekord",
+  "circuit_hero_lap_record_by_prefix": "Rundenrekord von ",
+  "circuits_hero_stat_length": "LÄNGE",
+  "circuits_hero_stat_laps": "RUNDEN",
+  "circuits_hero_stat_top_speed": "HÖCHSTGESCHW.",
+  "circuits_hero_stat_lap_record": "RUNDENREKORD",
   "cfield_laps": "Runden",
+  "cfield_lateral_score": "Seitliche Last",
   "cfield_lateral_stress_score": "Seitliche Belastungs-Score",
   "cfield_length": "Länge",
   "cfield_manual_override_energy_cost": "Energiekosten manueller Override",
@@ -328,11 +336,14 @@
   "cfield_sun_angle_start": "Sonnenstand beim Start",
   "cfield_t1_accident_risk": "Unfallrisiko Kurve 1",
   "cfield_temperature_c": "Temperatur",
+  "cfield_traction_score": "Traktionsanforderung",
   "cfield_top_speed": "Höchstgeschwindigkeit",
   "cfield_top_speed_delta": "Höchstgeschwindigkeits-Delta",
   "cfield_track_evolution": "Streckenevolution",
+  "cfield_track_evolution_score": "Streckenevolution (Gummi)",
   "cfield_track_type": "Streckentyp",
   "cfield_tyre_physics": "Reifenphysik",
+  "cfield_tyre_stress_score": "Reifenbelastung",
   "cfield_tyre_working_window_c": "Reifen-Arbeitsfenster",
   "cfield_undercut_potential_score": "Undercut-Potenzial",
   "cfield_utc_offset": "UTC-Offset",
@@ -377,6 +388,9 @@
   "circuit_difficulty": "Streckenschwierigkeit",
   "circuit_difficulty_l10n": "Streckenschwierigkeit",
   "circuit_go_home": "Zur Startseite",
+  "circuit_back_to_circuits": "Zurück zu den Strecken",
+  "hub_back_to_drivers": "Zurück zu den Fahrern",
+  "hub_back_to_constructors": "Zurück zu den Konstrukteuren",
   "circuit_info": "Streckeninfo",
   "circuit_layout": "Streckenlayout",
   "circuit_not_found_message": "Für diese Adresse liegen keine Streckendaten vor. Prüfen Sie den Link oder wählen Sie eine Strecke im Kalender.",
@@ -393,9 +407,90 @@
   },
   "circuit_weekend_hub_no_data_tooltip": "Noch keine Session-Daten verfügbar.",
   "circuits": "Strecken",
+  "circuits_catalog_season_subtitle": "{count} Strecken · Saison {seasonYear}",
+  "@circuits_catalog_season_subtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "seasonYear": {
+        "type": "int"
+      }
+    }
+  },
+  "circuits_stat_km": "KM",
+  "circuits_stat_laps": "RUNDEN",
+  "circuits_stat_kmh": "KM/H",
+  "circuits_catalog_load_error": "Streckendaten konnten nicht geladen werden.",
+  "race_calendar_title": "Rennkalender",
+  "race_calendar_subtitle": "{total} Rennen · {completed} absolviert",
+  "@race_calendar_subtitle": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "completed": {
+        "type": "int"
+      }
+    }
+  },
+  "race_calendar_season_progress": "Saisonfortschritt",
+  "race_calendar_progress_fraction": "{completed}/{total} Rennen",
+  "@race_calendar_progress_fraction": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "race_calendar_status_completed": "BEENDET",
+  "race_calendar_status_next": "NÄCHSTES",
+  "calendar_search_hint": "Rennen suchen…",
+  "calendar_nav": "Kalender",
   "city": "Stadt",
   "clear_cache": "Cache leeren",
   "close": "Schließen",
+  "constructor_standings_title": "Konstrukteurswertung",
+  "constructor_standings_subtitle": "Saison {year}",
+  "@constructor_standings_subtitle": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "constructor_team_driver_count": "{count} Fahrer",
+  "@constructor_team_driver_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "constructor_driver_points_short": "{points} Pkt.",
+  "@constructor_driver_points_short": {
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "driver_standings_title": "Fahrerwertung",
+  "driver_standings_subtitle": "Saison {year}",
+  "hub_search_driver_hint": "Fahrer oder Teams suchen...",
+  "hub_search_drivers_empty": "Keine Fahrer gefunden",
+  "hub_search_circuits_hint": "Strecken, Grands Prix oder Länder suchen...",
+  "hub_search_circuits_empty": "Keine Strecken gefunden",
+  "@driver_standings_subtitle": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
   "compare": "Vergleichen",
   "compare_overall": "Gesamt",
   "compare_season": "Pro Saison",
@@ -775,29 +870,25 @@
   "nat_spanish": "Spanisch",
   "nat_thai": "Thailändisch",
   "nationality": "Nationalität",
-  "news_empty": "Zurzeit keine Artikel. Zum Aktualisieren nach unten ziehen.",
-  "news_feed_section_empty": "Keine Artikel aus diesem Feed.",
-  "news_load_error": "News konnten nicht geladen werden: {error}",
-  "@news_load_error": {
+  "hub_nav_menu": "Menü öffnen",
+  "simulator_share_og_title": "F1 Hub — {username}",
+  "@simulator_share_og_title": {
     "placeholders": {
-      "error": {
+      "username": {
         "type": "String"
       }
     }
   },
-  "news_nav": "News",
-  "news_settings_add": "Hinzufügen",
-  "news_settings_drag_to_reorder": "Ziehen, um die Feed-Reihenfolge zu ändern",
-  "news_settings_duplicate_url": "Diese URL steht bereits in der Liste.",
-  "news_settings_invalid_url": "Bitte eine gültige http(s)-URL eingeben.",
-  "news_settings_no_feeds": "Noch keine Feeds. Oben eine URL eintragen.",
-  "news_settings_save_failed": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
-  "news_settings_stream_error": "Profil-Updates konnten nicht abonniert werden.",
-  "news_settings_subtitle": "RSS- oder Atom-URLs hinzufügen. Sie werden im Tab News geladen (neueste zuerst).",
-  "news_settings_title": "News-Feeds",
-  "news_settings_url_hint": "https://beispiel.de/feed.xml",
-  "news_settings_your_feeds": "Deine Feeds",
-  "news_title": "F1 News",
+  "simulator_share_og_description": "Sieh dir die F1-Vorhersagen von {username} auf F1 Hub an.",
+  "@simulator_share_og_description": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "live_timing_waiting_first_frame": "Warte auf den ersten Timing‑Frame…",
+  "live_timing_waiting_green_flag": "Warte auf RACE STARTED (grüne Flagge)…",
   "next_race": "Nächstes Rennen",
   "no_data_yet": "Daten noch nicht verfügbar oder API noch nicht aktualisiert",
   "no_finish_data": "Keine Ziel-Daten",
@@ -847,6 +938,7 @@
   "previous_teams": "Teams",
   "previous_winners": "Frühere Sieger",
   "profile": "Profil",
+  "nav_legal": "Rechtliches",
   "pts": "PTS",
   "q1_out": "Q1 raus",
   "q2_out": "Q2 raus",
@@ -1063,6 +1155,12 @@
   "weekend_hub_penalties_filter_empty": "Keine Straf- oder Untersuchungsmeldungen für diese Session.",
   "weekend_hub_spot_placeholder_title": "Live-Radar & DRS",
   "weekend_hub_spot_placeholder_body": "Wetterradar, Regenradar und eine DRS-Zonenübersicht erscheinen hier in einem zukünftigen Update.",
+  "weekend_hub_back_to_calendar": "Zurück zum Kalender",
+  "weekend_hub_weather_air": "Luft",
+  "weekend_hub_weather_track": "Strecke",
+  "weekend_hub_no_weather_data": "Keine Wetterdaten verfügbar.",
+  "weekend_hub_live_preview": "Schnelle Rangliste",
+  "weekend_hub_view_full_results": "Alle Ergebnisse",
   "weekend_schedule": "Wochenend-Zeitplan",
   "weeks": "Wochen",
   "win_rate": "Siegquote %",
@@ -1152,6 +1250,8 @@
     }
   },
   "simulator_share_error_load": "Geteilte Tipps konnten nicht geladen werden. Mit eigenem Supabase: sql/add_simulator_share_rpcs.sql ausführen (get_shared_predictions) und erneut versuchen.",
+  "simulator_network_timeout": "Der Server hat zu lange gebraucht. Verbindung prüfen und erneut versuchen.",
+  "simulator_calendar_unavailable": "Kalender oder Fahrerliste fehlt. App nach einem Update neu starten.",
   "simulator_share_local_preview": "Nur Vorschau auf diesem Gerät — geteilte Wertung angemeldet öffnen, damit Tipps in die Cloud synchronisiert werden.",
   "simulator_steward_coming": "Stewards (Strafen / Status) — nächste Iteration",
   "simulator_round": "R{round}",
@@ -1185,5 +1285,22 @@
         "type": "int"
       }
     }
-  }
+  },
+  "simulator_back_to_dashboard": "Zurück zum Dashboard",
+  "simulator_tab_predictions": "Prognosen",
+  "simulator_tab_full_grid": "Gesamtes Grid",
+  "simulator_tab_steward": "Stewards",
+  "simulator_hero_season": "Saison-{year}-Simulation",
+  "@simulator_hero_season": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "simulator_simulate": "Simulieren",
+  "simulator_probability": "Wahrscheinlichkeit",
+  "simulator_chart_team_title": "Konstrukteurspunkte",
+  "simulator_chart_team_hint": "Offizielle Ergebnisse — tippen zum Vergrößern",
+  "simulator_chart_empty": "Team-Trends erscheinen, sobald Rennergebnisse vorliegen."
 }

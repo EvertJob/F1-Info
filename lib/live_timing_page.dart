@@ -13,6 +13,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'theme/f1_team_schemes.dart';
+import 'widgets/hub_glass_chart_loading.dart';
 import 'widgets/live_timing_data_table.dart';
 
 /// Sector status from F1 API: 2064 = Overall Best (purple), 2048 = Personal Best (green), else = slower (yellow).
@@ -3783,23 +3784,28 @@ class _LiveTimingPageState extends State<LiveTimingPage>
               border: Border.all(color: _kLiveCardBorder, width: 1),
               boxShadow: _kLiveCardShadow,
             ),
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(color: _kLiveTimingPurple),
-                  const SizedBox(height: 16),
-                  Text(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: Text(
                     _raceTimingLiveActive
-                        ? 'Wachten op eerste frame...'
-                        : 'Waiting for RACE STARTED (GREEN flag)...',
+                        ? context.l10n.live_timing_waiting_first_frame
+                        : context.l10n.live_timing_waiting_green_flag,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: _kLiveSecondaryText.withValues(alpha: 0.9),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
                     ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(
+                  height: 120,
+                  child: HubGlassPageLoadingPlaceholder(fixedHeight: 120),
+                ),
+              ],
             ),
           )
         else if (hasStorageData)

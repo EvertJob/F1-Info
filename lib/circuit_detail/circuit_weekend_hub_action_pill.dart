@@ -1,7 +1,10 @@
 import 'dart:ui' as ui;
 
 import 'package:f1/data/f1_asset_resolver.dart';
+import 'package:f1/theme/hub_visual_language.dart';
 import 'package:f1/utils/l10n_extension.dart';
+import 'package:f1/widgets/constructor_hub_theme.dart';
+import 'package:f1/widgets/hub_glass_chart_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -243,6 +246,234 @@ class _CircuitWeekendHubActionPillState extends State<CircuitWeekendHubActionPil
           opacity: CurvedAnimation(parent: _fadeIn, curve: Curves.easeOutCubic),
           child: Center(child: pill),
         );
+      },
+    );
+  }
+}
+
+/// Compact F1-red pill for the circuit JSON hero (opens `/weekendhub/{slug}` when data exists).
+class CircuitWeekendHubHeroPill extends StatefulWidget {
+  const CircuitWeekendHubHeroPill({
+    super.key,
+    required this.circuitAssetId,
+  });
+
+  final String circuitAssetId;
+
+  @override
+  State<CircuitWeekendHubHeroPill> createState() =>
+      _CircuitWeekendHubHeroPillState();
+}
+
+class _CircuitWeekendHubHeroPillState extends State<CircuitWeekendHubHeroPill> {
+  Future<_HubResolve>? _future;
+  bool _hover = false;
+
+  /// Matches [_F1NavTile] selected row radius (hub rail / Kalender).
+  static const double _kRailSelectedRadius = 12;
+
+  /// Same glass + gradient language as desktop hub rail selected tile (Kalender, …).
+  BoxDecoration _weekendHubHeroPillDecoration(
+    BuildContext context, {
+    required bool isDark,
+    required bool hovered,
+  }) {
+    final red = ConstructorHubColors.railLogoRed;
+    final r = BorderRadius.circular(_kRailSelectedRadius);
+    if (isDark) {
+      return BoxDecoration(
+        borderRadius: r,
+        border: Border.all(
+          color: Colors.white.withValues(alpha: hovered ? 0.22 : 0.12),
+          width: 0.8,
+        ),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color.lerp(
+              ConstructorHubColors.surfaceElevated,
+              red,
+              hovered ? 0.5 : 0.42,
+            )!,
+            ConstructorHubColors.surfaceElevated.withValues(alpha: 0.94),
+          ],
+        ),
+      );
+    }
+    return BoxDecoration(
+      borderRadius: r,
+      border: Border.all(
+        color: Colors.black.withValues(alpha: hovered ? 0.10 : 0.06),
+        width: HubVisualLanguage.glassBorderWidth,
+      ),
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Color.lerp(
+            Colors.white.withValues(alpha: 0.82),
+            red,
+            hovered ? 0.20 : 0.14,
+          )!,
+          Colors.white.withValues(alpha: 0.52),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _future ??= _load(DefaultAssetBundle.of(context));
+  }
+
+  @override
+  void didUpdateWidget(covariant CircuitWeekendHubHeroPill oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.circuitAssetId != widget.circuitAssetId) {
+      _future = _load(DefaultAssetBundle.of(context));
+    }
+  }
+
+  Future<_HubResolve> _load(AssetBundle bundle) async {
+    final id = widget.circuitAssetId.trim();
+    if (id.isEmpty) return const _HubResolve.none();
+    final venue = F1AssetResolver.venueFolderForCircuitAssetId(id);
+    if (venue == null) return const _HubResolve.none();
+    final hasData = await F1AssetResolver.venueHasAnyBundledSessionResults(
+      bundle: bundle,
+      venueFolder: venue,
+    );
+    final hubSlug = F1AssetResolver.weekendHubPathSlug(venue);
+    return _HubResolve(venue: hubSlug, hasData: hasData);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return FutureBuilder<_HubResolve>(
+      future: _future,
+      builder: (context, snap) {
+        if (snap.connectionState != ConnectionState.done) {
+          return const SizedBox(
+            width: 44,
+            height: 38,
+            child: Center(
+              child: HubGlassInlineLoadingPlaceholder(width: 20, height: 20),
+            ),
+          );
+        }
+        if (snap.hasError) {
+          return const SizedBox.shrink();
+        }
+        final state = snap.data ?? const _HubResolve.none();
+        if (state.venue == null) {
+          return const SizedBox.shrink();
+        }
+
+        final enabled = state.hasData;
+        final tooltipMessage = l10n.circuit_weekend_hub_no_data_tooltip;
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+        final red = ConstructorHubColors.railLogoRed;
+
+        Widget rowContent(Color fg) {
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(Icons.flag_rounded, size: 18, color: fg),
+              const SizedBox(width: 8),
+              Text(
+                l10n.weekend_hub,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.35,
+                  height: 1.0,
+                  color: fg,
+                ),
+              ),
+            ],
+          );
+        }
+
+        Widget pill;
+        if (!enabled) {
+          final fg = red.withValues(alpha: 0.45);
+          pill = Material(
+            color: Colors.transparent,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius:
+                    BorderRadius.circular(_kRailSelectedRadius),
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.10)
+                      : Colors.black.withValues(alpha: 0.08),
+                  width: 0.8,
+                ),
+                color: isDark
+                    ? ConstructorHubColors.surface.withValues(alpha: 0.45)
+                    : Colors.black.withValues(alpha: 0.04),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                child: rowContent(fg),
+              ),
+            ),
+          );
+          pill = Tooltip(
+            message: tooltipMessage,
+            waitDuration: const Duration(milliseconds: 350),
+            child: pill,
+          );
+        } else {
+          final fg = red;
+          pill = MouseRegion(
+            onEnter: (_) => setState(() => _hover = true),
+            onExit: (_) => setState(() => _hover = false),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => context.push('/weekendhub/${state.venue}'),
+                borderRadius:
+                    BorderRadius.circular(_kRailSelectedRadius),
+                splashColor: red.withValues(alpha: 0.12),
+                highlightColor: red.withValues(alpha: 0.06),
+                child: ClipRRect(
+                  borderRadius:
+                      BorderRadius.circular(_kRailSelectedRadius),
+                  child: BackdropFilter(
+                    filter: ui.ImageFilter.blur(
+                      sigmaX: HubVisualLanguage.glassBlurSigma,
+                      sigmaY: HubVisualLanguage.glassBlurSigma,
+                    ),
+                    child: DecoratedBox(
+                      decoration: _weekendHubHeroPillDecoration(
+                        context,
+                        isDark: isDark,
+                        hovered: _hover,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                        child: rowContent(fg),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        return pill;
       },
     );
   }

@@ -1,4 +1,4 @@
-﻿{
+{
     "circuit_id":  "yas_marina",
     "name":  "Yas Marina Circuit",
     "location":  "Abu Dhabi, UAE",
@@ -16,8 +16,13 @@
                                                "elevation_sea_level_m":  3,
                                                "max_elevation_change_m":  3.5,
                                                "tyre_physics":  {
-                                                                    "asphalt_grip_score":  6,
-                                                                    "lateral_stress_score":  7
+                                                                    "traction_score":  3,
+                                                                    "tyre_stress_score":  3,
+                                                                    "asphalt_grip_score":  3,
+                                                                    "braking_score":  3,
+                                                                    "asphalt_abrasion_score":  3,
+                                                                    "lateral_score":  3,
+                                                                    "track_evolution_score":  3
                                                                 },
                                                "tyre_working_window_c":  114,
                                                "wind_sensitivity_sector":  "S3",

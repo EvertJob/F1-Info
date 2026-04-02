@@ -1,4 +1,4 @@
-﻿{
+{
     "circuit_id":  "circuit_de_monaco",
     "name":  "Circuit de Monaco",
     "location":  "Monte Carlo, Monaco",
@@ -16,8 +16,13 @@
                                                "elevation_sea_level_m":  2,
                                                "max_elevation_change_m":  42.0,
                                                "tyre_physics":  {
+                                                                    "traction_score":  3,
+                                                                    "tyre_stress_score":  3,
                                                                     "asphalt_grip_score":  3,
-                                                                    "lateral_stress_score":  4
+                                                                    "braking_score":  3,
+                                                                    "asphalt_abrasion_score":  3,
+                                                                    "lateral_score":  3,
+                                                                    "track_evolution_score":  3
                                                                 },
                                                "tyre_working_window_c":  95,
                                                "wind_sensitivity_sector":  "None",

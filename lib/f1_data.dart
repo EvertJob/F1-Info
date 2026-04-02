@@ -663,6 +663,13 @@ class Driver {
   final String contractUntil;
   final List<String> previousTeams;
   final List<String> personalSponsors;
+
+  /// GP-race wins for the standings JSON season (from [rounds] or row fields). Null = use career [wins] in UI.
+  final int? seasonStandingWins;
+
+  /// GP-race podiums (P1–P3) for the standings JSON season. Null = use career [podiums] in UI.
+  final int? seasonStandingPodiums;
+
   final String? reserveDriver;
 
   Driver({
@@ -708,6 +715,8 @@ class Driver {
     required this.contractUntil,
     required List<String> previousTeams,
     required this.personalSponsors,
+    this.seasonStandingWins,
+    this.seasonStandingPodiums,
     this.reserveDriver,
   }) : previousTeams = _resolveDriverCareerTeams(name, team, previousTeams),
        realWorldFactsEn = _buildDriverFactsEn(
@@ -789,8 +798,65 @@ class Driver {
     contractUntil: d.contractUntil,
     previousTeams: d.previousTeams,
     personalSponsors: d.personalSponsors,
+    seasonStandingWins: null,
+    seasonStandingPodiums: null,
     reserveDriver: d.reserveDriver,
   );
+
+  /// Like [Driver.copy] but attaches per-season GP wins / podiums from standings data (career [wins]/[podiums] unchanged).
+  factory Driver.copyWithPointsAndSeasonRaceStats(
+    Driver d,
+    double points, {
+    required int seasonRaceWins,
+    required int seasonRacePodiums,
+  }) =>
+      Driver(
+        name: d.name,
+        flag: d.flag,
+        points: points,
+        number: d.number,
+        nationality: d.nationality,
+        team: d.team,
+        pointsFinishPct: d.pointsFinishPct,
+        seasonPointsFinishPct: d.seasonPointsFinishPct,
+        wins: d.wins,
+        podiums2nd: d.podiums2nd,
+        podiums3rd: d.podiums3rd,
+        podiums: d.podiums,
+        poles: d.poles,
+        fastestLaps: d.fastestLaps,
+        totalPoints: d.totalPoints,
+        championships: d.championships,
+        championshipYears: d.championshipYears,
+        lapsRaced: d.lapsRaced,
+        starts: d.starts,
+        dnfs: d.dnfs,
+        dsqs: d.dsqs,
+        dnqs: d.dnqs,
+        lapsLed: d.lapsLed,
+        frontRowStarts: d.frontRowStarts,
+        highestFinish: d.highestFinish,
+        highestGrid: d.highestGrid,
+        hatTricks: d.hatTricks,
+        overtakes: d.overtakes,
+        age: d.age,
+        height: d.height,
+        birthPlace: d.birthPlace,
+        partner: d.partner,
+        children: d.children,
+        pets: d.pets,
+        manager: d.manager,
+        realWorldFactsEn: d.realWorldFactsEn,
+        realWorldFactsNl: d.realWorldFactsNl,
+        pointsPerSeason: d.pointsPerSeason,
+        debutYear: d.debutYear,
+        contractUntil: d.contractUntil,
+        previousTeams: d.previousTeams,
+        personalSponsors: d.personalSponsors,
+        seasonStandingWins: seasonRaceWins,
+        seasonStandingPodiums: seasonRacePodiums,
+        reserveDriver: d.reserveDriver,
+      );
 }
 
 /// Latest `seasons[].record` from a hub driver export (`f1_hub_driver_export_v1`).
@@ -8833,9 +8899,9 @@ final List<Team> fallbackTeams = [
     poles: 0,
     fastestLaps: 2,
     racesLed: 1,
-    principalName: 'Laurent Mekies',
-    principalAge: 47,
-    principalFlag: '🇫🇷',
+    principalName: 'Alan Permane',
+    principalAge: 59,
+    principalFlag: '🇬🇧',
     totalEntries: 368,
     technicalDirectorName: 'Jody Egginton',
     technicalDirectorAge: 52,

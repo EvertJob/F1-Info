@@ -29,7 +29,9 @@ Future<List<Map<String, String>>> fetchWikiHistoricalRecords(String targetDriver
 
       // Alleen relevante "Youngest" of "Points" secties scannen
       if (!sectionTitle.toLowerCase().contains('youngest') && 
-          !sectionTitle.toLowerCase().contains('points')) continue;
+          !sectionTitle.toLowerCase().contains('points')) {
+        continue;
+      }
 
       final rows = table.querySelectorAll('tr');
       for (var row in rows) {

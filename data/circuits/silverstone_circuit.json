@@ -1,4 +1,4 @@
-﻿{
+{
     "circuit_id":  "silverstone_circuit",
     "name":  "Silverstone Circuit",
     "location":  "Silverstone, UK",
@@ -16,8 +16,13 @@
                                                "elevation_sea_level_m":  154,
                                                "max_elevation_change_m":  11.3,
                                                "tyre_physics":  {
-                                                                    "asphalt_grip_score":  9,
-                                                                    "lateral_stress_score":  10
+                                                                    "traction_score":  3,
+                                                                    "tyre_stress_score":  3,
+                                                                    "asphalt_grip_score":  3,
+                                                                    "braking_score":  3,
+                                                                    "asphalt_abrasion_score":  3,
+                                                                    "lateral_score":  3,
+                                                                    "track_evolution_score":  3
                                                                 },
                                                "tyre_working_window_c":  118,
                                                "wind_sensitivity_sector":  "S2",

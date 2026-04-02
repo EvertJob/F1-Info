@@ -3,16 +3,16 @@ import 'dart:ui' as ui;
 import 'package:f1/circuit_detail/circuit_data.dart';
 import 'package:f1/circuit_detail/circuit_detail_view.dart';
 import 'package:f1/circuit_detail/circuit_embedded_map.dart';
-import 'package:f1/circuit_detail/circuit_weekend_hub_action_pill.dart';
-import 'package:f1/circuit_detail/circuit_map_launch.dart';
 import 'package:f1/circuit_detail/circuit_map_placement.dart';
 import 'package:f1/display_settings_controller.dart';
 import 'package:f1/theme/f1_ui_theme.dart';
 import 'package:f1/utils/l10n_extension.dart';
+import 'package:f1/widgets/hub_glass_chart_loading.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 EdgeInsets _bodyPaddingUnderTransparentAppBar(BuildContext context) {
@@ -20,6 +20,14 @@ EdgeInsets _bodyPaddingUnderTransparentAppBar(BuildContext context) {
     top: MediaQuery.paddingOf(context).top + kToolbarHeight,
   );
 }
+
+/// Content insets for [CircuitPage] (`/#/circuits/{slug}`): hub horizontal 16 + vertical rhythm.
+const EdgeInsets _kCircuitSlugContentPadding =
+    EdgeInsets.fromLTRB(16, 14, 16, 28);
+
+/// “Back to circuits” row — extra top/bottom breathing room per hub parity spec.
+const EdgeInsets _kCircuitSlugBackRowPadding =
+    EdgeInsets.only(top: 32, bottom: 20, left: 16);
 
 void _popCircuitRoute(BuildContext context) {
   if (context.canPop()) {
@@ -29,24 +37,38 @@ void _popCircuitRoute(BuildContext context) {
   }
 }
 
-/// City / short name for "Go to {venue} Hub" (e.g. "Suzuka, Japan" → Suzuka).
-String weekendHubVenueLabelForCircuit(CircuitData data) {
-  final loc = data.location.trim();
-  if (loc.isNotEmpty) {
-    final comma = loc.indexOf(',');
-    if (comma > 0) {
-      return loc.substring(0, comma).trim();
-    }
-    return loc;
+class _CircuitBackToCircuitsLink extends StatelessWidget {
+  const _CircuitBackToCircuitsLink({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final muted = scheme.onSurface.withValues(alpha: 0.55);
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: TextButton.icon(
+        onPressed: onPressed,
+        icon: Icon(Icons.arrow_back_rounded, size: 20, color: muted),
+        label: Text(
+          context.l10n.circuit_back_to_circuits,
+          style: GoogleFonts.titilliumWeb(
+            color: muted,
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            height: 1.2,
+          ),
+        ),
+        style: TextButton.styleFrom(
+          foregroundColor: muted,
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+      ),
+    );
   }
-  final n = data.name.trim();
-  if (n.isEmpty) return '';
-  final lower = n.toLowerCase();
-  final circuitWord = lower.indexOf(' circuit');
-  if (circuitWord > 2) {
-    return n.substring(0, circuitWord).trim();
-  }
-  return n;
 }
 
 /// Loads `assets/data/circuits/{circuitAssetId}.json` and shows [CircuitDetailView].
@@ -71,6 +93,9 @@ class _CircuitPageState extends State<CircuitPage> {
   /// (important for web and nested shells). [rootBundle] alone can miss assets in some setups.
   Future<CircuitData?>? _loadFuture;
 
+  /// Active pointers on the embedded map (pinch/drag); pauses parent [ListView] scroll.
+  int _circuitMapActivePointers = 0;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -82,6 +107,7 @@ class _CircuitPageState extends State<CircuitPage> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.circuitAssetId != widget.circuitAssetId) {
       _loadFuture = _load(DefaultAssetBundle.of(context));
+      _circuitMapActivePointers = 0;
     }
   }
 
@@ -123,7 +149,7 @@ class _CircuitPageState extends State<CircuitPage> {
         body: _CircuitPageSurface(
           child: Padding(
             padding: _bodyPaddingUnderTransparentAppBar(context),
-            child: const Center(child: CircularProgressIndicator()),
+            child: const HubGlassPageLoadingPlaceholder(),
           ),
         ),
       );
@@ -139,7 +165,7 @@ class _CircuitPageState extends State<CircuitPage> {
             body: _CircuitPageSurface(
               child: Padding(
                 padding: _bodyPaddingUnderTransparentAppBar(context),
-                child: const Center(child: CircularProgressIndicator()),
+                child: const HubGlassPageLoadingPlaceholder(),
               ),
             ),
           );
@@ -171,45 +197,60 @@ class _CircuitPageState extends State<CircuitPage> {
         }
 
         final mapPlacement = CircuitMapPlacement.resolve(data);
-        final openMapsLat = data.latitude ?? mapPlacement?.center.latitude;
-        final openMapsLng = data.longitude ?? mapPlacement?.center.longitude;
-
         if (mapPlacement != null) {
+          final bottomPad = MediaQuery.paddingOf(context).bottom;
           return Scaffold(
             backgroundColor: Colors.transparent,
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
-                  child: CircuitEmbeddedMap(
-                    placement: mapPlacement,
-                    title: data.name.isNotEmpty
-                        ? data.name
-                        : data.circuitId,
-                    circuitId: data.circuitId,
-                    onBack: () => _popCircuitRoute(context),
+                SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: _kCircuitSlugBackRowPadding,
+                    child: _CircuitBackToCircuitsLink(
+                      onPressed: () => _popCircuitRoute(context),
+                    ),
                   ),
                 ),
                 Expanded(
-                  child: CircuitDetailView(
-                    data: data,
-                    showTitleHeader: false,
-                    useAppBarTopInset: false,
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-                    onOpenInMaps:
-                        openMapsLat != null && openMapsLng != null
-                        ? () => launchCircuitMaps(
-                            latitude: openMapsLat,
-                            longitude: openMapsLng,
-                            label: data.name.isNotEmpty
-                                ? data.name
-                                : data.circuitId,
-                          )
-                        : null,
-                    belowLocationAction: CircuitWeekendHubActionPill(
+                  child: SafeArea(
+                    top: false,
+                    bottom: false,
+                    child: CircuitDetailView(
+                      data: data,
                       circuitAssetId: widget.circuitAssetId,
-                      venueLabel: weekendHubVenueLabelForCircuit(data),
+                      showTitleHeader: false,
+                      useAppBarTopInset: false,
+                      padding: _kCircuitSlugContentPadding,
+                      listPhysics: _circuitMapActivePointers > 0
+                          ? const NeverScrollableScrollPhysics()
+                          : null,
+                      scrollableAppend: Listener(
+                        behavior: HitTestBehavior.translucent,
+                        onPointerDown: (_) {
+                          setState(() => _circuitMapActivePointers++);
+                        },
+                        onPointerUp: (_) {
+                          setState(() {
+                            _circuitMapActivePointers =
+                                (_circuitMapActivePointers - 1).clamp(0, 32);
+                          });
+                        },
+                        onPointerCancel: (_) {
+                          setState(() {
+                            _circuitMapActivePointers =
+                                (_circuitMapActivePointers - 1).clamp(0, 32);
+                          });
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.only(bottom: bottomPad + 6),
+                          child: CircuitEmbeddedMap(
+                            placement: mapPlacement,
+                            circuitId: data.circuitId,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -221,25 +262,28 @@ class _CircuitPageState extends State<CircuitPage> {
         return Scaffold(
           extendBodyBehindAppBar: true,
           backgroundColor: Colors.transparent,
-          appBar: _ambientAppBar(context, title: ''),
-          body: CircuitDetailView(
-            data: data,
-            showTitleHeader: true,
-            useAppBarTopInset: true,
-            onOpenInMaps:
-                data.latitude != null && data.longitude != null
-                ? () => launchCircuitMaps(
-                    latitude: data.latitude!,
-                    longitude: data.longitude!,
-                    label: data.name.isNotEmpty
-                        ? data.name
-                        : data.circuitId,
-                  )
-                : null,
-            belowLocationAction: CircuitWeekendHubActionPill(
-              circuitAssetId: widget.circuitAssetId,
-              venueLabel: weekendHubVenueLabelForCircuit(data),
-            ),
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: _kCircuitSlugBackRowPadding,
+                  child: _CircuitBackToCircuitsLink(
+                    onPressed: () => _popCircuitRoute(context),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: CircuitDetailView(
+                  data: data,
+                  circuitAssetId: widget.circuitAssetId,
+                  showTitleHeader: true,
+                  useAppBarTopInset: false,
+                  padding: _kCircuitSlugContentPadding,
+                ),
+              ),
+            ],
           ),
         );
       },

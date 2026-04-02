@@ -1,4 +1,4 @@
-﻿{
+{
     "circuit_id":  "marina_bay_circuit",
     "name":  "Marina Bay Street Circuit",
     "location":  "Singapore",
@@ -16,8 +16,13 @@
                                                "elevation_sea_level_m":  0,
                                                "max_elevation_change_m":  3.8,
                                                "tyre_physics":  {
-                                                                    "asphalt_grip_score":  6,
-                                                                    "lateral_stress_score":  7
+                                                                    "traction_score":  3,
+                                                                    "tyre_stress_score":  3,
+                                                                    "asphalt_grip_score":  3,
+                                                                    "braking_score":  3,
+                                                                    "asphalt_abrasion_score":  3,
+                                                                    "lateral_score":  3,
+                                                                    "track_evolution_score":  3
                                                                 },
                                                "tyre_working_window_c":  122,
                                                "wind_sensitivity_sector":  "None",

@@ -8,6 +8,7 @@ import '../display_settings_controller.dart';
 import '../theme/f1_ui_theme.dart';
 import '../theme/hub_list_card_style.dart';
 import 'f1_module.dart';
+import 'hub_interactive_glass.dart';
 
 /// Shared glass / simple shell for Circuits, Driver standings, and Team rows.
 ///
@@ -101,12 +102,15 @@ class HubListRowShell extends StatelessWidget {
                 }
                 return Material(
                   color: Colors.transparent,
-                  child: InkWell(
-                    onTap: onTap,
-                    borderRadius: BorderRadius.circular(
-                      HubListCardStyle.shellBorderRadius,
+                  child: HubInteractiveGlass(
+                    borderRadius: HubListCardStyle.shellBorderRadius,
+                    child: InkWell(
+                      onTap: onTap,
+                      borderRadius: BorderRadius.circular(
+                        HubListCardStyle.shellBorderRadius,
+                      ),
+                      child: padded,
                     ),
-                    child: padded,
                   ),
                 );
               },

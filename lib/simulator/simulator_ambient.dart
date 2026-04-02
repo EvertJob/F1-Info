@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// Soft gradient behind simulator scaffold (replaces missing hub ambient widget).
+import '../widgets/hub_ambient_backdrop.dart';
+
+/// Stacks [HubAmbientBackdrop] (blur orbs) behind simulator content.
 class SimulatorAmbientBackdrop extends StatelessWidget {
   const SimulatorAmbientBackdrop({super.key, required this.child});
 
@@ -8,19 +10,12 @@ class SimulatorAmbientBackdrop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            scheme.primaryContainer.withValues(alpha: 0.22),
-            scheme.surface,
-          ],
-        ),
-      ),
-      child: child,
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        const HubAmbientBackdrop(),
+        child,
+      ],
     );
   }
 }

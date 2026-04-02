@@ -282,9 +282,11 @@
   "best_tyre_combination": "Beste bandencombinatie",
   "cfield_air_pressure_hpa": "Luchtdruk",
   "cfield_asphalt_grip_score": "Gripscore asfalt",
+  "cfield_asphalt_abrasion_score": "Asfaltabrasie",
   "cfield_avg_g_force": "Gemiddelde G-kracht",
   "cfield_avg_time_2024_2025": "Gemiddelde rondetijd (2024–25)",
   "cfield_brake_cooling_requirement_score": "Score remkoeling",
+  "cfield_braking_score": "Rembelasting",
   "cfield_circuit_director": "Circuitdirecteur",
   "cfield_circuit_owner": "Circuiteigenaar",
   "cfield_contract_until": "Contract tot",
@@ -303,6 +305,11 @@
   "cfield_local_time_zone": "Lokale tijdzone",
   "cfield_longitude": "Lengtegraad",
   "cfield_lap_record_detail": "Ronderecord",
+  "circuit_hero_lap_record_by_prefix": "Ronderecord door ",
+  "circuits_hero_stat_length": "LENGTE",
+  "circuits_hero_stat_laps": "RONDEN",
+  "circuits_hero_stat_top_speed": "TOPSNELHEID",
+  "circuits_hero_stat_lap_record": "RONDERECORD",
   "cfield_laps": "Ronden",
   "cfield_lateral_stress_score": "Laterale stressscore",
   "cfield_length": "Lengte",
@@ -328,11 +335,13 @@
   "cfield_sun_angle_start": "Zonnestand bij start",
   "cfield_t1_accident_risk": "Crashrisico bocht 1",
   "cfield_temperature_c": "Temperatuur",
+  "cfield_traction_score": "Tractievraag",
   "cfield_top_speed": "Topsnelheid",
   "cfield_top_speed_delta": "Delta topsnelheid",
   "cfield_track_evolution": "Baanevolutie",
   "cfield_track_type": "Baantype",
   "cfield_tyre_physics": "Bandenfysica",
+  "cfield_tyre_stress_score": "Bandstress",
   "cfield_tyre_working_window_c": "Werkvenster banden",
   "cfield_undercut_potential_score": "Undercut-potentieel",
   "cfield_utc_offset": "UTC-offset",
@@ -377,6 +386,9 @@
   "circuit_difficulty": "Circuit moeilijkheid",
   "circuit_difficulty_l10n": "Moeilijkheidsgraad circuit",
   "circuit_go_home": "Terug naar home",
+  "circuit_back_to_circuits": "Terug naar circuits",
+  "hub_back_to_drivers": "Terug naar coureurs",
+  "hub_back_to_constructors": "Terug naar constructeurs",
   "circuit_info": "Circuit info",
   "circuit_layout": "Circuit lay-out",
   "circuit_not_found_message": "Er zijn geen circuitgegevens voor dit adres. Controleer de link of kies een race in de kalender.",
@@ -393,9 +405,90 @@
   },
   "circuit_weekend_hub_no_data_tooltip": "Nog geen sessiedata beschikbaar.",
   "circuits": "Circuits",
+  "circuits_catalog_season_subtitle": "{count} circuits · seizoen {seasonYear}",
+  "@circuits_catalog_season_subtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "seasonYear": {
+        "type": "int"
+      }
+    }
+  },
+  "circuits_stat_km": "KM",
+  "circuits_stat_laps": "RONDEN",
+  "circuits_stat_kmh": "KM/U",
+  "circuits_catalog_load_error": "Circuitgegevens konden niet worden geladen.",
+  "race_calendar_title": "Racekalender",
+  "race_calendar_subtitle": "{total} races · {completed} afgerond",
+  "@race_calendar_subtitle": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "completed": {
+        "type": "int"
+      }
+    }
+  },
+  "race_calendar_season_progress": "Seizoensvoortgang",
+  "race_calendar_progress_fraction": "{completed}/{total} races",
+  "@race_calendar_progress_fraction": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "race_calendar_status_completed": "AFGEROND",
+  "race_calendar_status_next": "VOLGENDE",
+  "calendar_search_hint": "Zoek races…",
+  "calendar_nav": "Kalender",
   "city": "Stad",
   "clear_cache": "Cache legen",
   "close": "Sluiten",
+  "constructor_standings_title": "Constructeursstand",
+  "constructor_standings_subtitle": "Kampioenschap seizoen {year}",
+  "@constructor_standings_subtitle": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "constructor_team_driver_count": "{count} coureurs",
+  "@constructor_team_driver_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "constructor_driver_points_short": "{points} ptn",
+  "@constructor_driver_points_short": {
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "driver_standings_title": "Coureursstand",
+  "driver_standings_subtitle": "Kampioenschap seizoen {year}",
+  "hub_search_driver_hint": "Zoek coureurs of teams...",
+  "hub_search_drivers_empty": "Geen coureurs gevonden voor je zoekopdracht",
+  "hub_search_circuits_hint": "Zoek circuits, Grands Prix of landen...",
+  "hub_search_circuits_empty": "Geen circuits gevonden voor je zoekopdracht",
+  "@driver_standings_subtitle": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
   "compare": "Vergelijken",
   "compare_overall": "Overall",
   "compare_season": "Per seizoen",
@@ -775,29 +868,25 @@
   "nat_spanish": "Spaans",
   "nat_thai": "Thais",
   "nationality": "Nationaliteit",
-  "news_empty": "Geen artikelen op dit moment. Trek om te vernieuwen.",
-  "news_feed_section_empty": "Geen artikelen uit deze feed.",
-  "news_load_error": "Kon nieuws niet laden: {error}",
-  "@news_load_error": {
+  "hub_nav_menu": "Menu openen",
+  "simulator_share_og_title": "F1 Hub — {username}",
+  "@simulator_share_og_title": {
     "placeholders": {
-      "error": {
+      "username": {
         "type": "String"
       }
     }
   },
-  "news_nav": "Nieuws",
-  "news_settings_add": "Toevoegen",
-  "news_settings_drag_to_reorder": "Sleep om de volgorde van feeds te wijzigen",
-  "news_settings_duplicate_url": "Deze URL staat al in je lijst.",
-  "news_settings_invalid_url": "Voer een geldige http(s)-URL in.",
-  "news_settings_no_feeds": "Nog geen feeds. Voeg hierboven een URL toe.",
-  "news_settings_save_failed": "Opslaan mislukt. Probeer opnieuw.",
-  "news_settings_stream_error": "Kon profiel-updates niet ontvangen.",
-  "news_settings_subtitle": "Voeg RSS- of Atom-URL''s toe. Ze worden op het tabblad Nieuws geladen (nieuwste eerst).",
-  "news_settings_title": "Nieuwsfeeds",
-  "news_settings_url_hint": "https://voorbeeld.nl/feed.xml",
-  "news_settings_your_feeds": "Jouw feeds",
-  "news_title": "F1 Nieuws",
+  "simulator_share_og_description": "Bekijk de F1-voorspellingen van {username} op F1 Hub.",
+  "@simulator_share_og_description": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "live_timing_waiting_first_frame": "Wachten op eerste timing-frame…",
+  "live_timing_waiting_green_flag": "Wachten op RACE STARTED (groene vlag)…",
   "next_race": "Volgende race",
   "no_data_yet": "Data nog niet beschikbaar of API is nog niet geüpdatet",
   "no_finish_data": "Geen finishdata",
@@ -847,6 +936,7 @@
   "previous_teams": "Teams",
   "previous_winners": "Eerdere winnaars",
   "profile": "Profiel",
+  "nav_legal": "Juridisch",
   "pts": "PNT",
   "q1_out": "Q1 uit",
   "q2_out": "Q2 uit",
@@ -1063,6 +1153,12 @@
   "weekend_hub_penalties_filter_empty": "Geen straf- of onderzoeksmeldingen voor deze sessie.",
   "weekend_hub_spot_placeholder_title": "Live radar & DRS",
   "weekend_hub_spot_placeholder_body": "Weerradar, regen op het circuit en een DRS-zonesoverzicht verschijnen hier in een toekomstige update.",
+  "weekend_hub_back_to_calendar": "Terug naar kalender",
+  "weekend_hub_weather_air": "Lucht",
+  "weekend_hub_weather_track": "Circuit",
+  "weekend_hub_no_weather_data": "Geen weergegevens beschikbaar.",
+  "weekend_hub_live_preview": "Snelle tussenstand",
+  "weekend_hub_view_full_results": "Volledige uitslagen",
   "weekend_schedule": "Weekend schema",
   "weeks": "weken",
   "win_rate": "Winrate %",
@@ -1152,6 +1248,8 @@
     }
   },
   "simulator_share_error_load": "Gedeelde voorspellingen laden is mislukt. Gebruik je eigen Supabase? Voer sql/add_simulator_share_rpcs.sql uit (functie get_shared_predictions) en probeer opnieuw.",
+  "simulator_network_timeout": "De server deed er te lang over. Controleer je verbinding en probeer opnieuw.",
+  "simulator_calendar_unavailable": "Kalender of coureurslijst ontbreekt. Herstart de app na een update.",
   "simulator_share_local_preview": "Alleen voorbeeld vanaf dit apparaat — open Gedeelde stand ingelogd zodat je keuzes naar de cloud gaan voor anderen.",
   "simulator_steward_coming": "Stewards (straffen / status) — volgende iteratie",
   "simulator_round": "R{round}",
@@ -1185,5 +1283,22 @@
         "type": "int"
       }
     }
-  }
+  },
+  "simulator_back_to_dashboard": "Terug naar dashboard",
+  "simulator_tab_predictions": "Voorspellingen",
+  "simulator_tab_full_grid": "Volledig rooster",
+  "simulator_tab_steward": "Stewards",
+  "simulator_hero_season": "Seizoen {year}-simulatie",
+  "@simulator_hero_season": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "simulator_simulate": "Simuleer",
+  "simulator_probability": "Waarschijnlijkheid",
+  "simulator_chart_team_title": "Constructeurspunten",
+  "simulator_chart_team_hint": "Officiële uitslagen — tik om te vergroten",
+  "simulator_chart_empty": "Constructeurstrends verschijnen zodra raceuitslagen beschikbaar zijn."
 }

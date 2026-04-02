@@ -30,7 +30,9 @@ Future<void> main(List<String> arguments) async {
     var parts = yearArg.split('-');
     int start = int.parse(parts[0]);
     int end = int.parse(parts[1]);
-    for (var y = start; y <= end; y++) yearsToFetch.add(y.toString());
+    for (var y = start; y <= end; y++) {
+      yearsToFetch.add(y.toString());
+    }
   } else {
     yearsToFetch.add(yearArg);
   }

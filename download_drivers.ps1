@@ -1,5 +1,5 @@
 # f1_download_2026_v8_final_grid.ps1
-$dir = "C:\Users\evert\f1\assets\images\drivers"
+$dir = "C:\Users\evert\f1\images\drivers"
 if (!(Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force }
 
 # slug | server_mapnaam | driver_id | team_prefix_voor_bestand

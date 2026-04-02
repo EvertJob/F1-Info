@@ -1,4 +1,4 @@
-﻿{
+{
     "circuit_id":  "imola_circuit",
     "name":  "Autodromo Enzo e Dino Ferrari",
     "location":  "Imola, Italy",
@@ -16,8 +16,13 @@
                                                "elevation_sea_level_m":  37,
                                                "max_elevation_change_m":  33.3,
                                                "tyre_physics":  {
-                                                                    "asphalt_grip_score":  7,
-                                                                    "lateral_stress_score":  7
+                                                                    "traction_score":  3,
+                                                                    "tyre_stress_score":  3,
+                                                                    "asphalt_grip_score":  3,
+                                                                    "braking_score":  3,
+                                                                    "asphalt_abrasion_score":  3,
+                                                                    "lateral_score":  3,
+                                                                    "track_evolution_score":  3
                                                                 },
                                                "tyre_working_window_c":  105,
                                                "wind_sensitivity_sector":  "S2",

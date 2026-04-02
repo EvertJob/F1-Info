@@ -1,4 +1,4 @@
-﻿{
+{
     "circuit_id":  "suzuka_circuit",
     "name":  "Suzuka Circuit",
     "location":  "Suzuka, Japan",
@@ -16,8 +16,13 @@
                                                "elevation_sea_level_m":  45,
                                                "max_elevation_change_m":  40.4,
                                                "tyre_physics":  {
-                                                                    "asphalt_grip_score":  9,
-                                                                    "lateral_stress_score":  10
+                                                                    "traction_score":  3,
+                                                                    "tyre_stress_score":  5,
+                                                                    "asphalt_grip_score":  4,
+                                                                    "braking_score":  2,
+                                                                    "asphalt_abrasion_score":  3,
+                                                                    "lateral_score":  5,
+                                                                    "track_evolution_score":  4
                                                                 },
                                                "tyre_working_window_c":  115,
                                                "wind_sensitivity_sector":  "S1",

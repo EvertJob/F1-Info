@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -21,6 +22,11 @@ class SimulatorSyncService {
   static final SimulatorSyncService instance = SimulatorSyncService._();
 
   static const int _seasonYear = 2026;
+
+  /// [SharedPredictionsLoadResult.backendError] sentinel when the network stalls (web / RPC hang).
+  static const String backendErrorTimedOut = 'SIMULATOR_SYNC_TIMEOUT';
+
+  static const Duration _networkTimeout = Duration(seconds: 20);
 
   static const String _kDraftKeyV1 = 'championship_simulator_draft_v1';
   static const String _kDraftKeyV2 = 'championship_simulator_draft_v2';
@@ -94,9 +100,15 @@ class SimulatorSyncService {
           .from('user_predictions')
           .select('circuit_id, payload')
           .eq('user_id', user.id)
-          .eq('season_year', _seasonYear);
+          .eq('season_year', _seasonYear)
+          .timeout(_networkTimeout);
       final list = res as List;
       return list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    } on TimeoutException catch (e, st) {
+      if (kDebugMode) {
+        debugPrint('[SimulatorSync] pullPredictions timeout: $e\n$st');
+      }
+      return [];
     } catch (e, st) {
       if (kDebugMode) {
         debugPrint('[SimulatorSync] pullPredictions: $e\n$st');
@@ -143,10 +155,12 @@ class SimulatorSyncService {
 
     String? rpcFailure;
     try {
-      final res = await _client.rpc(
-        'get_shared_predictions',
-        params: {'p_username': normalizeShareHandle(u)},
-      );
+      final res = await _client
+          .rpc(
+            'get_shared_predictions',
+            params: {'p_username': normalizeShareHandle(u)},
+          )
+          .timeout(_networkTimeout);
       if (res != null) {
         final list = res as List;
         final rows =
@@ -155,6 +169,11 @@ class SimulatorSyncService {
           return SharedPredictionsLoadResult(rows: rows);
         }
       }
+    } on TimeoutException catch (e, st) {
+      if (kDebugMode) {
+        debugPrint('[SimulatorSync] get_shared_predictions timeout: $e\n$st');
+      }
+      rpcFailure = backendErrorTimedOut;
     } catch (e, st) {
       if (kDebugMode) {
         debugPrint('[SimulatorSync] get_shared_predictions: $e\n$st');

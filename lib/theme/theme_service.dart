@@ -17,7 +17,7 @@ final class ThemeService {
   Future<({int schemeIndex, bool isDark})> load() async {
     final prefs = await SharedPreferences.getInstance();
     final schemeIndex = prefs.getInt(_keySchemeIndex) ?? F1TeamSchemes.defaultIndex;
-    final isDark = prefs.getBool(_keyIsDark) ?? false;
+    final isDark = prefs.getBool(_keyIsDark) ?? true;
 
     return (
       schemeIndex: schemeIndex.clamp(0, F1TeamSchemes.count - 1),

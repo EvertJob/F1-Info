@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 
 import '../theme/f1_theme_tokens.dart';
 import '../theme/f1_ui_theme.dart';
+import '../theme/hub_visual_language.dart';
 import '../utils/l10n_extension.dart';
+import 'constructor_hub_theme.dart';
 import 'f1_module.dart';
 
 /// Project-wide horizontal inset for shell content and the app header, before
@@ -57,6 +59,7 @@ class F1HubAppHeader extends StatelessWidget {
   const F1HubAppHeader({
     required this.isDesktopLayout,
     this.trailing,
+    this.hubCockpitDark = false,
     super.key,
   });
 
@@ -65,6 +68,9 @@ class F1HubAppHeader extends StatelessWidget {
   final bool isDesktopLayout;
 
   final Widget? trailing;
+
+  /// Flat near-black strip for dark “cockpit” shell (matches hub rail).
+  final bool hubCockpitDark;
 
   @override
   Widget build(BuildContext context) {
@@ -81,10 +87,13 @@ class F1HubAppHeader extends StatelessWidget {
     final f1Ui =
         Theme.of(context).extension<F1UiTheme>() ?? F1UiTheme.fallback();
     final tokens = Theme.of(context).extension<F1ThemeTokens>();
-    final panelStrong = tokens?.panelStrong ?? scheme.surfaceContainerHighest;
-    final outlineColor =
-        tokens?.outline.withValues(alpha: 0.7) ??
-        Colors.grey.withValues(alpha: 0.7);
+    final panelStrong = hubCockpitDark
+        ? ConstructorHubColors.surface
+        : (tokens?.panelStrong ?? scheme.surfaceContainerHighest);
+    final outlineColor = hubCockpitDark
+        ? ConstructorHubColors.border
+        : (tokens?.outline.withValues(alpha: 0.7) ??
+            Colors.grey.withValues(alpha: 0.7));
     final width = MediaQuery.sizeOf(context).width;
     final titleSize = _f1HubTitleFontSize(width);
     final innerV = _f1HubTitleVerticalPadding(width);
@@ -104,13 +113,12 @@ class F1HubAppHeader extends StatelessWidget {
     final title = Text(
       context.l10n.app_title.toUpperCase(),
       textAlign: TextAlign.center,
-      style: TextStyle(
-        fontFamily: 'TitilliumWeb',
+      style: HubVisualLanguage.f1Wide(
+        context,
         fontSize: titleSize,
         fontWeight: FontWeight.w800,
-        letterSpacing: 1.1 + titleSize * 0.02,
-        height: 1.05,
         color: scheme.onSurface,
+        height: 1.05,
       ),
     );
 
@@ -133,7 +141,7 @@ class F1HubAppHeader extends StatelessWidget {
             ),
     );
 
-    if (f1Ui.glassBlur > 0) {
+    if (!hubCockpitDark && f1Ui.glassBlur > 0) {
       bar = ClipRRect(
         borderRadius: radius,
         child: BackdropFilter(
@@ -148,7 +156,7 @@ class F1HubAppHeader extends StatelessWidget {
       bar = ClipRRect(borderRadius: radius, child: bar);
     }
 
-    if (f1Ui.showFadingBorder) {
+    if (!hubCockpitDark && f1Ui.showFadingBorder) {
       bar = Stack(
         clipBehavior: Clip.none,
         children: [

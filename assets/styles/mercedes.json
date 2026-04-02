@@ -1,0 +1,55 @@
+{
+  "team_id": "mercedes",
+  "team_name": "Mercedes-AMG Petronas F1 Team",
+  "theme": {
+    "colors": {
+      "primary": "#00A19B",
+      "secondary": "#C0C0C8",
+      "accent": "#FFFFFF",
+      "background_start": "#E8F7F6",
+      "background_end": "#F2FAF9",
+      "header_glow": "#5EEAD4",
+      "bg_gradient": ["#D8F2F0", "#F4FAFA", "#E8F4FC"]
+    },
+    "glass": {
+      "blur_sigma": 12.0,
+      "opacity": 0.05,
+      "border_width": 0.8,
+      "card_blur_sigma": 22.0
+    },
+    "layout": {
+      "card_padding": 16.0,
+      "card_border_radius": 20.0,
+      "card_margin_vertical": 20.0,
+      "header_height": 65.0,
+      "show_team_stripe": true,
+      "stripe_height": 4.0
+    },
+    "typography": {
+      "font_family": "Inter",
+      "title_letter_spacing": 0.14,
+      "uppercase_headers": true
+    },
+    "header_title": "F1 HUB",
+    "header_nav": [
+      "F1 HUB",
+      "CIRCUITS",
+      "DRIVERS",
+      "TEAMS",
+      "NEWS",
+      "STANDINGS"
+    ],
+    "assets": {
+      "car_image": "assets/images/cars/mercedes-2026.png",
+      "logo_minimal": "assets/images/teams/mercedes.png"
+    },
+    "aero_effect": {
+      "line_count": 8,
+      "line_opacity": 0.12,
+      "stroke_width": 1.0,
+      "curviness": 0.5,
+      "animate": true,
+      "card_grid_opacity": 0.05
+    }
+  }
+}

@@ -1,4 +1,4 @@
-﻿{
+{
     "circuit_id":  "shanghai_international",
     "name":  "Shanghai International Circuit",
     "location":  "Shanghai, China",
@@ -16,8 +16,13 @@
                                                "elevation_sea_level_m":  5,
                                                "max_elevation_change_m":  7.4,
                                                "tyre_physics":  {
-                                                                    "asphalt_grip_score":  8,
-                                                                    "lateral_stress_score":  9
+                                                                    "traction_score":  3,
+                                                                    "tyre_stress_score":  4,
+                                                                    "asphalt_grip_score":  3,
+                                                                    "braking_score":  4,
+                                                                    "asphalt_abrasion_score":  2,
+                                                                    "lateral_score":  4,
+                                                                    "track_evolution_score":  4
                                                                 },
                                                "tyre_working_window_c":  110,
                                                "wind_sensitivity_sector":  "S3",

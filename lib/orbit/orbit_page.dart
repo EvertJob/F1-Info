@@ -9,11 +9,13 @@ import 'package:f1/orbit/orbit_prefs.dart';
 import 'package:f1/orbit/orbit_technical_models.dart';
 import 'package:f1/orbit/orbit_technical_stats.dart';
 import 'package:go_router/go_router.dart';
+import 'package:f1/theme/hub_modal_overlays.dart';
 import 'package:f1/theme/f1_theme_tokens.dart';
 import 'package:f1/theme/f1_ui_theme.dart';
 import 'package:f1/utils/l10n_extension.dart';
 import 'package:f1/widgets/f1_elevation_chart.dart';
 import 'package:f1/widgets/f1_module.dart';
+import 'package:f1/widgets/hub_glass_chart_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
@@ -469,56 +471,65 @@ class _OrbitPageState extends State<OrbitPage>
 
   void _openCircuitList() {
     final scheme = Theme.of(context).colorScheme;
-    showModalBottomSheet<void>(
+    hubShowModalBottomSheetWithBlurBarrier<void>(
       context: context,
       isScrollControlled: true,
-      showDragHandle: true,
-      backgroundColor: scheme.surface,
+      enableDrag: true,
       builder: (ctx) {
-        return DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.55,
-          minChildSize: 0.35,
-          maxChildSize: 0.92,
-          builder: (context, scrollController) {
-            return ListView.separated(
-              controller: scrollController,
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-              itemCount: _locations.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 10),
-              itemBuilder: (context, i) {
-                final c = _locations[i];
-                final selected = c.id == _selectedId;
-                return Material(
-                  color: scheme.surfaceContainerHighest.withValues(
-                    alpha: selected ? 0.9 : 0.65,
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                  child: ListTile(
-                    title: Text(
-                      c.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: scheme.onSurface,
+        return SizedBox.expand(
+          child: DraggableScrollableSheet(
+            expand: false,
+            initialChildSize: 0.55,
+            minChildSize: 0.35,
+            maxChildSize: 0.92,
+            builder: (context, scrollController) {
+              return Material(
+                color: scheme.surface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: ListView.separated(
+                  controller: scrollController,
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                  itemCount: _locations.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 10),
+                  itemBuilder: (context, i) {
+                    final c = _locations[i];
+                    final selected = c.id == _selectedId;
+                    return Material(
+                      color: scheme.surfaceContainerHighest.withValues(
+                        alpha: selected ? 0.9 : 0.65,
                       ),
-                    ),
-                    subtitle: Text(
-                      c.location,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: Icon(
-                      Icons.chevron_right_rounded,
-                      color: scheme.primary,
-                    ),
-                    onTap: () => _selectCircuit(c),
-                  ),
-                );
-              },
-            );
-          },
+                      borderRadius: BorderRadius.circular(14),
+                      child: ListTile(
+                        title: Text(
+                          c.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: scheme.onSurface,
+                          ),
+                        ),
+                        subtitle: Text(
+                          c.location,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: Icon(
+                          Icons.chevron_right_rounded,
+                          color: scheme.primary,
+                        ),
+                        onTap: () => _selectCircuit(c),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
         );
       },
     );
@@ -866,11 +877,9 @@ class _OrbitPageState extends State<OrbitPage>
     final f1PinkDeep = Color.lerp(f1Pink, const Color(0xFF0A0A0A), 0.22)!;
     final markerNeonGlow =
         Color.lerp(f1Pink, const Color(0xFF050505), 0.38)!.withValues(alpha: 0.52);
-    final desktopShell = MediaQuery.sizeOf(context).width >= 600;
-
     if (_error != null) {
       return Scaffold(
-        backgroundColor: desktopShell ? Colors.transparent : null,
+        backgroundColor: Colors.transparent,
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -886,8 +895,8 @@ class _OrbitPageState extends State<OrbitPage>
 
     if (!_ready) {
       return Scaffold(
-        backgroundColor: desktopShell ? Colors.transparent : null,
-        body: const Center(child: CircularProgressIndicator()),
+        backgroundColor: Colors.transparent,
+        body: const HubGlassPageLoadingPlaceholder(),
       );
     }
 
@@ -924,7 +933,7 @@ class _OrbitPageState extends State<OrbitPage>
         techMapStyle;
 
     return Scaffold(
-      backgroundColor: desktopShell ? Colors.transparent : null,
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Stack(
           fit: StackFit.expand,

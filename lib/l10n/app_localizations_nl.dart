@@ -295,6 +295,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get cfield_asphalt_grip_score => 'Gripscore asfalt';
 
   @override
+  String get cfield_asphalt_abrasion_score => 'Asfaltabrasie';
+
+  @override
   String get cfield_avg_g_force => 'Gemiddelde G-kracht';
 
   @override
@@ -302,6 +305,9 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get cfield_brake_cooling_requirement_score => 'Score remkoeling';
+
+  @override
+  String get cfield_braking_score => 'Rembelasting';
 
   @override
   String get cfield_circuit_director => 'Circuitdirecteur';
@@ -358,7 +364,25 @@ class AppLocalizationsNl extends AppLocalizations {
   String get cfield_lap_record_detail => 'Ronderecord';
 
   @override
+  String get circuit_hero_lap_record_by_prefix => 'Ronderecord door ';
+
+  @override
+  String get circuits_hero_stat_length => 'LENGTE';
+
+  @override
+  String get circuits_hero_stat_laps => 'RONDEN';
+
+  @override
+  String get circuits_hero_stat_top_speed => 'TOPSNELHEID';
+
+  @override
+  String get circuits_hero_stat_lap_record => 'RONDERECORD';
+
+  @override
   String get cfield_laps => 'Ronden';
+
+  @override
+  String get cfield_lateral_score => 'Lateral load';
 
   @override
   String get cfield_lateral_stress_score => 'Laterale stressscore';
@@ -433,6 +457,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get cfield_temperature_c => 'Temperatuur';
 
   @override
+  String get cfield_traction_score => 'Tractievraag';
+
+  @override
   String get cfield_top_speed => 'Topsnelheid';
 
   @override
@@ -446,6 +473,9 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get cfield_tyre_physics => 'Bandenfysica';
+
+  @override
+  String get cfield_tyre_stress_score => 'Bandstress';
 
   @override
   String get cfield_tyre_working_window_c => 'Werkvenster banden';
@@ -622,6 +652,51 @@ class AppLocalizationsNl extends AppLocalizations {
   String get circuits => 'Circuits';
 
   @override
+  String circuits_catalog_season_subtitle(int count, int seasonYear) {
+    return '$count circuits · seizoen $seasonYear';
+  }
+
+  @override
+  String get circuits_stat_km => 'KM';
+
+  @override
+  String get circuits_stat_laps => 'RONDEN';
+
+  @override
+  String get circuits_stat_kmh => 'KM/U';
+
+  @override
+  String get circuits_catalog_load_error => 'Circuitgegevens konden niet worden geladen.';
+
+  @override
+  String get race_calendar_title => 'Racekalender';
+
+  @override
+  String race_calendar_subtitle(int total, int completed) {
+    return '$total races · $completed afgerond';
+  }
+
+  @override
+  String get race_calendar_season_progress => 'Seizoensvoortgang';
+
+  @override
+  String race_calendar_progress_fraction(int completed, int total) {
+    return '$completed/$total races';
+  }
+
+  @override
+  String get race_calendar_status_completed => 'AFGEROND';
+
+  @override
+  String get race_calendar_status_next => 'VOLGENDE';
+
+  @override
+  String get calendar_search_hint => 'Zoek races…';
+
+  @override
+  String get calendar_nav => 'Kalender';
+
+  @override
   String get city => 'Stad';
 
   @override
@@ -629,6 +704,44 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get close => 'Sluiten';
+
+  @override
+  String get constructor_standings_title => 'Constructeursstand';
+
+  @override
+  String constructor_standings_subtitle(String year) {
+    return 'Kampioenschap seizoen $year';
+  }
+
+  @override
+  String constructor_team_driver_count(int count) {
+    return '$count coureurs';
+  }
+
+  @override
+  String constructor_driver_points_short(String points) {
+    return '$points ptn';
+  }
+
+  @override
+  String get driver_standings_title => 'Coureursstand';
+
+  @override
+  String driver_standings_subtitle(String year) {
+    return 'Kampioenschap seizoen $year';
+  }
+
+  @override
+  String get hub_search_driver_hint => 'Zoek coureurs of teams...';
+
+  @override
+  String get hub_search_drivers_empty => 'Geen coureurs gevonden voor je zoekopdracht';
+
+  @override
+  String get hub_search_circuits_hint => 'Zoek circuits, Grands Prix of landen...';
+
+  @override
+  String get hub_search_circuits_empty => 'Geen circuits gevonden voor je zoekopdracht';
 
   @override
   String get compare => 'Vergelijken';
@@ -1490,6 +1603,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get profile => 'Profiel';
 
   @override
+  String get nav_legal => 'Juridisch';
+
+  @override
   String get pts => 'PNT';
 
   @override
@@ -2005,6 +2121,24 @@ class AppLocalizationsNl extends AppLocalizations {
   String get weekend_hub_spot_placeholder_body => 'Weerradar, regen op het circuit en een DRS-zonesoverzicht verschijnen hier in een toekomstige update.';
 
   @override
+  String get weekend_hub_back_to_calendar => 'Terug naar kalender';
+
+  @override
+  String get weekend_hub_weather_air => 'Lucht';
+
+  @override
+  String get weekend_hub_weather_track => 'Circuit';
+
+  @override
+  String get weekend_hub_no_weather_data => 'Geen weergegevens beschikbaar.';
+
+  @override
+  String get weekend_hub_live_preview => 'Snelle tussenstand';
+
+  @override
+  String get weekend_hub_view_full_results => 'Volledige uitslagen';
+
+  @override
   String get weekend_schedule => 'Weekend schema';
 
   @override
@@ -2041,6 +2175,15 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get circuit_go_home => 'Terug naar home';
+
+  @override
+  String get circuit_back_to_circuits => 'Terug naar circuits';
+
+  @override
+  String get hub_back_to_drivers => 'Terug naar coureurs';
+
+  @override
+  String get hub_back_to_constructors => 'Terug naar constructeurs';
 
   @override
   String get circuit_not_found_message => 'Er zijn geen circuitgegevens voor dit adres. Controleer de link of kies een race in de kalender.';
@@ -2166,54 +2309,23 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String news_load_error(String error) {
-    return 'Kon nieuws niet laden: $error';
+  String get hub_nav_menu => 'Menu openen';
+
+  @override
+  String simulator_share_og_title(String username) {
+    return 'F1 Hub — $username';
   }
 
   @override
-  String get news_title => 'F1 Nieuws';
+  String simulator_share_og_description(String username) {
+    return 'Bekijk de F1-voorspellingen van $username op F1 Hub.';
+  }
 
   @override
-  String get news_nav => 'Nieuws';
+  String get live_timing_waiting_first_frame => 'Wachten op eerste timing-frame…';
 
   @override
-  String get news_empty => 'Geen artikelen op dit moment. Trek om te vernieuwen.';
-
-  @override
-  String get news_feed_section_empty => 'Geen artikelen uit deze feed.';
-
-  @override
-  String get news_settings_title => 'Nieuwsfeeds';
-
-  @override
-  String get news_settings_subtitle => 'Voeg RSS- of Atom-URL\'\'s toe. Ze worden op het tabblad Nieuws geladen (nieuwste eerst).';
-
-  @override
-  String get news_settings_url_hint => 'https://voorbeeld.nl/feed.xml';
-
-  @override
-  String get news_settings_add => 'Toevoegen';
-
-  @override
-  String get news_settings_your_feeds => 'Jouw feeds';
-
-  @override
-  String get news_settings_no_feeds => 'Nog geen feeds. Voeg hierboven een URL toe.';
-
-  @override
-  String get news_settings_invalid_url => 'Voer een geldige http(s)-URL in.';
-
-  @override
-  String get news_settings_duplicate_url => 'Deze URL staat al in je lijst.';
-
-  @override
-  String get news_settings_save_failed => 'Opslaan mislukt. Probeer opnieuw.';
-
-  @override
-  String get news_settings_stream_error => 'Kon profiel-updates niet ontvangen.';
-
-  @override
-  String get news_settings_drag_to_reorder => 'Sleep om de volgorde van feeds te wijzigen';
+  String get live_timing_waiting_green_flag => 'Wachten op RACE STARTED (groene vlag)…';
 
   @override
   String get orbit_nav => 'Orbit';
@@ -2422,6 +2534,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get simulator_share_error_load => 'Gedeelde voorspellingen laden is mislukt. Gebruik je eigen Supabase? Voer sql/add_simulator_share_rpcs.sql uit (functie get_shared_predictions) en probeer opnieuw.';
 
   @override
+  String get simulator_network_timeout => 'De server deed er te lang over. Controleer je verbinding en probeer opnieuw.';
+
+  @override
+  String get simulator_calendar_unavailable => 'Kalender of coureurslijst ontbreekt. Herstart de app na een update.';
+
+  @override
   String get simulator_share_local_preview => 'Alleen voorbeeld vanaf dit apparaat — open Gedeelde stand ingelogd zodat je keuzes naar de cloud gaan voor anderen.';
 
   @override
@@ -2466,4 +2584,36 @@ class AppLocalizationsNl extends AppLocalizations {
   String simulator_stats_line(int predPts, int gridPct, int p1Pct) {
     return '$predPts ptn · Rooster $gridPct% · P1 $p1Pct%';
   }
+
+  @override
+  String get simulator_back_to_dashboard => 'Terug naar dashboard';
+
+  @override
+  String get simulator_tab_predictions => 'Voorspellingen';
+
+  @override
+  String get simulator_tab_full_grid => 'Volledig rooster';
+
+  @override
+  String get simulator_tab_steward => 'Stewards';
+
+  @override
+  String simulator_hero_season(int year) {
+    return 'Seizoen $year-simulatie';
+  }
+
+  @override
+  String get simulator_simulate => 'Simuleer';
+
+  @override
+  String get simulator_probability => 'Waarschijnlijkheid';
+
+  @override
+  String get simulator_chart_team_title => 'Constructeurspunten';
+
+  @override
+  String get simulator_chart_team_hint => 'Officiële uitslagen — tik om te vergroten';
+
+  @override
+  String get simulator_chart_empty => 'Constructeurstrends verschijnen zodra raceuitslagen beschikbaar zijn.';
 }

@@ -591,6 +591,12 @@ abstract class AppLocalizations {
   /// **'Asphalt grip score'**
   String get cfield_asphalt_grip_score;
 
+  /// No description provided for @cfield_asphalt_abrasion_score.
+  ///
+  /// In en, this message translates to:
+  /// **'Asphalt abrasion'**
+  String get cfield_asphalt_abrasion_score;
+
   /// No description provided for @cfield_avg_g_force.
   ///
   /// In en, this message translates to:
@@ -608,6 +614,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Brake cooling requirement'**
   String get cfield_brake_cooling_requirement_score;
+
+  /// No description provided for @cfield_braking_score.
+  ///
+  /// In en, this message translates to:
+  /// **'Braking demand'**
+  String get cfield_braking_score;
 
   /// No description provided for @cfield_circuit_director.
   ///
@@ -717,11 +729,47 @@ abstract class AppLocalizations {
   /// **'Lap record'**
   String get cfield_lap_record_detail;
 
+  /// No description provided for @circuit_hero_lap_record_by_prefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Lap record by '**
+  String get circuit_hero_lap_record_by_prefix;
+
+  /// No description provided for @circuits_hero_stat_length.
+  ///
+  /// In en, this message translates to:
+  /// **'LENGTH'**
+  String get circuits_hero_stat_length;
+
+  /// No description provided for @circuits_hero_stat_laps.
+  ///
+  /// In en, this message translates to:
+  /// **'LAPS'**
+  String get circuits_hero_stat_laps;
+
+  /// No description provided for @circuits_hero_stat_top_speed.
+  ///
+  /// In en, this message translates to:
+  /// **'TOP SPEED'**
+  String get circuits_hero_stat_top_speed;
+
+  /// No description provided for @circuits_hero_stat_lap_record.
+  ///
+  /// In en, this message translates to:
+  /// **'LAP RECORD'**
+  String get circuits_hero_stat_lap_record;
+
   /// No description provided for @cfield_laps.
   ///
   /// In en, this message translates to:
   /// **'Laps'**
   String get cfield_laps;
+
+  /// No description provided for @cfield_lateral_score.
+  ///
+  /// In en, this message translates to:
+  /// **'Lateral load'**
+  String get cfield_lateral_score;
 
   /// No description provided for @cfield_lateral_stress_score.
   ///
@@ -867,6 +915,12 @@ abstract class AppLocalizations {
   /// **'Temperature'**
   String get cfield_temperature_c;
 
+  /// No description provided for @cfield_traction_score.
+  ///
+  /// In en, this message translates to:
+  /// **'Traction demand'**
+  String get cfield_traction_score;
+
   /// No description provided for @cfield_top_speed.
   ///
   /// In en, this message translates to:
@@ -896,6 +950,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tyre physics'**
   String get cfield_tyre_physics;
+
+  /// No description provided for @cfield_tyre_stress_score.
+  ///
+  /// In en, this message translates to:
+  /// **'Tyre stress'**
+  String get cfield_tyre_stress_score;
 
   /// No description provided for @cfield_tyre_working_window_c.
   ///
@@ -1233,6 +1293,84 @@ abstract class AppLocalizations {
   /// **'Circuits'**
   String get circuits;
 
+  /// No description provided for @circuits_catalog_season_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} circuits · {seasonYear} Season'**
+  String circuits_catalog_season_subtitle(int count, int seasonYear);
+
+  /// No description provided for @circuits_stat_km.
+  ///
+  /// In en, this message translates to:
+  /// **'KM'**
+  String get circuits_stat_km;
+
+  /// No description provided for @circuits_stat_laps.
+  ///
+  /// In en, this message translates to:
+  /// **'LAPS'**
+  String get circuits_stat_laps;
+
+  /// No description provided for @circuits_stat_kmh.
+  ///
+  /// In en, this message translates to:
+  /// **'KM/H'**
+  String get circuits_stat_kmh;
+
+  /// No description provided for @circuits_catalog_load_error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load circuit data.'**
+  String get circuits_catalog_load_error;
+
+  /// No description provided for @race_calendar_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Race Calendar'**
+  String get race_calendar_title;
+
+  /// No description provided for @race_calendar_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} races · {completed} completed'**
+  String race_calendar_subtitle(int total, int completed);
+
+  /// No description provided for @race_calendar_season_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Season progress'**
+  String get race_calendar_season_progress;
+
+  /// No description provided for @race_calendar_progress_fraction.
+  ///
+  /// In en, this message translates to:
+  /// **'{completed}/{total} races'**
+  String race_calendar_progress_fraction(int completed, int total);
+
+  /// No description provided for @race_calendar_status_completed.
+  ///
+  /// In en, this message translates to:
+  /// **'COMPLETED'**
+  String get race_calendar_status_completed;
+
+  /// No description provided for @race_calendar_status_next.
+  ///
+  /// In en, this message translates to:
+  /// **'NEXT'**
+  String get race_calendar_status_next;
+
+  /// No description provided for @calendar_search_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search races…'**
+  String get calendar_search_hint;
+
+  /// No description provided for @calendar_nav.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get calendar_nav;
+
   /// No description provided for @city.
   ///
   /// In en, this message translates to:
@@ -1250,6 +1388,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get close;
+
+  /// No description provided for @constructor_standings_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Constructor standings'**
+  String get constructor_standings_title;
+
+  /// No description provided for @constructor_standings_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{year} season championship'**
+  String constructor_standings_subtitle(String year);
+
+  /// No description provided for @constructor_team_driver_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} drivers'**
+  String constructor_team_driver_count(int count);
+
+  /// No description provided for @constructor_driver_points_short.
+  ///
+  /// In en, this message translates to:
+  /// **'{points} pts'**
+  String constructor_driver_points_short(String points);
+
+  /// No description provided for @driver_standings_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver standings'**
+  String get driver_standings_title;
+
+  /// No description provided for @driver_standings_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{year} Season Championship'**
+  String driver_standings_subtitle(String year);
+
+  /// No description provided for @hub_search_driver_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search drivers or teams...'**
+  String get hub_search_driver_hint;
+
+  /// No description provided for @hub_search_drivers_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No drivers found matching your search'**
+  String get hub_search_drivers_empty;
+
+  /// No description provided for @hub_search_circuits_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search circuits, Grands Prix, or countries...'**
+  String get hub_search_circuits_hint;
+
+  /// No description provided for @hub_search_circuits_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No circuits found matching your search'**
+  String get hub_search_circuits_empty;
 
   /// No description provided for @compare.
   ///
@@ -2961,6 +3159,12 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get profile;
 
+  /// No description provided for @nav_legal.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal'**
+  String get nav_legal;
+
   /// No description provided for @pts.
   ///
   /// In en, this message translates to:
@@ -3975,6 +4179,42 @@ abstract class AppLocalizations {
   /// **'Weather radar, track rain radar, and a DRS zone overview will appear here in a future update.'**
   String get weekend_hub_spot_placeholder_body;
 
+  /// No description provided for @weekend_hub_back_to_calendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Calendar'**
+  String get weekend_hub_back_to_calendar;
+
+  /// No description provided for @weekend_hub_weather_air.
+  ///
+  /// In en, this message translates to:
+  /// **'Air'**
+  String get weekend_hub_weather_air;
+
+  /// No description provided for @weekend_hub_weather_track.
+  ///
+  /// In en, this message translates to:
+  /// **'Track'**
+  String get weekend_hub_weather_track;
+
+  /// No description provided for @weekend_hub_no_weather_data.
+  ///
+  /// In en, this message translates to:
+  /// **'No weather data available.'**
+  String get weekend_hub_no_weather_data;
+
+  /// No description provided for @weekend_hub_live_preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick leaderboard'**
+  String get weekend_hub_live_preview;
+
+  /// No description provided for @weekend_hub_view_full_results.
+  ///
+  /// In en, this message translates to:
+  /// **'View full results'**
+  String get weekend_hub_view_full_results;
+
   /// No description provided for @weekend_schedule.
   ///
   /// In en, this message translates to:
@@ -4046,6 +4286,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back to home'**
   String get circuit_go_home;
+
+  /// No description provided for @circuit_back_to_circuits.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Circuits'**
+  String get circuit_back_to_circuits;
+
+  /// No description provided for @hub_back_to_drivers.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Drivers'**
+  String get hub_back_to_drivers;
+
+  /// No description provided for @hub_back_to_constructors.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Constructors'**
+  String get hub_back_to_constructors;
 
   /// No description provided for @circuit_not_found_message.
   ///
@@ -4269,101 +4527,35 @@ abstract class AppLocalizations {
   /// **'{label}: {value}'**
   String metric_label_value(String label, String value);
 
-  /// No description provided for @news_load_error.
+  /// No description provided for @hub_nav_menu.
   ///
   /// In en, this message translates to:
-  /// **'Could not load news: {error}'**
-  String news_load_error(String error);
+  /// **'Menu'**
+  String get hub_nav_menu;
 
-  /// No description provided for @news_title.
+  /// No description provided for @simulator_share_og_title.
   ///
   /// In en, this message translates to:
-  /// **'F1 News'**
-  String get news_title;
+  /// **'F1 Hub — {username}'**
+  String simulator_share_og_title(String username);
 
-  /// No description provided for @news_nav.
+  /// No description provided for @simulator_share_og_description.
   ///
   /// In en, this message translates to:
-  /// **'News'**
-  String get news_nav;
+  /// **'View {username}\'s F1 predictions on F1 Hub.'**
+  String simulator_share_og_description(String username);
 
-  /// No description provided for @news_empty.
+  /// No description provided for @live_timing_waiting_first_frame.
   ///
   /// In en, this message translates to:
-  /// **'No articles right now. Pull to refresh.'**
-  String get news_empty;
+  /// **'Waiting for the first timing frame…'**
+  String get live_timing_waiting_first_frame;
 
-  /// No description provided for @news_feed_section_empty.
+  /// No description provided for @live_timing_waiting_green_flag.
   ///
   /// In en, this message translates to:
-  /// **'No articles from this feed.'**
-  String get news_feed_section_empty;
-
-  /// No description provided for @news_settings_title.
-  ///
-  /// In en, this message translates to:
-  /// **'News feeds'**
-  String get news_settings_title;
-
-  /// No description provided for @news_settings_subtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Add RSS or Atom URLs. They are loaded on the News tab (newest first).'**
-  String get news_settings_subtitle;
-
-  /// No description provided for @news_settings_url_hint.
-  ///
-  /// In en, this message translates to:
-  /// **'https://example.com/feed.xml'**
-  String get news_settings_url_hint;
-
-  /// No description provided for @news_settings_add.
-  ///
-  /// In en, this message translates to:
-  /// **'Add'**
-  String get news_settings_add;
-
-  /// No description provided for @news_settings_your_feeds.
-  ///
-  /// In en, this message translates to:
-  /// **'Your feeds'**
-  String get news_settings_your_feeds;
-
-  /// No description provided for @news_settings_no_feeds.
-  ///
-  /// In en, this message translates to:
-  /// **'No feeds yet. Add a URL above.'**
-  String get news_settings_no_feeds;
-
-  /// No description provided for @news_settings_invalid_url.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter a valid http(s) URL.'**
-  String get news_settings_invalid_url;
-
-  /// No description provided for @news_settings_duplicate_url.
-  ///
-  /// In en, this message translates to:
-  /// **'That URL is already in your list.'**
-  String get news_settings_duplicate_url;
-
-  /// No description provided for @news_settings_save_failed.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not save. Try again.'**
-  String get news_settings_save_failed;
-
-  /// No description provided for @news_settings_stream_error.
-  ///
-  /// In en, this message translates to:
-  /// **'Could not subscribe to profile updates.'**
-  String get news_settings_stream_error;
-
-  /// No description provided for @news_settings_drag_to_reorder.
-  ///
-  /// In en, this message translates to:
-  /// **'Drag to change feed order'**
-  String get news_settings_drag_to_reorder;
+  /// **'Waiting for RACE STARTED (green flag)…'**
+  String get live_timing_waiting_green_flag;
 
   /// No description provided for @orbit_nav.
   ///
@@ -4749,6 +4941,18 @@ abstract class AppLocalizations {
   /// **'Could not load shared predictions. If you use your own Supabase project, run sql/add_simulator_share_rpcs.sql (function get_shared_predictions) and try again.'**
   String get simulator_share_error_load;
 
+  /// No description provided for @simulator_network_timeout.
+  ///
+  /// In en, this message translates to:
+  /// **'The server took too long to respond. Check your connection and try again.'**
+  String get simulator_network_timeout;
+
+  /// No description provided for @simulator_calendar_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The season calendar or driver list is not available. Restart the app after updating.'**
+  String get simulator_calendar_unavailable;
+
   /// No description provided for @simulator_share_local_preview.
   ///
   /// In en, this message translates to:
@@ -4832,6 +5036,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{predPts} pts · Grid {gridPct}% · P1 {p1Pct}%'**
   String simulator_stats_line(int predPts, int gridPct, int p1Pct);
+
+  /// No description provided for @simulator_back_to_dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Dashboard'**
+  String get simulator_back_to_dashboard;
+
+  /// No description provided for @simulator_tab_predictions.
+  ///
+  /// In en, this message translates to:
+  /// **'Predictions'**
+  String get simulator_tab_predictions;
+
+  /// No description provided for @simulator_tab_full_grid.
+  ///
+  /// In en, this message translates to:
+  /// **'Full grid'**
+  String get simulator_tab_full_grid;
+
+  /// No description provided for @simulator_tab_steward.
+  ///
+  /// In en, this message translates to:
+  /// **'Steward logic'**
+  String get simulator_tab_steward;
+
+  /// No description provided for @simulator_hero_season.
+  ///
+  /// In en, this message translates to:
+  /// **'Season {year} simulation'**
+  String simulator_hero_season(int year);
+
+  /// No description provided for @simulator_simulate.
+  ///
+  /// In en, this message translates to:
+  /// **'Simulate'**
+  String get simulator_simulate;
+
+  /// No description provided for @simulator_probability.
+  ///
+  /// In en, this message translates to:
+  /// **'Probability'**
+  String get simulator_probability;
+
+  /// No description provided for @simulator_chart_team_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Constructor points'**
+  String get simulator_chart_team_title;
+
+  /// No description provided for @simulator_chart_team_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Official results — tap to expand'**
+  String get simulator_chart_team_hint;
+
+  /// No description provided for @simulator_chart_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Constructor trends appear after race results are available.'**
+  String get simulator_chart_empty;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

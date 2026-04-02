@@ -240,14 +240,9 @@ class _RecentFormTrendCardState extends State<RecentFormTrendCard> {
       future: _future,
       builder: (context, snap) {
         if (snap.connectionState != ConnectionState.done) {
-          return SizedBox(
+          return const SizedBox(
             height: 200,
-            child: Center(
-              child: CircularProgressIndicator(
-                color: scheme.primary,
-                strokeWidth: 2,
-              ),
-            ),
+            child: HubGlassPageLoadingPlaceholder(fixedHeight: 188),
           );
         }
         final all = snap.data;
@@ -278,6 +273,10 @@ class _RecentFormTrendCardState extends State<RecentFormTrendCard> {
 
         final heroTag =
             'recent_form_${widget.driverName}_${widget.seasonYear}';
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final gridLineColor = isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.black.withValues(alpha: 0.07);
 
         return ClipRRect(
           borderRadius: BorderRadius.circular(20),
@@ -316,7 +315,7 @@ class _RecentFormTrendCardState extends State<RecentFormTrendCard> {
                           onPressed: () => _openExpanded(context, all, heroTag),
                           icon: Icon(
                             Icons.open_in_full_rounded,
-                            color: scheme.onSurfaceVariant,
+                            color: HubTheme.iconOnGlass(context),
                           ),
                         ),
                       ],
@@ -346,6 +345,7 @@ class _RecentFormTrendCardState extends State<RecentFormTrendCard> {
                               primary: scheme.primary,
                               fillTopAlpha: 0.22,
                               axisIconColor: scheme.onSurfaceVariant,
+                              gridLineColor: gridLineColor,
                             ),
                             child: const SizedBox.expand(),
                           ),
@@ -459,6 +459,7 @@ class _CompactFormAreaPainter extends CustomPainter {
     required this.primary,
     required this.fillTopAlpha,
     required this.axisIconColor,
+    required this.gridLineColor,
   });
 
   final List<double> weekendDeltas;
@@ -466,6 +467,7 @@ class _CompactFormAreaPainter extends CustomPainter {
   final Color primary;
   final double fillTopAlpha;
   final Color axisIconColor;
+  final Color gridLineColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -505,6 +507,14 @@ class _CompactFormAreaPainter extends CustomPainter {
         ],
       );
     canvas.drawPath(fillPath, fillPaint);
+
+    final gridPaint = Paint()
+      ..color = gridLineColor
+      ..strokeWidth = 1;
+    for (var g = 1; g < 4; g++) {
+      final gy = padTop + chartH * (g / 4);
+      canvas.drawLine(Offset(padL, gy), Offset(size.width - padR, gy), gridPaint);
+    }
 
     final linePaint = Paint()
       ..color = primary
@@ -547,7 +557,7 @@ class _CompactFormAreaPainter extends CustomPainter {
           text: i < circuitCodes.length ? circuitCodes[i] : '',
           style: codeStyle,
         ),
-        textDirection: TextDirection.ltr,
+        textDirection: ui.TextDirection.ltr,
       )..layout();
       tp.paint(
         canvas,
@@ -560,7 +570,9 @@ class _CompactFormAreaPainter extends CustomPainter {
   bool shouldRepaint(covariant _CompactFormAreaPainter oldDelegate) {
     return oldDelegate.weekendDeltas != weekendDeltas ||
         oldDelegate.primary != primary ||
-        oldDelegate.circuitCodes != circuitCodes;
+        oldDelegate.circuitCodes != circuitCodes ||
+        oldDelegate.gridLineColor != gridLineColor ||
+        oldDelegate.axisIconColor != axisIconColor;
   }
 }
 
@@ -822,7 +834,7 @@ class _ExpandedDualTrendPainter extends CustomPainter {
             fontWeight: FontWeight.w700,
           ),
         ),
-        textDirection: TextDirection.ltr,
+        textDirection: ui.TextDirection.ltr,
       )..layout();
       tp.paint(canvas, Offset(xFor(i) - tp.width / 2, size.height - 44));
 
@@ -842,7 +854,7 @@ class _ExpandedDualTrendPainter extends CustomPainter {
               fontWeight: FontWeight.w700,
             ),
           ),
-          textDirection: TextDirection.ltr,
+          textDirection: ui.TextDirection.ltr,
         )..layout(maxWidth: 80);
         lp.paint(
           canvas,
@@ -870,7 +882,7 @@ class _ExpandedDualTrendPainter extends CustomPainter {
               fontWeight: FontWeight.w700,
             ),
           ),
-          textDirection: TextDirection.ltr,
+          textDirection: ui.TextDirection.ltr,
         )..layout(maxWidth: 72);
         lp.paint(canvas, Offset(xFor(i) - lp.width / 2, yS - lp.height - 4));
       }

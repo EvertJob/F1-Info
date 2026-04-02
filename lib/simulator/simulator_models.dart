@@ -67,6 +67,18 @@ class SimulatorRoundInput {
   final bool isCancelled;
 }
 
+/// Cumulative constructor points after each completed round (for trend chart).
+@immutable
+class SimulatorTeamSeriesData {
+  const SimulatorTeamSeriesData({
+    required this.team,
+    required this.cumulativePoints,
+  });
+
+  final String team;
+  final List<double> cumulativePoints;
+}
+
 /// One row in the steward virtual classification for a circuit.
 @immutable
 class DriverStanding {
@@ -127,8 +139,8 @@ ParsedFinish parseFinishField(String finish) {
   return const ParsedFinish(status: SimulatorRaceStatus.unknown);
 }
 
-/// `assets/images/drivers/george-russell.png` — ASCII-folded names (é → e).
-String driverPortraitAssetPath(String fullName) {
+/// File stem for `images/drivers/{slug}.png` — ASCII-folded names (é → e).
+String driverPortraitSlugForAsset(String fullName) {
   final folded = normalizeForComparison(fullName.trim());
   final slug = folded.isEmpty
       ? fullName
@@ -142,13 +154,38 @@ String driverPortraitAssetPath(String fullName) {
           .replaceAll(RegExp(r'[^a-z0-9-]'), '')
           .replaceAll(RegExp(r'-+'), '-')
           .replaceAll(RegExp(r'^-|-$'), '');
-  return 'assets/images/drivers/${slug.isEmpty ? 'na' : slug}.png';
+  return slug.isEmpty ? 'na' : slug;
+}
+
+/// `images/drivers/george-russell.png` → web serves `/assets/images/drivers/…`.
+String driverPortraitAssetPath(String fullName) {
+  final slug = driverPortraitSlugForAsset(fullName);
+  return 'images/drivers/$slug.png';
+}
+
+/// Tries, in order: [images/drivers] (download script default), [assets/images/drivers]
+/// (bundled under `assets/images/` in pubspec), then [data/images/drivers] overrides.
+List<String> driverPortraitAssetPathCandidates(String fullName) {
+  final slug = driverPortraitSlugForAsset(fullName);
+  return [
+    'images/drivers/$slug.png',
+    'assets/images/drivers/$slug.png',
+    'data/images/drivers/$slug.png',
+  ];
 }
 
 /// Portrait path using [canonicalSimulatorDriverName] so API / cloud spellings map to assets.
 String simulatorDriverPortraitPath(String raw, List<SimulatorDriverRef> roster) {
   final n = canonicalSimulatorDriverName(raw, roster);
   return driverPortraitAssetPath(n.isEmpty ? raw : n);
+}
+
+List<String> simulatorDriverPortraitPathCandidates(
+  String raw,
+  List<SimulatorDriverRef> roster,
+) {
+  final n = canonicalSimulatorDriverName(raw, roster);
+  return driverPortraitAssetPathCandidates(n.isEmpty ? raw : n);
 }
 
 /// Grid size from app config ([kSimulatorGridSize]).

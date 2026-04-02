@@ -1,4 +1,4 @@
-﻿{
+{
     "circuit_id":  "hungaroring",
     "name":  "Hungaroring",
     "location":  "Mogyoród, Hungary",
@@ -16,8 +16,13 @@
                                                "elevation_sea_level_m":  215,
                                                "max_elevation_change_m":  34.7,
                                                "tyre_physics":  {
-                                                                    "asphalt_grip_score":  6,
-                                                                    "lateral_stress_score":  8
+                                                                    "traction_score":  3,
+                                                                    "tyre_stress_score":  3,
+                                                                    "asphalt_grip_score":  3,
+                                                                    "braking_score":  3,
+                                                                    "asphalt_abrasion_score":  3,
+                                                                    "lateral_score":  3,
+                                                                    "track_evolution_score":  3
                                                                 },
                                                "tyre_working_window_c":  120,
                                                "wind_sensitivity_sector":  "S2",

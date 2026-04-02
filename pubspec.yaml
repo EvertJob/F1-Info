@@ -64,7 +64,6 @@ dependencies:
   provider: ^6.1.2
   web_socket_channel: ^3.0.2
   archive: ^4.0.6
-  rss_dart: ^1.0.14
   flutter_map: ^8.2.2
   latlong2: ^0.9.1
   flutter_map_animations: ^0.9.0
@@ -74,6 +73,8 @@ dependencies:
   args: ^2.7.0
   html: ^0.15.4
   share_plus: ^10.1.4
+  shimmer: ^3.0.0
+  flutter_markdown: ^0.7.7+1
   
 
 dev_dependencies:
@@ -164,6 +165,10 @@ flutter:
     - assets/data/circuits/
     # Per-coureur export uit f1_data.dart (tool/export_driver_json_from_f1_data.dart).
     - assets/data/drivers/
+    # Optional portrait overrides (single /assets/ prefix on web, not assets/assets/).
+    - data/images/drivers/
+    - data/images/constructors/
+    - data/images/cars/
     # Submap staat niet automatisch in de bundle; nodig voor *.geojson op web.
     - assets/data/circuits/geojson/
     - assets/data/circuits/specs_2026/
@@ -177,28 +182,16 @@ flutter:
     - assets/tires/F1_tire_Pirelli_Cinturato_Green.svg
     - assets/tires/F1_tire_Pirelli_Cinturato_Blue.svg
     - assets/images/
-    - assets/images/drivers/george-russell.png
-    - assets/images/drivers/kimi-antonelli.png
-    - assets/images/drivers/charles-leclerc.png
-    - assets/images/drivers/lewis-hamilton.png
-    - assets/images/drivers/lando-norris.png
-    - assets/images/drivers/oscar-piastri.png
-    - assets/images/drivers/oliver-bearman.png
-    - assets/images/drivers/esteban-ocon.png
-    - assets/images/drivers/pierre-gasly.png
-    - assets/images/drivers/franco-colapinto.png
-    - assets/images/drivers/max-verstappen.png
-    - assets/images/drivers/isack-hadjar.png
-    - assets/images/drivers/liam-lawson.png
-    - assets/images/drivers/arvid-lindblad.png
-    - assets/images/drivers/nico-hulkenberg.png
-    - assets/images/drivers/gabriel-bortoleto.png
-    - assets/images/drivers/carlos-sainz.png
-    - assets/images/drivers/alexander-albon.png
-    - assets/images/drivers/sergio-perez.png
-    - assets/images/drivers/valtteri-bottas.png
-    - assets/images/drivers/fernando-alonso.png
-    - assets/images/drivers/lance-stroll.png
+    - assets/styles/
+    # Style PoC JSON (explicit — reliable on web after pub get + full restart).
+    - assets/styles/racingbulls.json
+    - assets/styles/ferrari.json
+    - assets/styles/mercedes.json
+    # Constructor logos & car renders: root `images/` → /assets/images/{constructors|cars}/…
+    - images/constructors/
+    - images/cars/
+    # Driver headshots: /assets/images/drivers/…
+    - images/drivers/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

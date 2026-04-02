@@ -1141,6 +1141,44 @@ class ChampionshipSimulatorController extends ChangeNotifier {
     return list;
   }
 
+  /// Constructor points after each round that has official results (chronological).
+  /// Returns the top [maxTeams] by final team total, each with one Y value per snapshot.
+  List<SimulatorTeamSeriesData> officialTeamStandingSeries({int maxTeams = 6}) {
+    final driverTotals = <String, int>{for (final d in _drivers) d.name: 0};
+    final teamSnapshots = <Map<String, int>>[];
+
+    void pushTeamSnapshot() {
+      final team = <String, int>{};
+      for (final d in _drivers) {
+        team[d.team] = (team[d.team] ?? 0) + (driverTotals[d.name] ?? 0);
+      }
+      teamSnapshots.add(Map<String, int>.from(team));
+    }
+
+    for (final round in _rounds) {
+      if (!round.hasActualResults || round.isCancelled) continue;
+      _addGrandPrixPoints(driverTotals, round.actualRows);
+      if (round.hasSprint && round.sprintActualRows.isNotEmpty) {
+        _addSprintPoints(driverTotals, round.sprintActualRows);
+      }
+      pushTeamSnapshot();
+    }
+
+    if (teamSnapshots.isEmpty) return [];
+
+    final last = teamSnapshots.last;
+    final ordered = last.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final topTeamNames = ordered.take(maxTeams).map((e) => e.key).toList();
+
+    return topTeamNames.map((team) {
+      final pts = <double>[
+        for (final snap in teamSnapshots) (snap[team] ?? 0).toDouble(),
+      ];
+      return SimulatorTeamSeriesData(team: team, cumulativePoints: pts);
+    }).toList();
+  }
+
   int? magicNumberClinchRoundIndex() {
     final board = seasonStandingsLeaderboard();
     if (board.length < 2) return null;

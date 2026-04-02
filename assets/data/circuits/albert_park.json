@@ -1,4 +1,4 @@
-﻿{
+{
     "circuit_id":  "albert_park",
     "name":  "Albert Park Circuit",
     "location":  "Melbourne, Australia",
@@ -16,8 +16,13 @@
                                                "elevation_sea_level_m":  4,
                                                "max_elevation_change_m":  2.6,
                                                "tyre_physics":  {
-                                                                    "asphalt_grip_score":  6,
-                                                                    "lateral_stress_score":  7
+                                                                    "traction_score":  2,
+                                                                    "tyre_stress_score":  3,
+                                                                    "asphalt_grip_score":  2,
+                                                                    "braking_score":  2,
+                                                                    "asphalt_abrasion_score":  2,
+                                                                    "lateral_score":  3,
+                                                                    "track_evolution_score":  4
                                                                 },
                                                "tyre_working_window_c":  105,
                                                "wind_sensitivity_sector":  "S2",

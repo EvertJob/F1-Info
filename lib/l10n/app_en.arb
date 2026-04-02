@@ -273,9 +273,11 @@
   "best_tyre_combination": "Best Combination",
   "cfield_air_pressure_hpa": "Air pressure",
   "cfield_asphalt_grip_score": "Asphalt grip score",
+  "cfield_asphalt_abrasion_score": "Asphalt abrasion",
   "cfield_avg_g_force": "Average G-force",
   "cfield_avg_time_2024_2025": "Average lap time (2024–25)",
   "cfield_brake_cooling_requirement_score": "Brake cooling requirement",
+  "cfield_braking_score": "Braking demand",
   "cfield_circuit_director": "Circuit director",
   "cfield_circuit_owner": "Circuit owner",
   "cfield_contract_until": "Contract until",
@@ -294,7 +296,13 @@
   "cfield_local_time_zone": "Local time zone",
   "cfield_longitude": "Longitude",
   "cfield_lap_record_detail": "Lap record",
+  "circuit_hero_lap_record_by_prefix": "Lap record by ",
+  "circuits_hero_stat_length": "LENGTH",
+  "circuits_hero_stat_laps": "LAPS",
+  "circuits_hero_stat_top_speed": "TOP SPEED",
+  "circuits_hero_stat_lap_record": "LAP RECORD",
   "cfield_laps": "Laps",
+  "cfield_lateral_score": "Lateral load",
   "cfield_lateral_stress_score": "Lateral stress score",
   "cfield_length": "Length",
   "cfield_manual_override_energy_cost": "Manual override energy cost",
@@ -319,11 +327,13 @@
   "cfield_sun_angle_start": "Sun angle at start",
   "cfield_t1_accident_risk": "Turn 1 accident risk",
   "cfield_temperature_c": "Temperature",
+  "cfield_traction_score": "Traction demand",
   "cfield_top_speed": "Top speed",
   "cfield_top_speed_delta": "Top speed delta",
   "cfield_track_evolution": "Track evolution",
   "cfield_track_type": "Track type",
   "cfield_tyre_physics": "Tyre physics",
+  "cfield_tyre_stress_score": "Tyre stress",
   "cfield_tyre_working_window_c": "Tyre working window",
   "cfield_undercut_potential_score": "Undercut potential",
   "cfield_utc_offset": "UTC offset",
@@ -399,9 +409,90 @@
   "circuit_info": "Circuit Info",
   "circuit_layout": "Circuit Layout",
   "circuits": "Circuits",
+  "circuits_catalog_season_subtitle": "{count} circuits · {seasonYear} Season",
+  "@circuits_catalog_season_subtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "seasonYear": {
+        "type": "int"
+      }
+    }
+  },
+  "circuits_stat_km": "KM",
+  "circuits_stat_laps": "LAPS",
+  "circuits_stat_kmh": "KM/H",
+  "circuits_catalog_load_error": "Could not load circuit data.",
+  "race_calendar_title": "Race Calendar",
+  "race_calendar_subtitle": "{total} races · {completed} completed",
+  "@race_calendar_subtitle": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "completed": {
+        "type": "int"
+      }
+    }
+  },
+  "race_calendar_season_progress": "Season progress",
+  "race_calendar_progress_fraction": "{completed}/{total} races",
+  "@race_calendar_progress_fraction": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "race_calendar_status_completed": "COMPLETED",
+  "race_calendar_status_next": "NEXT",
+  "calendar_search_hint": "Search races…",
+  "calendar_nav": "Calendar",
   "city": "City",
   "clear_cache": "Clear Cache",
   "close": "Close",
+  "constructor_standings_title": "Constructor standings",
+  "constructor_standings_subtitle": "{year} season championship",
+  "@constructor_standings_subtitle": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "constructor_team_driver_count": "{count} drivers",
+  "@constructor_team_driver_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "constructor_driver_points_short": "{points} pts",
+  "@constructor_driver_points_short": {
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "driver_standings_title": "Driver standings",
+  "driver_standings_subtitle": "{year} Season Championship",
+  "@driver_standings_subtitle": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "hub_search_driver_hint": "Search drivers or teams...",
+  "hub_search_drivers_empty": "No drivers found matching your search",
+  "hub_search_circuits_hint": "Search circuits, Grands Prix, or countries...",
+  "hub_search_circuits_empty": "No circuits found matching your search",
   "compare": "Compare",
   "compare_overall": "Overall",
   "compare_season": "By season",
@@ -701,6 +792,7 @@
   "previous_teams": "Teams",
   "previous_winners": "Previous winners",
   "profile": "Profile",
+  "nav_legal": "Legal",
   "pts": "PTS",
   "q1_out": "Q1 out",
   "q2_out": "Q2 out",
@@ -901,6 +993,12 @@
   "weekend_hub_penalties_filter_empty": "No penalty or investigation messages for this session.",
   "weekend_hub_spot_placeholder_title": "Live radar & DRS",
   "weekend_hub_spot_placeholder_body": "Weather radar, track rain radar, and a DRS zone overview will appear here in a future update.",
+  "weekend_hub_back_to_calendar": "Back to Calendar",
+  "weekend_hub_weather_air": "Air",
+  "weekend_hub_weather_track": "Track",
+  "weekend_hub_no_weather_data": "No weather data available.",
+  "weekend_hub_live_preview": "Quick leaderboard",
+  "weekend_hub_view_full_results": "View full results",
   "weekend_schedule": "Weekend schedule",
   "weeks": "weeks",
   "win_rate": "Win rate %",
@@ -920,6 +1018,9 @@
   "calendar_race_status_ended": "Ended",
   "calendar_race_status_ongoing": "Ongoing",
   "circuit_go_home": "Back to home",
+  "circuit_back_to_circuits": "Back to Circuits",
+  "hub_back_to_drivers": "Back to Drivers",
+  "hub_back_to_constructors": "Back to Constructors",
   "circuit_not_found_message": "No circuit data is available for this address. Check the link or pick a circuit from the calendar.",
   "circuit_not_found_title": "Circuit not found",
   "circuit_open_in_maps": "Open in Maps",
@@ -1005,29 +1106,25 @@
       }
     }
   },
-  "news_load_error": "Could not load news: {error}",
-  "@news_load_error": {
+  "hub_nav_menu": "Menu",
+  "simulator_share_og_title": "F1 Hub — {username}",
+  "@simulator_share_og_title": {
     "placeholders": {
-      "error": {
+      "username": {
         "type": "String"
       }
     }
   },
-  "news_title": "F1 News",
-  "news_nav": "News",
-  "news_empty": "No articles right now. Pull to refresh.",
-  "news_feed_section_empty": "No articles from this feed.",
-  "news_settings_title": "News feeds",
-  "news_settings_subtitle": "Add RSS or Atom URLs. They are loaded on the News tab (newest first).",
-  "news_settings_url_hint": "https://example.com/feed.xml",
-  "news_settings_add": "Add",
-  "news_settings_your_feeds": "Your feeds",
-  "news_settings_no_feeds": "No feeds yet. Add a URL above.",
-  "news_settings_invalid_url": "Enter a valid http(s) URL.",
-  "news_settings_duplicate_url": "That URL is already in your list.",
-  "news_settings_save_failed": "Could not save. Try again.",
-  "news_settings_stream_error": "Could not subscribe to profile updates.",
-  "news_settings_drag_to_reorder": "Drag to change feed order",
+  "simulator_share_og_description": "View {username}'s F1 predictions on F1 Hub.",
+  "@simulator_share_og_description": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "live_timing_waiting_first_frame": "Waiting for the first timing frame…",
+  "live_timing_waiting_green_flag": "Waiting for RACE STARTED (green flag)…",
   "orbit_nav": "Orbit",
   "orbit_circuit_list": "Circuits",
   "orbit_load_error": "Could not load map data: {error}",
@@ -1144,6 +1241,8 @@
     }
   },
   "simulator_share_error_load": "Could not load shared predictions. If you use your own Supabase project, run sql/add_simulator_share_rpcs.sql (function get_shared_predictions) and try again.",
+  "simulator_network_timeout": "The server took too long to respond. Check your connection and try again.",
+  "simulator_calendar_unavailable": "The season calendar or driver list is not available. Restart the app after updating.",
   "simulator_share_local_preview": "Preview from this device only — open Shared Standing while signed in so picks sync to the cloud for others.",
   "simulator_steward_coming": "Steward desk (penalties / status) — next iteration",
   "simulator_round": "R{round}",
@@ -1177,5 +1276,22 @@
         "type": "int"
       }
     }
-  }
+  },
+  "simulator_back_to_dashboard": "Back to Dashboard",
+  "simulator_tab_predictions": "Predictions",
+  "simulator_tab_full_grid": "Full grid",
+  "simulator_tab_steward": "Steward logic",
+  "simulator_hero_season": "Season {year} simulation",
+  "@simulator_hero_season": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "simulator_simulate": "Simulate",
+  "simulator_probability": "Probability",
+  "simulator_chart_team_title": "Constructor points",
+  "simulator_chart_team_hint": "Official results — tap to expand",
+  "simulator_chart_empty": "Constructor trends appear after race results are available."
 }

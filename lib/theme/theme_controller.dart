@@ -55,7 +55,7 @@ ThemeMode _themeModeFromSupabase(String? value) {
 class ThemeController extends ChangeNotifier {
   ThemeController({
     int initialSchemeIndex = F1TeamSchemes.defaultIndex,
-    ThemeMode initialThemeMode = ThemeMode.light,
+    ThemeMode initialThemeMode = ThemeMode.dark,
   })  : _schemeIndex = initialSchemeIndex.clamp(0, F1TeamSchemes.count - 1),
         _themeMode = initialThemeMode {
     _isDark = _themeMode == ThemeMode.dark;

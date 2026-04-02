@@ -515,7 +515,7 @@ void main(List<String> args) {
 
     if (dryRun) {
       stdout.writeln(
-        '[dry-run] #${number} ${out['name']}: points +${c.pointsTotal.toStringAsFixed(1)} '
+        '[dry-run] #$number ${out['name']}: points +${c.pointsTotal.toStringAsFixed(1)} '
         'HT+${c.hatTricks} …',
       );
       touched++;
@@ -529,7 +529,7 @@ void main(List<String> args) {
     final blTag =
         usedSyntheticBaseline ? 'synthetic_zero' : 'baseline<$blY';
     stdout.writeln(
-      'OK #${number} ${out['name']}: +${c.pointsTotal.toStringAsFixed(1)} pts '
+      'OK #$number ${out['name']}: +${c.pointsTotal.toStringAsFixed(1)} pts '
       '(${c.wins}W ${c.p2}P2 ${c.p3}P3 ${c.poles}pole ${c.fastestLaps}FL '
       '${c.hatTricks}HT) $blTag',
     );

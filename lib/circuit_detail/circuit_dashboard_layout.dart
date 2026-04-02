@@ -1,3 +1,4 @@
+import 'package:f1/theme/hub_theme.dart';
 import 'package:f1/widgets/f1_module.dart';
 import 'package:flutter/material.dart';
 
@@ -49,26 +50,46 @@ class CircuitAmbientGlowPainter extends CustomPainter {
       topLeftGlow != old.topLeftGlow || bottomRightGlow != old.bottomRightGlow;
 }
 
-/// [F1Module] + themed [ExpansionTile] shell (same idea as `_detailOverviewSectionCard` in `main.dart`).
-Widget circuitDashboardSectionCard(BuildContext context, {required Widget child}) {
+/// F1 red for category icons on the circuit JSON hub (reference: dark cards + red accents).
+const Color kCircuitHubHeaderIconRed = Color(0xFFE10600);
+
+/// [F1Module] + themed [ExpansionTile] shell (flat card: same fill + hairline border as hub detail).
+Widget circuitDashboardSectionCard(
+  BuildContext context, {
+  required Widget child,
+  bool hubAccordionStyle = false,
+}) {
   final theme = Theme.of(context);
   final scheme = theme.colorScheme;
-  return F1Module(
+  final hubDark = hubAccordionStyle && theme.brightness == Brightness.dark;
+  final isLight = theme.brightness == Brightness.light;
+  final accentColor = scheme.primary;
+  final titleColor = hubDark
+      ? scheme.onSurface.withValues(alpha: 0.98)
+      : (isLight ? HubTheme.f1DeepCharcoal : scheme.primary);
+  final moduleBg = hubDark
+      ? const Color(0xFF121212)
+      : (isLight ? Colors.white : scheme.surface);
+  final chevronHub = scheme.onSurface.withValues(alpha: 0.92);
+
+  final module = F1Module(
     fillWidth: true,
     padding: EdgeInsets.zero,
     borderRadius: kF1ModuleRadius,
-    backgroundColor: scheme.surface,
-    showFadingBorder: true,
+    backgroundColor: moduleBg,
+    showFadingBorder: !hubDark && !isLight,
     child: Theme(
       data: theme.copyWith(
         dividerColor: Colors.transparent,
         expansionTileTheme: ExpansionTileThemeData(
           backgroundColor: Colors.transparent,
           collapsedBackgroundColor: Colors.transparent,
-          textColor: scheme.primary,
-          collapsedTextColor: scheme.primary,
-          iconColor: scheme.primary,
-          collapsedIconColor: scheme.primary.withValues(alpha: 0.9),
+          textColor: titleColor,
+          collapsedTextColor: titleColor,
+          iconColor: hubDark ? chevronHub : accentColor,
+          collapsedIconColor: hubDark
+              ? chevronHub.withValues(alpha: 0.72)
+              : accentColor.withValues(alpha: 0.9),
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(20)),
             side: BorderSide.none,
@@ -84,6 +105,32 @@ Widget circuitDashboardSectionCard(BuildContext context, {required Widget child}
       child: child,
     ),
   );
+
+  if (hubDark) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(kF1ModuleRadius),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.10),
+          width: 1,
+        ),
+      ),
+      child: module,
+    );
+  }
+  if (isLight) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(kF1ModuleRadius),
+        border: Border.all(
+          color: Colors.black.withValues(alpha: 0.08),
+          width: 0.8,
+        ),
+      ),
+      child: module,
+    );
+  }
+  return module;
 }
 
 /// Distributes [sections] across up to three columns (matches `_buildResponsiveSections`).
