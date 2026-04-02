@@ -1,5 +1,10 @@
 part of '../main.dart';
 
+/// Debug-only: set `true` and run a **debug** build — team cards become solid red
+/// 100px-tall blocks. If they show on mobile, the list + data path is fine and the bug
+/// is in card chrome (glass/layout). If they do not show, look above [StandingsView.body].
+const bool kConstructorStandingsLayoutProbe = false;
+
 String _constructorRankPrefix(List<Driver> order, Driver d) {
   final r = _championshipRankForDriver(order, d);
   return r != null ? 'P$r ' : '';
@@ -17,20 +22,28 @@ Widget _buildConstructorStandingsHubScrollable(
   final hubDark = theme.brightness == Brightness.dark;
   final ch = state._championshipDriversOrdered;
   final items = state._standingsItems(false);
-  final teams = <Team>[
+  var teams = <Team>[
     for (final e in items)
       if (e is Team) e,
   ];
+  // Defensive: if cache/types ever yield no Team rows, still show data (fixes empty mobile/web body).
+  if (teams.isEmpty) {
+    teams = List<Team>.from(fallbackTeams);
+  }
   final leaderPts = teams.isEmpty
       ? 0
       : teams.map((t) => t.points).reduce((a, b) => a > b ? a : b);
   final leaderDenominator =
       leaderPts > 0 ? leaderPts.toDouble() : 1.0; // avoid div by zero when scaling
 
-  const listHorizontalPad = 16.0;
-
+  // Same header metrics as driver standings (`_buildDriverStandingsHubScrollable`).
   final header = Padding(
-    padding: const EdgeInsets.fromLTRB(4, 4, 4, 16),
+    padding: const EdgeInsets.fromLTRB(
+      HubStandingsMetrics.headerPaddingL,
+      HubStandingsMetrics.headerPaddingT,
+      HubStandingsMetrics.headerPaddingR,
+      HubStandingsMetrics.headerPaddingB,
+    ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -40,7 +53,7 @@ Widget _buildConstructorStandingsHubScrollable(
               ? HubVisualLanguage.f1Wide(
                   context,
                   fontSize: compact ? 24 : 28,
-                  color: ConstructorHubColors.textPrimary,
+                  color: HubTheme.primaryOnGlassText(context),
                   height: 1.05,
                 )
               : TextStyle(
@@ -51,7 +64,7 @@ Widget _buildConstructorStandingsHubScrollable(
                   color: theme.colorScheme.onSurface,
                 ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: HubStandingsMetrics.titleSubtitleGap),
         Text(
           context.l10n.constructor_standings_subtitle(
             state._selectedYear.toString(),
@@ -60,7 +73,7 @@ Widget _buildConstructorStandingsHubScrollable(
               ? HubVisualLanguage.titilliumSecondary(
                   context,
                   fontWeight: FontWeight.w600,
-                  color: ConstructorHubColors.textPrimary,
+                  color: HubTheme.primaryOnGlassText(context),
                   opacity: 0.7,
                 )
               : TextStyle(
@@ -91,22 +104,22 @@ Widget _buildConstructorStandingsHubScrollable(
             compact: compact,
             leaderPointsDenominator: leaderDenominator,
             leaderPointsRaw: leaderPts,
+            usableWidth: usableW,
           );
 
       final rows = <Widget>[];
       if (useTwoColumns) {
         for (var i = 0; i < teams.length; i += 2) {
           if (i + 1 < teams.length) {
+            // No [IntrinsicHeight] — avoids expensive intrinsics; cards top-align in wide grid.
             rows.add(
-              IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(child: cardFor(i)),
-                    const SizedBox(width: 16),
-                    Expanded(child: cardFor(i + 1)),
-                  ],
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: cardFor(i)),
+                  const SizedBox(width: 16),
+                  Expanded(child: cardFor(i + 1)),
+                ],
               ),
             );
           } else {
@@ -125,14 +138,17 @@ Widget _buildConstructorStandingsHubScrollable(
         separated.add(rows[i]);
       }
 
+      // Not ListView.builder: row count is `teams.length` (plus header). `teams` is never
+      // empty here because of [fallbackTeams] when `_cachedTeams` / typing yields no rows.
+
       return ListView(
         primary: false,
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.fromLTRB(
-          listHorizontalPad,
+          HubStandingsMetrics.listHorizontalPad,
           listPadV,
-          listHorizontalPad,
-          24,
+          HubStandingsMetrics.listHorizontalPad,
+          HubStandingsMetrics.listBottomPad,
         ),
         children: [
           header,
@@ -154,6 +170,7 @@ class _ConstructorTeamStandingCard extends StatefulWidget {
     required this.compact,
     required this.leaderPointsDenominator,
     required this.leaderPointsRaw,
+    required this.usableWidth,
   });
 
   final _StandingsViewState state;
@@ -164,6 +181,8 @@ class _ConstructorTeamStandingCard extends StatefulWidget {
   final bool compact;
   final double leaderPointsDenominator;
   final int leaderPointsRaw;
+  /// From parent [LayoutBuilder] — same idea as driver hub list rows.
+  final double usableWidth;
 
   @override
   State<_ConstructorTeamStandingCard> createState() =>
@@ -176,6 +195,25 @@ class _ConstructorTeamStandingCardState
 
   @override
   Widget build(BuildContext context) {
+    if (kDebugMode && kConstructorStandingsLayoutProbe) {
+      return SizedBox(
+        width: double.infinity,
+        height: 100,
+        child: ColoredBox(
+          color: Colors.red,
+          child: Center(
+            child: Text(
+              'Test ${widget.team.name}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final theme = Theme.of(context);
     final state = widget.state;
     final team = widget.team;
@@ -196,240 +234,257 @@ class _ConstructorTeamStandingCardState
         ? (team.points / widget.leaderPointsDenominator).clamp(0.0, 1.0)
         : (constructorPosition == 1 ? 1.0 : 0.0);
 
+    final narrow = widget.usableWidth < 380;
+    // Match `_DriverStandingsHubListRow`: fixed rank box, tight points column on narrow screens.
+    final rankBox =
+        narrow ? 36.0 : HubStandingsMetrics.rankBadgeSize;
+    final posFs = narrow
+        ? (compact ? 16.0 : 17.0)
+        : (compact ? 18.0 : 20.0);
+    final nameFs = narrow
+        ? (compact ? 15.0 : 16.0)
+        : (compact ? 15.0 : 16.0);
+    final ptsFs =
+        narrow ? (compact ? 17.0 : 19.0) : (compact ? 22.0 : 24.0);
+    final pointsColW = narrow ? 70.0 : 82.0;
+    final gapAfterName = narrow ? 14.0 : 22.0;
+    final gapBeforeChevron = narrow ? 10.0 : 14.0;
+
     final fill = hubDark
         ? ConstructorHubColors.surface
         : theme.colorScheme.surfaceContainerHighest;
     final borderC =
         hubDark ? ConstructorHubColors.border : theme.colorScheme.outline;
-    final titleC =
-        hubDark ? ConstructorHubColors.textPrimary : theme.colorScheme.onSurface;
+    // On dark hub, match driver standings rows: glass panel + hub ink colors.
+    final titleC = hubDark
+        ? HubTheme.primaryOnGlassText(context)
+        : theme.colorScheme.onSurface;
     final muted = hubDark
-        ? ConstructorHubColors.textSecondary
+        ? HubTheme.secondaryOnGlassText(context)
         : theme.colorScheme.onSurfaceVariant;
-    final greyWide =
-        hubDark ? ConstructorHubColors.textSecondary : theme.colorScheme.onSurfaceVariant;
+    final greyWide = hubDark
+        ? HubTheme.secondaryOnGlassText(context)
+        : theme.colorScheme.onSurfaceVariant;
 
     const radius = 20.0;
-    const stripeW = 6.0;
 
-    final cardBody = Row(
+    final rankFill = hubDark
+        ? ConstructorHubColors.surfaceElevated
+        : Colors.white.withValues(alpha: 0.45);
+
+    // Same nesting as `_DriverStandingsHubListRow` glass child: one [Row] with
+    // Badge → gap → Stripe(6×46) → gap → Expanded(Column[Text,Text]) → gap → points → chevron.
+    // Extra: progress + driver lines below in a [Column].
+    final cardBody = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ColoredBox(
-          color: accent,
-          child: const SizedBox(width: stripeW),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 16, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: compact ? 12 : 14,
-                      vertical: compact ? 10 : 12,
+        ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 64),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: rankBox,
+                height: rankBox,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: rankFill,
+                    borderRadius: BorderRadius.circular(
+                      HubStandingsMetrics.rankBadgeInnerRadius,
                     ),
-                    constraints: BoxConstraints(
-                      minWidth: compact ? 46 : 50,
-                      minHeight: compact ? 46 : 50,
-                    ),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: hubDark
-                          ? ConstructorHubColors.surfaceElevated
-                          : theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: hubDark
-                            ? ConstructorHubColors.border
-                            : theme.colorScheme.outline
-                                .withValues(alpha: 0.35),
+                    border: Border.all(
+                      color: _driverStandingsRankBadgeBorder(
+                        context,
+                        constructorPosition,
                       ),
+                      width: constructorPosition <= 3 ? 1.6 : 1,
                     ),
+                  ),
+                  child: Center(
                     child: Text(
                       '$constructorPosition',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
                       style: HubVisualLanguage.f1Wide(
                         context,
-                        fontSize: compact ? 24 : 28,
+                        fontSize: posFs,
                         color: greyWide,
                         height: 1,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          team.name,
-                          style: GoogleFonts.titilliumWeb(
-                            fontSize: compact ? 17 : 19,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.15,
-                            color: titleC,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Container(
-                              width: 6,
-                              height: 6,
-                              margin: const EdgeInsets.only(top: 1),
-                              decoration: BoxDecoration(
-                                color: accent,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                context.l10n.constructor_team_driver_count(
-                                  teamDrivers.length,
-                                ),
-                                style: hubDark
-                                    ? HubVisualLanguage.titilliumSecondary(
-                                        context,
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: ConstructorHubColors.textPrimary,
-                                        opacity: 0.7,
-                                      )
-                                    : TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: muted,
-                                      ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            state._formatPoints(team.points),
-                            style: HubVisualLanguage.f1Wide(
-                              context,
-                              fontSize: compact ? 28 : 32,
-                              color: greyWide,
-                              height: 1,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            context.l10n.pts.toUpperCase(),
-                            style: hubDark
-                                ? HubVisualLanguage.titilliumSecondary(
-                                    context,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 1.4,
-                                    color: ConstructorHubColors.textPrimary,
-                                    opacity: 0.65,
-                                  )
-                                : TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 1.4,
-                                    color: muted,
-                                  ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 2),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        size: 22,
-                        color: greyWide.withValues(alpha: 0.85),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: LinearProgressIndicator(
-                  value: progressFrac,
-                  minHeight: 6,
-                  backgroundColor: hubDark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : theme.colorScheme.surfaceContainerHighest,
-                  color: accent.withValues(alpha: 0.95),
                 ),
               ),
-              if (teamDrivers.isNotEmpty) ...[
-                const SizedBox(height: 14),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+              SizedBox(width: HubStandingsMetrics.rankToStripeGap),
+              Container(
+                width: HubStandingsMetrics.teamStripeWidth,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: accent,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              SizedBox(width: HubStandingsMetrics.stripeToTextGap),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    for (var i = 0; i < teamDrivers.length; i++)
-                      Padding(
-                        padding: EdgeInsets.only(
-                          bottom: i < teamDrivers.length - 1 ? 10 : 0,
-                        ),
-                        child: _constructorDriverRow(
-                          context,
-                          state: state,
-                          d: teamDrivers[i],
-                          championshipOrder: championshipOrder,
-                          greyWide: greyWide,
-                          titleC: titleC,
-                        ),
+                    Text(
+                      team.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: HubVisualLanguage.f1Wide(
+                        context,
+                        fontSize: nameFs,
+                        fontWeight: FontWeight.w700,
+                        color: titleC,
+                        height: 1.15,
                       ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      context.l10n.constructor_team_driver_count(
+                        teamDrivers.length,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: hubDark
+                          ? HubVisualLanguage.titilliumSecondary(
+                              context,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: HubTheme.primaryOnGlassText(context),
+                              opacity: 0.7,
+                            )
+                          : TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: muted,
+                            ),
+                    ),
                   ],
                 ),
-              ],
+              ),
+              SizedBox(width: gapAfterName),
+              SizedBox(
+                width: pointsColW,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      state._formatPoints(team.points),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
+                      style: HubVisualLanguage.f1Wide(
+                        context,
+                        fontSize: ptsFs,
+                        color: greyWide,
+                        height: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      context.l10n.pts.toUpperCase(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
+                      style: hubDark
+                          ? HubVisualLanguage.titilliumSecondary(
+                              context,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.4,
+                              color: HubTheme.primaryOnGlassText(context),
+                              opacity: 0.65,
+                            )
+                          : TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.4,
+                              color: muted,
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: gapBeforeChevron),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 22,
+                color: hubDark
+                    ? HubTheme.secondaryOnGlassText(context)
+                        .withValues(alpha: 0.85)
+                    : greyWide.withValues(alpha: 0.85),
+              ),
             ],
           ),
         ),
-      ),
-    ],
-    );
-
-    final borderOpacity = _hover ? 0.3 : 0.12;
-    final decoratedChild = hubDark
-        ? ClipRRect(
-            borderRadius: BorderRadius.circular(radius),
-            child: BackdropFilter(
-              filter: ui.ImageFilter.blur(
-                sigmaX: HubVisualLanguage.glassBlurSigma,
-                sigmaY: HubVisualLanguage.glassBlurSigma,
-              ),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(radius),
-                  border: Border.all(
-                    color: selected
-                        ? accent.withValues(alpha: _hover ? 0.75 : 0.55)
-                        : Colors.white.withValues(alpha: borderOpacity),
-                    width: selected ? 1.1 : 0.8,
+        const SizedBox(height: 12),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: LinearProgressIndicator(
+            value: progressFrac,
+            minHeight: 6,
+            backgroundColor: hubDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : theme.colorScheme.surfaceContainerHighest,
+            color: accent.withValues(alpha: 0.95),
+          ),
+        ),
+        if (teamDrivers.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < teamDrivers.length; i++)
+                Padding(
+                  padding: EdgeInsets.only(
+                    bottom: i < teamDrivers.length - 1 ? 10 : 0,
                   ),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.1),
-                      Colors.white.withValues(alpha: 0.08),
-                    ],
+                  child: _constructorDriverRow(
+                    context,
+                    state: state,
+                    d: teamDrivers[i],
+                    championshipOrder: championshipOrder,
+                    greyWide: greyWide,
+                    titleC: titleC,
                   ),
                 ),
-                child: cardBody,
+            ],
+          ),
+        ],
+      ],
+    );
+
+    // Dark hub: same shell as driver standings rows ([HubVisualLanguage.glassPanel]).
+    // The old nearly-transparent gradient on [BackdropFilter] often painted invisible
+    // on Flutter web / narrow viewports.
+    final decoratedChild = hubDark
+        ? AnimatedContainer(
+            duration: const Duration(milliseconds: 120),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(radius),
+              border: selected
+                  ? Border.all(
+                      color: accent.withValues(alpha: _hover ? 0.8 : 0.55),
+                      width: 1.2,
+                    )
+                  : null,
+            ),
+            child: HubVisualLanguage.glassPanel(
+              context: context,
+              radius: radius,
+              accentGlow: accent,
+              accentGlowOpacity: 0.085,
+              padding: EdgeInsets.symmetric(
+                horizontal: HubStandingsMetrics.rowHPadding,
+                vertical: HubStandingsMetrics.rowVPadding,
               ),
+              child: cardBody,
             ),
           )
         : Container(
@@ -451,7 +506,13 @@ class _ConstructorTeamStandingCardState
               ],
             ),
             clipBehavior: Clip.antiAlias,
-            child: cardBody,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: HubStandingsMetrics.rowHPadding,
+                vertical: HubStandingsMetrics.rowVPadding,
+              ),
+              child: cardBody,
+            ),
           );
 
     return MouseRegion(
@@ -487,6 +548,9 @@ Widget _constructorDriverRow(
     children: [
       Text(
         _constructorRankPrefix(championshipOrder, d),
+        maxLines: 1,
+        softWrap: false,
+        overflow: TextOverflow.ellipsis,
         style: HubVisualLanguage.f1Wide(
           context,
           fontSize: 13,
@@ -498,6 +562,7 @@ Widget _constructorDriverRow(
         child: Text(
           d.name,
           maxLines: 1,
+          softWrap: false,
           overflow: TextOverflow.ellipsis,
           style: GoogleFonts.titilliumWeb(
             fontSize: 14,
@@ -506,15 +571,22 @@ Widget _constructorDriverRow(
           ),
         ),
       ),
-      Text(
-        context.l10n.constructor_driver_points_short(
-          state._formatPoints(d.points),
-        ),
-        style: HubVisualLanguage.f1Wide(
-          context,
-          fontSize: 13,
-          color: greyWide,
-          height: 1.2,
+      Flexible(
+        fit: FlexFit.loose,
+        child: Text(
+          context.l10n.constructor_driver_points_short(
+            state._formatPoints(d.points),
+          ),
+          maxLines: 1,
+          softWrap: false,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.end,
+          style: HubVisualLanguage.f1Wide(
+            context,
+            fontSize: 13,
+            color: greyWide,
+            height: 1.2,
+          ),
         ),
       ),
     ],

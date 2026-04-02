@@ -12853,12 +12853,24 @@ class _StandingsViewState extends State<StandingsView> {
           } catch (_) {}
         }
         if (raw == null) throw Exception('No teams standings asset');
-        final jsonData = json.decode(raw);
-        final standings = jsonData['standings'] as List<dynamic>;
+        final jsonData = json.decode(raw) as Map<String, dynamic>;
+        final standingsRaw = jsonData['standings'];
+        if (standingsRaw is! List<dynamic>) {
+          throw Exception('Invalid teams standings shape');
+        }
+        final standings = standingsRaw;
         List<Team> mergedTeams = [];
-        for (final entry in standings) {
-          final name = entry['team'] as String;
-          final points = (entry['points'] as num).toInt();
+        for (final rawEntry in standings) {
+          if (rawEntry is! Map) continue;
+          final entry = Map<String, dynamic>.from(
+            rawEntry.map((k, v) => MapEntry(k.toString(), v)),
+          );
+          final name = entry['team']?.toString().trim() ?? '';
+          if (name.isEmpty) continue;
+          final pr = entry['points'];
+          final points = pr is num
+              ? pr.toInt()
+              : int.tryParse(pr?.toString() ?? '') ?? 0;
           final local = fallbackTeams.firstWhere(
             (t) => t.name == name,
             orElse: () => fallbackTeams.firstWhere(
@@ -12900,6 +12912,9 @@ class _StandingsViewState extends State<StandingsView> {
             ),
           );
           mergedTeams.add(Team.copy(local, points));
+        }
+        if (mergedTeams.isEmpty) {
+          mergedTeams = List<Team>.from(fallbackTeams);
         }
         mergedTeams.sort((a, b) => b.points.compareTo(a.points));
         final chDrivers =
@@ -13419,8 +13434,7 @@ class _StandingsViewState extends State<StandingsView> {
     final listPadV = f1Ui.cardPadding.top.clamp(8.0, 14.0);
 
     if (!isDriver) {
-      // Direct scrollable under [RefreshIndicator] — avoids LayoutBuilder width
-      // quirks (web / shell) that can zero out or inflate nested ListView children.
+      // Single scrollable under [RefreshIndicator] (same pattern as driver hub list).
       return _buildConstructorStandingsHubScrollable(
         this,
         context: context,
