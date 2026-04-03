@@ -165,6 +165,8 @@ flutter:
     - assets/data/circuits/
     # Per-coureur export uit f1_data.dart (tool/export_driver_json_from_f1_data.dart).
     - assets/data/drivers/
+    # Bundled driver DNF narrative JSON (hub retirements).
+    - assets/data/dnf/
     # Optional portrait overrides (single /assets/ prefix on web, not assets/assets/).
     - data/images/drivers/
     - data/images/constructors/

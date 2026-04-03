@@ -9559,59 +9559,6 @@ final Map<String, Map<int, double>> teamDriverTitlePoints = {
 
 List<List<String>> _getDnfEntries(String name) {
   const Map<String, List<List<String>>> dnfMap = {
-    'Max Verstappen': [
-      ['2024', 'Australian GP', 'Right rear brake stuck and caught fire', '3'],
-      ['2022', 'Australian GP', 'Fuel line leak causing external fire', '38'],
-      [
-        '2022',
-        'Bahrain GP',
-        'Fuel pump vacuum issue preventing fuel delivery',
-        '54',
-      ],
-      [
-        '2021',
-        'Azerbaijan GP',
-        'High-speed left-rear tyre blowout on main straight',
-        '45',
-      ],
-      [
-        '2021',
-        'British GP',
-        '51G impact at Copse corner after collision with Hamilton',
-        '0',
-      ],
-      [
-        '2021',
-        'Italian GP',
-        'Car launched over Hamilton\'s halo at Turn 1/2 chicane',
-        '25',
-      ],
-      ['2020', 'Italian GP', 'Honda power unit issue (misfire)', '30'],
-      [
-        '2020',
-        'Tuscan GP',
-        'Caught in multi-car Turn 2 pile-up after engine bog-down',
-        '0',
-      ],
-      [
-        '2019',
-        'Belgian GP',
-        'Track rod broken after Turn 1 collision with Raikkonen',
-        '0',
-      ],
-      [
-        '2018',
-        'Azerbaijan GP',
-        'Rear-ended by teammate Ricciardo under braking for Turn 1',
-        '39',
-      ],
-      [
-        '2017',
-        'Singapore GP',
-        'Sandwiched between Ferraris of Vettel and Raikkonen off the line',
-        '0',
-      ],
-    ],
     'Lando Norris': [
       [
         '2024',

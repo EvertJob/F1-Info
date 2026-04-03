@@ -66,6 +66,7 @@ import 'package:f1/utils/l10n_extension.dart';
 import 'utils/l10n_lookups.dart';
 import 'package:f1/l10n/app_localizations.dart';
 import 'data/f1_asset_resolver.dart';
+import 'data/driver_dnf_hub.dart';
 import 'data/team_standings_logo.dart';
 import 'data/team_car_image.dart';
 import 'pages/test_style_page.dart';
@@ -16807,7 +16808,7 @@ Widget _weekendHubCard(
   final inner = DecoratedBox(
     decoration: _hubFlatHubCardDecoration(context, radius: radius),
     child: Padding(
-      padding: padding ?? const EdgeInsets.all(18),
+      padding: padding ?? const EdgeInsets.all(16),
       child: child,
     ),
   );
@@ -19646,7 +19647,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                                         selectedStem: selectedStem,
                                         headerTopThree: headerTopThree,
                                       ),
-                                      const SizedBox(height: 24),
+                                      const SizedBox(height: 16),
                                       _buildWeekendHubLowerRow(
                                         context,
                                         uiSessionName,
@@ -19748,18 +19749,21 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     required String caption,
     bool emphasize = false,
   }) {
-    final scheme = Theme.of(context).colorScheme;
-    final borderColor = emphasize
-        ? accent.withValues(alpha: 0.92)
-        : Colors.white.withValues(alpha: 0.1);
+    final borderColor = HubTheme.statsTrioCellBorder(
+      context,
+      pointsCell: emphasize,
+      accent: accent,
+    );
+    final valueColor =
+        emphasize ? accent : HubTheme.primaryOnGlassText(context);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: ConstructorHubColors.surfaceElevated.withValues(alpha: 0.65),
+        color: HubTheme.statsTrioNestedFill(context),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: borderColor, width: emphasize ? 1 : 0.85),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -19767,12 +19771,12 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
               value,
               style: HubVisualLanguage.f1Wide(
                 context,
-                fontSize: 22,
+                fontSize: emphasize ? 28 : 26,
                 height: 1.05,
-                color: scheme.onSurface,
+                color: valueColor,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Text(
               caption.toUpperCase(),
               style: HubVisualLanguage.titilliumSecondary(
@@ -19780,12 +19784,62 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.05,
-                color: ConstructorHubColors.textSecondary,
-                opacity: 1,
+                height: 1.2,
+                color: HubTheme.primaryOnGlassText(context),
+                opacity: 0.6,
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Right-side header watermark (~24% larger than legacy 112×96 tile). No glass/helmet fallback.
+  Widget _weekendHubCircuitWatermarkLayer(
+    BuildContext context, {
+    required Color accent,
+    required Color onSurface,
+    required List<String> circuitPaths,
+    required bool hasCircuitSvg,
+    required String circuitSvg,
+  }) {
+    const wmW = 148.0;
+    const wmH = 124.0;
+    final o =
+        Theme.of(context).brightness == Brightness.dark ? 0.14 : 0.095;
+    Widget graphic;
+    if (circuitPaths.isNotEmpty) {
+      graphic = HubAssetImageChain(
+        paths: circuitPaths,
+        bundle: rootBundle,
+        height: wmH,
+        width: wmW,
+        fit: BoxFit.contain,
+        alignment: Alignment.centerRight,
+        borderRadius: null,
+        glassFallbackAccent: accent,
+        fallback: const SizedBox.shrink(),
+      );
+    } else if (hasCircuitSvg) {
+      graphic = SvgPicture.network(
+        circuitSvg,
+        height: wmH,
+        width: wmW,
+        fit: BoxFit.contain,
+        alignment: Alignment.centerRight,
+        colorFilter: ColorFilter.mode(
+          onSurface.withValues(alpha: 0.72),
+          BlendMode.srcIn,
+        ),
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
+    return IgnorePointer(
+      child: Opacity(
+        opacity: o,
+        child: SizedBox(width: wmW, height: wmH, child: graphic),
       ),
     );
   }
@@ -20216,10 +20270,10 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(flex: lowerTrackFlex, child: race),
-              const SizedBox(width: 24),
+              const SizedBox(width: 16),
               Expanded(flex: lowerRaceControlFlex, child: raceControl),
               if (_kWeekendHubShowLiveRadarDrCard) ...[
-                const SizedBox(width: 24),
+                const SizedBox(width: 16),
                 Expanded(flex: 6, child: hubSpot),
               ],
             ],
@@ -20234,12 +20288,12 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(flex: lowerTrackFlex, child: race),
-                  const SizedBox(width: 24),
+                  const SizedBox(width: 16),
                   Expanded(flex: lowerRaceControlFlex, child: raceControl),
                 ],
               ),
               if (_kWeekendHubShowLiveRadarDrCard) ...[
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 hubSpot,
               ],
             ],
@@ -20454,9 +20508,9 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
               );
 
         return DecoratedBox(
-          decoration: _hubFlatHubCardDecoration(context, radius: 18),
+          decoration: _hubFlatHubCardDecoration(context, radius: 20),
           child: Padding(
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -20494,7 +20548,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
     if (sessionWeather.isNotEmpty) {
       final trackPlayback = _weekendHubCard(
         context,
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(16),
         fillWidth: true,
         child: CircuitWeatherPlaybackCard(
           race: widget.race,
@@ -20529,7 +20583,7 @@ class _WeekendHubScreenState extends State<WeekendHubScreen> {
 
     return _weekendHubCard(
       context,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -20715,10 +20769,10 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
               children: [
                 Expanded(flex: 6, child: summaryColumn),
                 if (hasHubAssets) ...[
-                  const SizedBox(width: 24),
+                  const SizedBox(width: 16),
                   Expanded(flex: 5, child: podium),
                 ],
-                const SizedBox(width: 24),
+                const SizedBox(width: 16),
                 Expanded(flex: 6, child: schedule),
               ],
             ),
@@ -20735,13 +20789,13 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
                   children: [
                     Expanded(flex: 6, child: summaryColumn),
                     if (hasHubAssets) ...[
-                      const SizedBox(width: 24),
+                      const SizedBox(width: 16),
                       Expanded(flex: 5, child: podium),
                     ],
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               schedule,
             ],
           );
@@ -20752,10 +20806,10 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
           children: [
             summary,
             if (hasHubAssets) ...[
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               podium,
             ],
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             schedule,
           ],
         );
@@ -20858,31 +20912,36 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
               );
 
         final circuitPaths = _weekendHubCircuitAssetPaths();
-        final chainH = 96.0;
+        const weekendHeroRadius = 20.0;
+        final showCircuitWatermark =
+            circuitPaths.isNotEmpty || hasCircuitSvg;
 
         final heroCore = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.race.flag, style: const TextStyle(fontSize: 36)),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.race.name,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 22,
-                          height: 1.12,
-                          color: scheme.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
+                Text(
+                  widget.race.name,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 22,
+                    height: 1.12,
+                    color: scheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      widget.race.flag,
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
                         widget.race.country,
                         style: HubVisualLanguage.titilliumSecondary(
                           context,
@@ -20891,60 +20950,22 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
                           color: scheme.onSurfaceVariant,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        dateLine,
-                        style: HubVisualLanguage.f1Wide(
-                          context,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  dateLine,
+                  style: HubVisualLanguage.f1Wide(
+                    context,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
-                if (circuitPaths.isNotEmpty || hasCircuitSvg)
-                  SizedBox(
-                    width: 112,
-                    height: chainH,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      alignment: Alignment.center,
-                      children: [
-                        if (circuitPaths.isNotEmpty)
-                          HubAssetImageChain(
-                            paths: circuitPaths,
-                            bundle: rootBundle,
-                            height: chainH,
-                            width: 112,
-                            fit: BoxFit.contain,
-                            alignment: Alignment.centerRight,
-                            borderRadius: 12,
-                            glassFallbackAccent: accent,
-                          ),
-                        if (hasCircuitSvg)
-                          IgnorePointer(
-                            child: Opacity(
-                              opacity: circuitPaths.isNotEmpty ? 0.22 : 0.14,
-                              child: SvgPicture.network(
-                                circuitSvg,
-                                height: chainH,
-                                fit: BoxFit.contain,
-                                alignment: Alignment.centerRight,
-                                colorFilter: ColorFilter.mode(
-                                  scheme.onSurface.withValues(alpha: 0.88),
-                                  BlendMode.srcIn,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
               ],
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
@@ -20953,6 +20974,7 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
                     accent: accent,
                     value: '$lengthKm km',
                     caption: context.l10n.length,
+                    emphasize: true,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -21008,11 +21030,61 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
           ],
         );
 
-        return DecoratedBox(
-          decoration: _hubFlatHubCardDecoration(context, radius: 18),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: heroCore,
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(weekendHeroRadius),
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
+            clipBehavior: Clip.hardEdge,
+            children: [
+              DecoratedBox(
+                decoration: _hubFlatHubCardDecoration(
+                  context,
+                  radius: weekendHeroRadius,
+                ),
+                child: Stack(
+                  clipBehavior: Clip.hardEdge,
+                  children: [
+                    if (showCircuitWatermark)
+                      Positioned(
+                        top: 8,
+                        right: 6,
+                        child: _weekendHubCircuitWatermarkLayer(
+                          context,
+                          accent: accent,
+                          onSurface: scheme.onSurface,
+                          circuitPaths: circuitPaths,
+                          hasCircuitSvg: hasCircuitSvg,
+                          circuitSvg: circuitSvg,
+                        ),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: heroCore,
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 5,
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          accent.withValues(alpha: 0.4),
+                          accent.withValues(alpha: 0),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },
@@ -21072,7 +21144,7 @@ DateTime? _findPenaltyTimestamp(RaceResultRow row, Map<String, dynamic> detail) 
     // desktop, and LayoutBuilder cannot participate in intrinsic height calc.
     return _weekendHubCard(
       context,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       fillWidth: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -21894,6 +21966,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
   int? _selectedYearIndex;
   late ScrollController _scrollController;
   bool _showAllDnfs = false;
+  Future<DnfHubPayload?>? _bundledDnfPayloadFuture;
   late Driver _detailDriver;
   bool _isChampionshipLeader = false;
   /// Same merge as [StandingsView] / `/#/drivers` (drivers_standings_*.json).
@@ -21904,6 +21977,7 @@ class _DriverDetailViewState extends State<DriverDetailView> {
     super.initState();
     _detailDriver = widget.driver;
     _scrollController = ScrollController();
+    _bundledDnfPayloadFuture = loadBundledDriverDnfPayload(_detailDriver.name);
     _loadHubDriverJson();
     unawaited(_loadChampionshipDriversForHero());
   }
@@ -21915,6 +21989,8 @@ class _DriverDetailViewState extends State<DriverDetailView> {
         oldWidget.driver.number != widget.driver.number) {
       _detailDriver = widget.driver;
       _championshipDriversOrdered = null;
+      _bundledDnfPayloadFuture = loadBundledDriverDnfPayload(_detailDriver.name);
+      _showAllDnfs = false;
       _loadHubDriverJson();
       unawaited(_loadChampionshipDriversForHero());
     }
@@ -22976,49 +23052,117 @@ style: TextStyle(
             Icons.cancel_schedule_send,
           ),
           if (_detailDriver.dnfs > 0)
-            Theme(
-              data: Theme.of(
-                context,
-              ).copyWith(dividerColor: Colors.transparent),
-              child: ExpansionTile(
-                tilePadding: const EdgeInsets.symmetric(horizontal: 12),
-                childrenPadding: const EdgeInsets.only(bottom: 8),
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
+            FutureBuilder<DnfHubPayload?>(
+              future: _bundledDnfPayloadFuture,
+              builder: (context, snap) {
+                final retirementsInk = Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.82);
+                final bundled = driverHasBundledDnfJson(_detailDriver.name);
+                final legacy = _getDnfEntries(_detailDriver.name);
+                final payload = snap.data;
+                final int retirementsHeaderCount;
+                if (bundled &&
+                    !snap.hasError &&
+                    snap.connectionState != ConnectionState.done) {
+                  retirementsHeaderCount = _detailDriver.dnfs;
+                } else if (payload != null && payload.dnfList.isNotEmpty) {
+                  retirementsHeaderCount = payload.totalDnfs;
+                } else if (_dnfEntriesArePlaceholder(legacy)) {
+                  retirementsHeaderCount = _detailDriver.dnfs;
+                } else {
+                  retirementsHeaderCount = _dnfRetirementsHeaderCount(legacy);
+                }
+                final List<DnfUiEntry> uiEntries;
+                if (payload != null && payload.dnfList.isNotEmpty) {
+                  uiEntries = payload.orderedNewestFirst();
+                } else if (_dnfEntriesArePlaceholder(legacy)) {
+                  uiEntries = const [];
+                } else {
+                  uiEntries = DnfUiEntry.fromLegacyRows(legacy);
+                }
+                final placeholder = uiEntries.isEmpty &&
+                    _dnfEntriesArePlaceholder(legacy) &&
+                    payload == null;
+                return Theme(
+                  data: Theme.of(
+                    context,
+                  ).copyWith(dividerColor: Colors.transparent),
+                  child: ExpansionTile(
+                    tilePadding: const EdgeInsets.symmetric(horizontal: 12),
+                    childrenPadding: const EdgeInsets.only(bottom: 8),
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(
-                          Icons.car_crash,
-                          size: 16,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.primary.withValues(alpha: 0.8),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.car_crash,
+                              size: 16,
+                              color: retirementsInk,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              context.l10n.retirements,
+                              style: TextStyle(
+                                color: retirementsInk,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 12),
                         Text(
-                          context.l10n.retirements,
+                          retirementsHeaderCount.toString(),
                           style: TextStyle(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: 0.82),
+                            fontWeight: FontWeight.bold,
                             fontSize: 13,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ],
                     ),
-                    Text(
-                      _detailDriver.dnfs.toString(),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                  ],
-                ),
-                children: [_buildDnfTimeline()],
-              ),
+                    children: [
+                      if (bundled && snap.hasError)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+                          child: Text(
+                            'Could not load retirements data.',
+                            style: HubVisualLanguage.titilliumSecondary(
+                              context,
+                              fontSize: 13,
+                              color: Theme.of(context).colorScheme.error,
+                              opacity: 1,
+                            ),
+                          ),
+                        )
+                      else if (bundled &&
+                          snap.connectionState != ConnectionState.done)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: HubGlassPageLoadingPlaceholder(fixedHeight: 200),
+                        )
+                      else if (placeholder)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                          child: Text(
+                            legacy.first[2],
+                            style: HubVisualLanguage.titilliumSecondary(
+                              context,
+                              fontSize: 13,
+                            ),
+                          ),
+                        )
+                      else
+                        _buildDnfCardColumn(
+                          context,
+                          uiEntries,
+                          teamAccent: driverAccent,
+                        ),
+                    ],
+                  ),
+                );
+              },
             ),
           const SizedBox(height: 8),
         ],
@@ -23204,112 +23348,168 @@ style: TextStyle(
     );
   }
 
-  Widget _buildDnfTimeline() {
-    final theme = Theme.of(context);
-    final tokens = _themeTokens(context);
-    final allEntries = _getDnfEntries(_detailDriver.name);
+  /// Curated DNF narrative list uses a placeholder row when we have no stories.
+  bool _dnfEntriesArePlaceholder(List<List<String>> entries) {
+    return entries.length == 1 &&
+        entries[0].length > 1 &&
+        entries[0][1] == 'No recent DNFs';
+  }
+
+  /// Header count matches the timeline rows when we have real entries; otherwise
+  /// fall back to career [Driver.dnfs] (curated map is incomplete vs stats).
+  int _dnfRetirementsHeaderCount(List<List<String>> entries) {
+    if (_dnfEntriesArePlaceholder(entries)) {
+      return _detailDriver.dnfs;
+    }
+    return entries.length;
+  }
+
+  static const double _dnfCardRadius = 16;
+  static const double _dnfTopAccentH = 5;
+
+  Widget _buildDnfHubGlassCard(
+    BuildContext context, {
+    required DnfUiEntry entry,
+    required Color teamAccent,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final categoryAccent =
+        dnfCategoryAccentColor(context, entry.category, teamAccent);
+    final primaryText = HubTheme.primaryOnGlassText(context);
+    final glowOpacity = isDark ? 0.09 : 0.06;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 12),
+      child: HubInteractiveGlass(
+        borderRadius: _dnfCardRadius,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(_dnfCardRadius),
+          clipBehavior: Clip.hardEdge,
+          child: Stack(
+            clipBehavior: Clip.hardEdge,
+            children: [
+              HubVisualLanguage.glassPanel(
+                context: context,
+                radius: _dnfCardRadius,
+                accentGlow: categoryAccent,
+                accentGlowOpacity: glowOpacity,
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      '${entry.grandPrix} ${entry.year}',
+                      style: HubVisualLanguage.f1Wide(
+                        context,
+                        fontSize: 15,
+                        color: primaryText,
+                        height: 1.15,
+                      ),
+                    ),
+                    if (entry.reason.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        entry.reason,
+                        style: HubVisualLanguage.f1Wide(
+                          context,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: primaryText,
+                          height: 1.2,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 8),
+                    Text(
+                      entry.detail,
+                      style: HubVisualLanguage.titilliumSecondary(
+                        context,
+                        fontSize: 13,
+                        color: HubTheme.secondaryOnGlassText(context),
+                        opacity: 0.7,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Lap: ${entry.lapRaw}',
+                            style: HubVisualLanguage.titilliumSecondary(
+                              context,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            entry.category.isEmpty
+                                ? 'Category: —'
+                                : 'Category: ${entry.category}',
+                            textAlign: TextAlign.end,
+                            style: HubVisualLanguage.titilliumSecondary(
+                              context,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: _dnfTopAccentH,
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          categoryAccent.withValues(alpha: 0.4),
+                          categoryAccent.withValues(alpha: 0),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDnfCardColumn(
+    BuildContext context,
+    List<DnfUiEntry> allEntries, {
+    required Color teamAccent,
+  }) {
     final visibleEntries = _showAllDnfs || allEntries.length <= 5
         ? allEntries
         : allEntries.take(5).toList();
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ...visibleEntries.asMap().entries.map((entry) {
-          final index = entry.key;
-          final dnf = entry.value;
-          final isLast = index == visibleEntries.length - 1;
-          final lapValue = dnf[3].trim();
-          final lapNumber = int.tryParse(lapValue);
-          final lapLabel = lapNumber != null
-              ? 'Lap $lapNumber'
-              : lapValue.toUpperCase();
-
-          return IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 12),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 10,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          color: _hubReadableAccent(context),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: theme.colorScheme.onSurface,
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-                      if (!isLast)
-                        Expanded(
-                          child: Container(
-                            width: 2,
-                            color: tokens.outline.withValues(alpha: 0.75),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              dnf[0],
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: _hubReadableAccent(context),
-                                fontSize: 12,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              lapLabel,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: theme.colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          dnf[1],
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.onSurface,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          dnf[2],
-                          style: TextStyle(
-                            fontSize: 12,
-                            height: 1.35,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
+        ...visibleEntries.map(
+          (e) => _buildDnfHubGlassCard(
+            context,
+            entry: e,
+            teamAccent: teamAccent,
+          ),
+        ),
         if (allEntries.length > 5)
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
             child: Align(
               alignment: Alignment.centerLeft,
               child: TextButton.icon(

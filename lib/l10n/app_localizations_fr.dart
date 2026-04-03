@@ -2392,7 +2392,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get circuit_map_zoom_out => 'Zoom arrière';
 
   @override
-  String get recent_form_trend_title => 'Tendance de forme';
+  String get recent_form_trend_title => 'Saison en cours';
 
   @override
   String get recent_form_last_5_points => '5 derniers points';

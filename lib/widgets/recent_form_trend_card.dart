@@ -255,7 +255,17 @@ class _RecentFormTrendCardState extends State<RecentFormTrendCard> {
           );
         }
 
+        var seasonRun = 0.0;
+        final seasonCumulative = <double>[];
+        for (final r in all) {
+          seasonRun += r.weekendPoints;
+          seasonCumulative.add(seasonRun);
+        }
+
         final last5 = all.length <= 5 ? all : all.sublist(all.length - 5);
+        final last5Cumulative = all.length <= 5
+            ? seasonCumulative
+            : seasonCumulative.sublist(all.length - 5);
         final last5Points =
             last5.fold<double>(0, (s, r) => s + r.weekendPoints);
         final finishes = last5
@@ -338,8 +348,7 @@ class _RecentFormTrendCardState extends State<RecentFormTrendCard> {
                           height: 132,
                           child: CustomPaint(
                             painter: _CompactFormAreaPainter(
-                              weekendDeltas:
-                                  last5.map((r) => r.weekendPoints).toList(),
+                              cumulativePoints: last5Cumulative,
                               circuitCodes:
                                   last5.map((r) => r.circuitCode).toList(),
                               primary: scheme.primary,
@@ -454,7 +463,7 @@ class _RecentFormMetricChip extends StatelessWidget {
 
 class _CompactFormAreaPainter extends CustomPainter {
   _CompactFormAreaPainter({
-    required this.weekendDeltas,
+    required this.cumulativePoints,
     required this.circuitCodes,
     required this.primary,
     required this.fillTopAlpha,
@@ -462,7 +471,8 @@ class _CompactFormAreaPainter extends CustomPainter {
     required this.gridLineColor,
   });
 
-  final List<double> weekendDeltas;
+  /// Cumulative championship points after each shown round (monotonic, non-decreasing).
+  final List<double> cumulativePoints;
   final List<String> circuitCodes;
   final Color primary;
   final double fillTopAlpha;
@@ -471,10 +481,10 @@ class _CompactFormAreaPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (weekendDeltas.isEmpty) return;
+    if (cumulativePoints.isEmpty) return;
 
-    final n = weekendDeltas.length;
-    final maxY = math.max(1, weekendDeltas.reduce(math.max) * 1.15);
+    final n = cumulativePoints.length;
+    final maxY = math.max(1, cumulativePoints.reduce(math.max) * 1.12);
     const padL = 8.0;
     const padR = 8.0;
     const padTop = 10.0;
@@ -486,7 +496,7 @@ class _CompactFormAreaPainter extends CustomPainter {
     double yFor(double v) => padTop + chartH * (1 - v / maxY);
 
     final pts = <Offset>[
-      for (var i = 0; i < n; i++) Offset(xFor(i), yFor(weekendDeltas[i])),
+      for (var i = 0; i < n; i++) Offset(xFor(i), yFor(cumulativePoints[i])),
     ];
 
     final fillPath = Path()..moveTo(pts.first.dx, size.height - padBottom);
@@ -528,6 +538,11 @@ class _CompactFormAreaPainter extends CustomPainter {
     }
     canvas.drawPath(linePath, linePaint);
 
+    final dotPaint = Paint()..color = primary;
+    for (final p in pts) {
+      canvas.drawCircle(p, 3.2, dotPaint);
+    }
+
     final icon = Icons.timer_outlined;
     final builder = ui.ParagraphBuilder(
       ui.ParagraphStyle(
@@ -568,7 +583,7 @@ class _CompactFormAreaPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _CompactFormAreaPainter oldDelegate) {
-    return oldDelegate.weekendDeltas != weekendDeltas ||
+    return oldDelegate.cumulativePoints != cumulativePoints ||
         oldDelegate.primary != primary ||
         oldDelegate.circuitCodes != circuitCodes ||
         oldDelegate.gridLineColor != gridLineColor ||
@@ -594,22 +609,14 @@ class _RecentFormExpandedScaffold extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final l10n = context.l10n;
 
-    var raceCum = 0.0;
-    var sprintCum = 0.0;
-    final raceSeries = <double>[];
-    final sprintSeries = <double?>[];
+    var weekendCum = 0.0;
+    final weekendCumulative = <double>[];
     var podiums = 0;
     final raceFinishes = <int>[];
 
     for (final r in rows) {
-      raceCum += r.racePointsDelta;
-      raceSeries.add(raceCum);
-      if (r.sprintPointsDelta != null) {
-        sprintCum += r.sprintPointsDelta!;
-        sprintSeries.add(sprintCum);
-      } else {
-        sprintSeries.add(null);
-      }
+      weekendCum += r.weekendPoints;
+      weekendCumulative.add(weekendCum);
       if (r.racePosition != null && r.racePosition! <= 3) podiums++;
       if (r.sprintPosition != null && r.sprintPosition! <= 3) podiums++;
       if (r.racePosition != null) raceFinishes.add(r.racePosition!);
@@ -688,12 +695,10 @@ class _RecentFormExpandedScaffold extends StatelessWidget {
                               child: Material(
                                 color: Colors.transparent,
                                 child: CustomPaint(
-                                  painter: _ExpandedDualTrendPainter(
+                                  painter: _ExpandedCumulativeSeasonPainter(
                                     rows: rows,
-                                    raceCumulative: raceSeries,
-                                    sprintCumulative: sprintSeries,
+                                    weekendCumulative: weekendCumulative,
                                     primary: scheme.primary,
-                                    sprintColor: scheme.tertiary,
                                     labelColor: scheme.onSurfaceVariant,
                                     peakLabelColor: scheme.onSurface,
                                   ),
@@ -739,38 +744,30 @@ class _RecentFormExpandedScaffold extends StatelessWidget {
   }
 }
 
-class _ExpandedDualTrendPainter extends CustomPainter {
-  _ExpandedDualTrendPainter({
+/// Full-season line: cumulative **weekend** points (race + sprint) — monotonic upward.
+class _ExpandedCumulativeSeasonPainter extends CustomPainter {
+  _ExpandedCumulativeSeasonPainter({
     required this.rows,
-    required this.raceCumulative,
-    required this.sprintCumulative,
+    required this.weekendCumulative,
     required this.primary,
-    required this.sprintColor,
     required this.labelColor,
     required this.peakLabelColor,
   });
 
   final List<_DriverRoundFormRow> rows;
-  final List<double> raceCumulative;
-  final List<double?> sprintCumulative;
+  final List<double> weekendCumulative;
   final Color primary;
-  final Color sprintColor;
   final Color labelColor;
   final Color peakLabelColor;
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (rows.isEmpty) return;
+    if (rows.isEmpty || weekendCumulative.length != rows.length) return;
     final n = rows.length;
-    final maxRace = raceCumulative.isEmpty
-        ? 1.0
-        : raceCumulative.reduce(math.max) * 1.08;
-    final sprintVals =
-        sprintCumulative.whereType<double>().toList();
-    final maxSprint = sprintVals.isEmpty
-        ? 0.0
-        : sprintVals.reduce(math.max) * 1.08;
-    final maxY = math.max(math.max(maxRace, maxSprint), 1.0);
+    final maxY = math.max(
+      1.0,
+      weekendCumulative.reduce(math.max) * 1.08,
+    );
 
     const padL = 36.0;
     const padR = 12.0;
@@ -782,44 +779,53 @@ class _ExpandedDualTrendPainter extends CustomPainter {
     double xFor(int i) => padL + cw * (n <= 1 ? 0.5 : i / (n - 1));
     double yFor(double v) => padTop + ch * (1 - v / maxY);
 
-    final racePts = <Offset>[
-      for (var i = 0; i < n; i++) Offset(xFor(i), yFor(raceCumulative[i])),
+    final pts = <Offset>[
+      for (var i = 0; i < n; i++) Offset(xFor(i), yFor(weekendCumulative[i])),
     ];
-    final racePaint = Paint()
+
+    final gridPaint = Paint()
+      ..color = labelColor.withValues(alpha: 0.12)
+      ..strokeWidth = 1;
+    for (var g = 1; g < 4; g++) {
+      final gy = padTop + ch * (g / 4);
+      canvas.drawLine(Offset(padL, gy), Offset(size.width - padR, gy), gridPaint);
+    }
+
+    final fillPath = Path()..moveTo(pts.first.dx, size.height - padBottom);
+    for (final p in pts) {
+      fillPath.lineTo(p.dx, p.dy);
+    }
+    fillPath
+      ..lineTo(pts.last.dx, size.height - padBottom)
+      ..close();
+    canvas.drawPath(
+      fillPath,
+      Paint()
+        ..shader = ui.Gradient.linear(
+          Offset(0, padTop),
+          Offset(0, size.height - padBottom),
+          [
+            primary.withValues(alpha: 0.18),
+            primary.withValues(alpha: 0.03),
+          ],
+        ),
+    );
+
+    final linePaint = Paint()
       ..color = primary
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.8
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
-    final rp = Path()..moveTo(racePts.first.dx, racePts.first.dy);
-    for (var i = 1; i < racePts.length; i++) {
-      rp.lineTo(racePts[i].dx, racePts[i].dy);
+    final linePath = Path()..moveTo(pts.first.dx, pts.first.dy);
+    for (var i = 1; i < pts.length; i++) {
+      linePath.lineTo(pts[i].dx, pts[i].dy);
     }
-    canvas.drawPath(rp, racePaint);
+    canvas.drawPath(linePath, linePaint);
 
-    final dashPaint = Paint()
-      ..color = sprintColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.2
-      ..strokeCap = StrokeCap.round;
-    final dotPaint = Paint()..color = sprintColor;
-    for (var i = 0; i < n - 1; i++) {
-      final a = sprintCumulative[i];
-      final b = sprintCumulative[i + 1];
-      if (a != null && b != null) {
-        _drawDashedLine(
-          canvas,
-          Offset(xFor(i), yFor(a)),
-          Offset(xFor(i + 1), yFor(b)),
-          dashPaint,
-        );
-      }
-    }
-    for (var i = 0; i < n; i++) {
-      final sv = sprintCumulative[i];
-      if (sv != null) {
-        canvas.drawCircle(Offset(xFor(i), yFor(sv)), 3.2, dotPaint);
-      }
+    final dotPaint = Paint()..color = primary;
+    for (final p in pts) {
+      canvas.drawCircle(p, 3.8, dotPaint);
     }
 
     for (var i = 0; i < n; i++) {
@@ -860,7 +866,7 @@ class _ExpandedDualTrendPainter extends CustomPainter {
           canvas,
           Offset(
             xFor(i) - lp.width / 2,
-            yFor(raceCumulative[i]) - lp.height - 6,
+            yFor(weekendCumulative[i]) - lp.height - 6,
           ),
         );
       }
@@ -872,12 +878,12 @@ class _ExpandedDualTrendPainter extends CustomPainter {
         final pos =
             r.sprintPosition != null ? '[P${r.sprintPosition}]' : '';
         final label = '$bracket $pos'.trim();
-        final yS = yFor(sprintCumulative[i]!);
+        final yS = yFor(weekendCumulative[i]);
         final lp = TextPainter(
           text: TextSpan(
             text: label,
             style: TextStyle(
-              color: sprintColor,
+              color: primary.withValues(alpha: 0.92),
               fontSize: 8,
               fontWeight: FontWeight.w700,
             ),
@@ -889,28 +895,11 @@ class _ExpandedDualTrendPainter extends CustomPainter {
     }
   }
 
-  void _drawDashedLine(Canvas canvas, Offset a, Offset b, Paint paint) {
-    const dash = 6.0;
-    const gap = 4.0;
-    final d = b - a;
-    final len = d.distance;
-    if (len < 0.001) return;
-    final dir = d / len;
-    var dist = 0.0;
-    while (dist < len) {
-      final start = a + dir * dist;
-      dist += dash;
-      final end = a + dir * math.min(dist, len);
-      canvas.drawLine(start, end, paint);
-      dist += gap;
-    }
-  }
-
   @override
-  bool shouldRepaint(covariant _ExpandedDualTrendPainter oldDelegate) {
+  bool shouldRepaint(covariant _ExpandedCumulativeSeasonPainter oldDelegate) {
     return oldDelegate.rows != rows ||
-        oldDelegate.primary != primary ||
-        oldDelegate.sprintColor != sprintColor;
+        oldDelegate.weekendCumulative != weekendCumulative ||
+        oldDelegate.primary != primary;
   }
 }
 

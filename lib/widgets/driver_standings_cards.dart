@@ -414,14 +414,30 @@ class _DriverStandingsHubListRowState extends State<_DriverStandingsHubListRow> 
         ? driver.team
         : '${driver.team} $nat';
 
-    final narrow = widget.usableWidth < 380;
-    final rankBox = HubStandingsMetrics.rankBadgeSize;
-    final labelFs = narrow ? 9.0 : 10.0;
-    final statFigureFs = narrow ? 17.0 : 19.0;
-    final statColW = narrow ? 54.0 : 62.0;
-    final gapAfterName = narrow ? 14.0 : 22.0;
-    final gapBetweenStatCols = narrow ? 14.0 : 20.0;
-    final gapBeforeChevron = narrow ? 10.0 : 14.0;
+    // Hide WINS/PODIUMS on narrow viewports so name + team keep space (parity with teams row).
+    final isNarrow = widget.usableWidth < 500;
+    // Tighter badge / points / type sizes — same breakpoints as `_ConstructorTeamStandingCard`.
+    final tightMetrics = widget.usableWidth < 380;
+    final rankBox =
+        tightMetrics ? 36.0 : HubStandingsMetrics.rankBadgeSize;
+    final posFs = tightMetrics
+        ? (widget.compact ? 16.0 : 17.0)
+        : (widget.compact ? 18.0 : 20.0);
+    final nameFs = tightMetrics
+        ? (widget.compact ? 15.0 : 16.0)
+        : (widget.compact ? 15.0 : 16.0);
+    final labelFs = tightMetrics ? 9.0 : 10.0;
+    final statFigureFs = tightMetrics ? 17.0 : 19.0;
+    final statColW = tightMetrics ? 54.0 : 62.0;
+    final gapAfterName = tightMetrics ? 14.0 : 22.0;
+    final gapBetweenStatCols = tightMetrics ? 14.0 : 20.0;
+    final gapBeforeChevron = tightMetrics ? 10.0 : 14.0;
+    /// Points-only column when [isNarrow]: fixed width like constructor cards.
+    final pointsColW =
+        isNarrow ? (tightMetrics ? 70.0 : 74.0) : statColW;
+    final ptsFigureFsNarrow = tightMetrics
+        ? (widget.compact ? 17.0 : 19.0)
+        : (widget.compact ? 19.0 : 21.0);
     final rowRadius = HubStandingsMetrics.listRowGlassRadius;
 
     final rankFill = isDark
@@ -495,96 +511,143 @@ class _DriverStandingsHubListRowState extends State<_DriverStandingsHubListRow> 
                 horizontal: HubStandingsMetrics.rowHPadding,
                 vertical: HubStandingsMetrics.rowVPadding,
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: rankBox,
-                    height: rankBox,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: rankFill,
-                      borderRadius: BorderRadius.circular(
-                        HubStandingsMetrics.rankBadgeInnerRadius,
-                      ),
-                      border: Border.all(
-                        color: _driverStandingsRankBadgeBorder(context, pos),
-                        width: pos <= 3 ? 1.6 : 1,
-                      ),
-                    ),
-                    child: Text(
-                      '$pos',
-                      style: HubVisualLanguage.f1Wide(
-                        context,
-                        fontSize: widget.compact ? 18 : 20,
-                        color: HubTheme.primaryOnGlassText(context),
-                        height: 1,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: HubStandingsMetrics.rankToStripeGap),
-                  Container(
-                    width: HubStandingsMetrics.teamStripeWidth,
-                    height: 46,
-                    decoration: BoxDecoration(
-                      color: accent,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  SizedBox(width: HubStandingsMetrics.stripeToTextGap),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          driver.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: HubVisualLanguage.f1Wide(
-                            context,
-                            fontSize: widget.compact ? 15 : 16,
-                            color: HubTheme.primaryOnGlassText(context),
-                            height: 1.15,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 64),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: rankBox,
+                      height: rankBox,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: rankFill,
+                          borderRadius: BorderRadius.circular(
+                            HubStandingsMetrics.rankBadgeInnerRadius,
+                          ),
+                          border: Border.all(
+                            color: _driverStandingsRankBadgeBorder(context, pos),
+                            width: pos <= 3 ? 1.6 : 1,
                           ),
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          teamLine,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: HubVisualLanguage.titilliumSecondary(
-                            context,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                        child: Center(
+                          child: Text(
+                            '$pos',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: HubVisualLanguage.f1Wide(
+                              context,
+                              fontSize: posFs,
+                              color: HubTheme.primaryOnGlassText(context),
+                              height: 1,
+                            ),
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                  SizedBox(width: gapAfterName),
-                  statCol(
-                    context.l10n.wins.toUpperCase(),
-                    '${driver.seasonStandingWins ?? driver.wins}',
-                  ),
-                  SizedBox(width: gapBetweenStatCols),
-                  statCol(
-                    context.l10n.podiums.toUpperCase(),
-                    '${driver.seasonStandingPodiums ?? driver.podiums}',
-                  ),
-                  SizedBox(width: gapBetweenStatCols),
-                  statCol(
-                    context.l10n.pts.toUpperCase(),
-                    widget.state._formatPoints(driver.points),
-                  ),
-                  SizedBox(width: gapBeforeChevron),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    size: 22,
-                    color: HubTheme.secondaryOnGlassText(context)
-                        .withValues(alpha: 0.85),
-                  ),
-                ],
+                    SizedBox(width: HubStandingsMetrics.rankToStripeGap),
+                    Container(
+                      width: HubStandingsMetrics.teamStripeWidth,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: accent,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    SizedBox(width: HubStandingsMetrics.stripeToTextGap),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            driver.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: HubVisualLanguage.f1Wide(
+                              context,
+                              fontSize: nameFs,
+                              color: HubTheme.primaryOnGlassText(context),
+                              height: 1.15,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            teamLine,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: HubVisualLanguage.titilliumSecondary(
+                              context,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: gapAfterName),
+                    if (isNarrow)
+                      SizedBox(
+                        width: pointsColW,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              widget.state._formatPoints(driver.points),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.end,
+                              style: HubVisualLanguage.f1Wide(
+                                context,
+                                fontSize: ptsFigureFsNarrow,
+                                color: HubTheme.primaryOnGlassText(context),
+                                height: 1,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              context.l10n.pts.toUpperCase(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.end,
+                              style: HubVisualLanguage.titilliumSecondary(
+                                context,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1.4,
+                                opacity: 0.65,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else ...[
+                      statCol(
+                        context.l10n.wins.toUpperCase(),
+                        '${driver.seasonStandingWins ?? driver.wins}',
+                      ),
+                      SizedBox(width: gapBetweenStatCols),
+                      statCol(
+                        context.l10n.podiums.toUpperCase(),
+                        '${driver.seasonStandingPodiums ?? driver.podiums}',
+                      ),
+                      SizedBox(width: gapBetweenStatCols),
+                      statCol(
+                        context.l10n.pts.toUpperCase(),
+                        widget.state._formatPoints(driver.points),
+                      ),
+                    ],
+                    SizedBox(width: gapBeforeChevron),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 22,
+                      color: HubTheme.secondaryOnGlassText(context)
+                          .withValues(alpha: 0.85),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

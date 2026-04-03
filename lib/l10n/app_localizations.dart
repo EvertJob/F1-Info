@@ -4680,7 +4680,7 @@ abstract class AppLocalizations {
   /// No description provided for @recent_form_trend_title.
   ///
   /// In en, this message translates to:
-  /// **'Recent Form Trend'**
+  /// **'Current Season'**
   String get recent_form_trend_title;
 
   /// No description provided for @recent_form_last_5_points.
