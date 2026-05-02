@@ -688,51 +688,10 @@
       ]
     },
     {
-      "driverNumber": 23,
-      "broadcastName": "A ALBON",
-      "teamName": "Williams",
-      "finishPosition": 14,
-      "points": 0,
-      "duration": [
-        90.988,
-        90.216,
-        null
-      ],
-      "gap_to_leader": 1.883,
-      "fastestLapDuration": 90.216,
-      "driverFastestLap": {
-        "duration": 90.216,
-        "time": "1:30.216",
-        "lapNumber": 8
-      },
-      "tyreStints": [
-        {
-          "compound": "MEDIUM",
-          "lapStart": 1,
-          "lapEnd": 6
-        },
-        {
-          "compound": "MEDIUM",
-          "lapStart": 7,
-          "lapEnd": 12
-        }
-      ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 7,
-          "duration": 264.4
-        }
-      ]
-    },
-    {
       "driverNumber": 55,
       "broadcastName": "C SAINZ",
       "teamName": "Williams",
-      "finishPosition": 15,
+      "finishPosition": 14,
       "points": 0,
       "duration": [
         90.987,
@@ -773,7 +732,7 @@
       "driverNumber": 41,
       "broadcastName": "A LINDBLAD",
       "teamName": "Racing Bulls",
-      "finishPosition": 16,
+      "finishPosition": 15,
       "points": 0,
       "duration": [
         90.872,
@@ -823,7 +782,7 @@
       "driverNumber": 30,
       "broadcastName": "L LAWSON",
       "teamName": "Racing Bulls",
-      "finishPosition": 17,
+      "finishPosition": 16,
       "points": 0,
       "duration": [
         91.043,
@@ -864,7 +823,7 @@
       "driverNumber": 31,
       "broadcastName": "E OCON",
       "teamName": "Haas F1 Team",
-      "finishPosition": 18,
+      "finishPosition": 17,
       "points": 0,
       "duration": [
         91.245,
@@ -905,7 +864,7 @@
       "driverNumber": 11,
       "broadcastName": "S PEREZ",
       "teamName": "Cadillac",
-      "finishPosition": 19,
+      "finishPosition": 18,
       "points": 0,
       "duration": [
         91.255,
@@ -930,6 +889,47 @@
         {
           "lap": 1,
           "duration": null
+        }
+      ]
+    },
+    {
+      "driverNumber": 23,
+      "broadcastName": "A ALBON",
+      "teamName": "Williams",
+      "finishPosition": 19,
+      "points": 0,
+      "duration": [
+        91.322,
+        90.216,
+        null
+      ],
+      "gap_to_leader": 1.883,
+      "fastestLapDuration": 90.216,
+      "driverFastestLap": {
+        "duration": 90.216,
+        "time": "1:30.216",
+        "lapNumber": 8
+      },
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 6
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 7,
+          "lapEnd": 12
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 7,
+          "duration": 264.4
         }
       ]
     },
