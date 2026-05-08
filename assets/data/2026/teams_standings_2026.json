@@ -6,7 +6,7 @@
     },
     {
       "team": "Ferrari",
-      "points": 112.0
+      "points": 110.0
     },
     {
       "team": "McLaren",
@@ -18,7 +18,7 @@
     },
     {
       "team": "Alpine",
-      "points": 21.0
+      "points": 23.0
     },
     {
       "team": "Haas F1 Team",
@@ -275,7 +275,7 @@
             "points_received": 2.0
           },
           "Race": {
-            "points_received": 6.0
+            "points_received": 4.0
           }
         },
         "Mercedes": {

@@ -188,7 +188,7 @@
       "session_key": 11280,
       "date": "2026-05-03T17:04:02.493000+00:00",
       "driver_number": null,
-      "lap_number": null,
+      "lap_number": 1,
       "category": "SessionStatus",
       "flag": null,
       "scope": null,
