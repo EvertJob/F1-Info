@@ -18,6 +18,11 @@
       "timeOrGap": "1:33:19.273",
       "tyreStints": [
         {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 26
+        },
+        {
           "compound": "HARD",
           "lapStart": 27,
           "lapEnd": 57
@@ -46,6 +51,11 @@
       },
       "timeOrGap": "+3.264s",
       "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 27
+        },
         {
           "compound": "HARD",
           "lapStart": 28,
@@ -76,6 +86,11 @@
       "timeOrGap": "+27.092s",
       "tyreStints": [
         {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 28
+        },
+        {
           "compound": "HARD",
           "lapStart": 29,
           "lapEnd": 57
@@ -104,6 +119,11 @@
       },
       "timeOrGap": "+43.051s",
       "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 20
+        },
         {
           "compound": "HARD",
           "lapStart": 21,
@@ -134,6 +154,11 @@
       "timeOrGap": "+48.949s",
       "tyreStints": [
         {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 6
+        },
+        {
           "compound": "HARD",
           "lapStart": 7,
           "lapEnd": 57
@@ -162,6 +187,11 @@
       },
       "timeOrGap": "+53.753s",
       "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 27
+        },
         {
           "compound": "HARD",
           "lapStart": 28,
@@ -192,6 +222,11 @@
       "timeOrGap": "+61.871s",
       "tyreStints": [
         {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 31
+        },
+        {
           "compound": "HARD",
           "lapStart": 32,
           "lapEnd": 57
@@ -221,6 +256,11 @@
       "timeOrGap": "+64.245s",
       "tyreStints": [
         {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 21
+        },
+        {
           "compound": "HARD",
           "lapStart": 22,
           "lapEnd": 57
@@ -249,6 +289,11 @@
       },
       "timeOrGap": "+82.072s",
       "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 28
+        },
         {
           "compound": "HARD",
           "lapStart": 29,
@@ -312,6 +357,11 @@
       "timeOrGap": "-",
       "tyreStints": [
         {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 26
+        },
+        {
           "compound": "HARD",
           "lapStart": 27,
           "lapEnd": 56
@@ -339,6 +389,11 @@
       },
       "timeOrGap": "-",
       "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 32
+        },
         {
           "compound": "HARD",
           "lapStart": 33,
@@ -368,6 +423,11 @@
       "timeOrGap": "-",
       "tyreStints": [
         {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 31
+        },
+        {
           "compound": "HARD",
           "lapStart": 32,
           "lapEnd": 56
@@ -395,6 +455,11 @@
       },
       "timeOrGap": "-",
       "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 28
+        },
         {
           "compound": "HARD",
           "lapStart": 29,
@@ -424,6 +489,11 @@
       "timeOrGap": "-",
       "tyreStints": [
         {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 41
+        },
+        {
           "compound": "SOFT",
           "lapStart": 42,
           "lapEnd": 56
@@ -452,6 +522,11 @@
       "timeOrGap": "-",
       "tyreStints": [
         {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 29
+        },
+        {
           "compound": "HARD",
           "lapStart": 30,
           "lapEnd": 56
@@ -479,6 +554,16 @@
       },
       "timeOrGap": "-",
       "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 21
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 22,
+          "lapEnd": 37
+        },
         {
           "compound": "SOFT",
           "lapStart": 38,
@@ -511,6 +596,21 @@
       },
       "timeOrGap": "-",
       "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 6
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 7,
+          "lapEnd": 21
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 22,
+          "lapEnd": 30
+        },
         {
           "compound": "MEDIUM",
           "lapStart": 31,
@@ -546,6 +646,11 @@
       },
       "timeOrGap": "DNF",
       "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
         {
           "compound": "MEDIUM",
           "lapStart": 2,
