@@ -4,7 +4,7 @@
     {
       "driverNumber": 12,
       "broadcastName": "K ANTONELLI",
-      "teamName": "??",
+      "teamName": "Mercedes",
       "finishPosition": 1,
       "points": 0,
       "duration": 73.402,
@@ -68,7 +68,7 @@
     {
       "driverNumber": 63,
       "broadcastName": "G RUSSELL",
-      "teamName": "??",
+      "teamName": "Mercedes",
       "finishPosition": 2,
       "points": 0,
       "duration": 73.544,
@@ -132,7 +132,7 @@
     {
       "driverNumber": 44,
       "broadcastName": "L HAMILTON",
-      "teamName": "??",
+      "teamName": "Ferrari",
       "finishPosition": 3,
       "points": 0,
       "duration": 74.176,
@@ -196,7 +196,7 @@
     {
       "driverNumber": 16,
       "broadcastName": "C LECLERC",
-      "teamName": "??",
+      "teamName": "Ferrari",
       "finishPosition": 4,
       "points": 0,
       "duration": 74.355,
@@ -260,7 +260,7 @@
     {
       "driverNumber": 3,
       "broadcastName": "M VERSTAPPEN",
-      "teamName": "??",
+      "teamName": "Red Bull Racing",
       "finishPosition": 5,
       "points": 0,
       "duration": 74.366,
@@ -333,7 +333,7 @@
     {
       "driverNumber": 1,
       "broadcastName": "L NORRIS",
-      "teamName": "??",
+      "teamName": "McLaren",
       "finishPosition": 6,
       "points": 0,
       "duration": 74.799,
@@ -406,7 +406,7 @@
     {
       "driverNumber": 81,
       "broadcastName": "O PIASTRI",
-      "teamName": "??",
+      "teamName": "McLaren",
       "finishPosition": 7,
       "points": 0,
       "duration": 74.963,
@@ -479,7 +479,7 @@
     {
       "driverNumber": 41,
       "broadcastName": "A LINDBLAD",
-      "teamName": "??",
+      "teamName": "Racing Bulls",
       "finishPosition": 8,
       "points": 0,
       "duration": 75.452,
@@ -543,7 +543,7 @@
     {
       "driverNumber": 27,
       "broadcastName": "N HULKENBERG",
-      "teamName": "??",
+      "teamName": "Audi",
       "finishPosition": 9,
       "points": 0,
       "duration": 75.698,
@@ -625,7 +625,7 @@
     {
       "driverNumber": 14,
       "broadcastName": "F ALONSO",
-      "teamName": "??",
+      "teamName": "Aston Martin",
       "finishPosition": 10,
       "points": 0,
       "duration": 75.863,
@@ -698,7 +698,7 @@
     {
       "driverNumber": 5,
       "broadcastName": "G BORTOLETO",
-      "teamName": "??",
+      "teamName": "Audi",
       "finishPosition": 11,
       "points": 0,
       "duration": 76.214,
@@ -762,7 +762,7 @@
     {
       "driverNumber": 6,
       "broadcastName": "I HADJAR",
-      "teamName": "??",
+      "teamName": "Red Bull Racing",
       "finishPosition": 12,
       "points": 0,
       "duration": 76.253,
@@ -826,7 +826,7 @@
     {
       "driverNumber": 31,
       "broadcastName": "E OCON",
-      "teamName": "??",
+      "teamName": "Haas F1 Team",
       "finishPosition": 13,
       "points": 0,
       "duration": 76.497,
@@ -899,7 +899,7 @@
     {
       "driverNumber": 23,
       "broadcastName": "A ALBON",
-      "teamName": "??",
+      "teamName": "Williams",
       "finishPosition": 14,
       "points": 0,
       "duration": 76.642,
@@ -936,7 +936,7 @@
     {
       "driverNumber": 55,
       "broadcastName": "C SAINZ",
-      "teamName": "??",
+      "teamName": "Williams",
       "finishPosition": 15,
       "points": 0,
       "duration": 76.66,
@@ -1009,7 +1009,7 @@
     {
       "driverNumber": 10,
       "broadcastName": "P GASLY",
-      "teamName": "??",
+      "teamName": "Alpine",
       "finishPosition": 16,
       "points": 0,
       "duration": 76.809,
@@ -1064,7 +1064,7 @@
     {
       "driverNumber": 18,
       "broadcastName": "L STROLL",
-      "teamName": "??",
+      "teamName": "Aston Martin",
       "finishPosition": 17,
       "points": 0,
       "duration": 76.978,
@@ -1137,7 +1137,7 @@
     {
       "driverNumber": 30,
       "broadcastName": "L LAWSON",
-      "teamName": "??",
+      "teamName": "Racing Bulls",
       "finishPosition": 18,
       "points": 0,
       "duration": 77.431,
@@ -1165,7 +1165,7 @@
     {
       "driverNumber": 87,
       "broadcastName": "O BEARMAN",
-      "teamName": "??",
+      "teamName": "Haas F1 Team",
       "finishPosition": 19,
       "points": 0,
       "duration": 77.77,
@@ -1238,7 +1238,7 @@
     {
       "driverNumber": 77,
       "broadcastName": "V BOTTAS",
-      "teamName": "??",
+      "teamName": "Cadillac",
       "finishPosition": 20,
       "points": 0,
       "duration": 77.868,
@@ -1311,7 +1311,7 @@
     {
       "driverNumber": 11,
       "broadcastName": "S PEREZ",
-      "teamName": "??",
+      "teamName": "Cadillac",
       "finishPosition": 21,
       "points": 0,
       "duration": 77.926,
@@ -1375,7 +1375,7 @@
     {
       "driverNumber": 43,
       "broadcastName": "F COLAPINTO",
-      "teamName": "??",
+      "teamName": "Alpine",
       "finishPosition": 22,
       "points": 0,
       "tyreStints": [
