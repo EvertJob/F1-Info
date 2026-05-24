@@ -12,7 +12,8 @@
       "fastestLapDuration": 79.729,
       "driverFastestLap": {
         "duration": 79.729,
-        "time": "1:19.729"
+        "time": "1:19.729",
+        "lapNumber": 12
       },
       "tyreStints": [
         {
@@ -66,7 +67,8 @@
       "fastestLapDuration": 79.943,
       "driverFastestLap": {
         "duration": 79.943,
-        "time": "1:19.943"
+        "time": "1:19.943",
+        "lapNumber": 12
       },
       "tyreStints": [
         {
@@ -129,7 +131,8 @@
       "fastestLapDuration": 80.049,
       "driverFastestLap": {
         "duration": 80.049,
-        "time": "1:20.049"
+        "time": "1:20.049",
+        "lapNumber": 7
       },
       "tyreStints": [
         {
@@ -192,7 +195,8 @@
       "fastestLapDuration": 80.05,
       "driverFastestLap": {
         "duration": 80.05,
-        "time": "1:20.050"
+        "time": "1:20.050",
+        "lapNumber": 20
       },
       "tyreStints": [
         {
@@ -246,7 +250,8 @@
       "fastestLapDuration": 80.291,
       "driverFastestLap": {
         "duration": 80.291,
-        "time": "1:20.291"
+        "time": "1:20.291",
+        "lapNumber": 17
       },
       "tyreStints": [
         {
@@ -309,7 +314,8 @@
       "fastestLapDuration": 80.366,
       "driverFastestLap": {
         "duration": 80.366,
-        "time": "1:20.366"
+        "time": "1:20.366",
+        "lapNumber": 7
       },
       "tyreStints": [
         {
@@ -354,7 +360,8 @@
       "fastestLapDuration": 80.794,
       "driverFastestLap": {
         "duration": 80.794,
-        "time": "1:20.794"
+        "time": "1:20.794",
+        "lapNumber": 15
       },
       "tyreStints": [
         {
@@ -408,7 +415,8 @@
       "fastestLapDuration": 80.922,
       "driverFastestLap": {
         "duration": 80.922,
-        "time": "1:20.922"
+        "time": "1:20.922",
+        "lapNumber": 14
       },
       "tyreStints": [
         {
@@ -480,7 +488,8 @@
       "fastestLapDuration": 80.941,
       "driverFastestLap": {
         "duration": 80.941,
-        "time": "1:20.941"
+        "time": "1:20.941",
+        "lapNumber": 11
       },
       "tyreStints": [
         {
@@ -525,7 +534,8 @@
       "fastestLapDuration": 81.179,
       "driverFastestLap": {
         "duration": 81.179,
-        "time": "1:21.179"
+        "time": "1:21.179",
+        "lapNumber": 12
       },
       "tyreStints": [
         {
@@ -597,7 +607,8 @@
       "fastestLapDuration": 81.326,
       "driverFastestLap": {
         "duration": 81.326,
-        "time": "1:21.326"
+        "time": "1:21.326",
+        "lapNumber": 12
       },
       "tyreStints": [
         {
@@ -651,7 +662,8 @@
       "fastestLapDuration": 81.351,
       "driverFastestLap": {
         "duration": 81.351,
-        "time": "1:21.351"
+        "time": "1:21.351",
+        "lapNumber": 18
       },
       "tyreStints": [
         {
@@ -705,7 +717,8 @@
       "fastestLapDuration": 81.358,
       "driverFastestLap": {
         "duration": 81.358,
-        "time": "1:21.358"
+        "time": "1:21.358",
+        "lapNumber": 10
       },
       "tyreStints": [
         {
@@ -759,7 +772,8 @@
       "fastestLapDuration": 81.668,
       "driverFastestLap": {
         "duration": 81.668,
-        "time": "1:21.668"
+        "time": "1:21.668",
+        "lapNumber": 11
       },
       "tyreStints": [
         {
@@ -831,7 +845,8 @@
       "fastestLapDuration": 81.847,
       "driverFastestLap": {
         "duration": 81.847,
-        "time": "1:21.847"
+        "time": "1:21.847",
+        "lapNumber": 13
       },
       "tyreStints": [
         {
@@ -894,7 +909,8 @@
       "fastestLapDuration": 82.167,
       "driverFastestLap": {
         "duration": 82.167,
-        "time": "1:22.167"
+        "time": "1:22.167",
+        "lapNumber": 15
       },
       "tyreStints": [
         {
@@ -930,7 +946,8 @@
       "fastestLapDuration": 82.253,
       "driverFastestLap": {
         "duration": 82.253,
-        "time": "1:22.253"
+        "time": "1:22.253",
+        "lapNumber": 7
       },
       "tyreStints": [
         {
@@ -966,7 +983,8 @@
       "fastestLapDuration": 82.619,
       "driverFastestLap": {
         "duration": 82.619,
-        "time": "1:22.619"
+        "time": "1:22.619",
+        "lapNumber": 15
       },
       "tyreStints": [
         {
@@ -1011,7 +1029,8 @@
       "fastestLapDuration": 83.66,
       "driverFastestLap": {
         "duration": 83.66,
-        "time": "1:23.660"
+        "time": "1:23.660",
+        "lapNumber": 9
       },
       "tyreStints": [
         {
@@ -1056,7 +1075,8 @@
       "fastestLapDuration": 84.662,
       "driverFastestLap": {
         "duration": 84.662,
-        "time": "1:24.662"
+        "time": "1:24.662",
+        "lapNumber": 15
       },
       "tyreStints": [
         {
@@ -1110,7 +1130,8 @@
       "fastestLapDuration": 85.816,
       "driverFastestLap": {
         "duration": 85.816,
-        "time": "1:25.816"
+        "time": "1:25.816",
+        "lapNumber": 6
       },
       "tyreStints": [
         {
@@ -1164,5 +1185,11 @@
         }
       ]
     }
-  ]
+  ],
+  "sessionFastestLap": {
+    "driverName": "Oscar PIASTRI",
+    "time": "1:19.729",
+    "duration": 79.729,
+    "lapNumber": 12
+  }
 }
