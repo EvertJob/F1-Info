@@ -86,17 +86,17 @@
       "points": 2.0
     },
     {
-      "driver": "Sergio PEREZ",
-      "team": "Cadillac",
+      "driver": "Fernando ALONSO",
+      "team": "Aston Martin",
       "points": 1.0
     },
     {
-      "driver": "Lance STROLL",
-      "team": "Aston Martin",
+      "driver": "Sergio PEREZ",
+      "team": "Cadillac",
       "points": 0.0
     },
     {
-      "driver": "Fernando ALONSO",
+      "driver": "Lance STROLL",
       "team": "Aston Martin",
       "points": 0.0
     },
@@ -1118,37 +1118,37 @@
             "position_finish": 9
           }
         },
-        "Sergio PEREZ": {
+        "Fernando ALONSO": {
           "Race": {
             "points_received": 1.0,
             "position_finish": 10
           }
         },
-        "Fernando ALONSO": {
+        "Gabriel BORTOLETO": {
           "Race": {
             "points_received": 0.0,
             "position_finish": 11
           }
         },
-        "Gabriel BORTOLETO": {
+        "George RUSSELL": {
           "Race": {
             "points_received": 0.0,
             "position_finish": 12
           }
         },
-        "George RUSSELL": {
+        "Nico HULKENBERG": {
           "Race": {
             "points_received": 0.0,
             "position_finish": 13
           }
         },
-        "Nico HULKENBERG": {
+        "Franco COLAPINTO": {
           "Race": {
             "points_received": 0.0,
             "position_finish": 14
           }
         },
-        "Franco COLAPINTO": {
+        "Sergio PEREZ": {
           "Race": {
             "points_received": 0.0,
             "position_finish": 15

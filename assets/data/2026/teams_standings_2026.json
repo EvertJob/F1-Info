@@ -37,11 +37,11 @@
       "points": 2.0
     },
     {
-      "team": "Cadillac",
+      "team": "Aston Martin",
       "points": 1.0
     },
     {
-      "team": "Aston Martin",
+      "team": "Cadillac",
       "points": 0.0
     }
   ],
@@ -488,17 +488,17 @@
             "points_received": 0.0
           }
         },
-        "Cadillac": {
-          "Race": {
-            "points_received": 0.0
-          }
-        },
         "Aston Martin": {
           "Race": {
             "points_received": 0.0
           }
         },
         "Audi": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Cadillac": {
           "Race": {
             "points_received": 0.0
           }

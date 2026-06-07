@@ -587,90 +587,11 @@
       ]
     },
     {
-      "driverNumber": 11,
-      "broadcastName": "S PEREZ",
-      "teamName": "Cadillac",
-      "finishPosition": 10,
-      "points": 1.0,
-      "duration": 8650.396,
-      "gap_to_leader": 39.153,
-      "fastestLapDuration": 76.891,
-      "driverFastestLap": {
-        "duration": 76.891,
-        "time": "1:16.891",
-        "lapNumber": 78
-      },
-      "timeOrGap": "+39.153s",
-      "tyreStints": [
-        {
-          "compound": "SOFT",
-          "lapStart": 1,
-          "lapEnd": 3
-        },
-        {
-          "compound": "MEDIUM",
-          "lapStart": 4,
-          "lapEnd": 8
-        },
-        {
-          "compound": "MEDIUM",
-          "lapStart": 9,
-          "lapEnd": 58
-        },
-        {
-          "compound": "SOFT",
-          "lapStart": 59,
-          "lapEnd": 64
-        },
-        {
-          "compound": "SOFT",
-          "lapStart": 65,
-          "lapEnd": 66
-        },
-        {
-          "compound": "SOFT",
-          "lapStart": 67,
-          "lapEnd": 67
-        },
-        {
-          "compound": "SOFT",
-          "lapStart": 68,
-          "lapEnd": 78
-        }
-      ],
-      "pitStops": [
-        {
-          "lap": 4,
-          "duration": 27.1
-        },
-        {
-          "lap": 9,
-          "duration": 19.7
-        },
-        {
-          "lap": 59,
-          "duration": 26.0
-        },
-        {
-          "lap": 65,
-          "duration": 23.8
-        },
-        {
-          "lap": 67,
-          "duration": 2026.8
-        },
-        {
-          "lap": 68,
-          "duration": 65.8
-        }
-      ]
-    },
-    {
       "driverNumber": 14,
       "broadcastName": "F ALONSO",
       "teamName": "Aston Martin",
-      "finishPosition": 11,
-      "points": 0.0,
+      "finishPosition": 10,
+      "points": 1.0,
       "duration": 8653.142,
       "gap_to_leader": 41.899,
       "fastestLapDuration": 77.12,
@@ -748,7 +669,7 @@
       "driverNumber": 5,
       "broadcastName": "G BORTOLETO",
       "teamName": "Audi",
-      "finishPosition": 12,
+      "finishPosition": 11,
       "points": 0.0,
       "duration": 8653.991,
       "gap_to_leader": 42.748,
@@ -836,7 +757,7 @@
       "driverNumber": 63,
       "broadcastName": "G RUSSELL",
       "teamName": "Mercedes",
-      "finishPosition": 13,
+      "finishPosition": 12,
       "points": 0.0,
       "duration": 8654.596,
       "gap_to_leader": 43.353,
@@ -906,7 +827,7 @@
       "driverNumber": 27,
       "broadcastName": "N HULKENBERG",
       "teamName": "Audi",
-      "finishPosition": 14,
+      "finishPosition": 13,
       "points": 0.0,
       "duration": 8655.345,
       "gap_to_leader": 44.102,
@@ -985,7 +906,7 @@
       "driverNumber": 43,
       "broadcastName": "F COLAPINTO",
       "teamName": "Alpine",
-      "finishPosition": 15,
+      "finishPosition": 14,
       "points": 0.0,
       "duration": 8660.207,
       "gap_to_leader": 48.964,
@@ -1048,6 +969,85 @@
         {
           "lap": 68,
           "duration": 64.4
+        }
+      ]
+    },
+    {
+      "driverNumber": 11,
+      "broadcastName": "S PEREZ",
+      "teamName": "Cadillac",
+      "finishPosition": 15,
+      "points": 0.0,
+      "duration": 8660.396,
+      "gap_to_leader": 49.153,
+      "fastestLapDuration": 76.891,
+      "driverFastestLap": {
+        "duration": 76.891,
+        "time": "1:16.891",
+        "lapNumber": 78
+      },
+      "timeOrGap": "+49.153s",
+      "tyreStints": [
+        {
+          "compound": "SOFT",
+          "lapStart": 1,
+          "lapEnd": 3
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 4,
+          "lapEnd": 8
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 9,
+          "lapEnd": 58
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 59,
+          "lapEnd": 64
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 65,
+          "lapEnd": 66
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 67,
+          "lapEnd": 67
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 68,
+          "lapEnd": 78
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 4,
+          "duration": 27.1
+        },
+        {
+          "lap": 9,
+          "duration": 19.7
+        },
+        {
+          "lap": 59,
+          "duration": 26.0
+        },
+        {
+          "lap": 65,
+          "duration": 23.8
+        },
+        {
+          "lap": 67,
+          "duration": 2026.8
+        },
+        {
+          "lap": 68,
+          "duration": 65.8
         }
       ]
     },
