@@ -21,12 +21,12 @@
       "points": 75.0
     },
     {
-      "driver": "Oscar PIASTRI",
+      "driver": "Lando NORRIS",
       "team": "McLaren",
-      "points": 60.0
+      "points": 58.0
     },
     {
-      "driver": "Lando NORRIS",
+      "driver": "Oscar PIASTRI",
       "team": "McLaren",
       "points": 58.0
     },
@@ -36,19 +36,19 @@
       "points": 43.0
     },
     {
-      "driver": "Isack HADJAR",
-      "team": "Red Bull Racing",
-      "points": 29.0
-    },
-    {
       "driver": "Pierre GASLY",
       "team": "Alpine",
+      "points": 35.0
+    },
+    {
+      "driver": "Isack HADJAR",
+      "team": "Red Bull Racing",
       "points": 26.0
     },
     {
       "driver": "Liam LAWSON",
       "team": "Racing Bulls",
-      "points": 26.0
+      "points": 24.0
     },
     {
       "driver": "Oliver BEARMAN",
@@ -63,7 +63,7 @@
     {
       "driver": "Arvid LINDBLAD",
       "team": "Racing Bulls",
-      "points": 13.0
+      "points": 11.0
     },
     {
       "driver": "Carlos SAINZ",
@@ -1076,31 +1076,31 @@
             "position_finish": 2
           }
         },
-        "Isack HADJAR": {
+        "Pierre GASLY": {
           "Race": {
             "points_received": 15.0,
             "position_finish": 3
           }
         },
-        "Oscar PIASTRI": {
+        "Isack HADJAR": {
           "Race": {
             "points_received": 12.0,
             "position_finish": 4
           }
         },
-        "Liam LAWSON": {
+        "Oscar PIASTRI": {
           "Race": {
             "points_received": 10.0,
             "position_finish": 5
           }
         },
-        "Arvid LINDBLAD": {
+        "Liam LAWSON": {
           "Race": {
             "points_received": 8.0,
             "position_finish": 6
           }
         },
-        "Pierre GASLY": {
+        "Arvid LINDBLAD": {
           "Race": {
             "points_received": 6.0,
             "position_finish": 7

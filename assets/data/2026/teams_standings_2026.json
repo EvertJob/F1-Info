@@ -10,19 +10,19 @@
     },
     {
       "team": "McLaren",
-      "points": 118.0
+      "points": 116.0
     },
     {
       "team": "Red Bull Racing",
-      "points": 72.0
+      "points": 69.0
     },
     {
       "team": "Alpine",
-      "points": 41.0
+      "points": 50.0
     },
     {
       "team": "Racing Bulls",
-      "points": 39.0
+      "points": 35.0
     },
     {
       "team": "Haas F1 Team",
@@ -458,6 +458,11 @@
             "points_received": 0.0
           }
         },
+        "Alpine": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
         "Red Bull Racing": {
           "Race": {
             "points_received": 0.0
@@ -470,12 +475,7 @@
         },
         "Racing Bulls": {
           "Race": {
-            "points_received": 8.0
-          }
-        },
-        "Alpine": {
-          "Race": {
-            "points_received": 0.0
+            "points_received": 6.0
           }
         },
         "Williams": {

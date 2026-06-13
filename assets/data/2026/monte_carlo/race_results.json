@@ -133,11 +133,72 @@
       ]
     },
     {
+      "driverNumber": 10,
+      "broadcastName": "P GASLY",
+      "teamName": "Alpine",
+      "finishPosition": 3,
+      "points": 15.0,
+      "duration": 8631.612,
+      "gap_to_leader": 20.369,
+      "fastestLapDuration": 75.497,
+      "driverFastestLap": {
+        "duration": 75.497,
+        "time": "1:15.497",
+        "lapNumber": 77
+      },
+      "timeOrGap": "+20.369s",
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 44
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 45,
+          "lapEnd": 59
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 60,
+          "lapEnd": 65
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 66,
+          "lapEnd": 67
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 68,
+          "lapEnd": 78
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 45,
+          "duration": 25.5
+        },
+        {
+          "lap": 60,
+          "duration": 19.8
+        },
+        {
+          "lap": 66,
+          "duration": 23.3
+        },
+        {
+          "lap": 68,
+          "duration": 2151.5
+        }
+      ]
+    },
+    {
       "driverNumber": 6,
       "broadcastName": "I HADJAR",
       "teamName": "Red Bull Racing",
-      "finishPosition": 3,
-      "points": 15.0,
+      "finishPosition": 4,
+      "points": 12.0,
       "duration": 8634.637,
       "gap_to_leader": 23.394,
       "fastestLapDuration": 75.669,
@@ -197,8 +258,8 @@
       "driverNumber": 81,
       "broadcastName": "O PIASTRI",
       "teamName": "McLaren",
-      "finishPosition": 4,
-      "points": 12.0,
+      "finishPosition": 5,
+      "points": 10.0,
       "duration": 8635.504,
       "gap_to_leader": 24.261,
       "fastestLapDuration": 75.816,
@@ -267,8 +328,8 @@
       "driverNumber": 30,
       "broadcastName": "L LAWSON",
       "teamName": "Racing Bulls",
-      "finishPosition": 5,
-      "points": 10.0,
+      "finishPosition": 6,
+      "points": 8.0,
       "duration": 8637.796,
       "gap_to_leader": 26.553,
       "fastestLapDuration": 75.754,
@@ -328,8 +389,8 @@
       "driverNumber": 41,
       "broadcastName": "A LINDBLAD",
       "teamName": "Racing Bulls",
-      "finishPosition": 6,
-      "points": 8.0,
+      "finishPosition": 7,
+      "points": 6.0,
       "duration": 8640.253,
       "gap_to_leader": 29.01,
       "fastestLapDuration": 75.908,
@@ -382,67 +443,6 @@
         {
           "lap": 68,
           "duration": 62.5
-        }
-      ]
-    },
-    {
-      "driverNumber": 10,
-      "broadcastName": "P GASLY",
-      "teamName": "Alpine",
-      "finishPosition": 7,
-      "points": 6.0,
-      "duration": 8641.612,
-      "gap_to_leader": 30.369,
-      "fastestLapDuration": 75.497,
-      "driverFastestLap": {
-        "duration": 75.497,
-        "time": "1:15.497",
-        "lapNumber": 77
-      },
-      "timeOrGap": "+30.369s",
-      "tyreStints": [
-        {
-          "compound": "MEDIUM",
-          "lapStart": 1,
-          "lapEnd": 44
-        },
-        {
-          "compound": "HARD",
-          "lapStart": 45,
-          "lapEnd": 59
-        },
-        {
-          "compound": "HARD",
-          "lapStart": 60,
-          "lapEnd": 65
-        },
-        {
-          "compound": "HARD",
-          "lapStart": 66,
-          "lapEnd": 67
-        },
-        {
-          "compound": "SOFT",
-          "lapStart": 68,
-          "lapEnd": 78
-        }
-      ],
-      "pitStops": [
-        {
-          "lap": 45,
-          "duration": 25.5
-        },
-        {
-          "lap": 60,
-          "duration": 19.8
-        },
-        {
-          "lap": 66,
-          "duration": 23.3
-        },
-        {
-          "lap": 68,
-          "duration": 2151.5
         }
       ]
     },
