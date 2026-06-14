@@ -18,11 +18,11 @@
     },
     {
       "team": "Alpine",
-      "points": 60.0
+      "points": 57.0
     },
     {
       "team": "Racing Bulls",
-      "points": 38.0
+      "points": 41.0
     },
     {
       "team": "Haas F1 Team",
@@ -530,12 +530,12 @@
         },
         "Alpine": {
           "Race": {
-            "points_received": 4.0
+            "points_received": 1.0
           }
         },
         "Racing Bulls": {
           "Race": {
-            "points_received": 1.0
+            "points_received": 2.0
           }
         },
         "Audi": {

@@ -243,43 +243,11 @@
       ]
     },
     {
-      "driverNumber": 43,
-      "broadcastName": "F COLAPINTO",
-      "teamName": "Alpine",
-      "finishPosition": 8,
-      "points": 4.0,
-      "gap_to_leader": "+1 LAP",
-      "fastestLapDuration": 82.449,
-      "driverFastestLap": {
-        "duration": 82.449,
-        "time": "1:22.449",
-        "lapNumber": 43
-      },
-      "timeOrGap": "-",
-      "tyreStints": [
-        {
-          "compound": "HARD",
-          "lapStart": 35,
-          "lapEnd": 65
-        }
-      ],
-      "pitStops": [
-        {
-          "lap": 12,
-          "duration": 22.983
-        },
-        {
-          "lap": 34,
-          "duration": 22.29
-        }
-      ]
-    },
-    {
       "driverNumber": 30,
       "broadcastName": "L LAWSON",
       "teamName": "Racing Bulls",
-      "finishPosition": 9,
-      "points": 2.0,
+      "finishPosition": 8,
+      "points": 4.0,
       "gap_to_leader": "+1 LAP",
       "fastestLapDuration": 82.691,
       "driverFastestLap": {
@@ -315,8 +283,8 @@
       "driverNumber": 41,
       "broadcastName": "A LINDBLAD",
       "teamName": "Racing Bulls",
-      "finishPosition": 10,
-      "points": 1.0,
+      "finishPosition": 9,
+      "points": 2.0,
       "gap_to_leader": "+1 LAP",
       "fastestLapDuration": 81.914,
       "driverFastestLap": {
@@ -340,6 +308,38 @@
         {
           "lap": 37,
           "duration": 24.01
+        }
+      ]
+    },
+    {
+      "driverNumber": 43,
+      "broadcastName": "F COLAPINTO",
+      "teamName": "Alpine",
+      "finishPosition": 10,
+      "points": 1.0,
+      "gap_to_leader": "+1 LAP",
+      "fastestLapDuration": 82.449,
+      "driverFastestLap": {
+        "duration": 82.449,
+        "time": "1:22.449",
+        "lapNumber": 43
+      },
+      "timeOrGap": "-",
+      "tyreStints": [
+        {
+          "compound": "HARD",
+          "lapStart": 35,
+          "lapEnd": 65
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 12,
+          "duration": 22.983
+        },
+        {
+          "lap": 34,
+          "duration": 22.29
         }
       ]
     },
