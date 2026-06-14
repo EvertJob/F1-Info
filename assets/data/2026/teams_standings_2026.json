@@ -2,27 +2,27 @@
   "standings": [
     {
       "team": "Mercedes",
-      "points": 244.0
+      "points": 262.0
     },
     {
       "team": "Ferrari",
-      "points": 165.0
+      "points": 190.0
     },
     {
       "team": "McLaren",
-      "points": 116.0
+      "points": 141.0
     },
     {
       "team": "Red Bull Racing",
-      "points": 69.0
+      "points": 89.0
     },
     {
       "team": "Alpine",
-      "points": 50.0
+      "points": 60.0
     },
     {
       "team": "Racing Bulls",
-      "points": 35.0
+      "points": 38.0
     },
     {
       "team": "Haas F1 Team",
@@ -499,6 +499,66 @@
           }
         },
         "Cadillac": {
+          "Race": {
+            "points_received": 0.0
+          }
+        }
+      }
+    },
+    {
+      "round": "9",
+      "teams": {
+        "Ferrari": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "McLaren": {
+          "Race": {
+            "points_received": 10.0
+          }
+        },
+        "Red Bull Racing": {
+          "Race": {
+            "points_received": 8.0
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_received": 4.0
+          }
+        },
+        "Racing Bulls": {
+          "Race": {
+            "points_received": 1.0
+          }
+        },
+        "Audi": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Cadillac": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Aston Martin": {
           "Race": {
             "points_received": 0.0
           }
