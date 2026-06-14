@@ -13,25 +13,10 @@
       "driverFastestLap": {
         "duration": 80.122,
         "time": "1:20.122",
-        "lapNumber": 43
+        "lapNumber": 44
       },
       "timeOrGap": "1:32:28.105",
       "tyreStints": [
-        {
-          "compound": null,
-          "lapStart": 1,
-          "lapEnd": 20
-        },
-        {
-          "compound": "HARD",
-          "lapStart": 12,
-          "lapEnd": 27
-        },
-        {
-          "compound": "MEDIUM",
-          "lapStart": 28,
-          "lapEnd": 41
-        },
         {
           "compound": "HARD",
           "lapStart": 42,
@@ -41,15 +26,15 @@
       "pitStops": [
         {
           "lap": 11,
-          "duration": 22.4
+          "duration": 22.48
         },
         {
           "lap": 27,
-          "duration": 22.4
+          "duration": 22.477
         },
         {
           "lap": 41,
-          "duration": 22.8
+          "duration": 22.837
         }
       ]
     },
@@ -65,20 +50,10 @@
       "driverFastestLap": {
         "duration": 80.64,
         "time": "1:20.640",
-        "lapNumber": 42
+        "lapNumber": 43
       },
       "timeOrGap": "+19.561s",
       "tyreStints": [
-        {
-          "compound": null,
-          "lapStart": 1,
-          "lapEnd": 20
-        },
-        {
-          "compound": null,
-          "lapStart": 21,
-          "lapEnd": 36
-        },
         {
           "compound": "HARD",
           "lapStart": 37,
@@ -88,11 +63,11 @@
       "pitStops": [
         {
           "lap": 12,
-          "duration": 22.0
+          "duration": 22.08
         },
         {
           "lap": 36,
-          "duration": 21.6
+          "duration": 21.677
         }
       ]
     },
@@ -108,20 +83,10 @@
       "driverFastestLap": {
         "duration": 80.232,
         "time": "1:20.232",
-        "lapNumber": 36
+        "lapNumber": 37
       },
       "timeOrGap": "+23.719s",
       "tyreStints": [
-        {
-          "compound": null,
-          "lapStart": 1,
-          "lapEnd": 20
-        },
-        {
-          "compound": "HARD",
-          "lapStart": 14,
-          "lapEnd": 35
-        },
         {
           "compound": "HARD",
           "lapStart": 36,
@@ -151,25 +116,10 @@
       "driverFastestLap": {
         "duration": 80.23,
         "time": "1:20.230",
-        "lapNumber": 41
+        "lapNumber": 42
       },
       "timeOrGap": "+40.497s",
       "tyreStints": [
-        {
-          "compound": null,
-          "lapStart": 1,
-          "lapEnd": 20
-        },
-        {
-          "compound": null,
-          "lapStart": 21,
-          "lapEnd": 29
-        },
-        {
-          "compound": "HARD",
-          "lapStart": 30,
-          "lapEnd": 40
-        },
         {
           "compound": "MEDIUM",
           "lapStart": 41,
@@ -179,15 +129,15 @@
       "pitStops": [
         {
           "lap": 12,
-          "duration": 22.2
+          "duration": 22.273
         },
         {
           "lap": 29,
-          "duration": 24.1
+          "duration": 24.189
         },
         {
           "lap": 40,
-          "duration": 22.7
+          "duration": 22.786
         }
       ]
     },
@@ -203,20 +153,10 @@
       "driverFastestLap": {
         "duration": 80.835,
         "time": "1:20.835",
-        "lapNumber": 45
+        "lapNumber": 46
       },
       "timeOrGap": "+58.661s",
       "tyreStints": [
-        {
-          "compound": null,
-          "lapStart": 1,
-          "lapEnd": 20
-        },
-        {
-          "compound": null,
-          "lapStart": 21,
-          "lapEnd": 36
-        },
         {
           "compound": "HARD",
           "lapStart": 37,
@@ -226,11 +166,11 @@
       "pitStops": [
         {
           "lap": 14,
-          "duration": 21.7
+          "duration": 21.776
         },
         {
           "lap": 36,
-          "duration": 22.6
+          "duration": 22.661
         }
       ]
     },
@@ -245,25 +185,10 @@
       "driverFastestLap": {
         "duration": 80.15,
         "time": "1:20.150",
-        "lapNumber": 59
+        "lapNumber": 60
       },
       "timeOrGap": "-",
       "tyreStints": [
-        {
-          "compound": null,
-          "lapStart": 1,
-          "lapEnd": 19
-        },
-        {
-          "compound": "HARD",
-          "lapStart": 16,
-          "lapEnd": 32
-        },
-        {
-          "compound": "HARD",
-          "lapStart": 33,
-          "lapEnd": 58
-        },
         {
           "compound": "SOFT",
           "lapStart": 59,
@@ -273,15 +198,15 @@
       "pitStops": [
         {
           "lap": 15,
-          "duration": 22.4
+          "duration": 22.444
         },
         {
           "lap": 32,
-          "duration": 22.5
+          "duration": 22.528
         },
         {
           "lap": 58,
-          "duration": 21.9
+          "duration": 21.949
         }
       ]
     },
@@ -296,20 +221,10 @@
       "driverFastestLap": {
         "duration": 81.708,
         "time": "1:21.708",
-        "lapNumber": 41
+        "lapNumber": 42
       },
       "timeOrGap": "-",
       "tyreStints": [
-        {
-          "compound": null,
-          "lapStart": 1,
-          "lapEnd": 19
-        },
-        {
-          "compound": null,
-          "lapStart": 20,
-          "lapEnd": 40
-        },
         {
           "compound": "HARD",
           "lapStart": 41,
@@ -319,11 +234,11 @@
       "pitStops": [
         {
           "lap": 14,
-          "duration": 22.6
+          "duration": 22.682
         },
         {
           "lap": 40,
-          "duration": 23.3
+          "duration": 23.31
         }
       ]
     },
@@ -338,20 +253,10 @@
       "driverFastestLap": {
         "duration": 82.449,
         "time": "1:22.449",
-        "lapNumber": 42
+        "lapNumber": 43
       },
       "timeOrGap": "-",
       "tyreStints": [
-        {
-          "compound": null,
-          "lapStart": 1,
-          "lapEnd": 19
-        },
-        {
-          "compound": null,
-          "lapStart": 20,
-          "lapEnd": 34
-        },
         {
           "compound": "HARD",
           "lapStart": 35,
@@ -361,11 +266,11 @@
       "pitStops": [
         {
           "lap": 12,
-          "duration": 22.9
+          "duration": 22.983
         },
         {
           "lap": 34,
-          "duration": 22.2
+          "duration": 22.29
         }
       ]
     },
@@ -380,34 +285,29 @@
       "driverFastestLap": {
         "duration": 82.691,
         "time": "1:22.691",
-        "lapNumber": 44
+        "lapNumber": 45
       },
       "timeOrGap": "-",
       "tyreStints": [
         {
-          "compound": null,
-          "lapStart": 1,
-          "lapEnd": 19
+          "compound": "HARD",
+          "lapStart": 36,
+          "lapEnd": 65
         },
         {
           "compound": "HARD",
           "lapStart": 12,
           "lapEnd": 35
-        },
-        {
-          "compound": "HARD",
-          "lapStart": 36,
-          "lapEnd": 65
         }
       ],
       "pitStops": [
         {
           "lap": 11,
-          "duration": 25.9
+          "duration": 25.983
         },
         {
           "lap": 35,
-          "duration": 23.1
+          "duration": 23.172
         }
       ]
     },
@@ -422,20 +322,10 @@
       "driverFastestLap": {
         "duration": 81.914,
         "time": "1:21.914",
-        "lapNumber": 44
+        "lapNumber": 45
       },
       "timeOrGap": "-",
       "tyreStints": [
-        {
-          "compound": "MEDIUM",
-          "lapStart": 1,
-          "lapEnd": 22
-        },
-        {
-          "compound": "HARD",
-          "lapStart": 23,
-          "lapEnd": 37
-        },
         {
           "compound": "HARD",
           "lapStart": 38,
@@ -445,11 +335,11 @@
       "pitStops": [
         {
           "lap": 22,
-          "duration": 22.4
+          "duration": 22.476
         },
         {
           "lap": 37,
-          "duration": 24.0
+          "duration": 24.01
         }
       ]
     },
@@ -464,43 +354,33 @@
       "driverFastestLap": {
         "duration": 81.446,
         "time": "1:21.446",
-        "lapNumber": 54
+        "lapNumber": 55
       },
       "timeOrGap": "-",
       "tyreStints": [
         {
-          "compound": null,
-          "lapStart": 1,
-          "lapEnd": 19
+          "compound": "SOFT",
+          "lapStart": 54,
+          "lapEnd": 64
         },
         {
           "compound": "HARD",
           "lapStart": 16,
           "lapEnd": 33
-        },
-        {
-          "compound": "HARD",
-          "lapStart": 34,
-          "lapEnd": 53
-        },
-        {
-          "compound": "SOFT",
-          "lapStart": 54,
-          "lapEnd": 64
         }
       ],
       "pitStops": [
         {
           "lap": 15,
-          "duration": 22.7
+          "duration": 22.783
         },
         {
           "lap": 33,
-          "duration": 22.2
+          "duration": 22.285
         },
         {
           "lap": 53,
-          "duration": 25.9
+          "duration": 25.915
         }
       ]
     },
@@ -515,25 +395,10 @@
       "driverFastestLap": {
         "duration": 82.061,
         "time": "1:22.061",
-        "lapNumber": 57
+        "lapNumber": 58
       },
       "timeOrGap": "-",
       "tyreStints": [
-        {
-          "compound": null,
-          "lapStart": 1,
-          "lapEnd": 19
-        },
-        {
-          "compound": null,
-          "lapStart": 20,
-          "lapEnd": 30
-        },
-        {
-          "compound": "HARD",
-          "lapStart": 31,
-          "lapEnd": 55
-        },
         {
           "compound": "MEDIUM",
           "lapStart": 56,
@@ -543,15 +408,15 @@
       "pitStops": [
         {
           "lap": 14,
-          "duration": 22.9
+          "duration": 22.977
         },
         {
           "lap": 30,
-          "duration": 22.5
+          "duration": 22.595
         },
         {
           "lap": 55,
-          "duration": 22.7
+          "duration": 22.772
         }
       ]
     },
@@ -566,25 +431,10 @@
       "driverFastestLap": {
         "duration": 81.643,
         "time": "1:21.643",
-        "lapNumber": 62
+        "lapNumber": 63
       },
       "timeOrGap": "-",
       "tyreStints": [
-        {
-          "compound": null,
-          "lapStart": 1,
-          "lapEnd": 19
-        },
-        {
-          "compound": null,
-          "lapStart": 20,
-          "lapEnd": 34
-        },
-        {
-          "compound": "MEDIUM",
-          "lapStart": 35,
-          "lapEnd": 58
-        },
         {
           "compound": "SOFT",
           "lapStart": 59,
@@ -594,11 +444,11 @@
       "pitStops": [
         {
           "lap": 13,
-          "duration": 23.2
+          "duration": 23.256
         },
         {
           "lap": 34,
-          "duration": 26.4
+          "duration": 26.449
         },
         {
           "lap": 58,
@@ -617,24 +467,14 @@
       "driverFastestLap": {
         "duration": 82.82,
         "time": "1:22.820",
-        "lapNumber": 42
+        "lapNumber": 43
       },
       "timeOrGap": "-",
       "tyreStints": [
         {
-          "compound": null,
+          "compound": "SOFT",
           "lapStart": 1,
-          "lapEnd": 19
-        },
-        {
-          "compound": null,
-          "lapStart": 20,
-          "lapEnd": 31
-        },
-        {
-          "compound": "HARD",
-          "lapStart": 32,
-          "lapEnd": 39
+          "lapEnd": 12
         },
         {
           "compound": "MEDIUM",
@@ -645,15 +485,15 @@
       "pitStops": [
         {
           "lap": 12,
-          "duration": 24.8
+          "duration": 24.805
         },
         {
           "lap": 31,
-          "duration": 24.4
+          "duration": 24.432
         },
         {
           "lap": 39,
-          "duration": 23.9
+          "duration": 23.912
         }
       ]
     },
@@ -667,20 +507,10 @@
       "driverFastestLap": {
         "duration": 80.379,
         "time": "1:20.379",
-        "lapNumber": 46
+        "lapNumber": 47
       },
       "timeOrGap": "DNF",
       "tyreStints": [
-        {
-          "compound": "MEDIUM",
-          "lapStart": 1,
-          "lapEnd": 16
-        },
-        {
-          "compound": null,
-          "lapStart": 2,
-          "lapEnd": 39
-        },
         {
           "compound": "HARD",
           "lapStart": 40,
@@ -690,11 +520,11 @@
       "pitStops": [
         {
           "lap": 16,
-          "duration": 22.2
+          "duration": 22.249
         },
         {
           "lap": 39,
-          "duration": 22.1
+          "duration": 22.125
         }
       ]
     },
@@ -708,20 +538,10 @@
       "driverFastestLap": {
         "duration": 80.704,
         "time": "1:20.704",
-        "lapNumber": 45
+        "lapNumber": 46
       },
       "timeOrGap": "DNF",
       "tyreStints": [
-        {
-          "compound": null,
-          "lapStart": 1,
-          "lapEnd": 20
-        },
-        {
-          "compound": null,
-          "lapStart": 21,
-          "lapEnd": 37
-        },
         {
           "compound": "HARD",
           "lapStart": 38,
@@ -731,11 +551,11 @@
       "pitStops": [
         {
           "lap": 14,
-          "duration": 22.0
+          "duration": 22.038
         },
         {
           "lap": 37,
-          "duration": 22.2
+          "duration": 22.21
         }
       ]
     },
@@ -749,34 +569,29 @@
       "driverFastestLap": {
         "duration": 82.419,
         "time": "1:22.419",
-        "lapNumber": 42
+        "lapNumber": 43
       },
       "timeOrGap": "DNF",
       "tyreStints": [
         {
-          "compound": null,
-          "lapStart": 1,
-          "lapEnd": 19
-        },
-        {
-          "compound": "HARD",
-          "lapStart": 20,
-          "lapEnd": 28
-        },
-        {
           "compound": "SOFT",
           "lapStart": 29,
           "lapEnd": 60
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 19,
+          "lapEnd": 28
         }
       ],
       "pitStops": [
         {
           "lap": 18,
-          "duration": 23.1
+          "duration": 23.118
         },
         {
           "lap": 39,
-          "duration": 23.9
+          "duration": 23.901
         }
       ]
     },
@@ -791,44 +606,29 @@
       "driverFastestLap": {
         "duration": 81.744,
         "time": "1:21.744",
-        "lapNumber": 53
+        "lapNumber": 54
       },
       "timeOrGap": "NC",
       "tyreStints": [
         {
-          "compound": null,
-          "lapStart": 1,
-          "lapEnd": 19
+          "compound": "SOFT",
+          "lapStart": 51,
+          "lapEnd": 55
         },
         {
           "compound": "HARD",
           "lapStart": 14,
           "lapEnd": 29
-        },
-        {
-          "compound": "HARD",
-          "lapStart": 30,
-          "lapEnd": 34
-        },
-        {
-          "compound": "SOFT",
-          "lapStart": 35,
-          "lapEnd": 50
-        },
-        {
-          "compound": "SOFT",
-          "lapStart": 51,
-          "lapEnd": 55
         }
       ],
       "pitStops": [
         {
           "lap": 13,
-          "duration": 24.0
+          "duration": 24.005
         },
         {
           "lap": 29,
-          "duration": 22.0
+          "duration": 22.027
         },
         {
           "lap": 34,
@@ -836,7 +636,7 @@
         },
         {
           "lap": 50,
-          "duration": 22.7
+          "duration": 22.703
         }
       ]
     },
@@ -850,15 +650,10 @@
       "driverFastestLap": {
         "duration": 85.366,
         "time": "1:25.366",
-        "lapNumber": 26
+        "lapNumber": 27
       },
       "timeOrGap": "DNF",
       "tyreStints": [
-        {
-          "compound": "HARD",
-          "lapStart": 1,
-          "lapEnd": 21
-        },
         {
           "compound": "HARD",
           "lapStart": 22,
@@ -868,7 +663,7 @@
       "pitStops": [
         {
           "lap": 21,
-          "duration": 22.2
+          "duration": 22.22
         }
       ]
     },
@@ -887,11 +682,6 @@
       "timeOrGap": "DNF",
       "tyreStints": [
         {
-          "compound": null,
-          "lapStart": 1,
-          "lapEnd": 19
-        },
-        {
           "compound": "HARD",
           "lapStart": 14,
           "lapEnd": 29
@@ -900,7 +690,7 @@
       "pitStops": [
         {
           "lap": 13,
-          "duration": 22.8
+          "duration": 22.869
         }
       ]
     },
@@ -919,11 +709,6 @@
       "timeOrGap": "DNF",
       "tyreStints": [
         {
-          "compound": "MEDIUM",
-          "lapStart": 1,
-          "lapEnd": 14
-        },
-        {
           "compound": "HARD",
           "lapStart": 15,
           "lapEnd": 15
@@ -932,7 +717,7 @@
       "pitStops": [
         {
           "lap": 14,
-          "duration": 23.2
+          "duration": 23.28
         }
       ]
     },
@@ -963,6 +748,6 @@
     "driverName": "Lewis HAMILTON",
     "time": "1:20.122",
     "duration": 80.122,
-    "lapNumber": 43
+    "lapNumber": 44
   }
 }
