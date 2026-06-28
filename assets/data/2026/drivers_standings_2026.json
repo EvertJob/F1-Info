@@ -3,37 +3,42 @@
     {
       "driver": "Kimi ANTONELLI",
       "team": "Mercedes",
-      "points": 156.0
-    },
-    {
-      "driver": "Lewis HAMILTON",
-      "team": "Ferrari",
-      "points": 115.0
+      "points": 171.0
     },
     {
       "driver": "George RUSSELL",
       "team": "Mercedes",
-      "points": 106.0
+      "points": 131.0
     },
     {
-      "driver": "Charles LECLERC",
+      "driver": "Lewis HAMILTON",
       "team": "Ferrari",
-      "points": 75.0
-    },
-    {
-      "driver": "Lando NORRIS",
-      "team": "McLaren",
-      "points": 73.0
+      "points": 125.0
     },
     {
       "driver": "Oscar PIASTRI",
       "team": "McLaren",
-      "points": 68.0
+      "points": 80.0
+    },
+    {
+      "driver": "Charles LECLERC",
+      "team": "Ferrari",
+      "points": 79.0
+    },
+    {
+      "driver": "Lando NORRIS",
+      "team": "McLaren",
+      "points": 79.0
     },
     {
       "driver": "Max VERSTAPPEN",
       "team": "Red Bull Racing",
-      "points": 55.0
+      "points": 73.0
+    },
+    {
+      "driver": "Isack HADJAR",
+      "team": "Red Bull Racing",
+      "points": 42.0
     },
     {
       "driver": "Pierre GASLY",
@@ -41,14 +46,9 @@
       "points": 41.0
     },
     {
-      "driver": "Isack HADJAR",
-      "team": "Red Bull Racing",
-      "points": 34.0
-    },
-    {
       "driver": "Liam LAWSON",
       "team": "Racing Bulls",
-      "points": 28.0
+      "points": 30.0
     },
     {
       "driver": "Oliver BEARMAN",
@@ -63,7 +63,7 @@
     {
       "driver": "Arvid LINDBLAD",
       "team": "Racing Bulls",
-      "points": 13.0
+      "points": 14.0
     },
     {
       "driver": "Carlos SAINZ",
@@ -1328,6 +1328,143 @@
           }
         },
         "Lance STROLL": {
+          "Race": {
+            "points_received": 0.0,
+            "position_finish": null
+          }
+        }
+      }
+    },
+    {
+      "round": "10",
+      "drivers": {
+        "George RUSSELL": {
+          "Race": {
+            "points_received": 25.0,
+            "position_finish": 1
+          }
+        },
+        "Max VERSTAPPEN": {
+          "Race": {
+            "points_received": 18.0,
+            "position_finish": 2
+          }
+        },
+        "Kimi ANTONELLI": {
+          "Race": {
+            "points_received": 15.0,
+            "position_finish": 3
+          }
+        },
+        "Oscar PIASTRI": {
+          "Race": {
+            "points_received": 12.0,
+            "position_finish": 4
+          }
+        },
+        "Lewis HAMILTON": {
+          "Race": {
+            "points_received": 10.0,
+            "position_finish": 5
+          }
+        },
+        "Isack HADJAR": {
+          "Race": {
+            "points_received": 8.0,
+            "position_finish": 6
+          }
+        },
+        "Lando NORRIS": {
+          "Race": {
+            "points_received": 6.0,
+            "position_finish": 7
+          }
+        },
+        "Charles LECLERC": {
+          "Race": {
+            "points_received": 4.0,
+            "position_finish": 8
+          }
+        },
+        "Liam LAWSON": {
+          "Race": {
+            "points_received": 2.0,
+            "position_finish": 9
+          }
+        },
+        "Arvid LINDBLAD": {
+          "Race": {
+            "points_received": 1.0,
+            "position_finish": 10
+          }
+        },
+        "Gabriel BORTOLETO": {
+          "Race": {
+            "points_received": 0.0,
+            "position_finish": 11
+          }
+        },
+        "Nico HULKENBERG": {
+          "Race": {
+            "points_received": 0.0,
+            "position_finish": 12
+          }
+        },
+        "Pierre GASLY": {
+          "Race": {
+            "points_received": 0.0,
+            "position_finish": 13
+          }
+        },
+        "Oliver BEARMAN": {
+          "Race": {
+            "points_received": 0.0,
+            "position_finish": 14
+          }
+        },
+        "Franco COLAPINTO": {
+          "Race": {
+            "points_received": 0.0,
+            "position_finish": 15
+          }
+        },
+        "Esteban OCON": {
+          "Race": {
+            "points_received": 0.0,
+            "position_finish": 16
+          }
+        },
+        "Alexander ALBON": {
+          "Race": {
+            "points_received": 0.0,
+            "position_finish": 17
+          }
+        },
+        "Fernando ALONSO": {
+          "Race": {
+            "points_received": 0.0,
+            "position_finish": 18
+          }
+        },
+        "Lance STROLL": {
+          "Race": {
+            "points_received": 0.0,
+            "position_finish": null
+          }
+        },
+        "Carlos SAINZ": {
+          "Race": {
+            "points_received": 0.0,
+            "position_finish": null
+          }
+        },
+        "Sergio PEREZ": {
+          "Race": {
+            "points_received": 0.0,
+            "position_finish": null
+          }
+        },
+        "Valtteri BOTTAS": {
           "Race": {
             "points_received": 0.0,
             "position_finish": null
