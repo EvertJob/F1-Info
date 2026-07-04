@@ -290,34 +290,10 @@
       "pitStops": []
     },
     {
-      "driverNumber": 27,
-      "broadcastName": "N HULKENBERG",
-      "teamName": "Audi",
-      "finishPosition": 13,
-      "points": 0.0,
-      "duration": 1613.809,
-      "gap_to_leader": 41.68,
-      "fastestLapDuration": 93.497,
-      "driverFastestLap": {
-        "duration": 93.497,
-        "time": "1:33.497",
-        "lapNumber": 17
-      },
-      "timeOrGap": "+41.680s",
-      "tyreStints": [
-        {
-          "compound": "MEDIUM",
-          "lapStart": 1,
-          "lapEnd": 17
-        }
-      ],
-      "pitStops": []
-    },
-    {
       "driverNumber": 5,
       "broadcastName": "G BORTOLETO",
       "teamName": "Audi",
-      "finishPosition": 14,
+      "finishPosition": 13,
       "points": 0.0,
       "duration": 1614.628,
       "gap_to_leader": 42.499,
@@ -341,7 +317,7 @@
       "driverNumber": 87,
       "broadcastName": "O BEARMAN",
       "teamName": "Haas F1 Team",
-      "finishPosition": 15,
+      "finishPosition": 14,
       "points": 0.0,
       "duration": 1617.913,
       "gap_to_leader": 45.784,
@@ -352,6 +328,30 @@
         "lapNumber": 17
       },
       "timeOrGap": "+45.784s",
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 17
+        }
+      ],
+      "pitStops": []
+    },
+    {
+      "driverNumber": 27,
+      "broadcastName": "N HULKENBERG",
+      "teamName": "Audi",
+      "finishPosition": 15,
+      "points": 0.0,
+      "duration": 1618.809,
+      "gap_to_leader": 46.68,
+      "fastestLapDuration": 93.497,
+      "driverFastestLap": {
+        "duration": 93.497,
+        "time": "1:33.497",
+        "lapNumber": 17
+      },
+      "timeOrGap": "+46.680s",
       "tyreStints": [
         {
           "compound": "MEDIUM",
