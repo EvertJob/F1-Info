@@ -1482,7 +1482,7 @@
           },
           "Race": {
             "points_received": 0.0,
-            "position_finish": 16
+            "position_finish": 15
           }
         },
         "Lewis HAMILTON": {
@@ -1612,7 +1612,7 @@
           },
           "Race": {
             "points_received": 0.0,
-            "position_finish": 13
+            "position_finish": 12
           }
         },
         "Nico HULKENBERG": {
@@ -1632,7 +1632,7 @@
           },
           "Race": {
             "points_received": 0.0,
-            "position_finish": 14
+            "position_finish": 13
           }
         },
         "Carlos SAINZ": {
@@ -1642,7 +1642,7 @@
           },
           "Race": {
             "points_received": 0.0,
-            "position_finish": 12
+            "position_finish": 17
           }
         },
         "Alexander ALBON": {
@@ -1662,7 +1662,7 @@
           },
           "Race": {
             "points_received": 0.0,
-            "position_finish": 17
+            "position_finish": 16
           }
         },
         "Fernando ALONSO": {
@@ -1692,7 +1692,7 @@
           },
           "Race": {
             "points_received": 0.0,
-            "position_finish": 15
+            "position_finish": 14
           }
         }
       }
