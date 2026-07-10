@@ -497,11 +497,6 @@
       "timeOrGap": "-",
       "tyreStints": [
         {
-          "compound": "SOFT",
-          "lapStart": 1,
-          "lapEnd": 14
-        },
-        {
           "compound": "MEDIUM",
           "lapStart": 15,
           "lapEnd": 16
@@ -529,11 +524,6 @@
       },
       "timeOrGap": "-",
       "tyreStints": [
-        {
-          "compound": "MEDIUM",
-          "lapStart": 1,
-          "lapEnd": 2
-        },
         {
           "compound": "MEDIUM",
           "lapStart": 3,
