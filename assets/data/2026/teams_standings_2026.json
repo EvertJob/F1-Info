@@ -2,23 +2,23 @@
   "standings": [
     {
       "team": "Mercedes",
-      "points": 358.0
+      "points": 379.0
     },
     {
       "team": "Ferrari",
-      "points": 285.0
+      "points": 307.0
     },
     {
       "team": "McLaren",
-      "points": 195.0
+      "points": 220.0
     },
     {
       "team": "Red Bull Racing",
-      "points": 151.0
+      "points": 177.0
     },
     {
       "team": "Racing Bulls",
-      "points": 61.0
+      "points": 66.0
     },
     {
       "team": "Alpine",
@@ -29,12 +29,12 @@
       "points": 21.0
     },
     {
-      "team": "Williams",
-      "points": 11.0
+      "team": "Audi",
+      "points": 12.0
     },
     {
-      "team": "Audi",
-      "points": 10.0
+      "team": "Williams",
+      "points": 11.0
     },
     {
       "team": "Aston Martin",
@@ -772,6 +772,66 @@
           }
         },
         "Aston Martin": {
+          "Race": {
+            "points_received": 0.0
+          }
+        }
+      }
+    },
+    {
+      "round": "13",
+      "teams": {
+        "McLaren": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Red Bull Racing": {
+          "Race": {
+            "points_received": 8.0
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_received": 6.0
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_received": 10.0
+          }
+        },
+        "Racing Bulls": {
+          "Race": {
+            "points_received": 1.0
+          }
+        },
+        "Audi": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Aston Martin": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Cadillac": {
           "Race": {
             "points_received": 0.0
           }
