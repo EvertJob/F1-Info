@@ -2,11 +2,11 @@
   "standings": [
     {
       "team": "Mercedes",
-      "points": 503.0
+      "points": 538.0
     },
     {
       "team": "Ferrari",
-      "points": 358.0
+      "points": 378.0
     },
     {
       "team": "McLaren",
@@ -14,11 +14,11 @@
     },
     {
       "team": "Red Bull Racing",
-      "points": 230.0
+      "points": 263.0
     },
     {
       "team": "Racing Bulls",
-      "points": 77.0
+      "points": 83.0
     },
     {
       "team": "Alpine",
@@ -26,7 +26,7 @@
     },
     {
       "team": "Haas F1 Team",
-      "points": 21.0
+      "points": 27.0
     },
     {
       "team": "Audi",
@@ -34,7 +34,7 @@
     },
     {
       "team": "Williams",
-      "points": 11.0
+      "points": 12.0
     },
     {
       "team": "Aston Martin",
@@ -1045,6 +1045,66 @@
           }
         },
         "Cadillac": {
+          "Race": {
+            "points_received": 0.0
+          }
+        }
+      }
+    },
+    {
+      "round": "17",
+      "teams": {
+        "Mercedes": {
+          "Race": {
+            "points_received": 10.0
+          }
+        },
+        "Red Bull Racing": {
+          "Race": {
+            "points_received": 15.0
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_received": 8.0
+          }
+        },
+        "Racing Bulls": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_received": 2.0
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Audi": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "McLaren": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Cadillac": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Aston Martin": {
           "Race": {
             "points_received": 0.0
           }
