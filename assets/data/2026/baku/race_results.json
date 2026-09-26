@@ -527,53 +527,10 @@
       ]
     },
     {
-      "driverNumber": 5,
-      "broadcastName": "G BORTOLETO",
-      "teamName": "Audi",
-      "finishPosition": 13,
-      "points": 0.0,
-      "duration": 5916.373,
-      "gap_to_leader": 34.23,
-      "fastestLapDuration": 106.336,
-      "driverFastestLap": {
-        "duration": 106.336,
-        "time": "1:46.336",
-        "lapNumber": 46
-      },
-      "timeOrGap": "+34.230s",
-      "tyreStints": [
-        {
-          "compound": "MEDIUM",
-          "lapStart": 1,
-          "lapEnd": 30
-        },
-        {
-          "compound": "SOFT",
-          "lapStart": 31,
-          "lapEnd": 36
-        },
-        {
-          "compound": "SOFT",
-          "lapStart": 37,
-          "lapEnd": 51
-        }
-      ],
-      "pitStops": [
-        {
-          "lap": 30,
-          "duration": 20.3
-        },
-        {
-          "lap": 36,
-          "duration": 15.2
-        }
-      ]
-    },
-    {
       "driverNumber": 81,
       "broadcastName": "O PIASTRI",
       "teamName": "McLaren",
-      "finishPosition": 14,
+      "finishPosition": 13,
       "points": 0.0,
       "duration": 5918.544,
       "gap_to_leader": 36.401,
@@ -616,7 +573,7 @@
       "driverNumber": 11,
       "broadcastName": "S PEREZ",
       "teamName": "Cadillac",
-      "finishPosition": 15,
+      "finishPosition": 14,
       "points": 0.0,
       "duration": 5923.543,
       "gap_to_leader": 41.4,
@@ -652,6 +609,49 @@
         {
           "lap": 36,
           "duration": 15.3
+        }
+      ]
+    },
+    {
+      "driverNumber": 5,
+      "broadcastName": "G BORTOLETO",
+      "teamName": "Audi",
+      "finishPosition": 15,
+      "points": 0.0,
+      "duration": 5926.373,
+      "gap_to_leader": 44.23,
+      "fastestLapDuration": 106.336,
+      "driverFastestLap": {
+        "duration": 106.336,
+        "time": "1:46.336",
+        "lapNumber": 46
+      },
+      "timeOrGap": "+44.230s",
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 30
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 31,
+          "lapEnd": 36
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 37,
+          "lapEnd": 51
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 30,
+          "duration": 20.3
+        },
+        {
+          "lap": 36,
+          "duration": 15.2
         }
       ]
     },
