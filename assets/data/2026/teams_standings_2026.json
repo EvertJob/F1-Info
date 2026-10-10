@@ -2,23 +2,23 @@
   "standings": [
     {
       "team": "Mercedes",
-      "points": 556.0
+      "points": 561.0
     },
     {
       "team": "Ferrari",
-      "points": 405.0
+      "points": 418.0
     },
     {
       "team": "McLaren",
-      "points": 316.0
+      "points": 317.0
     },
     {
       "team": "Red Bull Racing",
-      "points": 298.0
+      "points": 306.0
     },
     {
       "team": "Racing Bulls",
-      "points": 90.0
+      "points": 94.0
     },
     {
       "team": "Alpine",
@@ -26,11 +26,11 @@
     },
     {
       "team": "Haas F1 Team",
-      "points": 27.0
+      "points": 30.0
     },
     {
       "team": "Audi",
-      "points": 17.0
+      "points": 19.0
     },
     {
       "team": "Williams",
@@ -1166,6 +1166,66 @@
         },
         "Cadillac": {
           "Race": {
+            "points_received": 0.0
+          }
+        }
+      }
+    },
+    {
+      "round": "19",
+      "teams": {
+        "Red Bull Racing": {
+          "Sprint": {
+            "points_received": 0.0
+          }
+        },
+        "Ferrari": {
+          "Sprint": {
+            "points_received": 6.0
+          }
+        },
+        "Mercedes": {
+          "Sprint": {
+            "points_received": 0.0
+          }
+        },
+        "Racing Bulls": {
+          "Sprint": {
+            "points_received": 0.0
+          }
+        },
+        "Haas F1 Team": {
+          "Sprint": {
+            "points_received": 0.0
+          }
+        },
+        "Audi": {
+          "Sprint": {
+            "points_received": 0.0
+          }
+        },
+        "McLaren": {
+          "Sprint": {
+            "points_received": 0.0
+          }
+        },
+        "Alpine": {
+          "Sprint": {
+            "points_received": 0.0
+          }
+        },
+        "Aston Martin": {
+          "Sprint": {
+            "points_received": 0.0
+          }
+        },
+        "Williams": {
+          "Sprint": {
+            "points_received": 0.0
+          }
+        },
+        "Cadillac": {
+          "Sprint": {
             "points_received": 0.0
           }
         }
