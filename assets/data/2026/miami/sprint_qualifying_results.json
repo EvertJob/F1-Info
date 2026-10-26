@@ -16,10 +16,40 @@
       "fastestLapDuration": 87.869,
       "driverFastestLap": {
         "duration": 87.869,
-        "time": "1:27.869"
+        "time": "1:27.869",
+        "lapNumber": 14
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 7
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 8,
+          "lapEnd": 12
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 13,
+          "lapEnd": 15
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 8,
+          "duration": 355.4
+        },
+        {
+          "lap": 13,
+          "duration": 585.4
+        }
+      ]
     },
     {
       "driverNumber": 12,
@@ -36,10 +66,58 @@
       "fastestLapDuration": 88.091,
       "driverFastestLap": {
         "duration": 88.091,
-        "time": "1:28.091"
+        "time": "1:28.091",
+        "lapNumber": 13
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 3
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 4,
+          "lapEnd": 5
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 6,
+          "lapEnd": 8
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 9,
+          "lapEnd": 11
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 12,
+          "lapEnd": 14
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 4,
+          "duration": 33.5
+        },
+        {
+          "lap": 6,
+          "duration": 357.5
+        },
+        {
+          "lap": 9,
+          "duration": 106.0
+        },
+        {
+          "lap": 12,
+          "duration": 601.7
+        }
+      ]
     },
     {
       "driverNumber": 81,
@@ -56,10 +134,40 @@
       "fastestLapDuration": 88.108,
       "driverFastestLap": {
         "duration": 88.108,
-        "time": "1:28.108"
+        "time": "1:28.108",
+        "lapNumber": 10
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 5
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 6,
+          "lapEnd": 8
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 9,
+          "lapEnd": 11
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 6,
+          "duration": 535.7
+        },
+        {
+          "lap": 9,
+          "duration": 895.3
+        }
+      ]
     },
     {
       "driverNumber": 16,
@@ -76,10 +184,40 @@
       "fastestLapDuration": 88.239,
       "driverFastestLap": {
         "duration": 88.239,
-        "time": "1:28.239"
+        "time": "1:28.239",
+        "lapNumber": 14
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 6
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 7,
+          "lapEnd": 12
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 13,
+          "lapEnd": 15
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 7,
+          "duration": 412.2
+        },
+        {
+          "lap": 13,
+          "duration": 546.2
+        }
+      ]
     },
     {
       "driverNumber": 3,
@@ -96,10 +234,40 @@
       "fastestLapDuration": 88.461,
       "driverFastestLap": {
         "duration": 88.461,
-        "time": "1:28.461"
+        "time": "1:28.461",
+        "lapNumber": 11
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 3
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 4,
+          "lapEnd": 9
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 10,
+          "lapEnd": 12
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 4,
+          "duration": 662.4
+        },
+        {
+          "lap": 10,
+          "duration": 610.1
+        }
+      ]
     },
     {
       "driverNumber": 63,
@@ -116,10 +284,58 @@
       "fastestLapDuration": 88.493,
       "driverFastestLap": {
         "duration": 88.493,
-        "time": "1:28.493"
+        "time": "1:28.493",
+        "lapNumber": 14
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 3
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 4,
+          "lapEnd": 6
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 7,
+          "lapEnd": 9
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 10,
+          "lapEnd": 12
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 13,
+          "lapEnd": 15
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 4,
+          "duration": 24.4
+        },
+        {
+          "lap": 7,
+          "duration": 296.9
+        },
+        {
+          "lap": 10,
+          "duration": 114.3
+        },
+        {
+          "lap": 13,
+          "duration": 449.7
+        }
+      ]
     },
     {
       "driverNumber": 44,
@@ -136,10 +352,40 @@
       "fastestLapDuration": 88.618,
       "driverFastestLap": {
         "duration": 88.618,
-        "time": "1:28.618"
+        "time": "1:28.618",
+        "lapNumber": 14
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 6
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 7,
+          "lapEnd": 12
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 13,
+          "lapEnd": 15
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 7,
+          "duration": 405.1
+        },
+        {
+          "lap": 13,
+          "duration": 515.2
+        }
+      ]
     },
     {
       "driverNumber": 43,
@@ -156,10 +402,40 @@
       "fastestLapDuration": 89.32,
       "driverFastestLap": {
         "duration": 89.32,
-        "time": "1:29.320"
+        "time": "1:29.320",
+        "lapNumber": 14
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 6
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 7,
+          "lapEnd": 12
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 13,
+          "lapEnd": 15
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 7,
+          "duration": 420.8
+        },
+        {
+          "lap": 13,
+          "duration": 540.1
+        }
+      ]
     },
     {
       "driverNumber": 6,
@@ -176,10 +452,40 @@
       "fastestLapDuration": 89.422,
       "driverFastestLap": {
         "duration": 89.422,
-        "time": "1:29.422"
+        "time": "1:29.422",
+        "lapNumber": 14
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 6
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 7,
+          "lapEnd": 12
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 13,
+          "lapEnd": 15
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 7,
+          "duration": 316.3
+        },
+        {
+          "lap": 13,
+          "duration": 603.4
+        }
+      ]
     },
     {
       "driverNumber": 10,
@@ -196,10 +502,40 @@
       "fastestLapDuration": 89.474,
       "driverFastestLap": {
         "duration": 89.474,
-        "time": "1:29.474"
+        "time": "1:29.474",
+        "lapNumber": 14
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 6
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 7,
+          "lapEnd": 12
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 13,
+          "lapEnd": 15
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 7,
+          "duration": 425.3
+        },
+        {
+          "lap": 13,
+          "duration": 564.9
+        }
+      ]
     },
     {
       "driverNumber": 5,
@@ -216,10 +552,40 @@
       "fastestLapDuration": 89.994,
       "driverFastestLap": {
         "duration": 89.994,
-        "time": "1:29.994"
+        "time": "1:29.994",
+        "lapNumber": 8
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 6
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 7,
+          "lapEnd": 9
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 10,
+          "lapEnd": 12
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 7,
+          "duration": 265.2
+        },
+        {
+          "lap": 10,
+          "duration": 91.1
+        }
+      ]
     },
     {
       "driverNumber": 27,
@@ -236,10 +602,40 @@
       "fastestLapDuration": 90.019,
       "driverFastestLap": {
         "duration": 90.019,
-        "time": "1:30.019"
+        "time": "1:30.019",
+        "lapNumber": 8
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 6
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 7,
+          "lapEnd": 9
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 10,
+          "lapEnd": 12
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 7,
+          "duration": 303.6
+        },
+        {
+          "lap": 10,
+          "duration": 96.8
+        }
+      ]
     },
     {
       "driverNumber": 87,
@@ -256,10 +652,40 @@
       "fastestLapDuration": 90.116,
       "driverFastestLap": {
         "duration": 90.116,
-        "time": "1:30.116"
+        "time": "1:30.116",
+        "lapNumber": 8
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 3
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 4,
+          "lapEnd": 6
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 7,
+          "lapEnd": 9
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 4,
+          "duration": 89.7
+        },
+        {
+          "lap": 7,
+          "duration": 710.4
+        }
+      ]
     },
     {
       "driverNumber": 55,
@@ -276,10 +702,31 @@
       "fastestLapDuration": 90.224,
       "driverFastestLap": {
         "duration": 90.224,
-        "time": "1:30.224"
+        "time": "1:30.224",
+        "lapNumber": 8
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 6
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 7,
+          "lapEnd": 12
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 7,
+          "duration": 339.5
+        }
+      ]
     },
     {
       "driverNumber": 41,
@@ -296,10 +743,40 @@
       "fastestLapDuration": 90.573,
       "driverFastestLap": {
         "duration": 90.573,
-        "time": "1:30.573"
+        "time": "1:30.573",
+        "lapNumber": 8
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 3
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 4,
+          "lapEnd": 6
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 7,
+          "lapEnd": 9
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 4,
+          "duration": 69.0
+        },
+        {
+          "lap": 7,
+          "duration": 699.1
+        }
+      ]
     },
     {
       "driverNumber": 30,
@@ -316,10 +793,31 @@
       "fastestLapDuration": 91.043,
       "driverFastestLap": {
         "duration": 91.043,
-        "time": "1:31.043"
+        "time": "1:31.043",
+        "lapNumber": 4
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 2
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 3,
+          "lapEnd": 5
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 3,
+          "duration": 90.3
+        }
+      ]
     },
     {
       "driverNumber": 31,
@@ -336,10 +834,31 @@
       "fastestLapDuration": 91.245,
       "driverFastestLap": {
         "duration": 91.245,
-        "time": "1:31.245"
+        "time": "1:31.245",
+        "lapNumber": 5
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 3
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 4,
+          "lapEnd": 6
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 4,
+          "duration": 102.7
+        }
+      ]
     },
     {
       "driverNumber": 11,
@@ -356,10 +875,22 @@
       "fastestLapDuration": 91.255,
       "driverFastestLap": {
         "duration": 91.255,
-        "time": "1:31.255"
+        "time": "1:31.255",
+        "lapNumber": 2
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 3
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        }
+      ]
     },
     {
       "driverNumber": 23,
@@ -376,10 +907,31 @@
       "fastestLapDuration": 90.216,
       "driverFastestLap": {
         "duration": 90.216,
-        "time": "1:30.216"
+        "time": "1:30.216",
+        "lapNumber": 8
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 6
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 7,
+          "lapEnd": 12
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 7,
+          "duration": 264.4
+        }
+      ]
     },
     {
       "driverNumber": 77,
@@ -396,10 +948,31 @@
       "fastestLapDuration": 91.826,
       "driverFastestLap": {
         "duration": 91.826,
-        "time": "1:31.826"
+        "time": "1:31.826",
+        "lapNumber": 5
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 3
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 4,
+          "lapEnd": 6
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 4,
+          "duration": 152.2
+        }
+      ]
     },
     {
       "driverNumber": 14,
@@ -413,13 +986,31 @@
         null
       ],
       "gap_to_leader": 12.588,
-      "fastestLapDuration": 101.311,
+      "fastestLapDuration": 92.49,
       "driverFastestLap": {
-        "duration": 101.311,
-        "time": "1:41.311"
+        "duration": 92.49,
+        "time": "1:32.490",
+        "lapNumber": 4
       },
-      "tyreStints": [],
-      "pitStops": []
+      "tyreStints": [
+        {
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 6
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        }
+      ]
     }
-  ]
+  ],
+  "sessionFastestLap": {
+    "driverName": "Lando NORRIS",
+    "time": "1:27.869",
+    "duration": 87.869,
+    "lapNumber": 14
+  }
 }
