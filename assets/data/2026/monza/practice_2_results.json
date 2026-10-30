@@ -755,14 +755,14 @@
           "lapEnd": 17
         },
         {
-          "compound": "MEDIUM",
-          "lapStart": 28,
-          "lapEnd": 28
-        },
-        {
           "compound": "SOFT",
           "lapStart": 18,
           "lapEnd": 27
+        },
+        {
+          "compound": "MEDIUM",
+          "lapStart": 28,
+          "lapEnd": 28
         }
       ],
       "pitStops": [

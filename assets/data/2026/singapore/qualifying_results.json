@@ -1413,13 +1413,13 @@
       "tyreStints": [
         {
           "compound": "SOFT",
-          "lapStart": 3,
-          "lapEnd": 3
+          "lapStart": 1,
+          "lapEnd": 2
         },
         {
           "compound": "SOFT",
-          "lapStart": 1,
-          "lapEnd": 2
+          "lapStart": 3,
+          "lapEnd": 3
         }
       ],
       "pitStops": [

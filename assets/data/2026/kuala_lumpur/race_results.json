@@ -283,11 +283,6 @@
           "lapEnd": 1
         },
         {
-          "compound": "HARD",
-          "lapStart": 3,
-          "lapEnd": 9
-        },
-        {
           "compound": "INTERMEDIATE",
           "lapStart": 2,
           "lapEnd": 2
@@ -296,6 +291,11 @@
           "compound": "HARD",
           "lapStart": 3,
           "lapEnd": 2
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 3,
+          "lapEnd": 9
         },
         {
           "compound": "MEDIUM",
@@ -396,11 +396,6 @@
       "timeOrGap": "+13.372s",
       "tyreStints": [
         {
-          "compound": "HARD",
-          "lapStart": 3,
-          "lapEnd": 9
-        },
-        {
           "compound": "MEDIUM",
           "lapStart": 1,
           "lapEnd": 1
@@ -409,6 +404,11 @@
           "compound": "HARD",
           "lapStart": 2,
           "lapEnd": 2
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 3,
+          "lapEnd": 9
         },
         {
           "compound": "SOFT",
@@ -506,13 +506,13 @@
         },
         {
           "compound": "HARD",
-          "lapStart": 10,
-          "lapEnd": 28
+          "lapStart": 2,
+          "lapEnd": 9
         },
         {
           "compound": "HARD",
-          "lapStart": 2,
-          "lapEnd": 9
+          "lapStart": 10,
+          "lapEnd": 28
         },
         {
           "compound": "SOFT",
@@ -557,11 +557,6 @@
           "lapEnd": 1
         },
         {
-          "compound": "SOFT",
-          "lapStart": 9,
-          "lapEnd": 32
-        },
-        {
           "compound": "INTERMEDIATE",
           "lapStart": 2,
           "lapEnd": 2
@@ -570,6 +565,11 @@
           "compound": "SOFT",
           "lapStart": 3,
           "lapEnd": 8
+        },
+        {
+          "compound": "SOFT",
+          "lapStart": 9,
+          "lapEnd": 32
         },
         {
           "compound": "SOFT",
@@ -613,9 +613,9 @@
       "timeOrGap": "+18.052s",
       "tyreStints": [
         {
-          "compound": "HARD",
-          "lapStart": 10,
-          "lapEnd": 28
+          "compound": "MEDIUM",
+          "lapStart": 1,
+          "lapEnd": 1
         },
         {
           "compound": "INTERMEDIATE",
@@ -623,14 +623,14 @@
           "lapEnd": 2
         },
         {
-          "compound": "MEDIUM",
-          "lapStart": 1,
-          "lapEnd": 1
-        },
-        {
           "compound": "HARD",
           "lapStart": 3,
           "lapEnd": 9
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 10,
+          "lapEnd": 28
         },
         {
           "compound": "SOFT",
@@ -679,14 +679,14 @@
           "lapEnd": 1
         },
         {
-          "compound": "HARD",
-          "lapStart": 3,
-          "lapEnd": 9
-        },
-        {
           "compound": "MEDIUM",
           "lapStart": 2,
           "lapEnd": 2
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 3,
+          "lapEnd": 9
         },
         {
           "compound": "MEDIUM",
@@ -830,6 +830,11 @@
       "timeOrGap": "+23.315s",
       "tyreStints": [
         {
+          "compound": "SOFT",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
           "compound": "MEDIUM",
           "lapStart": 2,
           "lapEnd": 2
@@ -838,11 +843,6 @@
           "compound": "HARD",
           "lapStart": 3,
           "lapEnd": 9
-        },
-        {
-          "compound": "SOFT",
-          "lapStart": 1,
-          "lapEnd": 1
         },
         {
           "compound": "SOFT",
@@ -948,6 +948,11 @@
           "lapEnd": 1
         },
         {
+          "compound": "INTERMEDIATE",
+          "lapStart": 2,
+          "lapEnd": 2
+        },
+        {
           "compound": "SOFT",
           "lapStart": 3,
           "lapEnd": 9
@@ -956,11 +961,6 @@
           "compound": "HARD",
           "lapStart": 10,
           "lapEnd": 15
-        },
-        {
-          "compound": "INTERMEDIATE",
-          "lapStart": 2,
-          "lapEnd": 2
         },
         {
           "compound": "SOFT",
@@ -1020,17 +1020,12 @@
         {
           "compound": "INTERMEDIATE",
           "lapStart": 2,
+          "lapEnd": 1
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 2,
           "lapEnd": 2
-        },
-        {
-          "compound": "HARD",
-          "lapStart": 19,
-          "lapEnd": 21
-        },
-        {
-          "compound": "HARD",
-          "lapStart": 10,
-          "lapEnd": 18
         },
         {
           "compound": "MEDIUM",
@@ -1038,14 +1033,19 @@
           "lapEnd": 9
         },
         {
+          "compound": "HARD",
+          "lapStart": 10,
+          "lapEnd": 18
+        },
+        {
+          "compound": "HARD",
+          "lapStart": 19,
+          "lapEnd": 21
+        },
+        {
           "compound": "MEDIUM",
           "lapStart": 22,
           "lapEnd": 39
-        },
-        {
-          "compound": "INTERMEDIATE",
-          "lapStart": 2,
-          "lapEnd": 1
         },
         {
           "compound": "SOFT",

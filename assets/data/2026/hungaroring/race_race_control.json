@@ -82,19 +82,6 @@
     {
       "meeting_key": 1291,
       "session_key": 11342,
-      "date": "2026-07-26T13:03:18.360000+00:00",
-      "driver_number": null,
-      "lap_number": 1,
-      "category": "SessionStatus",
-      "flag": null,
-      "scope": null,
-      "sector": null,
-      "qualifying_phase": null,
-      "message": "SESSION STARTED"
-    },
-    {
-      "meeting_key": 1291,
-      "session_key": 11342,
       "date": "2026-07-26T13:03:18+00:00",
       "driver_number": null,
       "lap_number": 1,
@@ -104,6 +91,19 @@
       "sector": null,
       "qualifying_phase": null,
       "message": "GREEN LIGHT - PIT EXIT OPEN"
+    },
+    {
+      "meeting_key": 1291,
+      "session_key": 11342,
+      "date": "2026-07-26T13:03:18.360000+00:00",
+      "driver_number": null,
+      "lap_number": 1,
+      "category": "SessionStatus",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "qualifying_phase": null,
+      "message": "SESSION STARTED"
     },
     {
       "meeting_key": 1291,
@@ -533,6 +533,19 @@
       "sector": null,
       "qualifying_phase": null,
       "message": "TURN 2 INCIDENT INVOLVING CARS 55 (SAI) AND 81 (PIA) NOTED - CAUSING A COLLISION (15:57:04)"
+    },
+    {
+      "meeting_key": 1291,
+      "session_key": 11342,
+      "date": "2026-07-26T13:59:45+00:00",
+      "driver_number": null,
+      "lap_number": 40,
+      "category": "Other",
+      "flag": null,
+      "scope": null,
+      "sector": null,
+      "qualifying_phase": null,
+      "message": "CAR 55 (SAI) TIME 1:31.701 DELETED - TRACK LIMITS AT TURN 7 LAP 37 15:57:29"
     },
     {
       "meeting_key": 1291,

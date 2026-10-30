@@ -1168,13 +1168,13 @@
         },
         {
           "compound": "SOFT",
-          "lapStart": 22,
-          "lapEnd": 22
+          "lapStart": 18,
+          "lapEnd": 21
         },
         {
           "compound": "SOFT",
-          "lapStart": 18,
-          "lapEnd": 21
+          "lapStart": 22,
+          "lapEnd": 22
         }
       ],
       "pitStops": [

@@ -505,6 +505,11 @@
         },
         {
           "compound": "MEDIUM",
+          "lapStart": 8,
+          "lapEnd": 8
+        },
+        {
+          "compound": "MEDIUM",
           "lapStart": 9,
           "lapEnd": 11
         },
@@ -512,11 +517,6 @@
           "compound": "MEDIUM",
           "lapStart": 12,
           "lapEnd": 19
-        },
-        {
-          "compound": "MEDIUM",
-          "lapStart": 8,
-          "lapEnd": 8
         }
       ],
       "pitStops": [

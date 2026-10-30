@@ -1066,10 +1066,10 @@
       "teamName": "Haas F1 Team",
       "finishPosition": null,
       "points": 0.0,
-      "fastestLapDuration": 97.522,
+      "fastestLapDuration": 97.523,
       "driverFastestLap": {
-        "duration": 97.522,
-        "time": "1:37.522",
+        "duration": 97.523,
+        "time": "1:37.523",
         "lapNumber": 1
       },
       "timeOrGap": "DNF",

@@ -822,13 +822,13 @@
       "tyreStints": [
         {
           "compound": "MEDIUM",
-          "lapStart": 8,
-          "lapEnd": 8
+          "lapStart": 1,
+          "lapEnd": 7
         },
         {
           "compound": "MEDIUM",
-          "lapStart": 1,
-          "lapEnd": 7
+          "lapStart": 8,
+          "lapEnd": 8
         }
       ],
       "pitStops": [

@@ -747,11 +747,11 @@
         {
           "compound": "MEDIUM",
           "lapStart": 9,
-          "lapEnd": 11
+          "lapEnd": 10
         },
         {
-          "compound": null,
-          "lapStart": 12,
+          "compound": "SOFT",
+          "lapStart": 11,
           "lapEnd": 15
         },
         {
