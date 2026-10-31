@@ -469,7 +469,7 @@
       "pitStops": [
         {
           "lap": 14,
-          "duration": 24.0
+          "duration": 24.068
         }
       ]
     },
@@ -502,7 +502,7 @@
       "pitStops": [
         {
           "lap": 19,
-          "duration": 70.6
+          "duration": 70.655
         }
       ]
     },
@@ -544,7 +544,7 @@
         },
         {
           "lap": 9,
-          "duration": 23.5
+          "duration": 23.59
         }
       ]
     },
@@ -576,7 +576,7 @@
       "pitStops": [
         {
           "lap": 15,
-          "duration": 24.6
+          "duration": 24.635
         }
       ]
     }

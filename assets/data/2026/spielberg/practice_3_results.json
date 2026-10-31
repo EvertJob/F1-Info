@@ -37,24 +37,7 @@
           "lapEnd": 19
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 10,
-          "duration": 869.8
-        },
-        {
-          "lap": 13,
-          "duration": 221.4
-        },
-        {
-          "lap": 17,
-          "duration": 21.4
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 12,
@@ -102,32 +85,7 @@
           "lapEnd": 17
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 4,
-          "duration": 393.1
-        },
-        {
-          "lap": 7,
-          "duration": 571.2
-        },
-        {
-          "lap": 10,
-          "duration": 233.9
-        },
-        {
-          "lap": 13,
-          "duration": 25.8
-        },
-        {
-          "lap": 15,
-          "duration": 16.4
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 44,
@@ -165,24 +123,7 @@
           "lapEnd": 22
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 8,
-          "duration": 215.9
-        },
-        {
-          "lap": 11,
-          "duration": 627.4
-        },
-        {
-          "lap": 18,
-          "duration": 32.4
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 81,
@@ -230,32 +171,7 @@
           "lapEnd": 17
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 4,
-          "duration": 373.0
-        },
-        {
-          "lap": 7,
-          "duration": 15.9
-        },
-        {
-          "lap": 9,
-          "duration": 511.5
-        },
-        {
-          "lap": 12,
-          "duration": 26.9
-        },
-        {
-          "lap": 15,
-          "duration": 308.5
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 1,
@@ -308,36 +224,7 @@
           "lapEnd": 20
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 4,
-          "duration": 488.3
-        },
-        {
-          "lap": 8,
-          "duration": 25.4
-        },
-        {
-          "lap": 11,
-          "duration": 428.9
-        },
-        {
-          "lap": 14,
-          "duration": 33.7
-        },
-        {
-          "lap": 17,
-          "duration": 23.8
-        },
-        {
-          "lap": 18,
-          "duration": 266.4
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 3,
@@ -380,28 +267,7 @@
           "lapEnd": 16
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 4,
-          "duration": 15.9
-        },
-        {
-          "lap": 7,
-          "duration": 15.9
-        },
-        {
-          "lap": 10,
-          "duration": 555.5
-        },
-        {
-          "lap": 13,
-          "duration": 545.3
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 16,
@@ -459,40 +325,7 @@
           "lapEnd": 24
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 4,
-          "duration": 16.5
-        },
-        {
-          "lap": 8,
-          "duration": 233.3
-        },
-        {
-          "lap": 11,
-          "duration": 19.0
-        },
-        {
-          "lap": 13,
-          "duration": 387.8
-        },
-        {
-          "lap": 15,
-          "duration": 15.9
-        },
-        {
-          "lap": 17,
-          "duration": 15.9
-        },
-        {
-          "lap": 20,
-          "duration": 27.6
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 6,
@@ -530,24 +363,7 @@
           "lapEnd": 27
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 7,
-          "duration": 597.6
-        },
-        {
-          "lap": 16,
-          "duration": 257.2
-        },
-        {
-          "lap": 19,
-          "duration": 29.5
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 30,
@@ -590,28 +406,7 @@
           "lapEnd": 21
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 4,
-          "duration": 671.0
-        },
-        {
-          "lap": 12,
-          "duration": 196.8
-        },
-        {
-          "lap": 15,
-          "duration": 224.3
-        },
-        {
-          "lap": 18,
-          "duration": 21.8
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 41,
@@ -654,28 +449,7 @@
           "lapEnd": 24
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 7,
-          "duration": 486.5
-        },
-        {
-          "lap": 15,
-          "duration": 259.8
-        },
-        {
-          "lap": 18,
-          "duration": 125.4
-        },
-        {
-          "lap": 21,
-          "duration": 15.9
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 10,
@@ -718,28 +492,7 @@
           "lapEnd": 16
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 4,
-          "duration": 435.6
-        },
-        {
-          "lap": 7,
-          "duration": 207.5
-        },
-        {
-          "lap": 10,
-          "duration": 238.4
-        },
-        {
-          "lap": 13,
-          "duration": 471.6
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 27,
@@ -787,32 +540,7 @@
           "lapEnd": 22
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 4,
-          "duration": 144.2
-        },
-        {
-          "lap": 7,
-          "duration": 132.5
-        },
-        {
-          "lap": 14,
-          "duration": 675.4
-        },
-        {
-          "lap": 17,
-          "duration": 154.5
-        },
-        {
-          "lap": 20,
-          "duration": 244.9
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 5,
@@ -860,32 +588,7 @@
           "lapEnd": 22
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 4,
-          "duration": 131.6
-        },
-        {
-          "lap": 7,
-          "duration": 318.8
-        },
-        {
-          "lap": 10,
-          "duration": 29.2
-        },
-        {
-          "lap": 15,
-          "duration": 339.9
-        },
-        {
-          "lap": 18,
-          "duration": 197.4
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 43,
@@ -933,32 +636,7 @@
           "lapEnd": 18
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 4,
-          "duration": 28.4
-        },
-        {
-          "lap": 5,
-          "duration": 598.2
-        },
-        {
-          "lap": 8,
-          "duration": 296.2
-        },
-        {
-          "lap": 11,
-          "duration": 410.7
-        },
-        {
-          "lap": 14,
-          "duration": 366.7
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 87,
@@ -1001,28 +679,7 @@
           "lapEnd": 19
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 5,
-          "duration": 51.6
-        },
-        {
-          "lap": 8,
-          "duration": 401.5
-        },
-        {
-          "lap": 12,
-          "duration": 456.5
-        },
-        {
-          "lap": 15,
-          "duration": 60.9
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 31,
@@ -1060,24 +717,7 @@
           "lapEnd": 15
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 4,
-          "duration": 83.8
-        },
-        {
-          "lap": 7,
-          "duration": 202.9
-        },
-        {
-          "lap": 10,
-          "duration": 1171.6
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 55,
@@ -1125,32 +765,7 @@
           "lapEnd": 27
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 4,
-          "duration": 23.1
-        },
-        {
-          "lap": 7,
-          "duration": 16.9
-        },
-        {
-          "lap": 10,
-          "duration": 230.1
-        },
-        {
-          "lap": 20,
-          "duration": 274.1
-        },
-        {
-          "lap": 23,
-          "duration": 28.9
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 23,
@@ -1203,36 +818,7 @@
           "lapEnd": 25
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 4,
-          "duration": 20.0
-        },
-        {
-          "lap": 7,
-          "duration": 360.5
-        },
-        {
-          "lap": 16,
-          "duration": 38.4
-        },
-        {
-          "lap": 17,
-          "duration": 267.1
-        },
-        {
-          "lap": 20,
-          "duration": 17.1
-        },
-        {
-          "lap": 23,
-          "duration": 36.9
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 11,
@@ -1270,24 +856,7 @@
           "lapEnd": 29
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 8,
-          "duration": 46.4
-        },
-        {
-          "lap": 11,
-          "duration": 704.9
-        },
-        {
-          "lap": 22,
-          "duration": 484.5
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 77,
@@ -1325,24 +894,7 @@
           "lapEnd": 24
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 4,
-          "duration": 16.1
-        },
-        {
-          "lap": 9,
-          "duration": 643.0
-        },
-        {
-          "lap": 18,
-          "duration": 355.9
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 14,
@@ -1385,28 +937,7 @@
           "lapEnd": 21
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 9,
-          "duration": 684.1
-        },
-        {
-          "lap": 11,
-          "duration": 34.9
-        },
-        {
-          "lap": 14,
-          "duration": 395.6
-        },
-        {
-          "lap": 17,
-          "duration": 35.4
-        }
-      ]
+      "pitStops": []
     },
     {
       "driverNumber": 18,
@@ -1444,24 +975,7 @@
           "lapEnd": 19
         }
       ],
-      "pitStops": [
-        {
-          "lap": 1,
-          "duration": null
-        },
-        {
-          "lap": 8,
-          "duration": 381.0
-        },
-        {
-          "lap": 12,
-          "duration": 535.2
-        },
-        {
-          "lap": 15,
-          "duration": 17.8
-        }
-      ]
+      "pitStops": []
     }
   ],
   "sessionFastestLap": {
