@@ -26,7 +26,7 @@
     },
     {
       "team": "Haas F1 Team",
-      "points": 30.0
+      "points": 31.0
     },
     {
       "team": "Audi",
@@ -39,10 +39,6 @@
     {
       "team": "Aston Martin",
       "points": 7.0
-    },
-    {
-      "team": "Unknown",
-      "points": 1.0
     },
     {
       "team": "Cadillac",
@@ -1361,9 +1357,9 @@
             "points_received": 0.0
           }
         },
-        "Unknown": {
+        "Haas F1 Team": {
           "Race": {
-            "points_received": 1.0
+            "points_received": 0.0
           }
         },
         "Williams": {
@@ -1377,11 +1373,6 @@
           }
         },
         "Cadillac": {
-          "Race": {
-            "points_received": 0.0
-          }
-        },
-        "Haas F1 Team": {
           "Race": {
             "points_received": 0.0
           }
