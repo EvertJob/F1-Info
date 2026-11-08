@@ -1,0 +1,1255 @@
+{
+  "sessionKey": 11408,
+  "results": [
+    {
+      "driverNumber": 1,
+      "broadcastName": "L NORRIS",
+      "teamName": "McLaren",
+      "finishPosition": 1,
+      "points": 0,
+      "duration": [
+        90.939,
+        89.207,
+        87.47
+      ],
+      "gap_to_leader": 0.0,
+      "fastestLapDuration": 87.47,
+      "driverFastestLap": {
+        "duration": 87.47,
+        "time": "1:27.470",
+        "lapNumber": 23
+      },
+      "tyreStints": [
+        {
+          "compound": "WET",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 11
+        },
+        {
+          "compound": "WET",
+          "lapStart": 12,
+          "lapEnd": 17
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 18,
+          "lapEnd": 20
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 21,
+          "lapEnd": 24
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": null
+        },
+        {
+          "lap": 12,
+          "duration": 269.8
+        },
+        {
+          "lap": 18,
+          "duration": 27.3
+        },
+        {
+          "lap": 21,
+          "duration": 911.9
+        }
+      ]
+    },
+    {
+      "driverNumber": 63,
+      "broadcastName": "G RUSSELL",
+      "teamName": "Mercedes",
+      "finishPosition": 2,
+      "points": 0,
+      "duration": [
+        91.206,
+        86.745,
+        87.674
+      ],
+      "gap_to_leader": 0.204,
+      "fastestLapDuration": 86.745,
+      "driverFastestLap": {
+        "duration": 86.745,
+        "time": "1:26.745",
+        "lapNumber": 18
+      },
+      "tyreStints": [
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 10
+        },
+        {
+          "compound": "WET",
+          "lapStart": 11,
+          "lapEnd": 16
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 17,
+          "lapEnd": 19
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 20,
+          "lapEnd": 23
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": null
+        },
+        {
+          "lap": 11,
+          "duration": 354.7
+        },
+        {
+          "lap": 17,
+          "duration": 30.2
+        },
+        {
+          "lap": 20,
+          "duration": 967.7
+        }
+      ]
+    },
+    {
+      "driverNumber": 12,
+      "broadcastName": "K ANTONELLI",
+      "teamName": "Mercedes",
+      "finishPosition": 3,
+      "points": 0,
+      "duration": [
+        92.229,
+        89.302,
+        88.095
+      ],
+      "gap_to_leader": 0.625,
+      "fastestLapDuration": 88.095,
+      "driverFastestLap": {
+        "duration": 88.095,
+        "time": "1:28.095",
+        "lapNumber": 22
+      },
+      "tyreStints": [
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 10
+        },
+        {
+          "compound": "WET",
+          "lapStart": 11,
+          "lapEnd": 17
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 18,
+          "lapEnd": 19
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 20,
+          "lapEnd": 23
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": null
+        },
+        {
+          "lap": 11,
+          "duration": 361.2
+        },
+        {
+          "lap": 18,
+          "duration": 24.8
+        },
+        {
+          "lap": 20,
+          "duration": 844.7
+        }
+      ]
+    },
+    {
+      "driverNumber": 16,
+      "broadcastName": "C LECLERC",
+      "teamName": "Ferrari",
+      "finishPosition": 4,
+      "points": 0,
+      "duration": [
+        92.121,
+        88.082,
+        88.289
+      ],
+      "gap_to_leader": 0.819,
+      "fastestLapDuration": 88.082,
+      "driverFastestLap": {
+        "duration": 88.082,
+        "time": "1:28.082",
+        "lapNumber": 17
+      },
+      "tyreStints": [
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 11
+        },
+        {
+          "compound": "WET",
+          "lapStart": 12,
+          "lapEnd": 15
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 16,
+          "lapEnd": 18
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 19,
+          "lapEnd": 22
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": null
+        },
+        {
+          "lap": 12,
+          "duration": 333.4
+        },
+        {
+          "lap": 16,
+          "duration": 177.3
+        },
+        {
+          "lap": 19,
+          "duration": 1085.1
+        }
+      ]
+    },
+    {
+      "driverNumber": 30,
+      "broadcastName": "L LAWSON",
+      "teamName": "Racing Bulls",
+      "finishPosition": 5,
+      "points": 0,
+      "duration": [
+        92.085,
+        87.049,
+        88.321
+      ],
+      "gap_to_leader": 0.851,
+      "fastestLapDuration": 87.049,
+      "driverFastestLap": {
+        "duration": 87.049,
+        "time": "1:27.049",
+        "lapNumber": 19
+      },
+      "tyreStints": [
+        {
+          "compound": "WET",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 11
+        },
+        {
+          "compound": "WET",
+          "lapStart": 12,
+          "lapEnd": 16
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 17,
+          "lapEnd": 20
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 21,
+          "lapEnd": 24
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": null
+        },
+        {
+          "lap": 12,
+          "duration": 329.2
+        },
+        {
+          "lap": 17,
+          "duration": 27.5
+        },
+        {
+          "lap": 21,
+          "duration": 998.2
+        }
+      ]
+    },
+    {
+      "driverNumber": 27,
+      "broadcastName": "N HULKENBERG",
+      "teamName": "Audi",
+      "finishPosition": 6,
+      "points": 0,
+      "duration": [
+        91.693,
+        88.361,
+        88.668
+      ],
+      "gap_to_leader": 1.198,
+      "fastestLapDuration": 88.361,
+      "driverFastestLap": {
+        "duration": 88.361,
+        "time": "1:28.361",
+        "lapNumber": 18
+      },
+      "tyreStints": [
+        {
+          "compound": "WET",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 11
+        },
+        {
+          "compound": "WET",
+          "lapStart": 12,
+          "lapEnd": 16
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 17,
+          "lapEnd": 19
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 20,
+          "lapEnd": 23
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": null
+        },
+        {
+          "lap": 12,
+          "duration": 394.0
+        },
+        {
+          "lap": 17,
+          "duration": 28.7
+        },
+        {
+          "lap": 20,
+          "duration": 931.4
+        }
+      ]
+    },
+    {
+      "driverNumber": 6,
+      "broadcastName": "I HADJAR",
+      "teamName": "Red Bull Racing",
+      "finishPosition": 7,
+      "points": 0,
+      "duration": [
+        92.059,
+        87.218,
+        88.763
+      ],
+      "gap_to_leader": 1.293,
+      "fastestLapDuration": 87.218,
+      "driverFastestLap": {
+        "duration": 87.218,
+        "time": "1:27.218",
+        "lapNumber": 19
+      },
+      "tyreStints": [
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 11
+        },
+        {
+          "compound": "WET",
+          "lapStart": 12,
+          "lapEnd": 16
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 17,
+          "lapEnd": 20
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 21,
+          "lapEnd": 24
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": null
+        },
+        {
+          "lap": 12,
+          "duration": 325.4
+        },
+        {
+          "lap": 17,
+          "duration": 34.4
+        },
+        {
+          "lap": 21,
+          "duration": 1000.1
+        }
+      ]
+    },
+    {
+      "driverNumber": 87,
+      "broadcastName": "O BEARMAN",
+      "teamName": "Haas F1 Team",
+      "finishPosition": 8,
+      "points": 0,
+      "duration": [
+        93.03,
+        89.13,
+        89.831
+      ],
+      "gap_to_leader": 2.361,
+      "fastestLapDuration": 89.13,
+      "driverFastestLap": {
+        "duration": 89.13,
+        "time": "1:29.130",
+        "lapNumber": 16
+      },
+      "tyreStints": [
+        {
+          "compound": "WET",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 10
+        },
+        {
+          "compound": "WET",
+          "lapStart": 11,
+          "lapEnd": 14
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 15,
+          "lapEnd": 18
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 19,
+          "lapEnd": 22
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": null
+        },
+        {
+          "lap": 11,
+          "duration": 451.0
+        },
+        {
+          "lap": 15,
+          "duration": 25.7
+        },
+        {
+          "lap": 19,
+          "duration": 1038.8
+        }
+      ]
+    },
+    {
+      "driverNumber": 14,
+      "broadcastName": "F ALONSO",
+      "teamName": "Aston Martin",
+      "finishPosition": 9,
+      "points": 0,
+      "duration": [
+        92.092,
+        89.072,
+        90.311
+      ],
+      "gap_to_leader": 2.841,
+      "fastestLapDuration": 89.072,
+      "driverFastestLap": {
+        "duration": 89.072,
+        "time": "1:29.072",
+        "lapNumber": 18
+      },
+      "tyreStints": [
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 11
+        },
+        {
+          "compound": "WET",
+          "lapStart": 12,
+          "lapEnd": 15
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 16,
+          "lapEnd": 19
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 20,
+          "lapEnd": 23
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": null
+        },
+        {
+          "lap": 12,
+          "duration": 368.3
+        },
+        {
+          "lap": 16,
+          "duration": 25.9
+        },
+        {
+          "lap": 20,
+          "duration": 1027.7
+        }
+      ]
+    },
+    {
+      "driverNumber": 23,
+      "broadcastName": "A ALBON",
+      "teamName": "Williams",
+      "finishPosition": 10,
+      "points": 0,
+      "duration": [
+        93.15,
+        88.918,
+        90.456
+      ],
+      "gap_to_leader": 2.986,
+      "fastestLapDuration": 88.918,
+      "driverFastestLap": {
+        "duration": 88.918,
+        "time": "1:28.918",
+        "lapNumber": 19
+      },
+      "tyreStints": [
+        {
+          "compound": "WET",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 11
+        },
+        {
+          "compound": "WET",
+          "lapStart": 12,
+          "lapEnd": 17
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 18,
+          "lapEnd": 20
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 21,
+          "lapEnd": 24
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": null
+        },
+        {
+          "lap": 12,
+          "duration": 316.2
+        },
+        {
+          "lap": 18,
+          "duration": 27.7
+        },
+        {
+          "lap": 21,
+          "duration": 936.9
+        }
+      ]
+    },
+    {
+      "driverNumber": 44,
+      "broadcastName": "L HAMILTON",
+      "teamName": "Ferrari",
+      "finishPosition": 11,
+      "points": 0,
+      "duration": [
+        91.666,
+        90.001,
+        null
+      ],
+      "gap_to_leader": 3.256,
+      "fastestLapDuration": 90.001,
+      "driverFastestLap": {
+        "duration": 90.001,
+        "time": "1:30.001",
+        "lapNumber": 12
+      },
+      "tyreStints": [
+        {
+          "compound": "WET",
+          "lapStart": 1,
+          "lapEnd": 9
+        },
+        {
+          "compound": "WET",
+          "lapStart": 10,
+          "lapEnd": 13
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 10,
+          "duration": 408.9
+        }
+      ]
+    },
+    {
+      "driverNumber": 81,
+      "broadcastName": "O PIASTRI",
+      "teamName": "McLaren",
+      "finishPosition": 12,
+      "points": 0,
+      "duration": [
+        92.251,
+        90.369,
+        null
+      ],
+      "gap_to_leader": 3.624,
+      "fastestLapDuration": 90.369,
+      "driverFastestLap": {
+        "duration": 90.369,
+        "time": "1:30.369",
+        "lapNumber": 19
+      },
+      "tyreStints": [
+        {
+          "compound": "WET",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 11
+        },
+        {
+          "compound": "WET",
+          "lapStart": 12,
+          "lapEnd": 17
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 18,
+          "lapEnd": 20
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": null
+        },
+        {
+          "lap": 12,
+          "duration": 294.8
+        },
+        {
+          "lap": 18,
+          "duration": 28.1
+        }
+      ]
+    },
+    {
+      "driverNumber": 51,
+      "broadcastName": "R CAMARA",
+      "teamName": "Haas F1 Team",
+      "finishPosition": 13,
+      "points": 0,
+      "duration": [
+        92.809,
+        91.515,
+        null
+      ],
+      "gap_to_leader": 4.77,
+      "fastestLapDuration": 91.47,
+      "driverFastestLap": {
+        "duration": 91.47,
+        "time": "1:31.470",
+        "lapNumber": 17
+      },
+      "tyreStints": [
+        {
+          "compound": "WET",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 3
+        },
+        {
+          "compound": "WET",
+          "lapStart": 4,
+          "lapEnd": 10
+        },
+        {
+          "compound": "WET",
+          "lapStart": 11,
+          "lapEnd": 15
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 16,
+          "lapEnd": 18
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": null
+        },
+        {
+          "lap": 4,
+          "duration": 129.4
+        },
+        {
+          "lap": 11,
+          "duration": 260.8
+        },
+        {
+          "lap": 16,
+          "duration": 30.3
+        }
+      ]
+    },
+    {
+      "driverNumber": 41,
+      "broadcastName": "A LINDBLAD",
+      "teamName": "Racing Bulls",
+      "finishPosition": 14,
+      "points": 0,
+      "duration": [
+        92.306,
+        91.687,
+        null
+      ],
+      "gap_to_leader": 4.942,
+      "fastestLapDuration": 91.687,
+      "driverFastestLap": {
+        "duration": 91.687,
+        "time": "1:31.687",
+        "lapNumber": 13
+      },
+      "tyreStints": [
+        {
+          "compound": "WET",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 11
+        },
+        {
+          "compound": "WET",
+          "lapStart": 12,
+          "lapEnd": 16
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": null
+        },
+        {
+          "lap": 12,
+          "duration": 337.2
+        }
+      ]
+    },
+    {
+      "driverNumber": 55,
+      "broadcastName": "C SAINZ",
+      "teamName": "Williams",
+      "finishPosition": 15,
+      "points": 0,
+      "duration": [
+        92.959,
+        91.785,
+        null
+      ],
+      "gap_to_leader": 5.04,
+      "fastestLapDuration": 91.785,
+      "driverFastestLap": {
+        "duration": 91.785,
+        "time": "1:31.785",
+        "lapNumber": 16
+      },
+      "tyreStints": [
+        {
+          "compound": "WET",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 11
+        },
+        {
+          "compound": "WET",
+          "lapStart": 12,
+          "lapEnd": 17
+        },
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 18,
+          "lapEnd": 19
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": null
+        },
+        {
+          "lap": 12,
+          "duration": 312.8
+        },
+        {
+          "lap": 18,
+          "duration": 27.2
+        }
+      ]
+    },
+    {
+      "driverNumber": 3,
+      "broadcastName": "M VERSTAPPEN",
+      "teamName": "Red Bull Racing",
+      "finishPosition": 16,
+      "points": 0,
+      "duration": [
+        91.238,
+        null,
+        null
+      ],
+      "gap_to_leader": 0.299,
+      "fastestLapDuration": 91.238,
+      "driverFastestLap": {
+        "duration": 91.238,
+        "time": "1:31.238",
+        "lapNumber": 8
+      },
+      "tyreStints": [
+        {
+          "compound": "WET",
+          "lapStart": 1,
+          "lapEnd": 9
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        }
+      ]
+    },
+    {
+      "driverNumber": 43,
+      "broadcastName": "F COLAPINTO",
+      "teamName": "Alpine",
+      "finishPosition": 17,
+      "points": 0,
+      "duration": [
+        93.327,
+        null,
+        null
+      ],
+      "gap_to_leader": 2.388,
+      "fastestLapDuration": 93.327,
+      "driverFastestLap": {
+        "duration": 93.327,
+        "time": "1:33.327",
+        "lapNumber": 10
+      },
+      "tyreStints": [
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 12
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": 5041.4
+        }
+      ]
+    },
+    {
+      "driverNumber": 10,
+      "broadcastName": "P GASLY",
+      "teamName": "Alpine",
+      "finishPosition": 18,
+      "points": 0,
+      "duration": [
+        93.449,
+        null,
+        null
+      ],
+      "gap_to_leader": 2.51,
+      "fastestLapDuration": 93.449,
+      "driverFastestLap": {
+        "duration": 93.449,
+        "time": "1:33.449",
+        "lapNumber": 11
+      },
+      "tyreStints": [
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 12
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": 5033.8
+        }
+      ]
+    },
+    {
+      "driverNumber": 18,
+      "broadcastName": "L STROLL",
+      "teamName": "Aston Martin",
+      "finishPosition": 19,
+      "points": 0,
+      "duration": [
+        93.653,
+        null,
+        null
+      ],
+      "gap_to_leader": 2.714,
+      "fastestLapDuration": 93.653,
+      "driverFastestLap": {
+        "duration": 93.653,
+        "time": "1:33.653",
+        "lapNumber": 10
+      },
+      "tyreStints": [
+        {
+          "compound": "WET",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 6
+        },
+        {
+          "compound": "WET",
+          "lapStart": 7,
+          "lapEnd": 11
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": null
+        },
+        {
+          "lap": 7,
+          "duration": 25.2
+        }
+      ]
+    },
+    {
+      "driverNumber": 77,
+      "broadcastName": "V BOTTAS",
+      "teamName": "Cadillac",
+      "finishPosition": 20,
+      "points": 0,
+      "duration": [
+        93.774,
+        null,
+        null
+      ],
+      "gap_to_leader": 2.835,
+      "fastestLapDuration": 93.774,
+      "driverFastestLap": {
+        "duration": 93.774,
+        "time": "1:33.774",
+        "lapNumber": 11
+      },
+      "tyreStints": [
+        {
+          "compound": "INTERMEDIATE",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 12
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": 5041.7
+        }
+      ]
+    },
+    {
+      "driverNumber": 11,
+      "broadcastName": "S PEREZ",
+      "teamName": "Cadillac",
+      "finishPosition": 21,
+      "points": 0,
+      "duration": [
+        94.509,
+        null,
+        null
+      ],
+      "gap_to_leader": 3.57,
+      "fastestLapDuration": 94.509,
+      "driverFastestLap": {
+        "duration": 94.509,
+        "time": "1:34.509",
+        "lapNumber": 9
+      },
+      "tyreStints": [
+        {
+          "compound": "WET",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 12
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": null
+        }
+      ]
+    },
+    {
+      "driverNumber": 5,
+      "broadcastName": "G BORTOLETO",
+      "teamName": "Audi",
+      "finishPosition": 22,
+      "points": 0,
+      "duration": [
+        101.564,
+        null,
+        null
+      ],
+      "gap_to_leader": 10.625,
+      "fastestLapDuration": 101.564,
+      "driverFastestLap": {
+        "duration": 101.564,
+        "time": "1:41.564",
+        "lapNumber": 4
+      },
+      "tyreStints": [
+        {
+          "compound": "WET",
+          "lapStart": 1,
+          "lapEnd": 1
+        },
+        {
+          "compound": "WET",
+          "lapStart": 2,
+          "lapEnd": 5
+        }
+      ],
+      "pitStops": [
+        {
+          "lap": 1,
+          "duration": null
+        },
+        {
+          "lap": 2,
+          "duration": null
+        }
+      ]
+    }
+  ],
+  "sessionFastestLap": {
+    "driverName": "George RUSSELL",
+    "time": "1:26.745",
+    "duration": 86.745,
+    "lapNumber": 18
+  }
+}
