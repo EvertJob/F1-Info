@@ -36,11 +36,11 @@
       "pitStops": [
         {
           "lap": 27,
-          "duration": 22.4
+          "duration": 22.466
         },
         {
           "lap": 45,
-          "duration": 2314.9
+          "duration": 2314.937
         }
       ]
     },
@@ -84,11 +84,11 @@
       "pitStops": [
         {
           "lap": 28,
-          "duration": 22.7
+          "duration": 22.734
         },
         {
           "lap": 44,
-          "duration": 23.8
+          "duration": 23.806
         },
         {
           "lap": 45,
@@ -135,7 +135,7 @@
         },
         {
           "lap": 43,
-          "duration": 23.7
+          "duration": 23.738
         },
         {
           "lap": 45,
@@ -178,7 +178,7 @@
       "pitStops": [
         {
           "lap": 27,
-          "duration": 28.7
+          "duration": 28.706
         },
         {
           "lap": 45,
@@ -225,7 +225,7 @@
         },
         {
           "lap": 39,
-          "duration": 24.7
+          "duration": 24.708
         },
         {
           "lap": 45,
@@ -273,11 +273,11 @@
       "pitStops": [
         {
           "lap": 33,
-          "duration": 33.9
+          "duration": 33.926
         },
         {
           "lap": 44,
-          "duration": 22.2
+          "duration": 22.264
         },
         {
           "lap": 45,
@@ -334,11 +334,11 @@
         },
         {
           "lap": 11,
-          "duration": 22.8
+          "duration": 22.855
         },
         {
           "lap": 42,
-          "duration": 22.5
+          "duration": 22.581
         },
         {
           "lap": 44,
@@ -346,7 +346,7 @@
         },
         {
           "lap": 45,
-          "duration": 60.5
+          "duration": 60.513
         }
       ]
     },
@@ -385,7 +385,7 @@
       "pitStops": [
         {
           "lap": 38,
-          "duration": 22.5
+          "duration": 22.546
         },
         {
           "lap": 45,
@@ -437,11 +437,11 @@
         },
         {
           "lap": 41,
-          "duration": 22.6
+          "duration": 22.611
         },
         {
           "lap": 45,
-          "duration": 2265.5
+          "duration": 2265.561
         }
       ]
     },
@@ -494,12 +494,16 @@
       ],
       "pitStops": [
         {
+          "lap": 59,
+          "duration": 22.9
+        },
+        {
           "lap": 35,
-          "duration": 22.8
+          "duration": 22.876
         },
         {
           "lap": 43,
-          "duration": 23.8
+          "duration": 23.802
         },
         {
           "lap": 44,
@@ -507,11 +511,7 @@
         },
         {
           "lap": 45,
-          "duration": 57.3
-        },
-        {
-          "lap": 59,
-          "duration": 22.9
+          "duration": 57.345
         }
       ]
     },
@@ -560,11 +560,11 @@
       "pitStops": [
         {
           "lap": 18,
-          "duration": 22.0
+          "duration": 22.012
         },
         {
           "lap": 41,
-          "duration": 25.4
+          "duration": 25.43
         },
         {
           "lap": 44,
@@ -572,7 +572,7 @@
         },
         {
           "lap": 45,
-          "duration": 54.8
+          "duration": 54.818
         }
       ]
     },
@@ -616,7 +616,7 @@
       "pitStops": [
         {
           "lap": 36,
-          "duration": 22.5
+          "duration": 22.572
         },
         {
           "lap": 44,
@@ -624,7 +624,7 @@
         },
         {
           "lap": 45,
-          "duration": 58.6
+          "duration": 58.647
         }
       ]
     },
@@ -668,11 +668,11 @@
       "pitStops": [
         {
           "lap": 26,
-          "duration": 22.6
+          "duration": 22.681
         },
         {
           "lap": 44,
-          "duration": 24.5
+          "duration": 24.559
         },
         {
           "lap": 45,
@@ -719,16 +719,16 @@
       ],
       "pitStops": [
         {
+          "lap": 59,
+          "duration": 34.5
+        },
+        {
           "lap": 31,
-          "duration": 21.9
+          "duration": 21.929
         },
         {
           "lap": 45,
           "duration": 2272.9
-        },
-        {
-          "lap": 59,
-          "duration": 34.5
         }
       ]
     },
@@ -767,7 +767,7 @@
       "pitStops": [
         {
           "lap": 34,
-          "duration": 23.3
+          "duration": 23.343
         },
         {
           "lap": 45,
@@ -828,6 +828,10 @@
           "duration": null
         },
         {
+          "lap": 59,
+          "duration": 29.8
+        },
+        {
           "lap": 30,
           "duration": 28.9
         },
@@ -842,10 +846,6 @@
         {
           "lap": 45,
           "duration": 57.0
-        },
-        {
-          "lap": 59,
-          "duration": 29.8
         }
       ]
     },
@@ -893,7 +893,7 @@
         },
         {
           "lap": 17,
-          "duration": 22.9
+          "duration": 22.965
         },
         {
           "lap": 44,
@@ -942,7 +942,7 @@
         },
         {
           "lap": 35,
-          "duration": 22.8
+          "duration": 22.823
         },
         {
           "lap": 45,
@@ -983,7 +983,7 @@
       "pitStops": [
         {
           "lap": 40,
-          "duration": 22.5
+          "duration": 22.59
         },
         {
           "lap": 45,
@@ -1023,7 +1023,7 @@
         },
         {
           "lap": 30,
-          "duration": 26.7
+          "duration": 26.712
         }
       ]
     },
@@ -1059,7 +1059,7 @@
         },
         {
           "lap": 3,
-          "duration": 27.1
+          "duration": 27.18
         }
       ]
     },
@@ -1095,7 +1095,7 @@
         },
         {
           "lap": 3,
-          "duration": 23.9
+          "duration": 23.958
         }
       ]
     }
