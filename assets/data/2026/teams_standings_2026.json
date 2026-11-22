@@ -2,19 +2,19 @@
   "standings": [
     {
       "team": "Mercedes",
-      "points": 652.0
+      "points": 666.0
     },
     {
       "team": "Ferrari",
-      "points": 510.0
+      "points": 517.0
     },
     {
       "team": "Red Bull Racing",
-      "points": 415.0
+      "points": 440.0
     },
     {
       "team": "McLaren",
-      "points": 398.0
+      "points": 431.0
     },
     {
       "team": "Racing Bulls",
@@ -22,7 +22,7 @@
     },
     {
       "team": "Alpine",
-      "points": 69.0
+      "points": 87.0
     },
     {
       "team": "Haas F1 Team",
@@ -34,7 +34,7 @@
     },
     {
       "team": "Williams",
-      "points": 12.0
+      "points": 16.0
     },
     {
       "team": "Aston Martin",
@@ -1433,6 +1433,66 @@
           }
         },
         "Haas F1 Team": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Cadillac": {
+          "Race": {
+            "points_received": 0.0
+          }
+        }
+      }
+    },
+    {
+      "round": "23",
+      "teams": {
+        "Red Bull Racing": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "McLaren": {
+          "Race": {
+            "points_received": 15.0
+          }
+        },
+        "Mercedes": {
+          "Race": {
+            "points_received": 2.0
+          }
+        },
+        "Alpine": {
+          "Race": {
+            "points_received": 8.0
+          }
+        },
+        "Ferrari": {
+          "Race": {
+            "points_received": 1.0
+          }
+        },
+        "Williams": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Audi": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Haas F1 Team": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Racing Bulls": {
+          "Race": {
+            "points_received": 0.0
+          }
+        },
+        "Aston Martin": {
           "Race": {
             "points_received": 0.0
           }
